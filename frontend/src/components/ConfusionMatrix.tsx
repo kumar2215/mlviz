@@ -80,10 +80,12 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             minRequiredHeight,
         );
 
-        // If height exceeds container, adjust both dimensions but maintain minimum cell size
-        if (height > containerHeight && containerHeight > 0) {
-            height = Math.max(containerHeight, minRequiredHeight);
-            width = Math.max(height * aspectRatio, minRequiredWidth);
+        // CRITICAL: Cap dimensions to container to prevent ResizeObserver feedback loop
+        if (containerHeight > 0) {
+            height = Math.min(height, containerHeight);
+        }
+        if (containerWidth > 0) {
+            width = Math.min(width, containerWidth);
         }
 
         return { width, height };
@@ -316,7 +318,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
     const needsScrolling = width > dimensions.width && dimensions.width > 0;
 
     return (
-        <div className="w-full h-full flex flex-col align-start overflow-hidden">
+        <div className="w-full h-full flex flex-col align-start overflow-hidden min-h-0">
             <div
                 ref={containerRef}
                 className="relative min-h-0"

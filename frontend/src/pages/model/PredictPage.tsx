@@ -118,14 +118,14 @@ const PredictPage: React.FC<PredictPageProps> = ({
             {showAlert && (
                 <SuccessAlert description="Prediction completed." />
             )}
-            <div className="col-span-2 shadow-lg justify-between overflow-auto p-4 bg-gradient-to-br from-blue-50 to-purple-50">
+            <div className="col-span-2 shadow-lg justify-between overflow-auto p-4 bg-gradient-to-br from-blue-50 to-purple-50 min-h-0">
                 <PredictionInputForm
                     features={currentFeatures}
                     initialPoints={predictionInputPoints}
                     onPredict={handlePredict}
                 />
             </div>
-            <div className="col-span-8 shadow-lg overflow-hidden">
+            <div className="col-span-8 shadow-lg overflow-hidden min-h-0">
                 <PredictComponent
                     componentName={model_name}
                     data={currentModelData}
