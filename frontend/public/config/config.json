@@ -136,13 +136,28 @@
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 0,
-                        "story_name": "rescue_team"
+                        "local_index": 5,
+                        "story_name": null
                     },
                     "condition": {
                         "condition_type": "Bypass",
                         "name": "Rescue team",
                         "description": "Time to try out making a decision tree yourself!"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 5,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": "rescue_team"
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Rescue data",
+                        "description": "Look at the rescue data for more insights!"
                     }
                 }
             ]
@@ -195,8 +210,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Rescue data",
-                        "description": "Look at the rescue data for more insights!"
+                        "name": "Design tree",
+                        "description": "Time to design the tree!"
                     }
                 },
                 {
@@ -210,8 +225,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Design tree",
-                        "description": "Time to design the tree!"
+                        "name": "Call is in!",
+                        "description": "A call has arrived. Send out the right team when you are ready!"
                     }
                 },
                 {
@@ -221,21 +236,6 @@
                     },
                     "end": {
                         "local_index": 4,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Call is in!",
-                        "description": "A call has arrived. Send out the right team when you are ready!"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 4,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 5,
                         "story_name": null
                     },
                     "condition": {
@@ -269,7 +269,7 @@
             "page_type": "static",
             "parameters": {
                 "text": "",
-                "link": "md/decision_tree/iris.md"
+                "link": "public/md/decision_tree/iris.md"
             }
         },
         "1859081650": {

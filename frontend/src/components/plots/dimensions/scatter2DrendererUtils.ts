@@ -56,7 +56,10 @@ export function renderScatter2D(
         legendPosition,
         onPointClick,
         onPointHover,
+        scaleFactor = 1,
     } = options;
+
+    const scaledPointRadius = pointRadius * scaleFactor;
 
     // Note: When used with BaseVisualisation, the container is already translated
     // by the margin, so we should use the inner dimensions directly
@@ -143,8 +146,9 @@ export function renderScatter2D(
         xScale,
         yScale,
         colorScale,
-        pointRadius,
+        scaledPointRadius,
         pointOpacity,
+        scaleFactor,
         onPointClick,
         onPointHover,
     );
@@ -159,12 +163,13 @@ export function renderScatter2D(
             innerWidth,
             innerHeight,
             margin,
+            scaleFactor,
         );
     }
 
     // Render legend (in overlay group - always on top)
     if (showLegend) {
-        const legend = renderLegend(overlayGroup, config, innerWidth, innerHeight, { position: legendPosition });
+        const legend = renderLegend(overlayGroup, config, innerWidth, innerHeight, { position: legendPosition }, scaleFactor);
         if (legend) {
             legend.onFilterChange((focusedNames) => {
                 // Update data points
@@ -387,12 +392,13 @@ function renderAxes2D(
         bottom: number;
         left: number;
     } = DEFAULT_MARGIN,
+    scaleFactor: number = 1,
 ) {
     // Calculate background coverage based on actual margins
-    const leftCoverage = margin.left + 10; // Left margin + padding
-    const bottomCoverage = margin.bottom + 20; // Bottom margin + padding for labels
-    const topCoverage = margin.top + 10; // Top margin + padding
-    const rightCoverage = margin.right + 10; // Right margin + padding
+    const leftCoverage = (margin.left + 10) * scaleFactor; // Left margin + padding
+    const bottomCoverage = (margin.bottom + 20) * scaleFactor; // Bottom margin + padding for labels
+    const topCoverage = (margin.top + 10) * scaleFactor; // Top margin + padding
+    const rightCoverage = (margin.right + 10) * scaleFactor; // Right margin + padding
 
     // Add white background for X-axis (bottom, extended to cover corners)
     g.append("rect")
@@ -447,9 +453,9 @@ function renderAxes2D(
     xAxis
         .append("text")
         .attr("x", width / 2)
-        .attr("y", 40)
+        .attr("y", 40 * scaleFactor)
         .attr("fill", "#374151")
-        .attr("font-size", "12px")
+        .attr("font-size", `${12 * scaleFactor}px`)
         .attr("font-weight", "500")
         .attr("text-anchor", "middle")
         .text(featureNames[0] || "X");
@@ -467,9 +473,9 @@ function renderAxes2D(
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
-        .attr("y", -45)
+        .attr("y", -45 * scaleFactor)
         .attr("fill", "#374151")
-        .attr("font-size", "12px")
+        .attr("font-size", `${12 * scaleFactor}px`)
         .attr("font-weight", "500")
         .attr("text-anchor", "middle")
         .text(featureNames[1] || "Y");
@@ -477,15 +483,15 @@ function renderAxes2D(
     // Style axis lines and ticks
     g.selectAll(".x-axis path, .y-axis path")
         .attr("stroke", "#9ca3af")
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis line, .y-axis line")
         .attr("stroke", "#9ca3af")
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis text, .y-axis text")
         .attr("fill", "#6b7280")
-        .attr("font-size", "10px");
+        .attr("font-size", `${10 * scaleFactor}px`);
 }
 
 function renderDataPoints2D(
@@ -494,8 +500,9 @@ function renderDataPoints2D(
     xScale: d3.ScaleLinear<number, number>,
     yScale: d3.ScaleLinear<number, number>,
     colorScale: (point: PlotPoint) => string,
-    radius: number,
+    pointRadius: number,
     opacity: number,
+    scaleFactor: number = 1,
     onPointClick?: (index: number, point: number[]) => void,
     onPointHover?: (index: number | null) => void,
 ) {
@@ -524,11 +531,11 @@ function renderDataPoints2D(
             if (isNaN(y)) console.warn("[2D] Invalid y coordinate:", d);
             return y;
         })
-        .attr("r", radius)
+        .attr("r", pointRadius)
         .attr("fill", (d) => colorScale(d))
         .attr("opacity", opacity)
         .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 1.5 * scaleFactor)
         .attr("cursor", onPointClick ? "pointer" : "default")
         .raise();
 
@@ -547,16 +554,16 @@ function renderDataPoints2D(
                 d3.select(event.currentTarget)
                     .transition()
                     .duration(150)
-                    .attr("r", radius * 1.5)
-                    .attr("stroke-width", 2.5);
+                    .attr("r", pointRadius * 1.5)
+                    .attr("stroke-width", 2.5 * scaleFactor);
             })
             .on("mouseleave", (event) => {
                 onPointHover(null);
                 d3.select(event.currentTarget)
                     .transition()
                     .duration(150)
-                    .attr("r", radius)
-                    .attr("stroke-width", 1.5);
+                    .attr("r", pointRadius)
+                    .attr("stroke-width", 1.5 * scaleFactor);
             });
     }
 

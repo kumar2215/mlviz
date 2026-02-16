@@ -49,6 +49,7 @@ export function renderScatter1D(
         legendPosition,
         onPointClick,
         onPointHover,
+        scaleFactor = 1,
     } = options;
 
     const innerWidth = width - margin.left - margin.right;
@@ -89,8 +90,8 @@ export function renderScatter1D(
         .attr("height", stripHeight)
         .attr("fill", "#f9fafb")
         .attr("stroke", "#e5e7eb")
-        .attr("stroke-width", 1)
-        .attr("rx", 4);
+        .attr("stroke-width", 1 * scaleFactor)
+        .attr("rx", 4 * scaleFactor);
 
     // Render grid
     if (showGrid) {
@@ -105,7 +106,8 @@ export function renderScatter1D(
             featureNames,
             stripCenter,
             stripHeight,
-            innerWidth
+            innerWidth,
+            scaleFactor
         );
     }
 
@@ -117,15 +119,16 @@ export function renderScatter1D(
         colorScale,
         stripCenter,
         stripHeight,
-        pointRadius,
+        pointRadius * scaleFactor,
         pointOpacity,
+        scaleFactor,
         onPointClick,
         onPointHover
     );
 
     // Render legend
     if (showLegend) {
-        const legend = renderLegend(container, config, innerWidth, innerHeight, { position: legendPosition });
+        const legend = renderLegend(container, config, innerWidth, innerHeight, { position: legendPosition }, scaleFactor);
         if (legend) {
             legend.onFilterChange((focusedNames) => {
                 // Update data points
@@ -252,7 +255,8 @@ function renderAxes1D(
     featureNames: string[],
     stripCenter: number,
     stripHeight: number,
-    width: number
+    width: number,
+    scaleFactor: number = 1
 ) {
     // X-axis
     const xAxis = g
@@ -264,9 +268,9 @@ function renderAxes1D(
     xAxis
         .append("text")
         .attr("x", width / 2)
-        .attr("y", 35)
+        .attr("y", 35 * scaleFactor)
         .attr("fill", "#374151")
-        .attr("font-size", "12px")
+        .attr("font-size", `${12 * scaleFactor}px`)
         .attr("font-weight", "500")
         .attr("text-anchor", "middle")
         .text(featureNames[0] || "Feature");
@@ -274,15 +278,15 @@ function renderAxes1D(
     // Style axis
     g.selectAll(".x-axis path")
         .attr("stroke", "#9ca3af")
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis line")
         .attr("stroke", "#9ca3af")
-        .attr("stroke-width", 1);
+        .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis text")
         .attr("fill", "#6b7280")
-        .attr("font-size", "10px");
+        .attr("font-size", `${10 * scaleFactor}px`);
 }
 
 function renderDataPoints1D(
@@ -292,8 +296,9 @@ function renderDataPoints1D(
     colorScale: (point: PlotPoint) => string,
     stripCenter: number,
     stripHeight: number,
-    radius: number,
+    pointRadius: number,
     opacity: number,
+    scaleFactor: number = 1,
     onPointClick?: (index: number, point: number[]) => void,
     onPointHover?: (index: number | null) => void
 ) {
@@ -310,7 +315,7 @@ function renderDataPoints1D(
 
     // Track occupied positions to avoid overlaps
     const occupiedPositions: Array<{ x: number; y: number }> = [];
-    const minSpacing = radius * 2.2; // Minimum distance between circle centers
+    const minSpacing = pointRadius * 2.2; // Minimum distance between circle centers
 
     const circles = pointsGroup
         .selectAll("circle")
@@ -355,12 +360,12 @@ function renderDataPoints1D(
                 }
 
                 // Try next position - alternate above and below
-                offset += radius * 1.1;
+                offset += pointRadius * 1.1;
                 direction *= -1;
                 y = stripCenter + (offset * direction);
 
                 // Constrain to strip bounds
-                const maxOffset = stripHeight / 2 - radius;
+                const maxOffset = stripHeight / 2 - pointRadius;
                 if (Math.abs(y - stripCenter) > maxOffset) {
                     y = stripCenter + (maxOffset * Math.sign(y - stripCenter));
                 }
@@ -370,11 +375,11 @@ function renderDataPoints1D(
 
             return y;
         })
-        .attr("r", radius)
+        .attr("r", pointRadius)
         .attr("fill", (d) => colorScale(d))
         .attr("opacity", opacity)
         .attr("stroke", "#fff")
-        .attr("stroke-width", 1.5)
+        .attr("stroke-width", 1.5 * scaleFactor)
         .attr("cursor", onPointClick ? "pointer" : "default")
         .raise();
 
@@ -395,16 +400,16 @@ function renderDataPoints1D(
                 d3.select(event.currentTarget)
                     .transition()
                     .duration(150)
-                    .attr("r", radius * 1.5)
-                    .attr("stroke-width", 2.5);
+                    .attr("r", pointRadius * 1.5)
+                    .attr("stroke-width", 2.5 * scaleFactor);
             })
             .on("mouseleave", (event) => {
                 onPointHover(null);
                 d3.select(event.currentTarget)
                     .transition()
                     .duration(150)
-                    .attr("r", radius)
-                    .attr("stroke-width", 1.5);
+                    .attr("r", pointRadius)
+                    .attr("stroke-width", 1.5 * scaleFactor);
             });
     }
 

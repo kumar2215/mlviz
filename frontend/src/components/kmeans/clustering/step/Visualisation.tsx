@@ -3,12 +3,17 @@
  * Specialized for an iterative cycle: Select -> Run Step -> Preview Next -> Repeat
  */
 
-import { renderKMeansTraining } from "@/components/kmeans/clustering/KMeansRenderer";
+import {
+    renderKMeansTraining,
+    renderProposedCentroidMarkers,
+    renderSelectedCentroidMarkers,
+} from "@/components/kmeans/clustering/KMeansRenderer";
 import type { KMeansVisualizationData } from "@/components/kmeans/clustering/types";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useKMeans } from "@/contexts/models/KMeansContext";
+import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { UNASSIGNED_COLOR } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -29,6 +34,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         setIsPlacingCentroids,
     } = useKMeans();
 
+    const scaleFactor = useScaleFactor();
     const [mode, setMode] = useState<KMeansStepMode>("ready");
     const scalesRef = useRef<{
         xScale?: d3.ScaleLinear<number, number>;
@@ -168,80 +174,6 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         [mode, kmeansData, setSelectedCentroids],
     );
 
-    const renderCustomMarkers = useCallback(
-        (container: d3.Selection<SVGGElement, unknown, null, undefined>) => {
-            const { xScale, yScale } = scalesRef.current;
-            if (!xScale || !yScale) return;
-
-            container.selectAll(".custom-marker").remove();
-
-            // 1. Render currently SELECTED centroids (Input)
-            selectedCentroids.forEach((c, i) => {
-                const g = container
-                    .append("g")
-                    .attr("class", "custom-marker selected-marker")
-                    .style("pointer-events", "none"); // Allow clicks to pass through to the background surface
-                const color = colorScale(`Cluster ${i}`);
-
-                g.append("circle")
-                    .attr("cx", xScale(c[0]))
-                    .attr("cy", yScale(c[1]))
-                    .attr("r", 8)
-                    .attr("fill", color)
-                    .attr("stroke", "#000")
-                    .attr("stroke-width", 2);
-
-                g.append("text")
-                    .attr("x", xScale(c[0]))
-                    .attr("y", yScale(c[1]) - 12)
-                    .attr("text-anchor", "middle")
-                    .attr("font-size", "10px")
-                    .attr("font-weight", "bold")
-                    .text(`C${i}`);
-            });
-
-            // 2. Render PROPOSED centroids (Output) if in preview mode
-            if (mode === "preview" && stepData?.new_centroids) {
-                stepData.new_centroids.forEach((c, i) => {
-                    const g = container
-                        .append("g")
-                        .attr("class", "custom-marker proposed-marker")
-                        .style("pointer-events", "none");
-                    const color = colorScale(`Cluster ${i}`);
-
-                    g.append("circle")
-                        .attr("cx", xScale(c[0]))
-                        .attr("cy", yScale(c[1]))
-                        .attr("r", 12)
-                        .attr("fill", color)
-                        .attr("opacity", 0.3)
-                        .append("animate")
-                        .attr("attributeName", "r")
-                        .attr("values", "10;14;10")
-                        .attr("dur", "1.5s")
-                        .attr("repeatCount", "indefinite");
-
-                    g.append("circle")
-                        .attr("cx", xScale(c[0]))
-                        .attr("cy", yScale(c[1]))
-                        .attr("r", 4)
-                        .attr("fill", color)
-                        .attr("stroke", "#fff")
-                        .attr("stroke-width", 1);
-
-                    g.append("text")
-                        .attr("x", xScale(c[0]))
-                        .attr("y", yScale(c[1]) + 20)
-                        .attr("text-anchor", "middle")
-                        .attr("font-size", "9px")
-                        .attr("fill", "#666")
-                        .text("Proposed");
-                });
-            }
-        },
-        [selectedCentroids, mode, stepData, colorScale],
-    );
-
     const renderCallback = useCallback(
         (
             container: d3.Selection<SVGGElement, unknown, null, undefined>,
@@ -299,15 +231,46 @@ const Visualisation: React.FC<VisualisationProps> = () => {
                         ),
                     );
 
-                renderCustomMarkers(targetGroup);
+                // Remove previous markers and render fresh
+                targetGroup.selectAll(".selected-centroids").remove();
+                targetGroup.selectAll(".proposed-centroids").remove();
+
+                const markerOptions = {
+                    colorScale,
+                    scaleFactor,
+                    centroidSize: 4 * scaleFactor,
+                };
+
+                // Render selected centroid markers
+                if (selectedCentroids.length > 0) {
+                    renderSelectedCentroidMarkers(
+                        targetGroup,
+                        selectedCentroids,
+                        result.xScale,
+                        result.yScale,
+                        markerOptions,
+                    );
+                }
+
+                // Render proposed centroid markers in preview mode
+                if (mode === "preview" && stepData?.new_centroids) {
+                    renderProposedCentroidMarkers(
+                        targetGroup,
+                        stepData.new_centroids,
+                        result.xScale,
+                        result.yScale,
+                        markerOptions,
+                    );
+                }
             }
         },
         [
             modifiedVisualizationData,
             colorScale,
             mode,
-            selectedCentroids.length,
-            renderCustomMarkers,
+            selectedCentroids,
+            stepData,
+            scaleFactor,
             handlePointClick,
         ],
     );

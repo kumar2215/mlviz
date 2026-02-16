@@ -1,4 +1,5 @@
 import NavigationBar from "@/components/navigation/NavigationBar";
+import { Sidenote } from "@/components/Sidenote";
 import { Button } from "@/components/ui/button";
 import DynamicPage from "@/pages/DynamicPage";
 import StaticPage from "@/pages/StaticPage";
@@ -47,15 +48,16 @@ export const StoryPage: React.FC<StoryPageProps> = ({
 
     return (
         <div className="w-screen h-screen flex flex-col overflow-hidden">
-            <div className="flex-1 flex flex-row justify-between items-center bg-gray-200 overflow-hidden">
-                <div className="h-full w-[85dvw] flex flex-col">
+            <div className="flex-1 flex flex-row justify-between bg-gray-200 overflow-hidden">
+                <div className="flex-1 flex flex-col min-w-0">
                     {renderPage()}
                 </div>
-                <div className="h-full w-[15dvw] flex flex-col gap-2 items-center overflow-hidden bg-gradient-to-br from-gray-50 to-slate-50">
+                <div className="shrink-0 w-80 flex flex-col gap-2 items-center justify-between overflow-hidden bg-gradient-to-br from-gray-50 to-slate-50 border-l border-gray-300">
                     <NavigationBar
                         edges={getAvailableEdges()}
                         handler={setCurrentPageId}
                     />
+                    {currentPage.note && <Sidenote note={currentPage.note} />}
                 </div>
             </div>
 

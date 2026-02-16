@@ -161,49 +161,49 @@ const PREDICTION_MODE: RenderMode = {
     },
 };
 
-const calculateLinkPath = (d: d3.HierarchyLink<TransformedNode>): string => {
+const calculateLinkPath = (d: d3.HierarchyLink<TransformedNode>, scaleFactor: number): string => {
     const source = d.source;
     const target = d.target;
-    const linePadding = 8;
+    const linePadding = 8 * scaleFactor;
 
     let sourceY = source.y as number;
     let targetY = target.y as number;
 
     if (source.data.type === "split") {
-        sourceY = (source.y as number) + 60 + linePadding;
+        sourceY = (source.y as number) + 60 * scaleFactor + linePadding;
     }
 
     if (target.data.type === "split") {
-        targetY = (target.y as number) - 60 - linePadding;
+        targetY = (target.y as number) - 60 * scaleFactor - linePadding;
     } else if (target.data.type === "leaf") {
-        targetY = (target.y as number) - 40 - linePadding;
+        targetY = (target.y as number) - 40 * scaleFactor - linePadding;
     }
 
     return `M${source.x},${sourceY}L${target.x},${targetY}`;
 };
 
-const calculateLinkLabelPosition = (d: d3.HierarchyLink<TransformedNode>) => {
+const calculateLinkLabelPosition = (d: d3.HierarchyLink<TransformedNode>, scaleFactor: number) => {
     const isLeftChild = d.source.children && d.source.children[0] === d.target;
-    const linePadding = 8;
+    const linePadding = 8 * scaleFactor;
 
     let sourceYForLabel = d.source.y as number;
     let targetYForLabel = d.target.y as number;
 
     if (d.source.data.type === "split") {
-        sourceYForLabel = (d.source.y as number) + 60 + linePadding;
+        sourceYForLabel = (d.source.y as number) + 60 * scaleFactor + linePadding;
     }
 
     if (d.target.data.type === "split") {
-        targetYForLabel = (d.target.y as number) - 60 - linePadding;
+        targetYForLabel = (d.target.y as number) - 60 * scaleFactor - linePadding;
     } else if (d.target.data.type === "leaf") {
-        targetYForLabel = (d.target.y as number) - 20 - linePadding;
+        targetYForLabel = (d.target.y as number) - 20 * scaleFactor - linePadding;
     }
 
     return {
         x:
             ((d.source.x || 0) + (d.target.x || 0)) / 2 +
-            (isLeftChild ? -30 : 30),
-        y: (sourceYForLabel + targetYForLabel) / 2 - 5,
+            (isLeftChild ? -30 * scaleFactor : 30 * scaleFactor),
+        y: (sourceYForLabel + targetYForLabel) / 2 - 5 * scaleFactor,
         isLeftChild,
     };
 };
@@ -258,7 +258,7 @@ export const renderDecisionTree = ({
     } = props;
 
     const { dimensions, state } = context;
-    const { width, height, margin } = dimensions;
+    const { width, height, margin, scaleFactor = 1 } = dimensions;
     const { currentStep = 0 } = state;
 
     console.log('[DecisionTreeRenderer] data.classes:', data.classes);
@@ -278,9 +278,9 @@ export const renderDecisionTree = ({
         .separation((a, b) => (a.parent === b.parent ? 2 : 3));
     treeLayout(root);
 
-    const depthSpacing = 200;
+    const depthSpacing = 200 * scaleFactor;
     root.descendants().forEach((d) => {
-        const nodeHeight = d.data.type === "split" ? 50 : 20;
+        const nodeHeight = d.data.type === "split" ? 50 * scaleFactor : 20 * scaleFactor;
         d.y = d.depth * depthSpacing + nodeHeight / 2;
     });
 
@@ -327,10 +327,11 @@ export const renderDecisionTree = ({
             nodeGroup,
             d,
             distribution,
-            120,
+            120 * scaleFactor,
             externalColorScale,
             interpolationFactor,
-            data.classes || []
+            data.classes || [],
+            scaleFactor
         );
         
         // In manual mode, add click handler for split nodes
@@ -405,9 +406,10 @@ export const renderDecisionTree = ({
                 nodeGroup,
                 d,
                 distribution,
-                80,
+                80 * scaleFactor,
                 colorScale,
-                isSelected || false
+                isSelected || false,
+                scaleFactor
             );
             
             // Add click handler for node selection in manual mode
@@ -440,9 +442,10 @@ export const renderDecisionTree = ({
                 nodeGroup,
                 d,
                 distribution,
-                80,
+                80 * scaleFactor,
                 colorScale,
-                interpolationFactor
+                interpolationFactor,
+                scaleFactor
             );
         }
     });
@@ -452,10 +455,10 @@ export const renderDecisionTree = ({
         .data(visibleLinks)
         .join("path")
         .attr("class", "link-base")
-        .attr("d", calculateLinkPath)
+        .attr("d", (d) => calculateLinkPath(d, scaleFactor))
         .attr("fill", "none")
         .attr("stroke", pathLineColor)
-        .attr("stroke-width", 2)
+        .attr("stroke-width", 2 * scaleFactor)
         .attr("opacity", 0.4);
 
     const pathLinks = visibleLinks.filter(
@@ -466,10 +469,10 @@ export const renderDecisionTree = ({
         .data(pathLinks)
         .join("path")
         .attr("class", "link-highlight")
-        .attr("d", calculateLinkPath)
+        .attr("d", (d) => calculateLinkPath(d, scaleFactor))
         .attr("fill", "none")
         .attr("stroke", onPathColor || pathLineColor)
-        .attr("stroke-width", 3)
+        .attr("stroke-width", 3 * scaleFactor)
         .attr("opacity", 1);
 
     // Apply mode-specific styling to highlight links
@@ -500,10 +503,10 @@ export const renderDecisionTree = ({
         .join("text")
         .attr("class", "link-label")
         .attr("text-anchor", "middle")
-        .attr("font-size", "9px")
+        .attr("font-size", `${9 * scaleFactor}px`)
         .attr("font-weight", "bold")
         .each(function (d) {
-            const position = calculateLinkLabelPosition(d);
+            const position = calculateLinkLabelPosition(d, scaleFactor);
             const isLeftChild = position.isLeftChild;
             d3.select(this)
                 .attr("x", position.x)

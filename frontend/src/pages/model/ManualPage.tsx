@@ -8,8 +8,6 @@ type ManualPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "datas
 
 const ManualPage: React.FC<ManualPageProps> = ({ 
     model_name,
-    parameters,
-    dataset,
 }) => {
 
     const {
