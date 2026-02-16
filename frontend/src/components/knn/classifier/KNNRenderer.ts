@@ -38,7 +38,7 @@ export function renderKNNTraining({
     props,
 }: RenderKNNVisualisationProps) {
     const { dimensions, state } = context;
-    const { width, height, margin } = dimensions;
+    const { width, height, margin, scaleFactor = 1 } = dimensions;
     const { currentStep = 0 } = state;
     const dimensions_to_render = data.nDimensions;
 
@@ -73,12 +73,13 @@ export function renderKNNTraining({
         width,
         height,
         margin,
-        pointRadius: 5,
+        pointRadius: 4 * scaleFactor,
         pointOpacity: 0.8,
         showGrid: true,
         showLegend: true,
         showAxes: true,
         useNiceScales: !decisionBoundary,  // Disable nice scales when decision boundary exists to avoid whitespace
+        scaleFactor,
     };
 
     // Render appropriate scatter plot based on dimensions
@@ -132,10 +133,11 @@ export function renderKNNTraining({
                     showNeighborLines: true,
                     showDistanceCircles: false,
                     neighborLineColor: "#666",
-                    neighborLineWidth: 1.5,
-                    queryPointSize: 8,
+                    neighborLineWidth: 1.5 * scaleFactor,
+                    queryPointSize: 8 * scaleFactor,
                     highlightColor: "#666",
                     interpolationFactor: 1,
+                    scaleFactor,
                 }
             );
         } else if (dimensions_to_render === 1) {
@@ -151,10 +153,11 @@ export function renderKNNTraining({
                     k: props.k,
                     showNeighborLines: true,
                     neighborLineColor: "#666",
-                    neighborLineWidth: 1.5,
-                    queryPointSize: 8,
+                    neighborLineWidth: 1.5 * scaleFactor,
+                    queryPointSize: 8 * scaleFactor,
                     highlightColor: "#ff6b6b",
                     interpolationFactor: 1,
+                    scaleFactor,
                 }
             );
         }
@@ -181,18 +184,18 @@ export function renderKNNPrediction({
     context,
     props,
 }: RenderKNNVisualisationProps) {
+    const { dimensions, state } = context;
+    const { height, margin, scaleFactor = 1 } = dimensions;
     const {
         colorScale,
         k,
         showNeighborLines = true,
         showDistanceCircles = false,
         neighborLineColor = "#666",
-        neighborLineWidth = 1.5,
-        queryPointSize = 8,
+        neighborLineWidth = 1.5 * scaleFactor,
+        queryPointSize = 8 * scaleFactor,
         highlightColor = "#ff6b6b",
     } = props;
-    const { dimensions, state } = context;
-    const { height, margin } = dimensions;
     const { currentStep = 0 } = state;
 
     // Clear previous render
@@ -225,7 +228,7 @@ export function renderKNNPrediction({
     // Setup for rendering query-specific elements
     const dimensions_to_render = data.nDimensions;
 
-    if (dimensions_to_render === 2) {
+    if (dimensions_to_render === 2 && baseRenderResult) {
         render2DQueryVisualization(
             targetGroup,
             currentQuery,
@@ -242,9 +245,10 @@ export function renderKNNPrediction({
                 queryPointSize,
                 highlightColor,
                 interpolationFactor,
+                scaleFactor,
             }
         );
-    } else if (dimensions_to_render === 1) {
+    } else if (dimensions_to_render === 1 && baseRenderResult) {
         const innerHeight = height - margin.top - margin.bottom;
         render1DQueryVisualization(
             targetGroup,
@@ -261,6 +265,7 @@ export function renderKNNPrediction({
                 queryPointSize,
                 highlightColor,
                 interpolationFactor,
+                scaleFactor,
             }
         );
     }
@@ -286,6 +291,7 @@ function render2DQueryVisualization(
         queryPointSize: number;
         highlightColor: string;
         interpolationFactor: number;
+        scaleFactor: number;
     }
 ) {
     const {
@@ -297,6 +303,7 @@ function render2DQueryVisualization(
         queryPointSize,
         highlightColor,
         interpolationFactor,
+        scaleFactor,
     } = options;
 
     if (!xScale || !yScale) {
@@ -344,8 +351,8 @@ function render2DQueryVisualization(
             .attr("r", xDist)
             .attr("fill", "none")
             .attr("stroke", highlightColor)
-            .attr("stroke-width", 1)
-            .attr("stroke-dasharray", "5,5")
+            .attr("stroke-width", 1 * scaleFactor)
+            .attr("stroke-dasharray", `${5 * scaleFactor},${5 * scaleFactor}`)
             .attr("opacity", 0.3 * interpolationFactor);
     }
 
@@ -354,7 +361,7 @@ function render2DQueryVisualization(
         const neighborSet = new Set(
             query.neighbors.slice(0, k).map((n: any) => n.index)
         );
-        const pointRadius = 5; // Should match the actual point radius
+        const pointRadius = 5 * scaleFactor; // Should match the actual point radius
 
         // Create a group for lines (will be behind hover circles)
         const linesGroup = queryGroup
@@ -412,7 +419,7 @@ function render2DQueryVisualization(
                 .attr("x2", x2)
                 .attr("y2", y2)
                 .attr("stroke", isNeighbor ? highlightColor : "#ccc")
-                .attr("stroke-width", isNeighbor ? neighborLineWidth : 0.5)
+                .attr("stroke-width", isNeighbor ? neighborLineWidth : 0.5 * scaleFactor)
                 .attr(
                     "opacity",
                     (isNeighbor ? 0.7 : 0.15) * interpolationFactor
@@ -444,7 +451,7 @@ function render2DQueryVisualization(
                     .append("circle")
                     .attr("cx", xScale(trainingPoint[0]))
                     .attr("cy", yScale(trainingPoint[1]))
-                    .attr("r", pointRadius + 3) // Slightly larger for easier hover
+                    .attr("r", pointRadius + 3 * scaleFactor) // Slightly larger for easier hover
                     .attr("fill", "transparent")
                     .attr("data-point-index", idx)
                     .style("cursor", "default")
@@ -493,10 +500,10 @@ function render2DQueryVisualization(
             .attr("class", "knn-neighbor-highlight")
             .attr("cx", xScale(trainingPoint[0]))
             .attr("cy", yScale(trainingPoint[1]))
-            .attr("r", 7)
+            .attr("r", 7 * scaleFactor)
             .attr("fill", "none")
             .attr("stroke", highlightColor)
-            .attr("stroke-width", 2.5)
+            .attr("stroke-width", 2.5 * scaleFactor)
             .attr("opacity", 0.8 * interpolationFactor);
     });
 
@@ -509,7 +516,7 @@ function render2DQueryVisualization(
         .attr("r", queryPointSize)
         .attr("fill", colorScale(query.prediction))
         .attr("stroke", "#fff")
-        .attr("stroke-width", 2.5)
+        .attr("stroke-width", 2.5 * scaleFactor)
         .attr("opacity", interpolationFactor);
 
     // Add query point marker (X or star)
@@ -533,7 +540,7 @@ function render2DQueryVisualization(
         .attr("class", "knn-query-hover-target")
         .attr("cx", xScale(query.queryPoint[0]))
         .attr("cy", yScale(query.queryPoint[1]))
-        .attr("r", queryPointSize + 5)
+        .attr("r", queryPointSize + 5 * scaleFactor)
         .attr("fill", "transparent")
         .style("cursor", "pointer")
         .style("pointer-events", "all");
@@ -600,6 +607,7 @@ function render1DQueryVisualization(
         queryPointSize: number;
         highlightColor: string;
         interpolationFactor: number;
+        scaleFactor: number;
     }
 ) {
     const {
@@ -610,6 +618,7 @@ function render1DQueryVisualization(
         queryPointSize,
         highlightColor,
         interpolationFactor,
+        scaleFactor,
     } = options;
 
     if (!xScale) {
@@ -640,7 +649,7 @@ function render1DQueryVisualization(
         const neighborSet = new Set(
             query.neighbors.slice(0, k).map((n: any) => n.index)
         );
-        const pointRadius = 6; // Should match the actual point radius for 1D
+        const pointRadius = 6 * scaleFactor; // Should match the actual point radius for 1D
 
         // Create a group for lines (will be behind hover circles)
         const linesGroup = queryGroup
@@ -685,7 +694,7 @@ function render1DQueryVisualization(
                 .attr("x2", x2)
                 .attr("y2", stripCenter)
                 .attr("stroke", isNeighbor ? highlightColor : "#ccc")
-                .attr("stroke-width", isNeighbor ? neighborLineWidth : 0.5)
+                .attr("stroke-width", isNeighbor ? neighborLineWidth : 0.5 * scaleFactor)
                 .attr(
                     "opacity",
                     (isNeighbor ? 0.7 : 0.15) * interpolationFactor
@@ -717,7 +726,7 @@ function render1DQueryVisualization(
                     .append("circle")
                     .attr("cx", xScale(trainingPoint[0]))
                     .attr("cy", stripCenter)
-                    .attr("r", pointRadius + 3) // Slightly larger for easier hover
+                    .attr("r", pointRadius + 3 * scaleFactor) // Slightly larger for easier hover
                     .attr("fill", "transparent")
                     .attr("data-point-index", idx)
                     .style("cursor", "default")
@@ -766,10 +775,10 @@ function render1DQueryVisualization(
             .attr("class", "knn-neighbor-highlight")
             .attr("cx", xScale(trainingPoint[0]))
             .attr("cy", stripCenter)
-            .attr("r", 7)
+            .attr("r", 7 * scaleFactor)
             .attr("fill", "none")
             .attr("stroke", highlightColor)
-            .attr("stroke-width", 2.5)
+            .attr("stroke-width", 2.5 * scaleFactor)
             .attr("opacity", 0.8 * interpolationFactor);
     });
 
@@ -782,7 +791,7 @@ function render1DQueryVisualization(
         .attr("r", queryPointSize)
         .attr("fill", colorScale(query.prediction))
         .attr("stroke", "#fff")
-        .attr("stroke-width", 2.5)
+        .attr("stroke-width", 2.5 * scaleFactor)
         .attr("opacity", interpolationFactor);
 
     // Add query point marker

@@ -1,6 +1,7 @@
 import { useResizeObserver } from "@/hooks/useResizeObserver";
 import * as d3 from "d3";
 import React, { useEffect, useRef, useState } from "react";
+import { useScaleFactor } from "../hooks/useScaleFactor";
 import { applyFont } from "./visualisation/config/fonts";
 
 interface TooltipData {
@@ -27,6 +28,10 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
     minCellSize = 20,
     aspectRatio = 1,
 }) => {
+    const scaleFactor = useScaleFactor();
+    const scaledMinSize = minSize * scaleFactor;
+    const scaledMinCellSize = minCellSize * scaleFactor;
+
     if (!classes || !matrix) {
         return <></>;
     }
@@ -45,21 +50,35 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
 
     // Calculate responsive dimensions
     const getResponsiveDimensions = () => {
-        if (dimensions.width === 0) return { width: minSize, height: minSize };
+        if (dimensions.width === 0)
+            return { width: scaledMinSize, height: scaledMinSize };
 
         const containerWidth = dimensions.width;
         const containerHeight = dimensions.height;
         const numClasses = classes.length;
 
-        const margin = { top: 10, right: 10, bottom: 10, left: 10 };
+        // Must match the margins used in the rendering useEffect
+        const margin = {
+            top: 20 * scaleFactor,
+            right: 40 * scaleFactor,
+            bottom: 60 * scaleFactor, // extra space for x-axis labels + title
+            left: 60 * scaleFactor, // extra space for y-axis title
+        };
         const minRequiredWidth =
-            numClasses * minCellSize + margin.left + margin.right;
+            numClasses * scaledMinCellSize + margin.left + margin.right;
         const minRequiredHeight =
-            numClasses * minCellSize + margin.top + margin.bottom;
+            numClasses * scaledMinCellSize + margin.top + margin.bottom;
 
-        // Start with container size but respect minimums
-        let width = Math.max(containerWidth, minSize, minRequiredWidth);
-        let height = Math.max(width / aspectRatio, minSize, minRequiredHeight);
+        // Prefer container size, only exceed it when minimum cell sizes require it
+        let width = Math.max(
+            Math.min(containerWidth, scaledMinSize),
+            minRequiredWidth,
+        );
+        let height = Math.max(
+            width / aspectRatio,
+            scaledMinSize,
+            minRequiredHeight,
+        );
 
         // If height exceeds container, adjust both dimensions but maintain minimum cell size
         if (height > containerHeight && containerHeight > 0) {
@@ -100,7 +119,12 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
         const svg = d3.select(svgRef.current);
         svg.selectAll("*").remove();
 
-        const margin = { top: 20, right: 40, bottom: 20, left: 40 };
+        const margin = {
+            top: 20 * scaleFactor,
+            right: 40 * scaleFactor,
+            bottom: 60 * scaleFactor,
+            left: 60 * scaleFactor,
+        };
         const innerWidth = width - margin.left - margin.right;
         const innerHeight = height - margin.top - margin.bottom;
 
@@ -108,7 +132,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
 
         // Create scales
         const cellSize = Math.max(
-            minCellSize,
+            scaledMinCellSize,
             Math.min(innerWidth, innerHeight) / numClasses,
         );
         const xScale = d3
@@ -161,10 +185,12 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             .attr("height", yScale.bandwidth())
             .attr("fill", (d) => colorScale(d.value))
             .attr("stroke", "#fff")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 2 * scaleFactor)
             .attr("cursor", "pointer")
             .on("mouseover", function (event, d) {
-                d3.select(this).attr("stroke", "#333").attr("stroke-width", 3);
+                d3.select(this)
+                    .attr("stroke", "#333")
+                    .attr("stroke-width", 3 * scaleFactor);
 
                 const [mouseX, mouseY] = d3.pointer(event, document.body);
                 setTooltip({
@@ -177,14 +203,25 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
                 });
             })
             .on("mouseout", function () {
-                d3.select(this).attr("stroke", "#fff").attr("stroke-width", 2);
+                d3.select(this)
+                    .attr("stroke", "#fff")
+                    .attr("stroke-width", 2 * scaleFactor);
                 setTooltip((prev) => ({ ...prev, visible: false }));
             });
 
         // Responsive font sizes based on cell size
-        const cellFontSize = Math.max(10, Math.min(16, cellSize / 4));
-        const labelFontSize = Math.max(10, Math.min(14, cellSize / 6));
-        const titleFontSize = Math.max(12, Math.min(16, cellSize / 5));
+        const cellFontSize = Math.max(
+            10 * scaleFactor,
+            Math.min(8 * scaleFactor, cellSize / 4),
+        );
+        const labelFontSize = Math.max(
+            10 * scaleFactor,
+            Math.min(2 * scaleFactor, cellSize / 6),
+        );
+        const titleFontSize = Math.max(
+            12 * scaleFactor,
+            Math.min(8 * scaleFactor, cellSize / 5),
+        );
 
         // Add text labels in cells
         cells
@@ -212,7 +249,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             .append("text")
             .attr("class", "x-label")
             .attr("x", (d) => (xScale(d) || 0) + xScale.bandwidth() / 2)
-            .attr("y", numClasses * cellSize + 20)
+            .attr("y", numClasses * cellSize + 20 * scaleFactor)
             .attr("text-anchor", "middle")
             .attr("font-size", `${labelFontSize}px`)
             .call(applyFont.family)
@@ -227,7 +264,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             .enter()
             .append("text")
             .attr("class", "y-label")
-            .attr("x", -20)
+            .attr("x", -20 * scaleFactor)
             .attr("y", (d) => (yScale(d) || 0) + yScale.bandwidth() / 2)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
@@ -239,7 +276,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
         // Add axis titles
         g.append("text")
             .attr("x", (numClasses * cellSize) / 2)
-            .attr("y", numClasses * cellSize + 45)
+            .attr("y", numClasses * cellSize + 45 * scaleFactor)
             .attr("text-anchor", "middle")
             .attr("font-size", `${titleFontSize}px`)
             .call(applyFont.family)
@@ -247,7 +284,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             .text("Predicted");
 
         g.append("text")
-            .attr("x", -45)
+            .attr("x", -45 * scaleFactor)
             .attr("y", (numClasses * cellSize) / 2)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
@@ -256,7 +293,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             .call(applyFont.weight.bold)
             .attr(
                 "transform",
-                `rotate(-90, -45, ${(numClasses * cellSize) / 2})`,
+                `rotate(-90, ${-45 * scaleFactor}, ${(numClasses * cellSize) / 2})`,
             )
             .text("Actual");
 

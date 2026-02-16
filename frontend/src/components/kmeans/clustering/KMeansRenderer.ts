@@ -6,7 +6,7 @@
 
 import type {
     KMeansVisualizationData,
-    RenderKMeansProps
+    RenderKMeansProps,
 } from "@/components/kmeans/clustering/types";
 import type { ClusteringConfig, PlotPoint } from "@/components/plots/types";
 import {
@@ -34,12 +34,12 @@ export function renderKMeansTraining({
     props,
 }: RenderKMeansProps) {
     const { dimensions } = context;
-    const { width, height, margin } = dimensions;
+    const { width, height, margin, scaleFactor = 1 } = dimensions;
     const {
         colorScale,
         currentIteration = 0,
         showCentroidMovement = true,
-        centroidSize = 6,
+        centroidSize = 4 * scaleFactor,
     } = props;
 
     // Clear previous render
@@ -118,7 +118,11 @@ export function renderKMeansTraining({
             iterationData.centroids.forEach((centroid, index) => {
                 // Calculate Euclidean distance
                 let distSq = 0;
-                for (let d = 0; d < Math.min(point.length, centroid.length); d++) {
+                for (
+                    let d = 0;
+                    d < Math.min(point.length, centroid.length);
+                    d++
+                ) {
                     const diff = point[d] - centroid[d];
                     distSq += diff * diff;
                 }
@@ -211,13 +215,14 @@ export function renderKMeansTraining({
         width,
         height,
         margin,
-        pointRadius: 5,
+        pointRadius: 4 * scaleFactor,
         pointOpacity: 0.7,
         showGrid: true,
         showLegend: true,
         legendPosition: props.legendPosition,
         showAxes: true,
         useNiceScales: !decisionBoundary,
+        scaleFactor,
     };
 
     // Render appropriate scatter plot based on dimensions
@@ -283,8 +288,9 @@ export function renderKMeansTraining({
                 colorScale,
                 centroidSize,
                 clusterNames,
-                opacity: props.isPlacementMode ? 0.3 : 1,
-                tooltipSuffix: props.isPlacementMode ? " (Previous)" : "",
+                opacity: 1,
+                tooltipSuffix: currentIteration === 0 ? " (Initial)" : "",
+                scaleFactor,
             },
         );
 
@@ -301,6 +307,7 @@ export function renderKMeansTraining({
                     {
                         colorScale,
                         clusterNames,
+                        scaleFactor,
                     },
                 );
             }
@@ -318,6 +325,7 @@ export function renderKMeansTraining({
                 clusterNames,
                 opacity: props.isPlacementMode ? 0.3 : 1,
                 tooltipSuffix: props.isPlacementMode ? " (Previous)" : "",
+                scaleFactor,
             },
         );
 
@@ -334,6 +342,7 @@ export function renderKMeansTraining({
                     {
                         colorScale,
                         clusterNames,
+                        scaleFactor,
                     },
                 );
             }
@@ -366,11 +375,11 @@ export function renderKMeansPrediction({
     const {
         colorScale,
         showCentroidLines = true,
-        centroidLineColor = "#666",
-        centroidLineWidth = 1.5,
-        queryPointSize = 8,
+        centroidLineWidth = 1.5 * (context.dimensions.scaleFactor || 1),
+        queryPointSize = 8 * (context.dimensions.scaleFactor || 1),
         highlightColor = "#666",
     } = props;
+    const scaleFactor = context.dimensions.scaleFactor || 1;
 
     // Clear previous render
     container.selectAll("*").remove();
@@ -391,7 +400,7 @@ export function renderKMeansPrediction({
             colorScale,
             currentIteration,
             showCentroidMovement: false,
-            centroidSize: 10,
+            centroidSize: 4 * scaleFactor,
         },
     });
 
@@ -423,10 +432,10 @@ export function renderKMeansPrediction({
                 {
                     colorScale,
                     showCentroidLines,
-                    centroidLineColor,
                     centroidLineWidth,
                     queryPointSize,
                     highlightColor,
+                    scaleFactor,
                 },
             );
         } else if (dimensions_to_render === 1) {
@@ -441,10 +450,10 @@ export function renderKMeansPrediction({
                 {
                     colorScale,
                     showCentroidLines,
-                    centroidLineColor,
                     centroidLineWidth,
                     queryPointSize,
                     highlightColor,
+                    scaleFactor,
                 },
             );
         }
@@ -464,10 +473,10 @@ function render2DQueryVisualization(
     options: {
         colorScale: d3.ScaleOrdinal<string, string>;
         showCentroidLines: boolean;
-        centroidLineColor: string;
         centroidLineWidth: number;
         queryPointSize: number;
         highlightColor: string;
+        scaleFactor: number;
     },
 ) {
     const {
@@ -476,6 +485,7 @@ function render2DQueryVisualization(
         centroidLineWidth,
         queryPointSize,
         highlightColor,
+        scaleFactor,
     } = options;
 
     if (!xScale || !yScale) {
@@ -518,7 +528,7 @@ function render2DQueryVisualization(
         const linesGroup = queryGroup
             .append("g")
             .attr("class", "centroid-lines");
-        const pointRadius = 5;
+        const pointRadius = 4 * scaleFactor;
 
         data.finalCentroids.forEach((centroid: number[], idx: number) => {
             const cx = xScale(centroid[0]);
@@ -537,8 +547,8 @@ function render2DQueryVisualization(
             // Calculate edge points (offset by circle radius)
             const x1 = qX + pointRadius * Math.cos(angle);
             const y1 = qY + pointRadius * Math.sin(angle);
-            const x2 = cx - 10 * Math.cos(angle); // 10 is centroid size
-            const y2 = cy - 10 * Math.sin(angle);
+            const x2 = cx - 10 * scaleFactor * Math.cos(angle); // 10 is centroid size
+            const y2 = cy - 10 * scaleFactor * Math.sin(angle);
 
             if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) return;
 
@@ -554,7 +564,10 @@ function render2DQueryVisualization(
                 .attr("x2", x2)
                 .attr("y2", y2)
                 .attr("stroke", isAssigned ? highlightColor : "#ccc")
-                .attr("stroke-width", isAssigned ? centroidLineWidth : 0.5)
+                .attr(
+                    "stroke-width",
+                    isAssigned ? centroidLineWidth : 0.5 * scaleFactor,
+                ) // Apply scaleFactor
                 .attr("opacity", isAssigned ? 0.7 : 0.15);
 
             // Create hover target on centroid
@@ -562,7 +575,7 @@ function render2DQueryVisualization(
                 .append("circle")
                 .attr("cx", cx)
                 .attr("cy", cy)
-                .attr("r", 15)
+                .attr("r", 15 * scaleFactor)
                 .attr("fill", "transparent")
                 .style("cursor", "pointer")
                 .style("pointer-events", "all");
@@ -578,7 +591,9 @@ function render2DQueryVisualization(
                 .on("mouseover", function (event: MouseEvent) {
                     line.attr(
                         "stroke-width",
-                        isAssigned ? centroidLineWidth + 1 : 1.5,
+                        isAssigned
+                            ? centroidLineWidth + 1 * scaleFactor
+                            : 1.5 * scaleFactor,
                     ).attr("opacity", 0.9);
                     tooltip.html(tooltipContent);
                     tooltip
@@ -594,7 +609,7 @@ function render2DQueryVisualization(
                 .on("mouseout", function () {
                     line.attr(
                         "stroke-width",
-                        isAssigned ? centroidLineWidth : 0.5,
+                        isAssigned ? centroidLineWidth : 0.5 * scaleFactor,
                     ).attr("opacity", isAssigned ? 0.7 : 0.15);
                     tooltip.style("opacity", 0);
                 });
@@ -611,7 +626,7 @@ function render2DQueryVisualization(
         .attr("r", queryPointSize)
         .attr("fill", colorScale(clusterName))
         .attr("stroke", "#fff")
-        .attr("stroke-width", 2.5)
+        .attr("stroke-width", 2.5 * scaleFactor)
         .attr("opacity", 1);
 
     // Add query point marker
@@ -622,7 +637,7 @@ function render2DQueryVisualization(
         .attr("y", qY)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "central")
-        .attr("font-size", "10px")
+        .attr("font-size", `${10 * scaleFactor}px`)
         .attr("font-weight", "bold")
         .attr("fill", "#fff")
         .attr("pointer-events", "none")
@@ -634,7 +649,7 @@ function render2DQueryVisualization(
         .attr("class", "kmeans-query-hover-target")
         .attr("cx", qX)
         .attr("cy", qY)
-        .attr("r", queryPointSize + 5)
+        .attr("r", queryPointSize + 5 * scaleFactor)
         .attr("fill", "transparent")
         .style("cursor", "pointer")
         .style("pointer-events", "all");
@@ -681,10 +696,10 @@ function render1DQueryVisualization(
     options: {
         colorScale: d3.ScaleOrdinal<string, string>;
         showCentroidLines: boolean;
-        centroidLineColor: string;
         centroidLineWidth: number;
         queryPointSize: number;
         highlightColor: string;
+        scaleFactor: number;
     },
 ) {
     const {
@@ -693,6 +708,7 @@ function render1DQueryVisualization(
         centroidLineWidth,
         queryPointSize,
         highlightColor,
+        scaleFactor,
     } = options;
 
     if (!xScale) {
@@ -731,7 +747,7 @@ function render1DQueryVisualization(
         const linesGroup = queryGroup
             .append("g")
             .attr("class", "centroid-lines");
-        const pointRadius = 6;
+        const pointRadius = 5 * scaleFactor;
 
         data.finalCentroids.forEach((centroid: number[], idx: number) => {
             const cx = xScale(centroid[0]);
@@ -744,7 +760,7 @@ function render1DQueryVisualization(
             // Calculate edge points (offset by circle radius in x direction)
             const direction = cx > qX ? 1 : -1;
             const x1 = qX + pointRadius * direction;
-            const x2 = cx - 10 * direction; // 10 is centroid size
+            const x2 = cx - 10 * scaleFactor * direction; // 10 is centroid size
 
             // Create line
             const line = linesGroup
@@ -758,7 +774,10 @@ function render1DQueryVisualization(
                 .attr("x2", x2)
                 .attr("y2", stripCenter)
                 .attr("stroke", isAssigned ? highlightColor : "#ccc")
-                .attr("stroke-width", isAssigned ? centroidLineWidth : 0.5)
+                .attr(
+                    "stroke-width",
+                    isAssigned ? centroidLineWidth : 0.5 * scaleFactor,
+                )
                 .attr("opacity", isAssigned ? 0.7 : 0.15);
 
             // Create hover target on centroid
@@ -766,7 +785,7 @@ function render1DQueryVisualization(
                 .append("circle")
                 .attr("cx", cx)
                 .attr("cy", stripCenter)
-                .attr("r", 15)
+                .attr("r", 15 * scaleFactor)
                 .attr("fill", "transparent")
                 .style("cursor", "pointer")
                 .style("pointer-events", "all");
@@ -782,7 +801,9 @@ function render1DQueryVisualization(
                 .on("mouseover", function (event: MouseEvent) {
                     line.attr(
                         "stroke-width",
-                        isAssigned ? centroidLineWidth + 1 : 1.5,
+                        isAssigned
+                            ? centroidLineWidth + 1 * scaleFactor
+                            : 1.5 * scaleFactor,
                     ).attr("opacity", 0.9);
                     tooltip.html(tooltipContent);
                     tooltip
@@ -798,7 +819,7 @@ function render1DQueryVisualization(
                 .on("mouseout", function () {
                     line.attr(
                         "stroke-width",
-                        isAssigned ? centroidLineWidth : 0.5,
+                        isAssigned ? centroidLineWidth : 0.5 * scaleFactor,
                     ).attr("opacity", isAssigned ? 0.7 : 0.15);
                     tooltip.style("opacity", 0);
                 });
@@ -815,7 +836,7 @@ function render1DQueryVisualization(
         .attr("r", queryPointSize)
         .attr("fill", colorScale(clusterName))
         .attr("stroke", "#fff")
-        .attr("stroke-width", 2.5)
+        .attr("stroke-width", 2.5 * scaleFactor)
         .attr("opacity", 1);
 
     // Add query point marker
@@ -826,7 +847,7 @@ function render1DQueryVisualization(
         .attr("y", stripCenter)
         .attr("text-anchor", "middle")
         .attr("dominant-baseline", "central")
-        .attr("font-size", "10px")
+        .attr("font-size", `${10 * scaleFactor}px`)
         .attr("font-weight", "bold")
         .attr("fill", "#fff")
         .attr("pointer-events", "none")
@@ -838,7 +859,7 @@ function render1DQueryVisualization(
         .attr("class", "kmeans-query-hover-target")
         .attr("cx", qX)
         .attr("cy", stripCenter)
-        .attr("r", queryPointSize + 5)
+        .attr("r", queryPointSize + 5 * scaleFactor)
         .attr("fill", "transparent")
         .style("cursor", "pointer")
         .style("pointer-events", "all");
@@ -887,6 +908,7 @@ function renderCentroids2D(
         clusterNames: string[];
         opacity?: number;
         tooltipSuffix?: string;
+        scaleFactor: number;
     },
 ) {
     const {
@@ -895,6 +917,7 @@ function renderCentroids2D(
         clusterNames,
         opacity = 1,
         tooltipSuffix = "",
+        scaleFactor,
     } = options;
     const tooltip = setupCentroidTooltip();
 
@@ -917,7 +940,7 @@ function renderCentroids2D(
             .attr("class", "centroid-glow")
             .attr("cx", cx)
             .attr("cy", cy)
-            .attr("r", centroidSize + 4)
+            .attr("r", centroidSize + 4 * scaleFactor)
             .attr("fill", color)
             .attr("opacity", 0.3 * opacity);
 
@@ -930,7 +953,7 @@ function renderCentroids2D(
             .attr("r", centroidSize)
             .attr("fill", color)
             .attr("stroke", "#fff")
-            .attr("stroke-width", 3)
+            .attr("stroke-width", 3 * scaleFactor)
             .attr("opacity", opacity);
 
         // Centroid marker (cross)
@@ -946,7 +969,7 @@ function renderCentroids2D(
             .attr("x2", cx + markerSize)
             .attr("y2", cy)
             .attr("stroke", "#fff")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
         markerGroup
@@ -956,7 +979,7 @@ function renderCentroids2D(
             .attr("x2", cx)
             .attr("y2", cy + markerSize)
             .attr("stroke", "#fff")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
         // Hover target
@@ -965,7 +988,7 @@ function renderCentroids2D(
             .attr("class", "centroid-hover-target")
             .attr("cx", cx)
             .attr("cy", cy)
-            .attr("r", centroidSize + 5)
+            .attr("r", centroidSize + 5 * scaleFactor)
             .attr("fill", "transparent")
             .style("cursor", "pointer")
             .style("pointer-events", "all");
@@ -979,8 +1002,8 @@ function renderCentroids2D(
         hoverTarget
             .on("mouseover", function (event: MouseEvent) {
                 centroidCircle
-                    .attr("stroke-width", 4)
-                    .attr("r", centroidSize + 1);
+                    .attr("stroke-width", 4 * scaleFactor)
+                    .attr("r", centroidSize + 1 * scaleFactor);
                 tooltip.html(tooltipContent);
                 tooltip
                     .style("opacity", 0.95)
@@ -993,7 +1016,9 @@ function renderCentroids2D(
                     .style("top", event.pageY - 10 + "px");
             })
             .on("mouseout", function () {
-                centroidCircle.attr("stroke-width", 3).attr("r", centroidSize);
+                centroidCircle
+                    .attr("stroke-width", 3 * scaleFactor)
+                    .attr("r", centroidSize);
                 tooltip.style("opacity", 0);
             });
     });
@@ -1014,6 +1039,7 @@ function renderCentroids1D(
         clusterNames: string[];
         opacity?: number;
         tooltipSuffix?: string;
+        scaleFactor: number;
     },
 ) {
     const {
@@ -1022,6 +1048,7 @@ function renderCentroids1D(
         clusterNames,
         opacity = 1,
         tooltipSuffix = "",
+        scaleFactor,
     } = options;
     const tooltip = setupCentroidTooltip();
 
@@ -1043,7 +1070,7 @@ function renderCentroids1D(
             .attr("class", "centroid-glow")
             .attr("cx", cx)
             .attr("cy", stripCenter)
-            .attr("r", centroidSize + 4)
+            .attr("r", centroidSize + 4 * scaleFactor)
             .attr("fill", color)
             .attr("opacity", 0.3 * opacity);
 
@@ -1056,7 +1083,7 @@ function renderCentroids1D(
             .attr("r", centroidSize)
             .attr("fill", color)
             .attr("stroke", "#fff")
-            .attr("stroke-width", 3)
+            .attr("stroke-width", 3 * scaleFactor)
             .attr("opacity", opacity);
 
         // Centroid marker (cross)
@@ -1072,7 +1099,7 @@ function renderCentroids1D(
             .attr("x2", cx + markerSize)
             .attr("y2", stripCenter)
             .attr("stroke", "#fff")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
         markerGroup
@@ -1082,7 +1109,7 @@ function renderCentroids1D(
             .attr("x2", cx)
             .attr("y2", stripCenter + markerSize)
             .attr("stroke", "#fff")
-            .attr("stroke-width", 2)
+            .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
         // Hover target
@@ -1091,7 +1118,7 @@ function renderCentroids1D(
             .attr("class", "centroid-hover-target")
             .attr("cx", cx)
             .attr("cy", stripCenter)
-            .attr("r", centroidSize + 5)
+            .attr("r", centroidSize + 5 * scaleFactor)
             .attr("fill", "transparent")
             .style("cursor", "pointer")
             .style("pointer-events", "all");
@@ -1105,8 +1132,8 @@ function renderCentroids1D(
         hoverTarget
             .on("mouseover", function (event: MouseEvent) {
                 centroidCircle
-                    .attr("stroke-width", 4)
-                    .attr("r", centroidSize + 1);
+                    .attr("stroke-width", 4 * scaleFactor)
+                    .attr("r", centroidSize + 1 * scaleFactor);
                 tooltip.html(tooltipContent);
                 tooltip
                     .style("opacity", 0.95)
@@ -1119,7 +1146,9 @@ function renderCentroids1D(
                     .style("top", event.pageY - 10 + "px");
             })
             .on("mouseout", function () {
-                centroidCircle.attr("stroke-width", 3).attr("r", centroidSize);
+                centroidCircle
+                    .attr("stroke-width", 3 * scaleFactor)
+                    .attr("r", centroidSize);
                 tooltip.style("opacity", 0);
             });
     });
@@ -1138,9 +1167,10 @@ function renderCentroidMovement2D(
     options: {
         colorScale: d3.ScaleOrdinal<string, string>;
         clusterNames: string[];
+        scaleFactor: number;
     },
 ) {
-    const { colorScale, clusterNames } = options;
+    const { colorScale, clusterNames, scaleFactor } = options;
     const movementGroup = container
         .append("g")
         .attr("class", "centroid-movement");
@@ -1177,8 +1207,8 @@ function renderCentroidMovement2D(
             .attr("x2", x2)
             .attr("y2", y2)
             .attr("stroke", color)
-            .attr("stroke-width", 2)
-            .attr("stroke-dasharray", "5,3")
+            .attr("stroke-width", 2 * scaleFactor)
+            .attr("stroke-dasharray", `${5 * scaleFactor},${3 * scaleFactor}`)
             .attr("opacity", 0.6)
             .attr("marker-end", "url(#arrow-" + clusterId + ")");
 
@@ -1192,8 +1222,8 @@ function renderCentroidMovement2D(
             .attr("viewBox", "0 0 10 10")
             .attr("refX", 8)
             .attr("refY", 5)
-            .attr("markerWidth", arrowSize)
-            .attr("markerHeight", arrowSize)
+            .attr("markerWidth", arrowSize * scaleFactor)
+            .attr("markerHeight", arrowSize * scaleFactor)
             .attr("orient", "auto")
             .append("path")
             .attr("d", "M 0 0 L 10 5 L 0 10 z")
@@ -1215,9 +1245,10 @@ function renderCentroidMovement1D(
     options: {
         colorScale: d3.ScaleOrdinal<string, string>;
         clusterNames: string[];
+        scaleFactor: number;
     },
 ) {
-    const { colorScale, clusterNames } = options;
+    const { colorScale, clusterNames, scaleFactor } = options;
     const movementGroup = container
         .append("g")
         .attr("class", "centroid-movement");
@@ -1248,8 +1279,8 @@ function renderCentroidMovement1D(
             .attr("x2", x2)
             .attr("y2", stripCenter)
             .attr("stroke", color)
-            .attr("stroke-width", 2)
-            .attr("stroke-dasharray", "5,3")
+            .attr("stroke-width", 2 * scaleFactor)
+            .attr("stroke-dasharray", `${5 * scaleFactor},${3 * scaleFactor}`)
             .attr("opacity", 0.6)
             .attr("marker-end", "url(#arrow-1d-" + clusterId + ")");
 
@@ -1263,13 +1294,179 @@ function renderCentroidMovement1D(
             .attr("viewBox", "0 0 10 10")
             .attr("refX", 8)
             .attr("refY", 5)
-            .attr("markerWidth", arrowSize)
-            .attr("markerHeight", arrowSize)
+            .attr("markerWidth", arrowSize * scaleFactor)
+            .attr("markerHeight", arrowSize * scaleFactor)
             .attr("orient", "auto")
             .append("path")
             .attr("d", "M 0 0 L 10 5 L 0 10 z")
             .attr("fill", color)
             .attr("opacity", 0.8);
+    });
+}
+
+// ============================================================================
+// Selected Centroid Markers (used in training & step placement modes)
+// ============================================================================
+
+/**
+ * Renders user-selected centroid markers with glow, circle, cross, and label.
+ * pointer-events are disabled so clicks pass through to the background surface.
+ */
+export function renderSelectedCentroidMarkers(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    centroids: number[][],
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    options: {
+        colorScale: d3.ScaleOrdinal<string, string>;
+        scaleFactor: number;
+        centroidSize: number;
+    },
+) {
+    const { colorScale, scaleFactor, centroidSize } = options;
+
+    const group = container
+        .append("g")
+        .attr("class", "selected-centroids")
+        .style("pointer-events", "none");
+
+    centroids.forEach((centroid, index) => {
+        const cx = xScale(centroid[0]);
+        const cy = yScale(centroid[1]);
+
+        if (isNaN(cx) || isNaN(cy)) return;
+
+        const clusterName = `Cluster ${index}`;
+        const color = colorScale(clusterName);
+
+        // Outer glow
+        group
+            .append("circle")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", centroidSize + 4 * scaleFactor)
+            .attr("fill", color)
+            .attr("opacity", 0.2);
+
+        // Main circle
+        group
+            .append("circle")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", centroidSize)
+            .attr("fill", color)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 3 * scaleFactor)
+            .attr("opacity", 0.9);
+
+        // Cross marker
+        const markerSize = centroidSize * 0.6;
+        group
+            .append("line")
+            .attr("x1", cx - markerSize)
+            .attr("y1", cy)
+            .attr("x2", cx + markerSize)
+            .attr("y2", cy)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 2 * scaleFactor);
+
+        group
+            .append("line")
+            .attr("x1", cx)
+            .attr("y1", cy - markerSize)
+            .attr("x2", cx)
+            .attr("y2", cy + markerSize)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 2 * scaleFactor);
+
+        // Label above
+        group
+            .append("text")
+            .attr("x", cx)
+            .attr("y", cy - centroidSize - 8 * scaleFactor)
+            .attr("text-anchor", "middle")
+            .attr("font-size", `${11 * scaleFactor}px`)
+            .attr("font-weight", "bold")
+            .attr("fill", color)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 3 * scaleFactor)
+            .attr("paint-order", "stroke")
+            .text(`C${index}`);
+    });
+}
+
+// ============================================================================
+// Proposed Centroid Markers (used in step preview mode)
+// ============================================================================
+
+/**
+ * Renders proposed (next-step) centroid markers with a pulsing animation.
+ * pointer-events are disabled so clicks pass through to the background surface.
+ */
+export function renderProposedCentroidMarkers(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    centroids: number[][],
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    options: {
+        colorScale: d3.ScaleOrdinal<string, string>;
+        scaleFactor: number;
+        centroidSize: number;
+    },
+) {
+    const { colorScale, scaleFactor, centroidSize } = options;
+
+    const group = container
+        .append("g")
+        .attr("class", "proposed-centroids")
+        .style("pointer-events", "none");
+
+    centroids.forEach((centroid, index) => {
+        const cx = xScale(centroid[0]);
+        const cy = yScale(centroid[1]);
+
+        if (isNaN(cx) || isNaN(cy)) return;
+
+        const clusterName = `Cluster ${index}`;
+        const color = colorScale(clusterName);
+
+        // Pulsing outer glow
+        const glowRadius = centroidSize + 2 * scaleFactor;
+        const pulseMin = glowRadius - 1 * scaleFactor;
+        const pulseMax = glowRadius + 1 * scaleFactor;
+
+        group
+            .append("circle")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", glowRadius)
+            .attr("fill", color)
+            .attr("opacity", 0.3)
+            .append("animate")
+            .attr("attributeName", "r")
+            .attr("values", `${pulseMin};${pulseMax};${pulseMin}`)
+            .attr("dur", "1.5s")
+            .attr("repeatCount", "indefinite");
+
+        // Inner circle
+        group
+            .append("circle")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", centroidSize)
+            .attr("fill", color)
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1 * scaleFactor);
+
+        // Label below
+        group
+            .append("text")
+            .attr("x", cx)
+            .attr("y", cy + centroidSize + 12 * scaleFactor)
+            .attr("text-anchor", "middle")
+            .attr("font-size", `${9 * scaleFactor}px`)
+            .attr("fill", "#666")
+            .text("Proposed");
     });
 }
 

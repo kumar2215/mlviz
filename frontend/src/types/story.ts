@@ -84,6 +84,7 @@ interface BasePage {
         | components["schemas"]["PredefinedDataset"] 
         | components["schemas"]["Dataset"]
         | DatasetReference;
+    note?: string;
 }
 
 export interface StaticPageParameters {

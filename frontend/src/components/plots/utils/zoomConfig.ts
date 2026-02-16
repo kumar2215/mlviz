@@ -24,7 +24,7 @@ export const DEFAULT_2D_ZOOM_CONFIG: ZoomConfig = {
     scaleExtent: [1.0, 5],
     enableReset: true,
     enablePan: true,
-    panMargin: 50,
+    panMargin: 0,
     contentBounds: {
         width: 800 - 60,  // Default width minus typical margins
         height: 600 - 90, // Default height minus typical margins
@@ -40,7 +40,7 @@ export const EXPLORATORY_ZOOM_CONFIG: ZoomConfig = {
     scaleExtent: [0.5, 10],
     enableReset: true,
     enablePan: true,
-    panMargin: 100,
+    panMargin: 20,
     contentBounds: {
         width: 800 - 60,
         height: 600 - 90,
@@ -50,13 +50,13 @@ export const EXPLORATORY_ZOOM_CONFIG: ZoomConfig = {
 /**
  * Strict zoom configuration for precise interactions
  * - No zoom out beyond initial view
- * - Minimal pan margin to keep focus on content
+ * - Zero pan margin to keep absolute focus on content
  */
 export const STRICT_ZOOM_CONFIG: ZoomConfig = {
     scaleExtent: [1.0, 3],
     enableReset: true,
     enablePan: true,
-    panMargin: 20,
+    panMargin: 0,
     contentBounds: {
         width: 800 - 60,
         height: 600 - 90,

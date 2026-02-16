@@ -19,6 +19,7 @@ class Slide(BaseModel):
 class BasePage(BaseModel):
     name: Optional[str] = None
     page_type: Literal["static", "dynamic"]
+    note: Optional[str] = Field(None, description="Optional note or annotation for this page")
     # Parameters are defined in subclasses
 
 

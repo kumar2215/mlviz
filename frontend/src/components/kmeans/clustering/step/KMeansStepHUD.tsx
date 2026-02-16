@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useKMeans } from "@/contexts/models/KMeansContext";
+import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { Check, Move, Play, Plus, RotateCcw, Target } from "lucide-react";
 import React from "react";
 
@@ -12,6 +13,7 @@ interface KMeansStepHUDProps {
 }
 
 const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
+    const scaleFactor = useScaleFactor();
     const {
         selectedCentroids,
         setSelectedCentroids,
@@ -23,14 +25,16 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
 
     const handleRunStep = async () => {
         if (selectedCentroids.length === 0) return;
-        const includeBoundary =
-            lastVisualizationParams?.parameters?.include_boundary !== false;
+        
+        // Safety cast for parameters access
+        const params = (lastVisualizationParams as any)?.parameters;
+        const includeBoundary = params?.include_boundary !== false;
 
         await performStep({
             ...lastVisualizationParams,
             centroids: selectedCentroids,
             include_boundary: includeBoundary,
-        });
+        } as any);
         setMode("preview");
     };
 
@@ -42,120 +46,289 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
     };
 
     return (
-        <div className="bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-md p-5 rounded-2xl shadow-2xl border border-slate-200 w-72">
-            <h3 className="font-bold text-slate-800 flex items-center gap-2 mb-4">
-                <Target className="w-4 h-4 text-primary" />
+        <div
+            className="bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200"
+            style={{
+                padding: `${20 * scaleFactor}px`,
+                width: `${288 * scaleFactor}px`, // Equivalent to w-72
+            }}
+        >
+            <h3
+                className="font-bold text-slate-800 flex items-center mb-4"
+                style={{
+                    gap: `${8 * scaleFactor}px`,
+                    fontSize: `${16 * scaleFactor}px`,
+                }}
+            >
+                <Target
+                    style={{
+                        width: `${16 * scaleFactor}px`,
+                        height: `${16 * scaleFactor}px`,
+                    }}
+                    className="text-primary"
+                />
                 Step-by-Step Training
             </h3>
 
-            <div className="space-y-4">
+            <div style={{ gap: `${16 * scaleFactor}px` }} className="flex flex-col">
                 {mode === "ready" && (
-                    <div className="space-y-3">
-                        <p className="text-sm text-slate-500 leading-relaxed">
+                    <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
+                        <p
+                            className="text-slate-500 leading-relaxed"
+                            style={{ fontSize: `${14 * scaleFactor}px` }}
+                        >
                             {selectedCentroids.length > 0
                                 ? "Continue from your saved state or start fresh."
                                 : "Start by choosing initial points as cluster centers."}
                         </p>
                         {selectedCentroids.length > 0 ? (
-                            <div className="flex flex-col gap-2">
+                            <div style={{ gap: `${8 * scaleFactor}px` }} className="flex flex-col">
                                 <Button
-                                    className="w-full gap-2 bg-slate-900 text-white border-none hover:bg-slate-700 shadow-md transition-all active:scale-[0.98]"
+                                    className="w-full bg-slate-900 text-white border-none hover:bg-slate-700 shadow-md transition-all active:scale-[0.98]"
+                                    style={{
+                                        gap: `${8 * scaleFactor}px`,
+                                        height: `${40 * scaleFactor}px`,
+                                        fontSize: `${14 * scaleFactor}px`,
+                                    }}
                                     onClick={() => setMode("selecting")}
                                 >
-                                    <Move className="w-4 h-4" /> Adjust Centroids
+                                    <Move
+                                        style={{
+                                            width: `${16 * scaleFactor}px`,
+                                            height: `${16 * scaleFactor}px`,
+                                        }}
+                                    />{" "}
+                                    Adjust Centroids
                                 </Button>
                                 <Button
                                     variant="outline"
-                                    className="w-full gap-2 shadow-sm transition-all active:scale-[0.98]"
+                                    className="w-full shadow-sm transition-all active:scale-[0.98]"
+                                    style={{
+                                        gap: `${8 * scaleFactor}px`,
+                                        height: `${40 * scaleFactor}px`,
+                                        fontSize: `${14 * scaleFactor}px`,
+                                    }}
                                     onClick={handleRunStep}
                                     disabled={isStepLoading}
                                 >
-                                    <Play className="w-4 h-4" /> Run Step
+                                    <Play
+                                        style={{
+                                            width: `${16 * scaleFactor}px`,
+                                            height: `${16 * scaleFactor}px`,
+                                        }}
+                                    />{" "}
+                                    Run Step
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    className="w-full text-xs h-8 text-slate-400 hover:text-slate-600"
+                                    className="w-full text-slate-400 hover:text-slate-600"
+                                    style={{
+                                        fontSize: `${12 * scaleFactor}px`,
+                                        height: `${32 * scaleFactor}px`,
+                                    }}
                                     onClick={() => {
                                         setSelectedCentroids([]);
                                         setMode("selecting");
                                     }}
                                 >
-                                    <RotateCcw className="w-3 h-3 mr-1" /> Start Over (Clear)
+                                    <RotateCcw
+                                        style={{
+                                            width: `${12 * scaleFactor}px`,
+                                            height: `${12 * scaleFactor}px`,
+                                            marginRight: `${4 * scaleFactor}px`,
+                                        }}
+                                    />{" "}
+                                    Start Over (Clear)
                                 </Button>
                             </div>
                         ) : (
                             <Button
-                                className="w-full gap-2 bg-slate-900 border-none hover:bg-slate-700 text-white shadow-md transition-all active:scale-[0.98]"
+                                className="w-full bg-slate-900 border-none hover:bg-slate-700 text-white shadow-md transition-all active:scale-[0.98]"
+                                style={{
+                                    gap: `${8 * scaleFactor}px`,
+                                    height: `${40 * scaleFactor}px`,
+                                    fontSize: `${14 * scaleFactor}px`,
+                                }}
                                 onClick={() => setMode("selecting")}
                             >
-                                <Plus className="w-4 h-4" /> Start Placing
+                                <Plus
+                                    style={{
+                                        width: `${16 * scaleFactor}px`,
+                                        height: `${16 * scaleFactor}px`,
+                                    }}
+                                />{" "}
+                                Start Placing
                             </Button>
                         )}
                     </div>
                 )}
 
                 {mode === "selecting" && (
-                    <div className="space-y-3">
+                    <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
                         <div className="flex justify-between items-end">
-                            <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <Label
+                                className="font-bold uppercase tracking-wider text-slate-400"
+                                style={{ fontSize: `${10 * scaleFactor}px` }}
+                            >
                                 Centroids Placed
                             </Label>
-                            <span className="text-lg font-mono font-bold text-primary leading-none">
+                            <span
+                                className="font-mono font-bold text-primary leading-none"
+                                style={{ fontSize: `${18 * scaleFactor}px` }}
+                            >
                                 {selectedCentroids.length}
                             </span>
                         </div>
-                        <p className="text-xs text-slate-500 italic">
+                        <p
+                            className="text-slate-500 italic"
+                            style={{ fontSize: `${12 * scaleFactor}px` }}
+                        >
                             Click data points to select/deselect them.
                         </p>
                         <Button
-                            className="w-full h-auto py-2 gap-2 bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
+                            className="w-full h-auto bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                            style={{
+                                padding: `${8 * scaleFactor}px`,
+                                gap: `${8 * scaleFactor}px`,
+                            }}
                             disabled={selectedCentroids.length === 0 || isStepLoading}
                             onClick={handleRunStep}
                         >
                             {isStepLoading ? (
-                                "Computing..."
+                                <span style={{ fontSize: `${14 * scaleFactor}px` }}>
+                                    Computing...
+                                </span>
                             ) : (
                                 <>
-                                    <Play className="w-4 h-4 fill-current shrink-0" /> <span className="text-xs font-semibold">Run Step</span>
+                                    <Play
+                                        className="fill-current shrink-0"
+                                        style={{
+                                            width: `${16 * scaleFactor}px`,
+                                            height: `${16 * scaleFactor}px`,
+                                        }}
+                                    />{" "}
+                                    <span
+                                        style={{
+                                            fontSize: `${12 * scaleFactor}px`,
+                                            fontWeight: 600,
+                                        }}
+                                    >
+                                        Run Step
+                                    </span>
                                 </>
                             )}
                         </Button>
                         <Button
                             variant="ghost"
-                            className="w-full text-xs h-8 text-slate-400 hover:text-slate-600"
+                            className="w-full text-slate-400 hover:text-slate-600"
+                            style={{
+                                fontSize: `${12 * scaleFactor}px`,
+                                height: `${32 * scaleFactor}px`,
+                            }}
                             onClick={() => setSelectedCentroids([])}
                         >
-                            <RotateCcw className="w-3 h-3 mr-1" /> Clear All
+                            <RotateCcw
+                                style={{
+                                    width: `${12 * scaleFactor}px`,
+                                    height: `${12 * scaleFactor}px`,
+                                    marginRight: `${4 * scaleFactor}px`,
+                                }}
+                            />{" "}
+                            Clear All
                         </Button>
                     </div>
                 )}
 
                 {mode === "preview" && (
-                    <div className="space-y-3">
-                        <div className="p-3 rounded-xl border border-primary/10 bg-white/50">
-                            <p className="text-xs font-medium text-primary flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
+                        <div
+                            className="border border-primary/10 bg-white/50"
+                            style={{
+                                padding: `${12 * scaleFactor}px`,
+                                borderRadius: `${12 * scaleFactor}px`,
+                            }}
+                        >
+                            <p
+                                className="font-medium text-primary flex items-center"
+                                style={{
+                                    gap: `${6 * scaleFactor}px`,
+                                    fontSize: `${12 * scaleFactor}px`,
+                                }}
+                            >
+                                <div
+                                    className="rounded-full bg-primary animate-pulse"
+                                    style={{
+                                        width: `${6 * scaleFactor}px`,
+                                        height: `${6 * scaleFactor}px`,
+                                    }}
+                                />
                                 Step Complete
                             </p>
-                            <p className="text-[11px] text-slate-500 mt-1">
-                                The algorithm has proposed new centers based on the current assignments.
+                            <p
+                                className="text-slate-500 mt-1"
+                                style={{ fontSize: `${11 * scaleFactor}px` }}
+                            >
+                                The algorithm has proposed new centers based on the current
+                                assignments.
                             </p>
                         </div>
-                        <div className="text-xs text-slate-500 px-1">
+                        <div
+                            className="text-slate-500 px-1"
+                            style={{ fontSize: `${12 * scaleFactor}px` }}
+                        >
                             Would you like to keep the centroids suggested?
                         </div>
-                        <div className="flex flex-row gap-2 w-full pt-1">
+                        <div
+                            className="flex flex-row w-full pt-1"
+                            style={{ gap: `${8 * scaleFactor}px` }}
+                        >
                             <Button
-                                className="w-1/2 h-auto py-2 gap-2 bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
+                                className="w-1/2 h-auto bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                                style={{
+                                    padding: `${8 * scaleFactor}px`,
+                                    gap: `${8 * scaleFactor}px`,
+                                }}
                                 onClick={() => setMode("selecting")}
                             >
-                                <Check className="w-4 h-4 shrink-0" /> <span className="text-xs font-semibold">Keep</span>
+                                <Check
+                                    className="shrink-0"
+                                    style={{
+                                        width: `${16 * scaleFactor}px`,
+                                        height: `${16 * scaleFactor}px`,
+                                    }}
+                                />
+                                <span
+                                    style={{
+                                        fontSize: `${12 * scaleFactor}px`,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Keep
+                                </span>
                             </Button>
                             <Button
-                                className="w-1/2 h-auto py-2 gap-2 bg-gradient-to-r from-red-100 to-fuchsia-100 text-black border-none hover:from-red-200 hover:to-fuchsia-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
+                                className="w-1/2 h-auto bg-gradient-to-r from-red-100 to-fuchsia-100 text-black border-none hover:from-red-200 hover:to-fuchsia-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                                style={{
+                                    padding: `${8 * scaleFactor}px`,
+                                    gap: `${8 * scaleFactor}px`,
+                                }}
                                 onClick={handleTrainNext}
                             >
-                                <Move className="w-4 h-4 shrink-0" /> <span className="text-xs font-semibold">Adjust</span>
+                                <Move
+                                    className="shrink-0"
+                                    style={{
+                                        width: `${16 * scaleFactor}px`,
+                                        height: `${16 * scaleFactor}px`,
+                                    }}
+                                />
+                                <span
+                                    style={{
+                                        fontSize: `${12 * scaleFactor}px`,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Adjust
+                                </span>
                             </Button>
                         </div>
                     </div>

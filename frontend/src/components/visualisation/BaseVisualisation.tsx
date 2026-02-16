@@ -1,5 +1,6 @@
 import * as d3 from "d3";
 import React, { useEffect, useRef } from "react";
+import { useScaleFactor } from "../../hooks/useScaleFactor";
 import VisualisationControls from "./controls/VisualisationControls";
 import { usePlayControls } from "./hooks/usePlayControls";
 import { useZoomControls } from "./hooks/useZoomControls";
@@ -27,6 +28,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
     const svgRef = useRef<SVGSVGElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const visualizationRef = useRef<HTMLDivElement>(null);
+    const scaleFactor = useScaleFactor();
 
     const playControls = capabilities.playable
         ? usePlayControls({
@@ -124,6 +126,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 width: containerWidth,
                 height: containerHeight,
                 margin: MARGIN,
+                scaleFactor: scaleFactor,
             },
             styling: {
                 theme: theme === "auto" ? "light" : theme,

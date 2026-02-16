@@ -192,7 +192,9 @@ export function calculatePlotBounds(
         range.push(rangeVal + 2 * paddingAmount);
     }
 
-    return { min, max, range };
+    const result = { min, max, range };
+    console.log("[calculatePlotBounds] Calculated bounds:", result);
+    return result;
 }
 
 /**
@@ -203,13 +205,23 @@ export function calculateCombinedBounds(
     decisionBoundary?: DecisionBoundary,
     padding: number = 0.1,
 ): PlotBounds {
-    const allPoints = [...data];
-
-    if (decisionBoundary) {
-        allPoints.push(...decisionBoundary.meshPoints);
+    // If decision boundary is available, use its mesh points exclusively
+    // Usually we want 0 padding for decision boundaries as they define the full plot area
+    if (decisionBoundary && decisionBoundary.meshPoints.length > 0) {
+        const bounds = calculatePlotBounds(decisionBoundary.meshPoints, 0);
+        console.log("[calculateCombinedBounds] Using decision boundary bounds:", bounds, {
+            meshPoints: decisionBoundary.meshPoints.length,
+            originalDataPoints: data.length
+        });
+        return bounds;
     }
 
-    return calculatePlotBounds(allPoints, padding);
+    const bounds = calculatePlotBounds(data, padding);
+    console.log("[calculateCombinedBounds] Using data points bounds:", bounds, {
+        dataPoints: data.length,
+        padding
+    });
+    return bounds;
 }
 
 // ============================================================================

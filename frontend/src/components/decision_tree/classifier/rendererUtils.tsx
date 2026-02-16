@@ -63,36 +63,37 @@ export const renderIntegratedSplitNode = (
     totalWidth: number,
     colorScale?: ((className: string) => string) | d3.ScaleOrdinal<string, string>,
     interpolationFactor?: number,
-    classNames?: string[]
+    classNames?: string[],
+    scaleFactor: number = 1
 ) => {
-    const histogramHeight = 40;
-    const textHeight = 30;
-    const barHeight = 8;
+    const histogramHeight = 40 * scaleFactor;
+    const textHeight = 30 * scaleFactor;
+    const barHeight = 8 * scaleFactor;
     const totalHeight = histogramHeight + textHeight + barHeight;
 
     nodeGroup
         .append("rect")
-        .attr("width", totalWidth + 15)
-        .attr("height", totalHeight + 10)
-        .attr("x", -totalWidth / 2 - 6)
+        .attr("width", totalWidth + 15 * scaleFactor)
+        .attr("height", totalHeight + 10 * scaleFactor)
+        .attr("x", -totalWidth / 2 - 6 * scaleFactor)
         .attr("y", -totalHeight / 2)
-        .attr("rx", 6)
+        .attr("rx", 6 * scaleFactor)
         .attr("fill", "#ecececff")
         .attr("fill-opacity", d.data.isOnPath ? interpolationFactor || 0 : 0)
         .attr("stroke", d.data.isOnPath ? "#333" : "none")
         .attr(
             "stroke-width",
-            d.data.isOnPath ? (interpolationFactor || 0) * 2 : 0
+            d.data.isOnPath ? (interpolationFactor || 0) * 2 * scaleFactor : 0
         );
 
     if (d.data.histogram_data) {
         renderHistogramComponent(
             nodeGroup,
             d.data.histogram_data,
-            totalWidth - 10,
-            histogramHeight - 5,
-            -totalWidth / 2 + 5,
-            -totalHeight / 2 + 5,
+            totalWidth - 10 * scaleFactor,
+            histogramHeight - 5 * scaleFactor,
+            -totalWidth / 2 + 5 * scaleFactor,
+            -totalHeight / 2 + 5 * scaleFactor,
             colorScale,
             classNames
         );
@@ -101,9 +102,9 @@ export const renderIntegratedSplitNode = (
     nodeGroup
         .append("text")
         .attr("text-anchor", "middle")
-        .attr("y", -totalHeight / 2 + histogramHeight + 20)
+        .attr("y", -totalHeight / 2 + histogramHeight + 20 * scaleFactor)
         .call(applyFont.family)
-        .call(applyFont.size.medium)
+        .attr("font-size", `${10 * scaleFactor}px`)
         .call(applyFont.weight.bold)
         .attr("fill", "#374151")
         .text(d.data.feature || d.data.name);
@@ -111,10 +112,11 @@ export const renderIntegratedSplitNode = (
     renderDistributionBar(
         nodeGroup,
         distribution,
-        totalWidth - 10,
+        totalWidth - 10 * scaleFactor,
         barHeight,
         -totalHeight / 2 + histogramHeight + textHeight,
-        colorScale
+        colorScale,
+        scaleFactor
     );
 };
 
@@ -129,9 +131,10 @@ export const renderLeafNode = (
     distribution: ClassDistribution[],
     totalWidth: number,
     colorScale?: ((className: string) => string) | d3.ScaleOrdinal<string, string>,
-    interpolationFactor?: number
+    interpolationFactor?: number,
+    scaleFactor: number = 1
 ) => {
-    const leafHeight = 40;
+    const leafHeight = 40 * scaleFactor;
 
     console.log('[renderLeafNode] Called with distribution:', distribution, 'totalWidth:', totalWidth);
     console.log('[renderLeafNode] Node data:', d.data);
@@ -145,15 +148,15 @@ export const renderLeafNode = (
         if (d.data.isOnPath && interpolationFactor && interpolationFactor > 0) {
             nodeGroup
                 .append("rect")
-                .attr("width", totalWidth + 8)
-                .attr("height", leafHeight + 8)
-                .attr("x", -totalWidth / 2 - 4)
-                .attr("y", -leafHeight / 2 - 4)
-                .attr("rx", 8)
+                .attr("width", totalWidth + 8 * scaleFactor)
+                .attr("height", leafHeight + 8 * scaleFactor)
+                .attr("x", -totalWidth / 2 - 4 * scaleFactor)
+                .attr("y", -leafHeight / 2 - 4 * scaleFactor)
+                .attr("rx", 8 * scaleFactor)
                 .attr("fill", "#333")
                 .attr("fill-opacity", interpolationFactor * 0.3)
                 .attr("stroke", "#333")
-                .attr("stroke-width", interpolationFactor * 2);
+                .attr("stroke-width", interpolationFactor * 2 * scaleFactor);
         }
 
         nodeGroup
@@ -162,25 +165,25 @@ export const renderLeafNode = (
             .attr("height", leafHeight)
             .attr("x", -totalWidth / 2)
             .attr("y", -leafHeight / 2)
-            .attr("rx", 6)
+            .attr("rx", 6 * scaleFactor)
             .attr("fill", colorScale ? colorScale(classInfo.class) : "#3b82f6");
 
         nodeGroup
             .append("text")
-            .attr("y", -3)
+            .attr("y", -3 * scaleFactor)
             .attr("text-anchor", "middle")
             .call(applyFont.family)
-            .call(applyFont.size.medium)
+            .attr("font-size", `${10 * scaleFactor}px`)
             .call(applyFont.weight.bold)
             .attr("fill", "#eeeeee")
             .text(classInfo.class.substring(0, 3));
 
         nodeGroup
             .append("text")
-            .attr("y", 10)
+            .attr("y", 10 * scaleFactor)
             .attr("text-anchor", "middle")
             .call(applyFont.family)
-            .call(applyFont.size.small)
+            .attr("font-size", `${8 * scaleFactor}px`)
             .attr("fill", "white")
             .text(`n=${classInfo.count}`);
     } else {
@@ -188,24 +191,25 @@ export const renderLeafNode = (
         if (d.data.isOnPath && interpolationFactor && interpolationFactor > 0) {
             nodeGroup
                 .append("rect")
-                .attr("width", totalWidth + 8)
-                .attr("height", leafHeight + 8)
-                .attr("x", -totalWidth / 2 - 4)
-                .attr("y", -leafHeight / 2 - 4)
-                .attr("rx", 8)
+                .attr("width", totalWidth + 8 * scaleFactor)
+                .attr("height", leafHeight + 8 * scaleFactor)
+                .attr("x", -totalWidth / 2 - 4 * scaleFactor)
+                .attr("y", -leafHeight / 2 - 4 * scaleFactor)
+                .attr("rx", 8 * scaleFactor)
                 .attr("fill", "#333")
                 .attr("fill-opacity", interpolationFactor * 0.3)
                 .attr("stroke", "#333")
-                .attr("stroke-width", interpolationFactor * 2);
+                .attr("stroke-width", interpolationFactor * 2 * scaleFactor);
         }
 
         let currentX = -totalWidth / 2;
 
         distribution.forEach((classInfo: ClassDistribution, index: number) => {
             const proportionalWidth = Math.max(
-                10,
+                10 * scaleFactor,
                 classInfo.value * totalWidth
             );
+            const cornerRadius = 5 * scaleFactor;
 
             nodeGroup
                 .append("path")
@@ -214,35 +218,34 @@ export const renderLeafNode = (
                     const height = leafHeight;
                     const x = currentX;
                     const y = -leafHeight / 2;
-                    const cornerRadius = 5;
 
                     if (index === 0) {
-                        return `M${x + cornerRadius},${y} 
-                                L${x + width},${y} 
-                                L${x + width},${y + height} 
-                                L${x + cornerRadius},${y + height} 
+                        return `M${x + cornerRadius},${y}
+                                L${x + width},${y}
+                                L${x + width},${y + height}
+                                L${x + cornerRadius},${y + height}
                                 A${cornerRadius},${cornerRadius} 0 0,1 ${x},${
                             y + height - cornerRadius
-                        } 
-                                L${x},${y + cornerRadius} 
+                        }
+                                L${x},${y + cornerRadius}
                                 A${cornerRadius},${cornerRadius} 0 0,1 ${
                             x + cornerRadius
                         },${y} Z`;
                     } else if (index === distribution.length - 1) {
-                        return `M${x},${y} 
-                                L${x + width - cornerRadius},${y} 
+                        return `M${x},${y}
+                                L${x + width - cornerRadius},${y}
                                 A${cornerRadius},${cornerRadius} 0 0,1 ${
                             x + width
-                        },${y + cornerRadius} 
-                                L${x + width},${y + height - cornerRadius} 
+                        },${y + cornerRadius}
+                                L${x + width},${y + height - cornerRadius}
                                 A${cornerRadius},${cornerRadius} 0 0,1 ${
                             x + width - cornerRadius
-                        },${y + height} 
+                        },${y + height}
                                 L${x},${y + height} Z`;
                     } else {
-                        return `M${x},${y} 
-                        L${x + width},${y} 
-                        L${x + width},${y + height} 
+                        return `M${x},${y}
+                        L${x + width},${y}
+                        L${x + width},${y + height}
                         L${x},${y + height} Z`;
                     }
                 })
@@ -253,24 +256,24 @@ export const renderLeafNode = (
                         : `hsl(${(index * 137.5) % 360}, 50%, 50%)`
                 );
 
-            if (proportionalWidth > 20) {
+            if (proportionalWidth > 20 * scaleFactor) {
                 nodeGroup
                     .append("text")
                     .attr("x", currentX + proportionalWidth / 2)
-                    .attr("y", -3)
+                    .attr("y", -3 * scaleFactor)
                     .attr("text-anchor", "middle")
                     .call(applyFont.family)
-                    .call(applyFont.size.medium)
+                    .attr("font-size", `${10 * scaleFactor}px`)
                     .call(applyFont.weight.bold)
                     .attr("fill", "white")
                     .text(classInfo.class.substring(0, 3));
                 nodeGroup
                     .append("text")
                     .attr("x", currentX + proportionalWidth / 2)
-                    .attr("y", 10)
+                    .attr("y", 10 * scaleFactor)
                     .attr("text-anchor", "middle")
                     .call(applyFont.family)
-                    .call(applyFont.size.small)
+                    .attr("font-size", `${8 * scaleFactor}px`)
                     .attr("fill", "white")
                     .text(`n=${classInfo.count}`);
             }
@@ -334,14 +337,16 @@ const renderDistributionBar = (
     width: number,
     height: number,
     yOffset: number,
-    colorScale?: ((className: string) => string) | d3.ScaleOrdinal<string, string>
+    colorScale?: ((className: string) => string) | d3.ScaleOrdinal<string, string>,
+    scaleFactor: number = 1
 ) => {
     let currentX = -width / 2;
 
     distribution.forEach((classInfo, index) => {
-        const segmentWidth = Math.max(1, classInfo.value * width);
+        const segmentWidth = Math.max(1 * scaleFactor, classInfo.value * width);
 
         if (segmentWidth > 0) {
+            const cornerRadius = 4 * scaleFactor;
             nodeGroup
                 .append("path")
                 .attr("x", currentX)
@@ -349,37 +354,36 @@ const renderDistributionBar = (
                 .attr("width", segmentWidth)
                 .attr("height", height)
                 .attr("d", function (_d) {
-                    const cornerRadius = 4;
                     const x = currentX;
                     const y = yOffset;
 
                     if (index === 0) {
-                        return `M${x + cornerRadius},${y} 
-                        L${x + segmentWidth},${y} 
-                        L${x + segmentWidth},${y + height} 
-                        L${x + cornerRadius},${y + height} 
+                        return `M${x + cornerRadius},${y}
+                        L${x + segmentWidth},${y}
+                        L${x + segmentWidth},${y + height}
+                        L${x + cornerRadius},${y + height}
                         A${cornerRadius},${cornerRadius} 0 0,1 ${x},${
                             y + height - cornerRadius
-                        } 
-                        L${x},${y + cornerRadius} 
+                        }
+                        L${x},${y + cornerRadius}
                         A${cornerRadius},${cornerRadius} 0 0,1 ${
                             x + cornerRadius
                         },${y} Z`;
                     } else if (index === distribution.length - 1) {
-                        return `M${x},${y} 
-                        L${x + segmentWidth - cornerRadius},${y} 
+                        return `M${x},${y}
+                        L${x + segmentWidth - cornerRadius},${y}
                         A${cornerRadius},${cornerRadius} 0 0,1 ${
                             x + segmentWidth
-                        },${y + cornerRadius} 
-                        L${x + segmentWidth},${y + height - cornerRadius} 
+                        },${y + cornerRadius}
+                        L${x + segmentWidth},${y + height - cornerRadius}
                         A${cornerRadius},${cornerRadius} 0 0,1 ${
                             x + segmentWidth - cornerRadius
-                        },${y + height} 
+                        },${y + height}
                         L${x},${y + height} Z`;
                     } else {
-                        return `M${x},${y} 
-                        L${x + segmentWidth},${y} 
-                        L${x + segmentWidth},${y + height} 
+                        return `M${x},${y}
+                        L${x + segmentWidth},${y}
+                        L${x + segmentWidth},${y + height}
                         L${x},${y + height} Z`;
                     }
                 })
@@ -496,26 +500,29 @@ export const renderExpandableLeafNode = (
     distribution: ClassDistribution[],
     nodeWidth: number,
     colorScale: ((className: string) => string) | d3.ScaleOrdinal<string, string, never>,
-    isSelected: boolean
+    isSelected: boolean,
+    scaleFactor: number = 1
 ): void => {
-    const nodeHeight = 40;
-    
+    const nodeHeight = 40 * scaleFactor;
+
     // Check if this is a terminal leaf (marked as not splittable)
     const isTerminal = d.data?.terminal === true;
     console.log('[renderExpandableLeafNode] Node:', d.data, 'isTerminal:', isTerminal);
-    
+
     // If terminal, render as a regular leaf node without + icon
     if (isTerminal) {
         console.log('[renderExpandableLeafNode] Rendering as terminal leaf');
         console.log(distribution, nodeWidth)
-        renderLeafNode(nodeGroup, 
-            d, 
-            distribution, 
-            nodeWidth, 
-            colorScale);
+        renderLeafNode(nodeGroup,
+            d,
+            distribution,
+            nodeWidth,
+            colorScale,
+            undefined,
+            scaleFactor);
         return;
     }
-    
+
     // Background with selection highlight
     nodeGroup
         .append("rect")
@@ -523,54 +530,55 @@ export const renderExpandableLeafNode = (
         .attr("height", nodeHeight)
         .attr("x", -nodeWidth / 2)
         .attr("y", -nodeHeight / 2)
-        .attr("rx", 6)
+        .attr("rx", 6 * scaleFactor)
         .attr("fill", isSelected ? "#e0e7ff" : "#f3f4f6")
         .attr("stroke", isSelected ? "#4f46e5" : "#d1d5db")
-        .attr("stroke-width", isSelected ? 2 : 1);
-    
+        .attr("stroke-width", isSelected ? 2 * scaleFactor : 1 * scaleFactor);
+
     // Display class distribution
     // Reusing renderDistributionBar ensures consistent visualization and correct color mapping
     // (using class name instead of potentially incorrect loop index)
-    const barWidth = nodeWidth - 20;
-    const barHeight = 8;
+    const barWidth = nodeWidth - 20 * scaleFactor;
+    const barHeight = 8 * scaleFactor;
     const barY = -nodeHeight / 4;
-    
+
     // Add a group positioned at the start of the bar area
     const barGroup = nodeGroup.append("g");
-    
+
     // renderDistributionBar expects to draw centered on 0, so we pass the correct yOffset
     // AND we must not translate the group if we want it to align with how renderDistributionBar works
     // (which draws from -width/2 to +width/2)
-    
+
     renderDistributionBar(
         barGroup,
         distribution,
         barWidth,
         barHeight,
         barY,
-        colorScale
+        colorScale,
+        scaleFactor
     );
-    
+
     // Show "+" icon or "Selected" text
     if (isSelected) {
         nodeGroup
             .append("text")
-            .attr("y", nodeHeight / 4 + 5)
+            .attr("y", nodeHeight / 4 + 5 * scaleFactor)
             .attr("text-anchor", "middle")
-            .attr("font-size", "12px")
+            .attr("font-size", `${12 * scaleFactor}px`)
             .attr("fill", "#4f46e5")
             .attr("font-weight", "bold")
             .text("Selected");
     } else {
         nodeGroup
             .append("text")
-            .attr("y", nodeHeight / 2 - 5)
+            .attr("y", nodeHeight / 2 - 5 * scaleFactor)
             .attr("text-anchor", "middle")
-            .attr("font-size", "10px")
+            .attr("font-size", `${10 * scaleFactor}px`)
             .attr("fill", "#6b7280")
             .text(`n=${d.data.samples}`);
     }
-    
+
 };
 
 /**

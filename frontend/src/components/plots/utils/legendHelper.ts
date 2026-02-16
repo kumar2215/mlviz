@@ -28,6 +28,7 @@ export function renderLegend(
     innerWidth: number,
     innerHeight: number,
     options: LegendOptions = {},
+    scaleFactor: number = 1,
 ) {
     const { position = "top-right" } = options;
 
@@ -51,29 +52,31 @@ export function renderLegend(
     let filterCallback: LegendFilterCallback | null = null;
 
     // Estimate dimensions for the foreignObject
-    const foWidth = 130;
-    const itemHeight = 22;
-    const paddingY = 16;
+    const foWidth = 130 * scaleFactor;
+    const itemHeight = 22 * scaleFactor;
+    const paddingY = 16 * scaleFactor;
     const foHeight = filteredNames.length * itemHeight + paddingY;
 
     let x = 0;
     let y = 0;
+    const offset = 8 * scaleFactor;
+
     switch (position) {
         case "top-right":
-            x = innerWidth - foWidth - 8;
-            y = 8;
+            x = innerWidth - foWidth - offset;
+            y = offset;
             break;
         case "top-left":
-            x = 8;
-            y = 8;
+            x = offset;
+            y = offset;
             break;
         case "bottom-right":
-            x = innerWidth - foWidth - 8;
-            y = innerHeight - foHeight - 8;
+            x = innerWidth - foWidth - offset;
+            y = innerHeight - foHeight - offset;
             break;
         case "bottom-left":
-            x = 8;
-            y = innerHeight - foHeight - 8;
+            x = offset;
+            y = innerHeight - foHeight - offset;
             break;
     }
 
@@ -90,8 +93,9 @@ export function renderLegend(
         .append("xhtml:div")
         .attr(
             "class",
-            "bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-sm border border-gray-200/50 rounded-lg px-3 py-2 shadow-sm",
-        );
+            "bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-sm font-sans",
+        )
+        .style("padding", `${8 * scaleFactor}px ${12 * scaleFactor}px`);
 
     const rows: Map<
         string,
@@ -123,8 +127,9 @@ export function renderLegend(
     filteredNames.forEach((name) => {
         const row = div
             .append("xhtml:div")
-            .attr("class", "flex items-center gap-2")
-            .style("margin-bottom", "2px")
+            .attr("class", "flex items-center")
+            .style("gap", `${8 * scaleFactor}px`)
+            .style("margin-bottom", `${2 * scaleFactor}px`)
             .style("cursor", "pointer")
             .style("user-select", "none")
             .style("border-radius", "4px")
@@ -137,16 +142,17 @@ export function renderLegend(
 
         row.append("xhtml:span")
             .attr("class", "rounded-full flex-shrink-0 legend-swatch")
-            .style("width", "10px")
-            .style("height", "10px")
+            .style("width", `${10 * scaleFactor}px`)
+            .style("height", `${10 * scaleFactor}px`)
             .style("display", "inline-block")
             .style("background-color", colorScale(name));
 
         row.append("xhtml:span")
             .attr(
                 "class",
-                "text-[10px] font-medium text-slate-700 select-none legend-label",
+                "font-medium text-slate-700 select-none legend-label",
             )
+            .style("font-size", `${10 * scaleFactor}px`)
             .text(name);
 
         rows.set(name, row);

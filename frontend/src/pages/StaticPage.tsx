@@ -41,7 +41,7 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, link }) => {
 
     return (
         <div className="flex justify-center h-full w-full overflow-y-auto bg-gradient-to-br from-blue-50 to-purple-50">
-            <div className="w-4/5 py-8">
+            <div className="w-7/10 py-8 px-6">
                 {loading && (
                     <div className="text-center text-gray-600">
                         Loading markdown...

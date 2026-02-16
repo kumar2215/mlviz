@@ -3,13 +3,17 @@
  * Interactive visualization for KMeans clustering with centroid placement and iteration playback
  */
 
-import { renderKMeansTraining } from "@/components/kmeans/clustering/KMeansRenderer";
+import {
+    renderKMeansTraining,
+    renderSelectedCentroidMarkers,
+} from "@/components/kmeans/clustering/KMeansRenderer";
 import type { KMeansVisualizationData } from "@/components/kmeans/clustering/types";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import { Button } from "@/components/ui/button";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useKMeans } from "@/contexts/models/KMeansContext";
+import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { UNASSIGNED_COLOR } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import { useCallback, useEffect, useMemo, useRef } from "react";
@@ -31,6 +35,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         isPlacingCentroids,
         setIsPlacingCentroids,
     } = useKMeans();
+    const scaleFactor = useScaleFactor();
     const scalesRef = useRef<{
         xScale?: d3.ScaleLinear<number, number>;
         yScale?: d3.ScaleLinear<number, number>;
@@ -233,83 +238,6 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         [isPlacingCentroids, visualizationData, selectedCentroids],
     );
 
-    // Render selected centroids as temporary markers
-    const renderSelectedCentroids = useCallback(
-        (
-            container: d3.Selection<SVGGElement, unknown, null, undefined>,
-            xScale: d3.ScaleLinear<number, number>,
-            yScale: d3.ScaleLinear<number, number>,
-        ) => {
-            const centroidGroup = container
-                .append("g")
-                .attr("class", "selected-centroids");
-
-            selectedCentroids.forEach((centroid, index) => {
-                const cx = xScale(centroid[0]);
-                const cy = yScale(centroid[1]);
-
-                if (isNaN(cx) || isNaN(cy)) return;
-
-                const clusterName = `Cluster ${index}`;
-                const color = colorScale(clusterName);
-
-                // Outer glow
-                centroidGroup
-                    .append("circle")
-                    .attr("cx", cx)
-                    .attr("cy", cy)
-                    .attr("r", 14)
-                    .attr("fill", color)
-                    .attr("opacity", 0.2);
-
-                // Main circle
-                centroidGroup
-                    .append("circle")
-                    .attr("cx", cx)
-                    .attr("cy", cy)
-                    .attr("r", 10)
-                    .attr("fill", color)
-                    .attr("stroke", "#fff")
-                    .attr("stroke-width", 3)
-                    .attr("opacity", 0.9);
-
-                // Cross marker
-                const markerSize = 6;
-                centroidGroup
-                    .append("line")
-                    .attr("x1", cx - markerSize)
-                    .attr("y1", cy)
-                    .attr("x2", cx + markerSize)
-                    .attr("y2", cy)
-                    .attr("stroke", "#fff")
-                    .attr("stroke-width", 2);
-
-                centroidGroup
-                    .append("line")
-                    .attr("x1", cx)
-                    .attr("y1", cy - markerSize)
-                    .attr("x2", cx)
-                    .attr("y2", cy + markerSize)
-                    .attr("stroke", "#fff")
-                    .attr("stroke-width", 2);
-
-                // Label
-                centroidGroup
-                    .append("text")
-                    .attr("x", cx)
-                    .attr("y", cy - 18)
-                    .attr("text-anchor", "middle")
-                    .attr("font-size", "11px")
-                    .attr("font-weight", "bold")
-                    .attr("fill", color)
-                    .attr("stroke", "#fff")
-                    .attr("stroke-width", 3)
-                    .attr("paint-order", "stroke")
-                    .text(`C${index}`);
-            });
-        },
-        [selectedCentroids, colorScale],
-    );
 
     const renderCallback = useCallback(
         (
@@ -330,7 +258,6 @@ const Visualisation: React.FC<VisualisationProps> = () => {
                     colorScale,
                     currentIteration,
                     showCentroidMovement: true,
-                    centroidSize: 6,
                     isPlacementMode: isPlacingCentroids,
                     activeClusterCount:
                         selectedCentroids.length || visualizationData.nClusters,
@@ -347,10 +274,16 @@ const Visualisation: React.FC<VisualisationProps> = () => {
                 // Render selected centroids if in placement mode
                 if (isPlacingCentroids && selectedCentroids.length > 0) {
                     const targetGroup = renderResult.contentGroup || container;
-                    renderSelectedCentroids(
+                    renderSelectedCentroidMarkers(
                         targetGroup,
+                        selectedCentroids,
                         renderResult.xScale,
                         renderResult.yScale,
+                        {
+                            colorScale,
+                            scaleFactor,
+                            centroidSize: 4 * scaleFactor,
+                        },
                     );
                 }
             }
@@ -379,7 +312,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
             colorScale,
             isPlacingCentroids,
             selectedCentroids,
-            renderSelectedCentroids,
+            scaleFactor,
             handleVisualizationClick,
         ],
     );

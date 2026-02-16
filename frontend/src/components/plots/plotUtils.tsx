@@ -158,7 +158,7 @@ const BasePlot: React.FC<BasePlotProps> = ({
             );
 
             // Get dimensions from context
-            const { width, height, margin } = context.dimensions;
+            const { width, height, margin, scaleFactor } = context.dimensions;
 
             // Render options
             const renderOptions = {
@@ -172,6 +172,7 @@ const BasePlot: React.FC<BasePlotProps> = ({
                 showAxes,
                 onPointClick,
                 onPointHover,
+                scaleFactor,
             };
 
             // Select appropriate render function based on dimensions
