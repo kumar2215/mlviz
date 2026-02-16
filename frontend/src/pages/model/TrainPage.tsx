@@ -82,7 +82,7 @@ const TrainPage: React.FC<TrainPageProps> = ({
     };
 
     return (
-        <div className="flex flex-row w-full h-full relative overflow-hidden bg-gray-200">
+        <div className="flex flex-row w-full h-full min-h-0 relative overflow-hidden bg-gray-200">
             {showAlert && (
                 <SuccessAlert description="Model trained successfully." />
             )}
@@ -106,7 +106,7 @@ const TrainPage: React.FC<TrainPageProps> = ({
             </div>
 
             {problem_type === "classifier" && (
-                <div className="shrink-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
+                <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
                     <ClassifierResults
                         metrics={data?.metrics}
                         metadata={data?.metadata}

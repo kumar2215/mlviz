@@ -3,6 +3,7 @@ import {
     renderHistogramBars
 } from "@/components/charts/histogramUtils";
 import { Button } from "@/components/ui/button";
+import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import { Label } from "@/components/ui/label";
 import {
     Select,
@@ -45,6 +46,11 @@ const ManualTreeHUD: React.FC = () => {
     const featureNames = useMemo(() => getFeatureNames() || [], [getFeatureNames]);
     const classNames = useMemo(() => getClassNames() || [], [getClassNames]);
 
+    // Clear exploration cache when the selected node changes
+    useEffect(() => {
+        exploredIndicesCache.current.clear();
+    }, [selectedNodePath]);
+
     useEffect(() => {
         if (!vizRef.current || !featureStats || !selectedFeature) return;
 
@@ -59,7 +65,7 @@ const ManualTreeHUD: React.FC = () => {
         const adjustedHistWidth = width - leftMargin - 10;
 
         const featureRange = featureStats.feature_range;
-        const currentThreshold = selectedThreshold ?? featureStats.thresholds[0].threshold;
+        const currentThreshold = selectedThreshold ?? (featureStats.thresholds.length > 0 ? featureStats.thresholds[0].threshold : 0);
 
         // Render histogram
         const histGroup = svg.append('g')
@@ -67,8 +73,13 @@ const ManualTreeHUD: React.FC = () => {
         const stackedData = prepareHistogramData(featureStats.histogram_data);
         
         const colorScheme = Object.keys(featureStats.histogram_data.counts_by_class).map((_, i) => {
-            return d3.schemeCategory10[i % 10]; 
+            return DEFAULT_COLORS[i % DEFAULT_COLORS.length];
         });
+
+        console.log('[ManualTreeHUD] Histogram color scheme source: DEFAULT_COLORS (Observable10)');
+        console.log('[ManualTreeHUD] Histogram colorScheme array:', colorScheme);
+        console.log('[ManualTreeHUD] Histogram class keys:', Object.keys(featureStats.histogram_data.counts_by_class));
+        console.log('[ManualTreeHUD] classNames from context:', classNames);
 
         renderHistogramBars(histGroup, featureStats.histogram_data, stackedData, {
             width: adjustedHistWidth,
@@ -164,11 +175,11 @@ const ManualTreeHUD: React.FC = () => {
                                     Threshold
                                 </Label>
                                 <span className="text-sm font-mono font-bold text-primary">
-                                    {selectedThreshold?.toFixed(3) || (featureStats.thresholds[0].threshold).toFixed(3)}
+                                    {selectedThreshold?.toFixed(3) || (featureStats.thresholds.length > 0 ? featureStats.thresholds[0].threshold : 0).toFixed(3)}
                                 </span>
                             </div>
                             <Slider 
-                                value={[selectedThreshold || featureStats.thresholds[0].threshold]}
+                                value={[selectedThreshold || (featureStats.thresholds.length > 0 ? featureStats.thresholds[0].threshold : 0)]}
                                 min={featureStats.feature_range[0]}
                                 max={featureStats.feature_range[1]}
                                 step={(featureStats.feature_range[1] - featureStats.feature_range[0]) / 100}

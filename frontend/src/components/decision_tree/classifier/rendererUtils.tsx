@@ -311,15 +311,20 @@ const renderHistogramComponent = (
     console.log('[renderHistogramComponent] Sorted Keys:', sortedKeys);
     console.log('[renderHistogramComponent] Class names:', classNames);
     
+    console.log('[renderHistogramComponent] colorScale type:', colorScale ? (typeof colorScale === 'function' ? 'function' : 'ordinal') : 'undefined');
+    console.log('[renderHistogramComponent] colorScale provided:', !!colorScale, '| classNames provided:', !!classNames);
+
     const colorScheme = colorScale && classNames
         ? sortedKeys.map((classIndex) => {
               // Convert class index (e.g., "0") to class name (e.g., "setosa")
               const className = classNames[parseInt(classIndex)];
               const color = colorScale(className);
-              console.log(`[renderHistogramComponent] Mapping class index "${classIndex}" -> name "${className}" -> color:`, color);
+              console.log(`[renderHistogramComponent] Mapping class index "${classIndex}" -> name "${className}" -> color: "${color}"`);
               return color;
           })
         : undefined;
+
+    console.log('[renderHistogramComponent] Final colorScheme for histogram bars:', colorScheme);
 
     renderHistogramBars(histogramGroup, histogramData, stackedData, {
         width,
@@ -340,6 +345,11 @@ const renderDistributionBar = (
     colorScale?: ((className: string) => string) | d3.ScaleOrdinal<string, string>,
     scaleFactor: number = 1
 ) => {
+    console.log('[renderDistributionBar] colorScale provided:', !!colorScale);
+    distribution.forEach((classInfo) => {
+        const color = colorScale ? colorScale(classInfo.class) : 'fallback-hsl';
+        console.log(`[renderDistributionBar] class "${classInfo.class}" -> color: "${color}"`);
+    });
     let currentX = -width / 2;
 
     distribution.forEach((classInfo, index) => {
@@ -508,6 +518,11 @@ export const renderExpandableLeafNode = (
     // Check if this is a terminal leaf (marked as not splittable)
     const isTerminal = d.data?.terminal === true;
     console.log('[renderExpandableLeafNode] Node:', d.data, 'isTerminal:', isTerminal);
+    console.log('[renderExpandableLeafNode] colorScale type:', typeof colorScale);
+    distribution.forEach((classInfo) => {
+        const color = colorScale(classInfo.class);
+        console.log(`[renderExpandableLeafNode] class "${classInfo.class}" -> color: "${color}"`);
+    });
 
     // If terminal, render as a regular leaf node without + icon
     if (isTerminal) {
@@ -669,6 +684,7 @@ export const renderInformationGainGraph = (
     
     // Find the index of the threshold closest to a given value
     const findClosestThresholdIndex = (targetThreshold: number): number => {
+        if (thresholds.length === 0) return -1;
         return thresholds.reduce((closestIdx, curr, idx) => {
             const currentDist = Math.abs(curr.threshold - targetThreshold);
             const closestDist = Math.abs(thresholds[closestIdx].threshold - targetThreshold);
@@ -678,9 +694,11 @@ export const renderInformationGainGraph = (
     
     // Get all explored points (sorted by threshold value for line drawing)
     const getExploredPoints = () => {
-        const indices = Array.from(exploredIndices).sort((a, b) => 
-            thresholds[a].threshold - thresholds[b].threshold
-        );
+        const indices = Array.from(exploredIndices)
+            .filter(idx => idx >= 0 && idx < thresholds.length) // Safety filter
+            .sort((a, b) => 
+                thresholds[a].threshold - thresholds[b].threshold
+            );
         return indices.map(idx => thresholds[idx]);
     };
     
@@ -737,6 +755,8 @@ export const renderInformationGainGraph = (
     const updateGraph = (newThreshold: number) => {
         // Mark current threshold as explored
         const currentIdx = findClosestThresholdIndex(newThreshold);
+        if (currentIdx === -1) return; // Safety check
+        
         exploredIndices.add(currentIdx);
         
         console.log('[Info Gain Graph] Threshold:', newThreshold.toFixed(3), '| Explored points:', exploredIndices.size);

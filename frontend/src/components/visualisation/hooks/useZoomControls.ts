@@ -52,7 +52,34 @@ export const useZoomControls = ({
 
             let rubberBandTimer: NodeJS.Timeout | null = null;
 
-            if (dynamicBoundsRef.current) {
+            if (!dynamicBoundsRef.current) {
+                // No content bounds provided — apply a 10% inset translate extent
+                // so content can't be panned to the very edge of the SVG
+                const PADDING_FRACTION = 0.1;
+                zoom.translateExtent([
+                    [-Infinity, -Infinity],
+                    [Infinity, Infinity],
+                ]);
+                zoom.constrain((transform, extent) => {
+                    const [[x0, y0], [x1, y1]] = extent;
+                    const viewW = x1 - x0;
+                    const viewH = y1 - y0;
+                    const padX = viewW * PADDING_FRACTION;
+                    const padY = viewH * PADDING_FRACTION;
+
+                    const minX = -(viewW * transform.k - viewW) - padX;
+                    const maxX = padX;
+                    const minY = -(viewH * transform.k - viewH) - padY;
+                    const maxY = padY;
+
+                    const clampedX = Math.max(minX, Math.min(maxX, transform.x));
+                    const clampedY = Math.max(minY, Math.min(maxY, transform.y));
+
+                    return d3.zoomIdentity
+                        .translate(clampedX, clampedY)
+                        .scale(transform.k);
+                });
+            } else if (dynamicBoundsRef.current) {
                 // Create rubber band constraint function
                 const applyRubberBand = (
                     transform: d3.ZoomTransform,

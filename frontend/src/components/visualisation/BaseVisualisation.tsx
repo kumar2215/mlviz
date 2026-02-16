@@ -135,6 +135,10 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         };
 
         renderContent(contentGroup, data, renderContext);
+    // Note: zoomControls is intentionally excluded — useZoomControls returns a new
+    // object reference every render, which would cause an infinite re-render loop.
+    // Its functions are stable (useCallback with refs) so this is safe.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         data,
         renderContent,
@@ -143,7 +147,6 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         theme,
         playControls?.currentStep,
         playControls?.isPlaying,
-        zoomControls,
     ]);
 
     return (
@@ -157,7 +160,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
 
             <div
                 ref={visualizationRef}
-                className="flex-1 overflow-auto bg-gradient-to-br from-gray-50 to-white min-h-0 relative"
+                className="flex-1 overflow-hidden bg-gradient-to-br from-gray-50 to-white min-h-0 relative"
             >
                 <VisualisationControls
                     capabilities={{

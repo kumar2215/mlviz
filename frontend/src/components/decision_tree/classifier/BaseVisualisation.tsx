@@ -1,6 +1,6 @@
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { TreeNode } from "@/types/model";
-import * as d3 from "d3";
+import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import { useCallback } from "react";
 
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
@@ -57,20 +57,23 @@ const BaseDecisionTreeVisualization: React.FC<
     // Create a stable color mapping to prevent d3's ordinal scale from accumulating domain values
     const classColors = new Map<string, string>();
     const classes = data?.classes || [];
-    const colors = d3.schemeDark2.slice(0, classes.length);
-    
+    const colors = DEFAULT_COLORS.slice(0, classes.length);
+
     classes.forEach((className: string, index: number) => {
         classColors.set(className, colors[index] || '#cccccc');
         // Also map the index as a string for histogram data compatibility
         classColors.set(index.toString(), colors[index] || '#cccccc');
     });
-    
+
+    console.log('[BaseVisualisation] Color scheme source: DEFAULT_COLORS (Observable10)');
+    console.log('[BaseVisualisation] Color mapping:', Object.fromEntries(classColors));
+
     // Create a color scale function that uses the stable mapping
     // Handles both class names (e.g., "setosa") and class indices (e.g., "0")
     const colorScale = (className: string) => {
-        console.log("[Color Scale] Class colors ", classColors)
-        console.log("[Color Scale] Class name ", className, typeof className)
-        return classColors.get(className) || '#cccccc';
+        const resolved = classColors.get(className) || '#cccccc';
+        console.log(`[BaseVisualisation colorScale] "${className}" -> "${resolved}"`);
+        return resolved;
     };
     
     const renderCallback = useCallback(
