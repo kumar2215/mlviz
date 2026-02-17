@@ -113,7 +113,7 @@ type ListItemProps = React.ComponentProps<"li"> & ExtraProps;
 const ListItem: React.FC<ListItemProps> = ({ children, node, ...props }) => {
     return (
         <li
-            className="text-base tracking-tight font-light mx-1"
+            className="text-gray-800 tracking-tight font-light mx-1 leading-none"
             {...props}
         >
             {children}
@@ -222,7 +222,21 @@ const TableDataCell: React.FC<TableDataCellProps> = ({
     );
 };
 
+type StrongProps = React.ComponentProps<"strong"> & ExtraProps;
+
+const Strong: React.FC<StrongProps> = ({ children, node, ...props }) => {
+    return (
+        <strong
+            className="font-bold bg-gradient-to-br from-blue-800 to-purple-800 bg-clip-text text-transparent"
+            {...props}
+        >
+            {children}
+        </strong>
+    );
+};
+
 const DefaultComponentMap: Components = {
+    strong: Strong,
     p: Paragraph,
     h1: Heading1,
     h2: Heading2,
@@ -247,7 +261,10 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
     const content = (
         <Markdown
             remarkPlugins={[remarkGfm, remarkMath]}
-            rehypePlugins={[rehypeRaw, rehypeMathjax]}
+            rehypePlugins={[
+                [rehypeRaw, { passThrough: ["math", "inlineMath"] }],
+                rehypeMathjax,
+            ]}
             components={DefaultComponentMap}
         >
             {children}
@@ -256,10 +273,12 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
 
     if (variant === "small") {
         return (
-            <div className="text-xs leading-tight [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs [&_h4]:text-xs [&_p]:mb-0.5 [&_ul]:my-1 [&_ol]:my-1 [&_li]:mx-0 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-1 [&_h4]:my-1 [&_img]:my-2">
+            <div className="px-2 text-xs leading-tight [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs [&_h4]:text-xs [&_p]:mb-0.5 [&_ul]:my-1 [&_ol]:my-1 [&_li]:mx-0 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-1 [&_h4]:my-1 [&_img]:my-2 [&_p]:text-xs">
                 {content}
             </div>
         );
+    } else {
+        return <div className="p-4">{content}</div>;
     }
 
     return content;

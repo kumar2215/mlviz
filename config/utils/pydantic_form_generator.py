@@ -201,8 +201,18 @@ def get_streamlit_widget(field_name: str, field_info: FieldInfo, annotation: Any
                 return default_val if default_val else []
     
     else:
-        # Default to string input
+        # Check for widget override via json_schema_extra
+        extra = field_info.json_schema_extra or {}
+        widget = extra.get("widget", "text_input")
+
         default_val = default if default is not None else ""
+        if widget == "textarea":
+            return st.text_area(
+                label,
+                value=str(default_val) if default_val is not None else "",
+                help=description,
+                key=key
+            )
         return st.text_input(
             label,
             value=str(default_val) if default_val is not None else "",
@@ -246,6 +256,173 @@ def generate_form_from_pydantic(
 
         # Generate widget and collect value
         form_data[field_name] = get_streamlit_widget(field_name, field_info, annotation, prefix=key_prefix)
+
+    return form_data
+
+
+def get_streamlit_widget_with_value(
+    field_name: str, field_info: FieldInfo, annotation: Any,
+    existing_value: Any = None, prefix: str = ""
+) -> Any:
+    """
+    Generate a Streamlit widget pre-filled with an existing value.
+
+    Falls back to model defaults when existing_value is None.
+    """
+    description = field_info.description or ""
+    default = existing_value if existing_value is not None else get_field_default(field_info)
+    required = field_info.is_required()
+
+    label = field_name.replace("_", " ").title()
+    if required:
+        label += " *"
+
+    key = f"{prefix}field_{field_name}" if prefix else f"field_{field_name}"
+
+    origin = get_origin(annotation)
+    args = get_args(annotation)
+
+    # Handle Optional types
+    if origin is type(None) or (args and type(None) in args):
+        actual_type = args[0] if args else annotation
+    else:
+        actual_type = annotation
+
+    origin = get_origin(actual_type)
+    args = get_args(actual_type)
+
+    # Handle nested Pydantic models
+    if is_pydantic_model(actual_type):
+        st.markdown(f"**{label}**")
+        if description:
+            st.caption(description)
+
+        nested_existing = existing_value if isinstance(existing_value, dict) else {}
+        nested_data = {}
+        for nested_field_name, nested_field_info in actual_type.model_fields.items():
+            nested_annotation = nested_field_info.annotation
+            nested_data[nested_field_name] = get_streamlit_widget_with_value(
+                nested_field_name,
+                nested_field_info,
+                nested_annotation,
+                existing_value=nested_existing.get(nested_field_name),
+                prefix=f"{key}_"
+            )
+
+        try:
+            return actual_type.model_validate(nested_data)
+        except Exception as e:
+            st.error(f"Error validating nested model {label}: {e}")
+            return None
+
+    if actual_type is bool or actual_type == bool:
+        default_val = default if default is not None else False
+        return st.checkbox(label, value=default_val, help=description, key=key)
+
+    elif actual_type is int or actual_type == int:
+        default_val = default if default is not None else 0
+        return st.number_input(label, value=int(default_val), step=1, help=description, key=key)
+
+    elif actual_type is float or actual_type == float:
+        default_val = default if default is not None else 0.0
+        return st.number_input(label, value=float(default_val), step=0.1, help=description, key=key)
+
+    elif origin is list:
+        inner_type = args[0] if args else str
+        default_val = default if default is not None else []
+
+        if inner_type is int or inner_type == int:
+            default_str = ",".join(map(str, default_val)) if default_val else ""
+            input_str = st.text_input(
+                label, value=default_str,
+                help=f"{description} (comma-separated integers)" if description else "Comma-separated integers",
+                key=key
+            )
+            if not input_str.strip():
+                return []
+            try:
+                return [int(x.strip()) for x in input_str.split(",") if x.strip()]
+            except ValueError:
+                st.error(f"Invalid input for {label}. Please enter comma-separated integers.")
+                return default_val if default_val else []
+
+        elif inner_type is str or inner_type == str:
+            default_str = ",".join(default_val) if default_val else ""
+            input_str = st.text_input(
+                label, value=default_str,
+                help=f"{description} (comma-separated values)" if description else "Comma-separated values",
+                key=key
+            )
+            if not input_str.strip():
+                return []
+            return [x.strip() for x in input_str.split(",") if x.strip()]
+
+        else:
+            default_json = json.dumps(default_val, indent=2)
+            input_str = st.text_area(
+                label, value=default_json,
+                help=f"{description} (JSON array)" if description else "JSON array",
+                key=key, height=100
+            )
+            try:
+                return json.loads(input_str)
+            except json.JSONDecodeError:
+                st.error(f"Invalid JSON for {label}")
+                return default_val if default_val else []
+
+    else:
+        extra = field_info.json_schema_extra or {}
+        widget = extra.get("widget", "text_input")
+        default_val = default if default is not None else ""
+        if widget == "textarea":
+            return st.text_area(
+                label, value=str(default_val) if default_val is not None else "",
+                help=description, key=key
+            )
+        return st.text_input(
+            label, value=str(default_val) if default_val is not None else "",
+            help=description, key=key
+        )
+
+
+def generate_form_from_pydantic_with_values(
+    model_class: Type[BaseModel],
+    existing_values: dict[str, Any] | None = None,
+    title: str | None = None,
+    exclude_fields: list[str] | None = None,
+    key_prefix: str = ""
+) -> dict[str, Any]:
+    """
+    Generate a Streamlit form from a Pydantic model, pre-filled with existing values.
+
+    Args:
+        model_class: Pydantic model class to generate form for
+        existing_values: Dictionary of existing values to pre-fill the form
+        title: Optional title for the form section
+        exclude_fields: List of field names to exclude from the form
+        key_prefix: Prefix for widget keys to ensure uniqueness
+
+    Returns:
+        Dictionary of field values from the form
+    """
+    exclude_fields = exclude_fields or []
+    existing_values = existing_values or {}
+
+    if title:
+        st.subheader(title)
+
+    form_data = {}
+
+    for field_name, field_info in model_class.model_fields.items():
+        if field_name in exclude_fields:
+            continue
+
+        annotation = field_info.annotation
+        form_data[field_name] = get_streamlit_widget_with_value(
+            field_name, field_info, annotation,
+            existing_value=existing_values.get(field_name),
+            prefix=key_prefix
+        )
 
     return form_data
 

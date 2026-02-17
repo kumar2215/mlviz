@@ -132,11 +132,17 @@ const BaseDecisionTreeVisualization: React.FC<
         }),
         ...(!disableZoom && {
             zoomable: {
-                scaleExtent: [0.1, 3] as [number, number],
+                scaleExtent: [1.0, 3] as [number, number], // Only allow zoom in from fit-to-view
                 enableReset: true,
                 enablePan: true,
-                panMargin: 50,
+                panMargin: 0, // Strict bounds - no margin to prevent content cutoff
                 clickableSelector,
+                // Provide extended content bounds for decision tree layout
+                // Trees use depth spacing and can extend beyond standard content area
+                contentBounds: {
+                    width: 800,  // Will be updated by BaseVisualisation
+                    height: 1200, // Extended height for tree depth (1.5x typical)
+                },
             },
         }),
     };

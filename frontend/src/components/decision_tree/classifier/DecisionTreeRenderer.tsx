@@ -284,6 +284,61 @@ export const renderDecisionTree = ({
         d.y = d.depth * depthSpacing + nodeHeight / 2;
     });
 
+    // Calculate actual tree bounds for fit-to-view zoom
+    const nodes = root.descendants();
+    let treeBounds = { minX: 0, maxX: contentWidth, minY: 0, maxY: contentHeight };
+    
+    if (nodes.length > 0) {
+        const xValues = nodes.map(d => d.x as number);
+        const yValues = nodes.map(d => d.y as number);
+        treeBounds = {
+            minX: Math.min(...xValues),
+            maxX: Math.max(...xValues),
+            minY: Math.min(...yValues),
+            maxY: Math.max(...yValues),
+        };
+    }
+    
+    // Add padding for node sizes
+    const nodePadding = 100 * scaleFactor;
+    const treeWidth = treeBounds.maxX - treeBounds.minX + nodePadding * 2;
+    const treeHeight = treeBounds.maxY - treeBounds.minY + nodePadding * 2;
+    
+    // Calculate scale to fit tree in viewport
+    const scaleX = contentWidth / treeWidth;
+    const scaleY = contentHeight / treeHeight;
+    const fitScale = Math.min(scaleX, scaleY, 1.0); // Don't zoom in by default, max 1.0
+    
+    // Calculate centering offset
+    // The tree's bounding box in layout coordinates (with padding)
+    const treeBBoxMinX = treeBounds.minX - nodePadding;
+    const treeBBoxMinY = treeBounds.minY - nodePadding;
+    const treeBBoxMaxX = treeBounds.maxX + nodePadding;
+    const treeBBoxMaxY = treeBounds.maxY + nodePadding;
+    
+    // Center of the tree's bounding box in layout coordinates
+    const treeCenterX = (treeBBoxMinX + treeBBoxMaxX) / 2;
+    const treeCenterY = (treeBBoxMinY + treeBBoxMaxY) / 2;
+    
+    // Where we want the tree center to appear (viewport center)
+    const viewportCenterX = contentWidth / 2;
+    const viewportCenterY = contentHeight / 2;
+    
+    // Calculate offset to move tree center to viewport center
+    const offsetX = viewportCenterX - treeCenterX * fitScale;
+    const offsetY = viewportCenterY - treeCenterY * fitScale;
+    
+    // Store fit-to-view transform and actual tree dimensions in context
+    (context as any).fitToViewTransform = {
+        x: offsetX,
+        y: offsetY,
+        k: fitScale,
+        // Actual layout space dimensions (what d3 tree layout uses)
+        // This is the coordinate space that nodes are positioned in
+        contentWidth: contentWidth * 1.2,
+        contentHeight: contentHeight * 1.5,
+    };
+
     const renderMode =
         mode === "training"
             ? TRAINING_MODE

@@ -23,7 +23,7 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, link }) => {
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error(
-                            `Failed to load markdown file: ${response.statusText}`
+                            `Failed to load markdown file: ${response.statusText}`,
                         );
                     }
                     return response.text();
@@ -41,7 +41,7 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, link }) => {
 
     return (
         <div className="flex justify-center h-full w-full overflow-y-auto bg-gradient-to-br from-blue-50 to-purple-50">
-            <div className="w-7/10 py-8 px-6">
+            <div className="w-7/10 py-6 px-6">
                 {loading && (
                     <div className="text-center text-gray-600">
                         Loading markdown...
