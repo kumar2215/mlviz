@@ -19,7 +19,11 @@ class Slide(BaseModel):
 class BasePage(BaseModel):
     name: Optional[str] = None
     page_type: Literal["static", "dynamic"]
-    note: Optional[str] = Field(None, description="Optional note or annotation for this page")
+    note: Optional[str] = Field(
+        None,
+        description="Optional note or annotation for this page",
+        json_schema_extra={"widget": "textarea"},
+    )
     # Parameters are defined in subclasses
 
 
@@ -49,7 +53,11 @@ class ModelPage(DynamicPageAbstract):
 
 
 class StaticParameters(BaseModel):
-    text: Optional[str] = Field(None, description="Text content for the page")
+    text: Optional[str] = Field(
+        None,
+        description="Text content for the page",
+        json_schema_extra={"widget": "textarea"},
+    )
     link: Optional[str] = Field(None, description="Optional link URL")
 
 

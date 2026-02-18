@@ -52,13 +52,40 @@ export const useZoomControls = ({
 
             let rubberBandTimer: NodeJS.Timeout | null = null;
 
-            if (dynamicBoundsRef.current) {
+            if (!dynamicBoundsRef.current) {
+                // No content bounds provided — apply a 10% inset translate extent
+                // so content can't be panned to the very edge of the SVG
+                const PADDING_FRACTION = 0.1;
+                zoom.translateExtent([
+                    [-Infinity, -Infinity],
+                    [Infinity, Infinity],
+                ]);
+                zoom.constrain((transform, extent) => {
+                    const [[x0, y0], [x1, y1]] = extent;
+                    const viewW = x1 - x0;
+                    const viewH = y1 - y0;
+                    const padX = viewW * PADDING_FRACTION;
+                    const padY = viewH * PADDING_FRACTION;
+
+                    const minX = -(viewW * transform.k - viewW) - padX;
+                    const maxX = padX;
+                    const minY = -(viewH * transform.k - viewH) - padY;
+                    const maxY = padY;
+
+                    const clampedX = Math.max(minX, Math.min(maxX, transform.x));
+                    const clampedY = Math.max(minY, Math.min(maxY, transform.y));
+
+                    return d3.zoomIdentity
+                        .translate(clampedX, clampedY)
+                        .scale(transform.k);
+                });
+            } else if (dynamicBoundsRef.current) {
                 // Create rubber band constraint function
                 const applyRubberBand = (
                     transform: d3.ZoomTransform,
-                    _extent: [[number, number], [number, number]]
+                    extent: [[number, number], [number, number]]
                 ) => {
-                    // Use dynamic bounds as the viewport for constraints
+                    // Use dynamic bounds as the content size for constraints
                     const currentBounds = dynamicBoundsRef.current;
                     const currentPanMargin = dynamicPanMarginRef.current || 0;
 
@@ -66,14 +93,17 @@ export const useZoomControls = ({
                         return transform;
                     }
                     
-                    // The viewport for the content is the plotting area itself
-                    const viewportWidth = currentBounds.width;
-                    const viewportHeight = currentBounds.height;
+                    // The viewport is the visible SVG area (from extent parameter)
+                    // The content bounds represent the full content size (which may be larger)
+                    const [[x0, y0], [x1, y1]] = extent;
+                    const viewportWidth = x1 - x0;
+                    const viewportHeight = y1 - y0;
 
                     if (viewportWidth <= 0 || viewportHeight <= 0) {
                         return transform;
                     }
 
+                    // Calculate the scaled content size
                     const scaledWidth = currentBounds.width * transform.k;
                     const scaledHeight = currentBounds.height * transform.k;
 
@@ -192,9 +222,22 @@ export const useZoomControls = ({
 
                             if (!currentBounds) return;
 
-                            // The viewport for the content is the plotting area itself
-                            const viewportWidth = currentBounds.width;
-                            const viewportHeight = currentBounds.height;
+                            // Get actual viewport dimensions from SVG element
+                            const svgNode = svgSelectionRef.current.node();
+                            if (!svgNode) return;
+                            
+                            const viewBox = svgNode.getAttribute('viewBox');
+                            let viewportWidth: number, viewportHeight: number;
+                            
+                            if (viewBox) {
+                                const [, , w, h] = viewBox.split(' ').map(Number);
+                                viewportWidth = w;
+                                viewportHeight = h;
+                            } else {
+                                const bbox = svgNode.getBoundingClientRect();
+                                viewportWidth = bbox.width;
+                                viewportHeight = bbox.height;
+                            }
 
                             const scaledWidth = currentBounds.width * currentTransform.k;
                             const scaledHeight = currentBounds.height * currentTransform.k;

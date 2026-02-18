@@ -18,6 +18,7 @@ st.markdown("Quick tool for creating Config objects")
 # Initialize session state (shared across all pages)
 if 'config' not in st.session_state:
     st.session_state.config = {
+        "datasets": {},
         "stories": {},
         "pages": {}
     }
@@ -36,6 +37,9 @@ Use the sidebar to navigate between different sections:
 - **➕ Add Story** - Create new stories with nodes and edges
 - **✏️ Edit Story** - Modify existing stories
 - **➕ Add Page** - Create static, model, or dynamic pages
+- **✏️ Edit Page** - Modify existing pages
+- **📊 Add Dataset** - Add custom datasets
+- **✏️ Edit Dataset** - Modify existing datasets
 - **💾 Export** - Export your configuration to JSON
 - **📥 Import JSON** - Import configuration from JSON text
 - **📋 Templates** - Load quick start templates

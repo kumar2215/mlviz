@@ -24,6 +24,7 @@ interface StoryContextType {
     updateStoryState: (storyId: string, updates: Partial<StoryState>) => void;
     resetStoryState: (storyId: string) => void;
     addEdge: (storyId: string, edge: EdgeNode) => void;
+    popPath: (storyId: string) => EdgeNode | undefined;
 }
 
 export const StoryContext = createContext<StoryContextType | null>(null);
@@ -35,6 +36,7 @@ interface CurrentStoryContextType {
     updateParams: (paramUpdates: Record<string, any>) => void;
     resetStoryState: () => void;
     addEdge: (edge: EdgeNode) => void;
+    popPath: () => EdgeNode | undefined;
 }
 
 export const CurrentStoryContext =
@@ -71,9 +73,18 @@ export function StoryProvider({ children }: { children: ReactNode }) {
     };
 
     const addEdge = (storyId: string, edge: EdgeNode) => {
+        console.log('[StoryContext] addEdge called:', { storyId, edge, stackTrace: new Error().stack });
         setStories((prev) => {
             const currentState = prev[storyId] || generateDefaultStoryState();
             const currentPath = Array.isArray(currentState.path) ? currentState.path : [];
+            console.log('[StoryContext] addEdge - before:', { currentPath, newEdge: edge });
+            
+            // Prevent duplicate consecutive edges (React Strict Mode can cause double calls)
+            const lastEdge = currentPath[currentPath.length - 1];
+            if (lastEdge && lastEdge.local_index === edge.local_index && lastEdge.story_name === edge.story_name) {
+                console.log('[StoryContext] Skipping duplicate edge');
+                return prev;
+            }
             
             return {
                 ...prev,
@@ -83,6 +94,42 @@ export function StoryProvider({ children }: { children: ReactNode }) {
                 },
             };
         });
+    };
+
+    const popPath = (storyId: string): EdgeNode | undefined => {
+        // Read current state synchronously first
+        const currentState = stories[storyId] || generateDefaultStoryState();
+        const currentPath = Array.isArray(currentState.path) ? currentState.path : [];
+        
+        if (currentPath.length === 0) {
+            console.log('[StoryContext] popPath - path is empty');
+            return undefined;
+        }
+        
+        const poppedEdge = currentPath[currentPath.length - 1];
+        console.log('[StoryContext] popPath - popping:', poppedEdge);
+        
+        // Update state
+        setStories((prev) => {
+            const currentState = prev[storyId] || generateDefaultStoryState();
+            const currentPath = Array.isArray(currentState.path) ? currentState.path : [];
+            
+            if (currentPath.length === 0) {
+                return prev;
+            }
+            
+            const newPath = currentPath.slice(0, -1);
+            
+            return {
+                ...prev,
+                [storyId]: {
+                    ...currentState,
+                    path: newPath,
+                },
+            };
+        });
+        
+        return poppedEdge;
     };
 
     const resetStoryState = (storyId: string) => {
@@ -99,6 +146,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
                 updateStoryState,
                 resetStoryState,
                 addEdge,
+                popPath,
             }}
         >
             {children}
@@ -138,6 +186,7 @@ export function CurrentStoryProvider({
         updateParams,
         resetStoryState: () => globalContext.resetStoryState(storyId),
         addEdge: (edge) => globalContext.addEdge(storyId, edge),
+        popPath: () => globalContext.popPath(storyId),
     };
 
     return (

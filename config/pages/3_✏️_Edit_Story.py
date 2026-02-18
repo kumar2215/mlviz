@@ -73,300 +73,34 @@ if selected_story_name:
 
     if not available_pages:
         st.error("Please add at least one page to the config before editing the story.")
-        num_nodes = 0
+        nodes_data = []
     else:
-        # Get existing nodes count
-        existing_nodes = existing_story.get("nodes", [])
-        num_nodes = st.number_input(
-            "Number of nodes",
-            min_value=1,
-            max_value=20,
-            value=len(existing_nodes) if existing_nodes else 1,
+        from utils.form_helpers import render_node_list
+        nodes_data = render_node_list(
+            available_pages=available_pages,
+            page_config=st.session_state.config["pages"],
+            existing_nodes=existing_nodes,
+            key_prefix=f"edit_story_{selected_story_name}_node"
         )
-
-    nodes_data = []
-    for i in range(num_nodes):
-        with st.expander(f"Node {i + 1}", expanded=(i == 0)):
-            # Show available pages as selectbox
-            page_options = {}
-            for page_id in available_pages:
-                page = st.session_state.config["pages"][page_id]
-                display_name = page.get("name")
-                if not display_name:
-                    display_name = page.get("page_type", "unknown")
-                page_options[page_id] = f"{page_id} - {display_name}"
-
-            # Pre-select existing node if available
-            default_page = None
-            if i < len(existing_nodes):
-                default_page = existing_nodes[i].get("index")
-                if default_page not in available_pages:
-                    st.warning(
-                        f"⚠️ Original page {default_page} no longer exists in config"
-                    )
-                    default_page = None
-
-            selected_page = st.selectbox(
-                f"Select Page for Node {i + 1}",
-                options=list(page_options.keys()),
-                format_func=lambda x: page_options[x],
-                index=list(page_options.keys()).index(default_page)
-                if default_page and default_page in page_options
-                else 0,
-                key=f"node_page_{i}",
-            )
-
-            # Show page preview
-            if selected_page:
-                st.json(st.session_state.config["pages"][selected_page])
-                nodes_data.append({"index": selected_page})
 
     # Edges section
     st.divider()
     st.subheader("Edges")
 
+    # Get existing edges from the story
     existing_edges = existing_story.get("edges", [])
 
-    # Option to keep existing edges or recreate
-    edge_mode = st.radio(
-        "Edge editing mode",
-        ["Keep existing edges", "Recreate edges"],
-        help="Keep existing: preserves current edges. Recreate: allows you to redefine all edges.",
-    )
-
     edges_data = []
-
-    if edge_mode == "Keep existing edges":
-        edges_data = existing_edges
-        st.info(f"📌 Keeping {len(existing_edges)} existing edge(s)")
-        if existing_edges:
-            with st.expander("View existing edges"):
-                st.json(existing_edges)
-
-    else:  # Recreate edges
-        add_edges = st.checkbox(
-            "Add edges to this story", value=len(existing_edges) > 0
+    if nodes_data and len(nodes_data) > 0:
+        from utils.form_helpers import render_edge_list
+        edges_data = render_edge_list(
+            num_nodes=len(nodes_data),
+            existing_edges=existing_edges,
+            key_prefix=f"edit_story_{selected_story_name}_edge"
         )
+    else:
+        st.info("ℹ️ Add at least one node to configure edges")
 
-        if add_edges:
-            num_edges = st.number_input(
-                "Number of edges",
-                min_value=1,
-                max_value=10,
-                value=max(1, len(existing_edges)),
-            )
-
-            for i in range(num_edges):
-                with st.expander(f"Edge {i + 1}", expanded=(i == 0)):
-                    col_a, col_b = st.columns(2)
-
-                    # Get existing edge data if available
-                    existing_edge = (
-                        existing_edges[i] if i < len(existing_edges) else None
-                    )
-
-                    with col_a:
-                        st.markdown("**Start Node**")
-                        default_start_idx = (
-                            existing_edge.get("start", {}).get("local_index", 0)
-                            if existing_edge
-                            else 0
-                        )
-                        start_local_index = st.number_input(
-                            "Local Index",
-                            min_value=0,
-                            value=default_start_idx,
-                            key=f"start_idx_{i}",
-                        )
-                        default_start_story = (
-                            existing_edge.get("start", {}).get("story_name", "")
-                            if existing_edge
-                            else ""
-                        )
-                        start_story_name = st.text_input(
-                            "Story Name (optional)",
-                            value=default_start_story,
-                            key=f"start_story_{i}",
-                            placeholder="Leave empty for current story",
-                        )
-
-                    with col_b:
-                        st.markdown("**End Node**")
-                        default_end_idx = (
-                            existing_edge.get("end", {}).get("local_index", 0)
-                            if existing_edge
-                            else 0
-                        )
-                        end_local_index = st.number_input(
-                            "Local Index",
-                            min_value=0,
-                            value=default_end_idx,
-                            key=f"end_idx_{i}",
-                        )
-                        default_end_story = (
-                            existing_edge.get("end", {}).get("story_name", "")
-                            if existing_edge
-                            else ""
-                        )
-                        end_story_name = st.text_input(
-                            "Story Name (optional)",
-                            value=default_end_story,
-                            key=f"end_story_{i}",
-                            placeholder="Leave empty for current story",
-                        )
-
-                    # Condition
-                    st.markdown("**Condition**")
-
-                    # Get existing condition type
-                    default_condition_type = "Bypass"
-                    if existing_edge and "condition" in existing_edge:
-                        default_condition_type = existing_edge["condition"].get(
-                            "condition_type", "Bypass"
-                        )
-
-                    condition_types = [
-                        "Bypass",
-                        "Parameter",
-                        "Time",
-                        "Button",
-                        "Lambda",
-                        "Slide",
-                    ]
-                    condition_type = st.selectbox(
-                        "Condition Type",
-                        condition_types,
-                        index=condition_types.index(default_condition_type)
-                        if default_condition_type in condition_types
-                        else 0,
-                        key=f"cond_type_{i}",
-                    )
-
-                    condition = None
-                    existing_condition = (
-                        existing_edge.get("condition", {}) if existing_edge else {}
-                    )
-
-                    cond_name = st.text_input(
-                        "Display Name (optional)",
-                        value=existing_condition.get("name", "") or "",
-                        key=f"cond_name_{i}",
-                        placeholder="Override navigation button title",
-                    )
-                    cond_description = st.text_area(
-                        "Display Description (optional)",
-                        value=existing_condition.get("description", "") or "",
-                        key=f"cond_desc_{i}",
-                        placeholder="Override navigation button description",
-                    )
-
-                    if condition_type == "Bypass":
-                        condition = {"condition_type": "Bypass"}
-
-                    elif condition_type == "Parameter":
-                        col_p1, col_p2, col_p3 = st.columns(3)
-                        with col_p1:
-                            category = st.text_input(
-                                "Category",
-                                value=existing_condition.get("category", ""),
-                                key=f"cat_{i}",
-                            )
-                        with col_p2:
-                            parameter = st.text_input(
-                                "Parameter",
-                                value=existing_condition.get("parameter", ""),
-                                key=f"param_{i}",
-                            )
-                        with col_p3:
-                            comparators = ["<", "<=", ">=", ">", "="]
-                            default_comp = existing_condition.get("comparator", "<")
-                            comparator = st.selectbox(
-                                "Comparator",
-                                comparators,
-                                index=comparators.index(default_comp)
-                                if default_comp in comparators
-                                else 0,
-                                key=f"comp_{i}",
-                            )
-                        value = st.text_input(
-                            "Value",
-                            value=str(existing_condition.get("value", "")),
-                            key=f"val_{i}",
-                        )
-
-                        condition = {
-                            "condition_type": "Parameter",
-                            "category": category,
-                            "parameter": parameter,
-                            "comparator": comparator,
-                            "value": value,
-                        }
-
-                    elif condition_type == "Time":
-                        wait = st.number_input(
-                            "Wait (seconds)",
-                            min_value=0,
-                            value=existing_condition.get("wait", 5),
-                            key=f"wait_{i}",
-                        )
-                        condition = {"condition_type": "Time", "wait": wait}
-
-                    elif condition_type == "Button":
-                        button_id = st.text_input(
-                            "Button ID",
-                            value=existing_condition.get("button_id", ""),
-                            key=f"btn_{i}",
-                        )
-                        condition = {"condition_type": "Button", "button_id": button_id}
-
-                    elif condition_type == "Lambda":
-                        exec_str = st.text_area(
-                            "Lambda Expression",
-                            value=existing_condition.get("exec_str", ""),
-                            key=f"lambda_{i}",
-                            placeholder="e.g., x > 5",
-                        )
-                        condition = {"condition_type": "Lambda", "exec_str": exec_str}
-
-                    elif condition_type == "Slide":
-                        slide_name = st.text_input(
-                            "Slide Name",
-                            value=existing_condition.get("slide_name", ""),
-                            key=f"slide_name_{i}",
-                        )
-                        slide_desc = st.text_input(
-                            "Slide Description (optional)",
-                            value=existing_condition.get("slide_description", "") or "",
-                            key=f"slide_desc_{i}",
-                        )
-                        condition = {
-                            "condition_type": "Slide",
-                            "slide_name": slide_name,
-                            "slide_description": slide_desc if slide_desc else None,
-                        }
-
-                    # Add optional display overrides
-                    if condition is not None:
-                        if cond_name:
-                            condition["name"] = cond_name
-                        if cond_description:
-                            condition["description"] = cond_description
-
-                    # Build edge
-                    edge = {
-                        "start": {
-                            "local_index": start_local_index,
-                            "story_name": start_story_name
-                            if start_story_name
-                            else None,
-                        },
-                        "end": {
-                            "local_index": end_local_index,
-                            "story_name": end_story_name if end_story_name else None,
-                        },
-                        "condition": condition,
-                    }
-                    edges_data.append(edge)
 
     # Update button
     st.divider()

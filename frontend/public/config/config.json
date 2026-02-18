@@ -23,11 +23,7 @@
                 "PeopleStranded",
                 "DistanceKm"
             ],
-            "target_names": [
-                "Team A (Medical)",
-                "Team B (Utility)",
-                "Team C (Supply/Rescue)"
-            ],
+            "target_names": ["Medical", "Utility", "Supply/Rescue"],
             "test_size": 0.0,
             "random_state": 2025
         }
@@ -35,38 +31,44 @@
     "stories": {
         "decision_tree": {
             "name": "decision_tree",
-            "description": "An introduction to decision_trees!",
+            "description": "An introduction to decision trees with Iris!",
             "start_page": 0,
             "nodes": [
                 {
-                    "index": "3363168022"
+                    "index": "1706176969"
                 },
                 {
-                    "index": "833070531"
+                    "index": "678243845"
                 },
                 {
-                    "index": "2534030846"
+                    "index": "4085344866"
                 },
                 {
-                    "index": "1859081650"
+                    "index": "56369627"
                 },
                 {
-                    "index": "604725305"
+                    "index": "3340448475"
                 },
                 {
-                    "index": "3558640099"
+                    "index": "1667859386"
                 },
                 {
-                    "index": "2374066883"
+                    "index": "2916033986"
                 },
                 {
-                    "index": "3425858178"
+                    "index": "2186130732"
                 },
                 {
-                    "index": "833078587"
+                    "index": "725792821"
                 },
                 {
-                    "index": "3623605709"
+                    "index": "745356001"
+                },
+                {
+                    "index": "3858303656"
+                },
+                {
+                    "index": "3754104197"
                 }
             ],
             "edges": [
@@ -81,8 +83,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Terminologies",
-                        "description": "Continue reading about the basic terminology we use for decision tree."
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -96,8 +98,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Iris",
-                        "description": "Learn about our first dataset, and how we will use decision trees"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -111,8 +113,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Training (with sklearn!)",
-                        "description": "Train a decision tree model using sklearn on the iris dataset!"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -126,8 +128,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Predict!",
-                        "description": "Predict any point using the decision tree"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -141,13 +143,103 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Rescue team",
-                        "description": "Time to try out making a decision tree yourself!"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
                     "start": {
                         "local_index": 5,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 6,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 6,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 7,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 7,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 8,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 8,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 9,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 9,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 10,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 10,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 11,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 11,
                         "story_name": null
                     },
                     "end": {
@@ -156,31 +248,43 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Rescue data",
-                        "description": "Look at the rescue data for more insights!"
+                        "name": null,
+                        "description": null
                     }
                 }
             ]
         },
         "rescue_team": {
             "name": "rescue_team",
-            "description": "An introduction to decision_trees!",
+            "description": "Build your own decision tree to become the master dispatcher",
             "start_page": 0,
             "nodes": [
                 {
-                    "index": "3558640099"
+                    "index": "733634818"
                 },
                 {
-                    "index": "2374066883"
+                    "index": "1894204052"
                 },
                 {
-                    "index": "3425858178"
+                    "index": "2221523252"
                 },
                 {
-                    "index": "833078587"
+                    "index": "3635196608"
                 },
                 {
-                    "index": "3623605709"
+                    "index": "2414803219"
+                },
+                {
+                    "index": "693563755"
+                },
+                {
+                    "index": "1304681094"
+                },
+                {
+                    "index": "2414803219"
+                },
+                {
+                    "index": "2465853138"
                 }
             ],
             "edges": [
@@ -195,8 +299,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Rescue data",
-                        "description": "Look at the rescue data for more insights!"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -210,8 +314,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Design tree",
-                        "description": "Time to design the tree!"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -225,8 +329,8 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Call is in!",
-                        "description": "A call has arrived. Send out the right team when you are ready!"
+                        "name": null,
+                        "description": null
                     }
                 },
                 {
@@ -240,58 +344,174 @@
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Predict",
-                        "description": "Time to use your tree to predict!"
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 4,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 5,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 5,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 6,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 6,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 7,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 7,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 8,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
                     }
                 }
             ]
         }
     },
     "pages": {
-        "3363168022": {
-            "name": "decision_tree/intro",
+        "1706176969": {
+            "name": "decision_tree/01",
             "page_type": "static",
+            "note": "Above this box is your navigation bar! Click on the next slide when you're ready.",
             "parameters": {
-                "text": "",
-                "link": "md/decision_tree/intro.md"
+                "text": "<!-- 01_what_is_a_decision_tree.md -->\n# What is a Decision Tree?\nA **decision tree** is a model that learns a sequence of **if/else questions** to make a decision.\n\n## The core idea\n- You start with **all training data** at the top (the **Root**).\n- The model asks a question like: `petal_length <= 2.45?`\n- Your data is split into two groups.\n- It repeats this until it can make confident decisions at the bottom (the **Leaves**).\n\n## Why it feels intuitive\n- It mirrors how humans explain choices:\n  - \u201cIf the petals are very short, it\u2019s probably Setosa.\u201d\n  - \u201cOtherwise, check the petal width\u2026\u201d\n\n## In this story\u2019s narrative\nWe\u2019re going to help a \u201cbotanist assistant\u201d identify unknown flowers using measurements.\nThe assistant will learn a tree of questions from the **Iris dataset**\u2014and you\u2019ll see the questions it learns.\n\n**Next:** we\u2019ll discuss what decision trees are good for (and when they\u2019re risky).",
+                "link": ""
             }
         },
-        "833070531": {
-            "name": "decision_tree/split",
+        "678243845": {
+            "name": "decision_tree/02",
             "page_type": "static",
+            "note": "",
             "parameters": {
-                "text": "",
-                "link": "md/decision_tree/split.md"
+                "text": "<!-- 02_how_could_decision_trees_be_used.md -->\n# How could Decision Trees be used?\nDecision trees are flexible: they solve both **classification** and **regression** problems.\n\n## Common uses (and why)\n- **Classification** (choose a category)\n  - Example: classify an iris as **Setosa**, **Versicolor**, or **Virginica**\n  - Why it works: trees can carve the feature space into \u201cregions\u201d\n- **Regression** (predict a number)\n  - Example: predict house price from size, location, etc.\n  - Why it works: each leaf can output an average value\n\n## Strengths\n- **Interpretable**: you can read the path of rules.\n- **Handles non-linear boundaries**: not limited to straight lines.\n- **Works with mixed feature types** (often after basic preprocessing).\n\n## Limitations (important for your intuition)\n- **Overfitting risk**: deep trees can memorize noise.\n- **Instability**: small data changes can produce a different tree.\n- Often improved with ensembles (e.g., **Random Forest**, **Gradient Boosted Trees**).\n\n## Narrative link\nOur botanist assistant wants **explainable decisions**, not just accuracy.\nA decision tree can say *which measurement mattered* and *which rule triggered*.\n\n**Next:** we\u2019ll define the key terminologies you\u2019ll keep seeing in the training view.",
+                "link": ""
             }
         },
-        "2534030846": {
-            "name": "decision_tree/iris",
+        "4085344866": {
+            "name": "decision_tree/03",
             "page_type": "static",
+            "note": "",
             "parameters": {
-                "text": "",
-                "link": "public/md/decision_tree/iris.md"
+                "text": "<!-- 03_terminologies_for_decision_trees.md -->\n# Terminologies used for Decision Trees\nTo read and build trees, you need a small vocabulary.\n\n## Tree structure terms\n- **Root**: the first node (all data starts here)\n- **Node**: a point where a decision is made\n- **Split**: the question that partitions data (e.g., `petal_width <= 0.8`)\n- **Branch**: the outcome path of a split (left/right)\n- **Leaf**: a terminal node that outputs a prediction (class or value)\n- **Depth**: maximum number of splits from root to leaf\n\n## Learning/quality terms\n- **Impurity**: how \u201cmixed\u201d the classes are inside a node  \n  - lower impurity = more \u201cpure\u201d (mostly one class)\n- **Entropy** (classification): impurity based on information theory  \n  - $H = -\\sum_k p_k \\log_2(p_k)$\n- **Gini Impurity** (classification): a simpler impurity measure  \n  - $G = 1 - \\sum_k p_k^2$\n- **Information Gain**: how much impurity decreases after a split\n- **Decision Boundary**: how the tree partitions the feature space\n\n## Narrative link\nThink of impurity as the botanist\u2019s confusion:\n- high confusion at the start (mixed species)\n- lower confusion after asking the right questions\n\n**Next:** we\u2019ll meet the dataset our botanist assistant uses: **Iris**.",
+                "link": ""
             }
         },
-        "1859081650": {
-            "name": "decision_tree/iris/train",
+        "56369627": {
+            "name": "decision_tree/04",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 04_what_is_iris.md -->\n# What is Iris?\nThe **Iris dataset** is a classic classification dataset in machine learning.\n\n## What it contains\n- **150 flowers**\n- **3 species (classes)**:\n  - **Iris setosa**\n  - **Iris versicolor**\n  - **Iris virginica**\n- **4 measured features (in cm)**:\n  - sepal length\n  - sepal width\n  - petal length\n  - petal width\n\n![iris](images/iris.png)\n\n## Why it\u2019s popular for learning\n- Small enough to visualize\n- Clear patterns (especially Setosa)\n- Great for practicing:\n  - training a classifier\n  - interpreting rules\n  - validating predictions\n\n## Narrative link\nOur botanist assistant doesn\u2019t see petals directly\u2014only measurements.\nFrom those numbers, it must learn a reliable decision process.\n\n**Next:** what Iris is used for (and why it\u2019s a good training \u201cmission\u201d).",
+                "link": ""
+            }
+        },
+        "3340448475": {
+            "name": "decision_tree/05",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 05_what_iris_is_used_for.md -->\n# What Iris is used for (and why it matters here)\nIris is commonly used to demonstrate **supervised learning**: learning a mapping from features \u2192 label.\n\n## Typical tasks with Iris\n- **Multiclass classification**\n  - Input: 4 measurements\n  - Output: one of 3 species\n- **Model comparison**\n  - Try decision trees vs logistic regression vs k-NN, etc.\n- **Explainability practice**\n  - Translate the model into human-friendly reasoning\n\n## What you should focus on in this story\n- How a tree chooses splits that reduce **impurity**\n- How the tree becomes a *sequence of questions*\n- How a single sample travels down the tree to a prediction\n\n## Narrative link\nYour botanist assistant is preparing for field work:\n- quick decisions\n- easy explanations\n- consistent rules\n\n**Next:** we\u2019ll define the concrete problem scenario we\u2019re solving with Iris.",
+                "link": ""
+            }
+        },
+        "1667859386": {
+            "name": "decision_tree/06",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 06_problem_scenario_with_iris.md -->\n# Problem scenario with Iris\nA botanist gives you measurements from an unknown iris and asks:\n\n## Mission\n- Train a **decision tree classifier** that predicts the species:\n  - **Setosa**, **Versicolor**, or **Virginica**\n- Keep the model **understandable**:\n  - prefer a tree you can explain\n  - avoid unnecessary complexity\n\n## What \u201csuccess\u201d looks like\n- The tree learns meaningful splits (often using **petal** measurements)\n- You can trace predictions:\n  - \u201cBecause petal length is small, we classify it as Setosa.\u201d\n\n## What you\u2019ll do next (Interactive Visualization)\n- You\u2019ll enter the **training view**\n  - explore feature distributions\n  - choose settings like **max depth**\n  - watch splits appear as the model trains\n\n**Next page:** *Dynamic Visualization \u2014 Iris training and tree building.*",
+                "link": ""
+            }
+        },
+        "2916033986": {
+            "name": "decision_tree/07",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 07_context_for_iris_training_visualization.md -->\n# Dynamic Visualization: Iris Training (Context Slide)\nYou\u2019re about to train a decision tree on Iris in an interactive view.\n\n## What to watch for during training\n- Which feature is picked for the **first split**\n  - this is often the most informative \u201cfirst question\u201d\n- How node **impurity** decreases as the tree grows\n- How **depth** changes:\n  - deeper = more rules\n  - but also higher risk of overfitting\n\n## Things to try (systematic experiments)\n- Change **max depth** and observe:\n  - training accuracy vs validation accuracy\n  - tree readability (shorter paths vs longer paths)\n- Compare **Gini** vs **Entropy** (if available)\n  - see whether the chosen splits change\n\n## Narrative link\nThis is the moment the botanist assistant \u201clearns its questioning strategy.\u201d\n\n**Now:** proceed to the training visualization and see how `sklearn` builds your tree! Hold tight, you'll be manually making your tree later.",
+                "link": ""
+            }
+        },
+        "2186130732": {
+            "name": "iris_training",
             "page_type": "dynamic",
+            "note": "This page allows you to choose hyperparameters for the model and see how `sklearn` trains the tree. Once you choose your hyperparams, you can press `Run Model`, and then press the Play button on top to see how the tree builds! You can also hover over the tree to see the different values calculated for each decision.",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "train",
             "problem_type": "classifier",
-            "dataset": {
-                "type": "predefined",
-                "name": "iris"
-            },
+            "dataset": null,
             "parameters": {
                 "max_depth": 5,
                 "min_samples_split": 2,
                 "min_samples_leaf": 1
             }
         },
-        "604725305": {
-            "name": "decision_tree/iris/predict",
+        "725792821": {
+            "name": "decision_tree/08",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 08_explanation_and_new_point_after_training.md -->\n# What just happened? (Interpreting your trained tree)\nAfter training, your tree is a set of learned rules.\n\n## How to read a tree (path = explanation)\n- Start at the **Root**\n- At each **Split**, evaluate the rule (e.g., `petal_length <= 2.45`)\n- Follow the branch\n- At the **Leaf**, output the predicted class\n\n## The key mechanism you observed\n- The trainer prefers splits that **reduce impurity**\n  - nodes become more \u201cpure\u201d (dominated by one species)\n\n## New point: controlling overfitting (tree complexity)\nDecision trees can overfit when they get too specific.\n\n### Common control knobs\n- **max_depth**: limit how many questions can be asked\n- **min_samples_split** / **min_samples_leaf**: prevent tiny \u201cmemorized\u201d leaves\n- **pruning** (if supported): remove branches that don\u2019t help generalization\n\n## Narrative link\nOur botanist assistant must balance:\n- detailed rules (accuracy)\n- simple rules (reliability + explainability)\n\n**Next:** you\u2019ll enter a prediction view and use the tree like a real tool.",
+                "link": ""
+            }
+        },
+        "745356001": {
+            "name": "decision_tree/09",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 09_context_for_prediction_visualization.md -->\n# Dynamic Visualization: Prediction (Context Slide)\nNow you\u2019ll use your trained tree to classify new iris measurements.\n\n## What you\u2019ll do in the interactive prediction view\n- Input a new flower\u2019s measurements\n- Watch it travel down the tree:\n  - which splits it triggers\n  - which leaf it ends at\n- See:\n  - predicted species\n  - (optionally) class probabilities at the leaf\n\n## What to pay attention to\n- **Which feature decided early**\n  - early splits are often the strongest signals\n- **Edge cases**\n  - samples near split thresholds can flip class\n\n## Narrative link\nThis is field deployment:\nthe botanist assistant makes a call\u2014and must justify it with the path it took.\n\n**Now:** proceed to the prediction visualization and test a few flowers.",
+                "link": ""
+            }
+        },
+        "3858303656": {
+            "name": "iris_prediction",
             "page_type": "dynamic",
+            "note": "",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "predict",
@@ -299,9 +519,37 @@
             "dataset": null,
             "parameters": {}
         },
-        "3425858178": {
-            "name": "decision_tree/rescue/manual",
+        "733634818": {
+            "name": "rescue_team/01",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 01_problem_scenario.md -->\n# Dispatch Night: You\u2019re Writing the Playbook\nThe storm is getting worse. Calls are coming in faster than your senior dispatcher can manually reason through each one. In desperation, you call in your friend, who tells you to design a process that allows quick reasoning and can be easily understood by new dispatchers. He tells you to design a **Decision Tree**.\n\nYou quickly scrape a small dataset, **`rescue_team`**. Each record is a past emergency call:\n- **Inputs (what dispatch knows)**: injury severity, water depth, power outage, road blocked, people stranded, distance\n- **Output (what was dispatched)**: **Team A (Medical)**, **Team B (Utility)**, or **Team C (Supply/Rescue)**\n\n## Why a decision tree?\n\nA **Decision Tree** can be simplified to:\n\n- **You are designing a process for other humans to use**\n  - A tree becomes a checklist: question \u2192 branch \u2192 question \u2192 decision\n- **You want it to be easily explainable**\n  - \u201cWe sent Team C because water was deep and roads were blocked.\u201d\n- **You need it to work as a real model**\n  - Trees handle **classification** (choose a team) and can also do **regression** (predict a number)\n\n## Today\u2019s objectives\n- **Turn** historical calls into a dispatch playbook (a decision tree)\n- **Manually build** a small tree using a few strong questions (**Splits**)\n- **Use** that playbook to route a new call\n- **Compare** your playbook to how `sklearn` trains one automatically\n\n> Next: we\u2019ll translate \u201cgood questions\u201d into tree language: **Splits**, **nodes**, and \u201cmaking groups more pure.\u201d",
+                "link": ""
+            }
+        },
+        "1894204052": {
+            "name": "rescue_team/02",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 02_before_manual_tree_viz.md -->\n# The Playbook is Just \u201cGood Questions\u201d in the Right Order\nImagine you\u2019re training a new dispatcher. You wouldn\u2019t say:\n- \u201cCompute a probability distribution and optimize a loss.\u201d\n\nYou would say:\n- \u201cAsk this question first.\u201d\n- \u201cIf yes, do this. If no, do that.\u201d\n\nThat is a **decision tree**.\n\n## Tree parts (in dispatch terms)\n- **Node**: a question you ask\n- **Split**: the exact rule, e.g. **`WaterDepthCm < 20`**\n- **Branch**: what happens if the rule is true/false\n- **Leaf**: the final action (which team to send)\n\n## What makes a good Split?\nA good split separates calls into groups that are **more decisive**:\n- One branch becomes \u201cmostly **Team A (Medical)**\u201d\n- The other becomes \u201cmostly **Team C (Supply/Rescue)**\u201d\n\nIn training, trees measure this with **impurity** (often **Gini** or **Entropy**).  \nIn this story, think of it as: *\u201cAfter I ask this question, do my next steps become obvious?\u201d*\n\n> Next up: Build your own tree! ",
+                "link": ""
+            }
+        },
+        "3635196608": {
+            "name": "rescue_team/03",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# A New Call: Can Your Playbook Handle It?\nYou\u2019ve drafted a playbook. Now dispatch needs it to work on a call it hasn\u2019t seen before.\n\n## The incoming report (a concrete point)\n- **InjurySeverity**: 3  \n- **WaterDepthCm**: 35  \n- **PowerOutage**: 1  \n- **RoadBlocked**: 1  \n- **PeopleStranded**: 4  \n- **DistanceKm**: 12.0  \n\nYour job: pick the team:\n- **Team A (Medical)**\n- **Team B (Utility)**\n- **Team C (Supply/Rescue)**\n\n## How prediction works (operationally)\n- Start at the first question (root **Split**)\n- Follow the branch that matches the call details\n- Keep going until the playbook tells you an answer (a **leaf**)",
+                "link": ""
+            }
+        },
+        "2221523252": {
+            "name": "rescue_team_manual",
             "page_type": "dynamic",
+            "note": "Click on the first split node to begin! Navigate through the top right menu to determine your split, and continue when you're satisfied with your tree!",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "manual",
@@ -312,41 +560,60 @@
             },
             "parameters": {}
         },
-        "3623605709": {
-            "name": "decision_tree/rescue/predict",
+        "2414803219": {
+            "name": "rescue_team_predict",
             "page_type": "dynamic",
+            "note": "## The incoming report (a concrete point)\n- **InjurySeverity**: 3  \n- **WaterDepthCm**: 35  \n- **PowerOutage**: 1  \n- **RoadBlocked**: 1  \n- **PeopleStranded**: 4  \n- **DistanceKm**: 12.0  \n\nYour job: pick the team:\n- **Team A (Medical)**\n- **Team B (Utility)**\n- **Team C (Supply/Rescue)**",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {}
+        },
+        "693563755": {
+            "name": "rescue_team/04",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "<!-- 04_after_predict_viz_wrapup.md -->\n# Debrief: You Didn\u2019t Just Predict \u2014 You Explained\nA good dispatch decision has two outputs:\n- **The action** (which team)\n- **The reason** (the path of rules)\n\nThat\u2019s the decision tree advantage: it produces both by design.\n\n## What to check in your tree\n- **Clarity**: can a human follow it without extra context?\n- **Consistency**: do similar calls take similar paths?\n- **Decisive leaves**: do leaves mostly point to one team?\n\n## The risk: overfitting a tiny playbook\nWith small data, a tree can become too specific:\n- It memorizes edge cases instead of learning a reusable policy\n\nThat\u2019s why real workflows use constraints:\n- **max depth**\n- **min samples per leaf**\n- (sometimes) pruning\n\n> Next: you\u2019ll see how `sklearn` writes the playbook automatically\u2014and whether it asks the same \u201cfirst question\u201d you did.",
+                "link": ""
+            }
+        },
+        "1304681094": {
+            "name": "rescue_team_train",
+            "page_type": "dynamic",
+            "note": "## What to compare to your manual tree\n- First split: did it match your best \u201copening question\u201d?\n- Complexity: is it still human-usable?\n- Leaves: are they more decisive, or just more specific?",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "train",
             "problem_type": "classifier",
             "dataset": {
                 "type": "reference",
                 "name": "rescue_team"
             },
-            "parameters": {}
-        },
-        "3558640099": {
-            "name": "decision_tree/rescue_team",
-            "page_type": "static",
             "parameters": {
-                "text": "",
-                "link": "md/decision_tree/rescue_team.md"
+                "max_depth": 3,
+                "min_samples_split": 2,
+                "min_samples_leaf": 1
             }
         },
-        "2374066883": {
-            "name": "decision_tree/rescue_data",
+        "2465853138": {
+            "name": "rescue_team/06",
             "page_type": "static",
+            "note": "",
             "parameters": {
-                "text": "",
-                "link": "md/decision_tree/rescue_data.md"
+                "text": "<!-- 06_after_training_viz_closing.md -->\n# Wrap-Up: Decision Trees as Human-Friendly Models\nIn this story, you built a decision tree for the reason dispatch teams actually adopt tools:\n\n- **A process other humans can use**\n  - A repeatable checklist under stress\n- **An explanation you can defend**\n  - The path is the justification\n- **A real model that works**\n  - Great for **classification** (Team A/B/C), also usable for regression tasks",
+                "link": ""
             }
         },
-        "833078587": {
-            "name": "decision_tree/rescue_predict",
+        "3754104197": {
+            "name": "decision_tree/10",
             "page_type": "static",
+            "note": "Continuing here will bring you the next story, `rescue_team`!",
             "parameters": {
-                "text": "",
-                "link": "md/decision_tree/rescue_predict.md"
+                "text": "<!-- 10_wrap_up.md -->\n# Wrap up\nYou\u2019ve learned how decision trees work and how they apply to the Iris classification task.\n\n## What you should be able to do now\n- **Explain** a decision tree as a sequence of if/else rules\n- **Define** core terms:\n  - **Root**, **Split**, **Leaf**, **Depth**, **Impurity**, **Gini/Entropy**\n- **Train** a tree on Iris and interpret why it chose certain splits\n- **Predict** a new iris and trace the exact decision path\n\n## Key takeaway\nA decision tree is valuable when you need:\n- solid performance *and*\n- **transparent reasoning**\n\n## Suggested next step (optional)\n- Try to build your own tree within `rescue_team`!",
+                "link": ""
             }
         }
     }
