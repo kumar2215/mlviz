@@ -7,12 +7,16 @@ import { CurrentStoryContext } from "@/contexts/StoryContext";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type TrainPageProps = Pick<
     ModelPageProps,
     "model_name" | "parameters" | "problem_type" | "dataset"
 >;
+
+const MODEL_BUTTON_LABELS: Record<string, string> = {
+    kmeans: "Set Hyperparams",
+};
 
 const TrainPage: React.FC<TrainPageProps> = ({
     model_name,
@@ -21,7 +25,10 @@ const TrainPage: React.FC<TrainPageProps> = ({
     dataset,
 }) => {
     const model = useModel();
-    const { isLoading, data, train, getParameters } = model;
+    const { isLoading, data, train, getParameters, resetModelData } = model;
+    const hasInitialized = useRef(false);
+
+    const buttonLabel = MODEL_BUTTON_LABELS[model_name.toLowerCase()] || "Train Model";
 
     // Try to get lastParams from context (different models use different names)
     // Use useMemo to maintain stable reference
@@ -65,17 +72,33 @@ const TrainPage: React.FC<TrainPageProps> = ({
     }, [lastParams, parameters]);
 
     useEffect(() => {
+        if (!hasInitialized.current) {
+            hasInitialized.current = true;
+            resetModelData();
+        }
+        
         const trainParams = {
             ...(parameters || {}),
             dataset: (parameters as any)?.dataset || dataset,
         };
-        train(trainParams);
-    }, [parameters, dataset, train]);
+        
+        const loadVisualization = (model as any).loadVisualization;
+
+        if (typeof loadVisualization === "function") {
+            loadVisualization(trainParams);
+        } else {
+            train(trainParams);
+        }
+    }, [parameters, dataset, train, resetModelData, (model as any).loadVisualization]);
 
     const [showAlert, setShowAlert] = useState(false);
 
     const handleTrainModel = async () => {
-        await train(trainingParams);
+        if (typeof (model as any).loadVisualization === "function") {
+            await (model as any).loadVisualization(trainingParams);
+        } else {
+            await train(trainingParams);
+        }
         updateParams({ trainParams: trainingParams });
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 2000);
@@ -95,6 +118,7 @@ const TrainPage: React.FC<TrainPageProps> = ({
                     onTrainModel={handleTrainModel}
                     isModelLoading={isLoading}
                     featureNames={featureNames}
+                    buttonLabel={buttonLabel}
                 />
             </div>
 

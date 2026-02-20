@@ -4,6 +4,7 @@
  */
 
 import {
+    renderCentroidTrail2D,
     renderKMeansTraining,
     renderProposedCentroidMarkers,
     renderSelectedCentroidMarkers,
@@ -32,6 +33,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         selectedCentroids,
         setSelectedCentroids,
         setIsPlacingCentroids,
+        centroidHistory,
     } = useKMeans();
 
     const scaleFactor = useScaleFactor();
@@ -234,12 +236,34 @@ const Visualisation: React.FC<VisualisationProps> = () => {
                 // Remove previous markers and render fresh
                 targetGroup.selectAll(".selected-centroids").remove();
                 targetGroup.selectAll(".proposed-centroids").remove();
+                targetGroup.selectAll(".centroid-trail").remove();
 
                 const markerOptions = {
                     colorScale,
                     scaleFactor,
                     centroidSize: 4 * scaleFactor,
                 };
+
+                // Render centroid trail (ghost history)
+                if (centroidHistory.length > 0) {
+                    const nClusters = selectedCentroids.length;
+                    const clusterNames = Array.from(
+                        { length: nClusters },
+                        (_, i) => `Cluster ${i}`,
+                    );
+                    renderCentroidTrail2D(
+                        targetGroup,
+                        centroidHistory,
+                        result.xScale,
+                        result.yScale,
+                        {
+                            colorScale,
+                            scaleFactor,
+                            centroidSize: 4 * scaleFactor,
+                            clusterNames,
+                        },
+                    );
+                }
 
                 // Render selected centroid markers
                 if (selectedCentroids.length > 0) {
@@ -272,6 +296,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
             stepData,
             scaleFactor,
             handlePointClick,
+            centroidHistory,
         ],
     );
 
@@ -296,8 +321,28 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         handleInitialLoad();
     }, [handleInitialLoad]);
 
-    if (!kmeansData)
-        return <div className="p-8 text-center">Initializing...</div>;
+    const isAutoLoading =
+        !kmeansData &&
+        !!lastVisualizationParams &&
+        Object.keys(lastVisualizationParams).length > 0;
+
+    if (!kmeansData) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full gap-3 text-center p-8">
+                {isAutoLoading ? (
+                    <>
+                        <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+                        <p className="text-slate-500 text-sm">Loading visualization...</p>
+                    </>
+                ) : (
+                    <>
+                        <p className="text-slate-600 font-medium">No data loaded yet</p>
+                        <p className="text-slate-400 text-sm">Apply parameters in the sidebar to begin.</p>
+                    </>
+                )}
+            </div>
+        );
+    }
 
     return (
         <div className="relative h-full w-full">

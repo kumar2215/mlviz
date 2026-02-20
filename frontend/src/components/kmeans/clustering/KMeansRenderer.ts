@@ -1196,7 +1196,7 @@ function renderCentroidMovement2D(
 
         if (distance < 1) return; // Skip if centroids didn't move
 
-        const arrowSize = 8;
+        const arrowSize = 4; // Reduced from 12
 
         // Arrow line
         movementGroup
@@ -1207,9 +1207,8 @@ function renderCentroidMovement2D(
             .attr("x2", x2)
             .attr("y2", y2)
             .attr("stroke", color)
-            .attr("stroke-width", 2 * scaleFactor)
-            .attr("stroke-dasharray", `${5 * scaleFactor},${3 * scaleFactor}`)
-            .attr("opacity", 0.6)
+            .attr("stroke-width", 3 * scaleFactor) // Reduced from 5
+            .attr("opacity", 0.9)
             .attr("marker-end", "url(#arrow-" + clusterId + ")");
 
         // Arrow marker
@@ -1217,18 +1216,26 @@ function renderCentroidMovement2D(
             ? container.append("defs")
             : container.select("defs");
 
-        defs.append("marker")
-            .attr("id", "arrow-" + clusterId)
-            .attr("viewBox", "0 0 10 10")
-            .attr("refX", 8)
-            .attr("refY", 5)
-            .attr("markerWidth", arrowSize * scaleFactor)
-            .attr("markerHeight", arrowSize * scaleFactor)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M 0 0 L 10 5 L 0 10 z")
-            .attr("fill", color)
-            .attr("opacity", 0.8);
+        if (defs.select("#arrow-" + clusterId).empty()) {
+            defs.append("marker")
+                .attr("id", "arrow-" + clusterId)
+                .attr("viewBox", "0 0 10 10")
+                .attr("refX", 9)
+                .attr("refY", 5)
+                .attr("markerWidth", arrowSize * scaleFactor)
+                .attr("markerHeight", arrowSize * scaleFactor)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+                .attr("fill", color)
+                .attr("opacity", 1.0);
+        } else {
+            defs.select("#arrow-" + clusterId)
+                .attr("markerWidth", arrowSize * scaleFactor)
+                .attr("markerHeight", arrowSize * scaleFactor)
+                .select("path")
+                .attr("fill", color);
+        }
     });
 }
 
@@ -1268,7 +1275,7 @@ function renderCentroidMovement1D(
         const distance = Math.abs(x2 - x1);
         if (distance < 1) return; // Skip if centroids didn't move
 
-        const arrowSize = 8;
+        const arrowSize = 8; // Reduced from 12
 
         // Arrow line
         movementGroup
@@ -1279,9 +1286,8 @@ function renderCentroidMovement1D(
             .attr("x2", x2)
             .attr("y2", stripCenter)
             .attr("stroke", color)
-            .attr("stroke-width", 2 * scaleFactor)
-            .attr("stroke-dasharray", `${5 * scaleFactor},${3 * scaleFactor}`)
-            .attr("opacity", 0.6)
+            .attr("stroke-width", 3 * scaleFactor) // Reduced from 5
+            .attr("opacity", 0.9)
             .attr("marker-end", "url(#arrow-1d-" + clusterId + ")");
 
         // Arrow marker
@@ -1289,18 +1295,147 @@ function renderCentroidMovement1D(
             ? container.append("defs")
             : container.select("defs");
 
-        defs.append("marker")
-            .attr("id", "arrow-1d-" + clusterId)
-            .attr("viewBox", "0 0 10 10")
-            .attr("refX", 8)
-            .attr("refY", 5)
-            .attr("markerWidth", arrowSize * scaleFactor)
-            .attr("markerHeight", arrowSize * scaleFactor)
-            .attr("orient", "auto")
-            .append("path")
-            .attr("d", "M 0 0 L 10 5 L 0 10 z")
-            .attr("fill", color)
-            .attr("opacity", 0.8);
+        if (defs.select("#arrow-1d-" + clusterId).empty()) {
+            defs.append("marker")
+                .attr("id", "arrow-1d-" + clusterId)
+                .attr("viewBox", "0 0 10 10")
+                .attr("refX", 9)
+                .attr("refY", 5)
+                .attr("markerWidth", arrowSize * scaleFactor)
+                .attr("markerHeight", arrowSize * scaleFactor)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+                .attr("fill", color)
+                .attr("opacity", 1.0);
+        } else {
+            defs.select("#arrow-1d-" + clusterId)
+                .attr("markerWidth", arrowSize * scaleFactor)
+                .attr("markerHeight", arrowSize * scaleFactor)
+                .select("path")
+                .attr("fill", color);
+        }
+    });
+}
+
+// ============================================================================
+// Centroid Trail (ghost history with opacity based on recency)
+// ============================================================================
+
+/**
+ * Renders ghost centroid circles for historical positions.
+ * centroidHistory: array of centroid snapshots from oldest to newest;
+ *   each entry is an array of [x, y] positions, one per cluster.
+ * The current (live) centroid positions are NOT included — pass only past snapshots.
+ * Opacity scales linearly: oldest ghost is most transparent, newest ghost is most opaque.
+ */
+export function renderCentroidTrail2D(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    centroidHistory: number[][][],
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    options: {
+        colorScale: d3.ScaleOrdinal<string, string>;
+        scaleFactor: number;
+        centroidSize: number;
+        clusterNames: string[];
+        maxTrail?: number; // cap number of ghost steps shown (default: 8)
+    },
+) {
+    if (centroidHistory.length === 0) return;
+
+    const { colorScale, scaleFactor, centroidSize, clusterNames, maxTrail = 8 } = options;
+
+    // Only keep the most recent `maxTrail` snapshots
+    const history = centroidHistory.slice(-maxTrail);
+    const total = history.length;
+
+    const MAX_GHOST_OPACITY = 0.4;
+    const GHOST_RADIUS_FACTOR = 0.65; // ghost circles are slightly smaller than live centroids
+
+    const trailGroup = container
+        .append("g")
+        .attr("class", "centroid-trail")
+        .style("pointer-events", "none");
+
+    history.forEach((snapshot, snapshotIndex) => {
+        // opacity: 0 = oldest, 1 = newest (just before live)
+        const relativeAge = (snapshotIndex + 1) / total; // 1/total … total/total
+        const opacity = relativeAge * MAX_GHOST_OPACITY;
+        const radius = centroidSize * GHOST_RADIUS_FACTOR;
+
+        snapshot.forEach((centroid, clusterId) => {
+            const cx = xScale(centroid[0]);
+            const cy = yScale(centroid[1]);
+            if (isNaN(cx) || isNaN(cy)) return;
+
+            const clusterName = clusterNames[clusterId] || `Cluster ${clusterId}`;
+            const color = colorScale(clusterName);
+
+            // Ghost glow (outermost ring)
+            trailGroup
+                .append("circle")
+                .attr("cx", cx)
+                .attr("cy", cy)
+                .attr("r", radius + 3 * scaleFactor)
+                .attr("fill", color)
+                .attr("opacity", opacity * 0.4);
+
+            // Ghost body
+            trailGroup
+                .append("circle")
+                .attr("cx", cx)
+                .attr("cy", cy)
+                .attr("r", radius)
+                .attr("fill", color)
+                .attr("stroke", "white")
+                .attr("stroke-width", 1.5 * scaleFactor)
+                .attr("opacity", opacity);
+
+            // Draw a thin line from this ghost to the next snapshot's centroid
+            // (or to the live centroid if this is the newest ghost, which the caller renders)
+            const nextSnapshot = history[snapshotIndex + 1];
+            if (nextSnapshot) {
+                const nextCentroid = nextSnapshot[clusterId];
+                if (nextCentroid) {
+                    const nx = xScale(nextCentroid[0]);
+                    const ny = yScale(nextCentroid[1]);
+                    if (!isNaN(nx) && !isNaN(ny)) {
+                        // Define trail arrow marker
+                        const trailArrowId = `trail-arrow-${clusterId}-${snapshotIndex}`;
+                        const defs = container.select("defs").empty()
+                            ? container.append("defs")
+                            : container.select("defs");
+                        
+                        if (defs.select("#" + trailArrowId).empty()) {
+                            defs.append("marker")
+                                .attr("id", trailArrowId)
+                                .attr("viewBox", "0 0 10 10")
+                                .attr("refX", 9)
+                                .attr("refY", 5)
+                                .attr("markerWidth", 5 * scaleFactor * relativeAge)
+                                .attr("markerHeight", 5 * scaleFactor * relativeAge)
+                                .attr("orient", "auto")
+                                .append("path")
+                                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+                                .attr("fill", color)
+                                .attr("opacity", opacity);
+                        }
+
+                        trailGroup
+                            .append("line")
+                            .attr("x1", cx)
+                            .attr("y1", cy)
+                            .attr("x2", nx)
+                            .attr("y2", ny)
+                            .attr("stroke", color)
+                            .attr("stroke-width", 3 * scaleFactor * relativeAge) // Thicker trails
+                            .attr("opacity", opacity * 1.0)
+                            .attr("marker-end", `url(#${trailArrowId})`);
+                    }
+                }
+            }
+        });
     });
 }
 

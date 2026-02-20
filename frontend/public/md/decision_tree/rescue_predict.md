@@ -1,6 +1,5 @@
 # It's time to predict!
 
-
 Your first call has arrived, luckily, right as you finish working on your decision tree!
 
 Here are the statistics:

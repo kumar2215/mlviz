@@ -66,10 +66,13 @@ export function StoryProvider({ children }: { children: ReactNode }) {
         storyId: string,
         updates: Partial<StoryState>
     ) => {
-        setStories((prev) => ({
-            ...prev,
-            [storyId]: { ...prev[storyId], ...updates },
-        }));
+        setStories((prev) => {
+            const currentState = prev[storyId] || generateDefaultStoryState();
+            return {
+                ...prev,
+                [storyId]: { ...currentState, ...updates },
+            };
+        });
     };
 
     const addEdge = (storyId: string, edge: EdgeNode) => {

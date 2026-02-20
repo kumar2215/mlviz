@@ -389,7 +389,7 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
             };
         }, [predictionData]);
 
-    const contextValue: KNNContextType = {
+    const contextValue: KNNContextType = React.useMemo(() => ({
         // BaseModelContextType
         currentModelData,
         lastParams,
@@ -430,7 +430,14 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         makePrediction,
         getK,
         isVisualizationReady,
-    };
+    }), [
+        currentModelData, lastParams, setCurrentModelData, setLastParams, resetModelData, getLastParams, getParameters,
+        isVisualizationLoading, visualizationError, trainModel,
+        isPredictionLoading, predictionError, predictionResult, predict, clearPrediction,
+        getFeatureNames, getClassNames, getPredictiveFeatureNames,
+        loadVisualization, predictionData, queryPoints,
+        makePrediction, getK, isVisualizationReady
+    ]);
 
     return (
         <KNNContext.Provider value={contextValue}>
