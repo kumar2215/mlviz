@@ -82,23 +82,15 @@ const TrainPage: React.FC<TrainPageProps> = ({
             dataset: (parameters as any)?.dataset || dataset,
         };
         
-        const loadVisualization = (model as any).loadVisualization;
-
-        if (typeof loadVisualization === "function") {
-            loadVisualization(trainParams);
-        } else {
-            train(trainParams);
-        }
+        // For a TrainPage, we always want to perform actual training if parameters are provided.
+        // loadVisualization is more appropriate for VizOnlyPage or preview states where metrics are not needed.
+        train(trainParams);
     }, [parameters, dataset, train, resetModelData, (model as any).loadVisualization]);
 
     const [showAlert, setShowAlert] = useState(false);
 
     const handleTrainModel = async () => {
-        if (typeof (model as any).loadVisualization === "function") {
-            await (model as any).loadVisualization(trainingParams);
-        } else {
-            await train(trainingParams);
-        }
+        await train(trainingParams);
         updateParams({ trainParams: trainingParams });
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 2000);

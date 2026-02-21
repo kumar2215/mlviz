@@ -13,6 +13,8 @@ interface DecisionTreeProps {
 const roundNumber = (x: number) => String(x.toFixed(5));
 
 const Results = ({ metrics, metadata }: DecisionTreeProps) => {
+    console.log("[ClassifierResults]", metrics , metadata)
+    
     if (metrics == null || metadata == null) {
         return <></>;
     }
