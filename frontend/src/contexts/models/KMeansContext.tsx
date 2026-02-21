@@ -382,44 +382,46 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                     }
 
                     // PERSISTENCE: Update the common model data so it survives refresh
-                    const baseData = {
-                        success: data.success,
-                        data_points: data.data_points,
-                        final_centroids: data.new_centroids,
-                        final_assignments: data.assignments,
-                        metadata: data.metadata,
-                        visualisation_feature_indices: data.visualisation_feature_indices,
-                        visualisation_feature_names: data.visualisation_feature_names,
-                        decision_boundary: data.decision_boundary,
-                        // For step-by-step, we may not have full iteration history, 
-                        // but we can provide the latest one to keep the UI consistent.
-                        iterations: [
-                            {
-                                iteration: (currentModelData?.total_iterations || 0),
-                                assignments: data.assignments,
-                                distance_matrix: data.distance_matrix,
-                                centroids: data.centroids,
-                                new_centroids: data.new_centroids,
-                                centroid_shifts: data.centroid_shifts,
-                                converged: data.converged,
-                                cluster_info: data.cluster_info,
-                            },
-                        ],
-                        total_iterations: (currentModelData?.total_iterations || 0) + 1,
-                        converged: data.converged,
-                        queryPoints: currentModelData?.queryPoints || null,
-                    };
+                    setCurrentModelData((prev) => {
+                        const total_iterations = prev?.total_iterations || 0;
+                        const baseData = {
+                            success: data.success,
+                            data_points: data.data_points,
+                            final_centroids: data.new_centroids,
+                            final_assignments: data.assignments,
+                            metadata: data.metadata,
+                            visualisation_feature_indices: data.visualisation_feature_indices,
+                            visualisation_feature_names: data.visualisation_feature_names,
+                            decision_boundary: data.decision_boundary,
+                            // For step-by-step, we may not have full iteration history, 
+                            // but we can provide the latest one to keep the UI consistent.
+                            iterations: [
+                                {
+                                    iteration: total_iterations,
+                                    assignments: data.assignments,
+                                    distance_matrix: data.distance_matrix,
+                                    centroids: data.centroids,
+                                    new_centroids: data.new_centroids,
+                                    centroid_shifts: data.centroid_shifts,
+                                    converged: data.converged,
+                                    cluster_info: data.cluster_info,
+                                },
+                            ],
+                            total_iterations: total_iterations + 1,
+                            converged: data.converged,
+                            queryPoints: prev?.queryPoints || null,
+                        };
 
-                    if (currentModelData) {
-                        setCurrentModelData({
-                            ...currentModelData,
-                            ...baseData,
-                            // Accumulate iterations if we want to support playback after steps
-                            iterations: [...(currentModelData.iterations || []), ...baseData.iterations],
-                        });
-                    } else {
-                        setCurrentModelData(baseData as KMeansModelData);
-                    }
+                        if (prev) {
+                            return {
+                                ...prev,
+                                ...baseData,
+                                // Accumulate iterations if we want to support playback after steps
+                                iterations: [...(prev.iterations || []), ...baseData.iterations],
+                            };
+                        }
+                        return baseData as KMeansModelData;
+                    });
 
                     setIsPlacingCentroids(false);
                     setIsStepLoading(false);
@@ -440,7 +442,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                 );
             }
         },
-        [currentModelData, setCurrentModelData],
+        [setCurrentModelData],
     );
 
     // ========================================================================
@@ -503,12 +505,10 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                     setQueryPoints(request.query_points || null);
 
                     // Opt-in: persist query points if desired
-                    if (currentModelData) {
-                        setCurrentModelData({
-                            ...currentModelData,
-                            queryPoints: request.query_points || null,
-                        });
-                    }
+                    setCurrentModelData((prev) => prev ? ({
+                        ...prev,
+                        queryPoints: request.query_points || null,
+                    }) : null);
                 } else {
                     throw new Error(
                         "Prediction failed - API returned success: false",
@@ -525,7 +525,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                 );
             }
         },
-        [currentModelData, setCurrentModelData],
+        [setCurrentModelData],
     );
 
     const predict = useCallback(
@@ -561,13 +561,11 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
         setQueryPoints(null);
 
         // Also clear persisted query points
-        if (currentModelData) {
-            setCurrentModelData({
-                ...currentModelData,
-                queryPoints: null,
-            });
-        }
-    }, [currentModelData, setCurrentModelData]);
+        setCurrentModelData((prev) => prev ? ({
+            ...prev,
+            queryPoints: null,
+        }) : null);
+    }, [setCurrentModelData]);
 
     // ========================================================================
     // Auto-load on mount

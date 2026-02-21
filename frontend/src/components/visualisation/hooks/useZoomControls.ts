@@ -84,7 +84,7 @@ export const useZoomControls = ({
                 const applyRubberBand = (
                     transform: d3.ZoomTransform,
                     extent: [[number, number], [number, number]]
-                ) => {
+                ): d3.ZoomTransform => {
                     // Use dynamic bounds as the content size for constraints
                     const currentBounds = dynamicBoundsRef.current;
                     const currentPanMargin = dynamicPanMarginRef.current || 0;
@@ -93,8 +93,6 @@ export const useZoomControls = ({
                         return transform;
                     }
                     
-                    // The viewport is the visible SVG area (from extent parameter)
-                    // The content bounds represent the full content size (which may be larger)
                     const [[x0, y0], [x1, y1]] = extent;
                     const viewportWidth = x1 - x0;
                     const viewportHeight = y1 - y0;
@@ -109,47 +107,25 @@ export const useZoomControls = ({
 
                     // Calculate bounds based on whether content is larger or smaller than viewport
                     let minX: number, maxX: number, minY: number, maxY: number;
-
-                    // Use a small tolerance for comparisons to avoid rounding issues
                     const tolerance = 0.5;
 
                     if (scaledWidth >= viewportWidth - tolerance) {
-                        // Content fills or exceeds viewport - constrain to keep viewport covered
                         maxX = 0;
                         minX = viewportWidth - scaledWidth;
                     } else {
-                        // Content is smaller than viewport - force centering to avoid whitespace
-                        const centerOffset = (viewportWidth - scaledWidth) / 2;
-                        minX = centerOffset - currentPanMargin;
-                        maxX = centerOffset + currentPanMargin;
+                        // Align to top-left of the inner area (offset 0 relative to margin-translated parent)
+                        minX = -currentPanMargin;
+                        maxX = currentPanMargin;
                     }
 
                     if (scaledHeight >= viewportHeight - tolerance) {
                         maxY = 0;
                         minY = viewportHeight - scaledHeight;
                     } else {
-                        const centerOffset = (viewportHeight - scaledHeight) / 2;
-                        minY = centerOffset - currentPanMargin;
-                        maxY = centerOffset + currentPanMargin;
+                        minY = -currentPanMargin;
+                        maxY = currentPanMargin;
                     }
 
-                    // Debug logging
-                    console.log("Bounds calculation:", {
-                        panMargin: currentPanMargin,
-                        viewport: {
-                            width: viewportWidth,
-                            height: viewportHeight,
-                        },
-                        scaled: { width: scaledWidth, height: scaledHeight },
-                        bounds: { minX, maxX, minY, maxY },
-                        transform: { x: transform.x, y: transform.y, k: transform.k },
-                        isContentLarger: {
-                            width: scaledWidth > viewportWidth,
-                            height: scaledHeight > viewportHeight,
-                        },
-                    });
-
-                    // Check if we're outside bounds
                     const isOutsideBounds =
                         transform.x < minX ||
                         transform.x > maxX ||
@@ -157,7 +133,7 @@ export const useZoomControls = ({
                         transform.y > maxY;
 
                     if (isOutsideBounds) {
-                        // If panMargin is 0, we use strict clamping (no rubber band)
+                        // If panMargin is 0, we use strict clamping
                         if (currentPanMargin === 0) {
                             return d3.zoomIdentity
                                 .translate(
@@ -170,29 +146,20 @@ export const useZoomControls = ({
                         let rubberX = transform.x;
                         let rubberY = transform.y;
 
-                        // Apply rubber band resistance with exponential falloff
                         if (transform.x < minX) {
                             const overDistance = minX - transform.x;
-                            rubberX =
-                                minX -
-                                overDistance * Math.exp(-overDistance / 100);
+                            rubberX = minX - overDistance * Math.exp(-overDistance / 100);
                         } else if (transform.x > maxX) {
                             const overDistance = transform.x - maxX;
-                            rubberX =
-                                maxX +
-                                overDistance * Math.exp(-overDistance / 100);
+                            rubberX = maxX + overDistance * Math.exp(-overDistance / 100);
                         }
 
                         if (transform.y < minY) {
                             const overDistance = minY - transform.y;
-                            rubberY =
-                                minY -
-                                overDistance * Math.exp(-overDistance / 100);
+                            rubberY = minY - overDistance * Math.exp(-overDistance / 100);
                         } else if (transform.y > maxY) {
                             const overDistance = transform.y - maxY;
-                            rubberY =
-                                maxY +
-                                overDistance * Math.exp(-overDistance / 100);
+                            rubberY = maxY + overDistance * Math.exp(-overDistance / 100);
                         }
 
                         return d3.zoomIdentity
@@ -249,23 +216,29 @@ export const useZoomControls = ({
                                 minX = viewportWidth - scaledWidth;
                                 maxX = 0;
                             } else {
-                                const centerOffset = (viewportWidth - scaledWidth) / 2;
-                                minX = centerOffset - currentPanMargin;
-                                maxX = centerOffset + currentPanMargin;
+                                minX = -currentPanMargin;
+                                maxX = currentPanMargin;
                             }
 
                             if (scaledHeight >= viewportHeight) {
                                 minY = viewportHeight - scaledHeight;
                                 maxY = 0;
                             } else {
-                                const centerOffset = (viewportHeight - scaledHeight) / 2;
-                                minY = centerOffset - currentPanMargin;
-                                maxY = centerOffset + currentPanMargin;
+                                minY = -currentPanMargin;
+                                maxY = currentPanMargin;
                             }
 
                             // Constrain to bounds
                             const constrainedX = Math.max(minX, Math.min(maxX, currentTransform.x));
                             const constrainedY = Math.max(minY, Math.min(maxY, currentTransform.y));
+
+                            console.log("[useZoomControls] Snap-back check:", {
+                                current: { x: currentTransform.x, y: currentTransform.y },
+                                constrained: { x: constrainedX, y: constrainedY },
+                                bounds: { minX, maxX, minY, maxY },
+                                viewport: { viewportWidth, viewportHeight },
+                                scaled: { scaledWidth, scaledHeight }
+                            });
 
                             // Only snap back if we're outside bounds
                             const deltaX = Math.abs(currentTransform.x - constrainedX);

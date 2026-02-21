@@ -408,10 +408,7 @@ class KNNService:
 
         # Determine visualisation features
         if visualisation_features is None:
-            if n_features <= 3:
-                visualisation_features = list(range(n_features))
-            else:
-                visualisation_features = [0, 1, 2]
+            visualisation_features = [0, 1] if n_features >= 2 else [0]
 
         # Validate visualisation_features
         if len(visualisation_features) > 3:

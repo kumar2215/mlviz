@@ -42,6 +42,14 @@ export function renderKNNTraining({
     const { currentStep = 0 } = state;
     const dimensions_to_render = data.nDimensions;
 
+    console.log("[KNNRenderer] renderKNNTraining called with:", {
+        dataPointsCount: data.trainingPoints?.length,
+        labelsCount: data.trainingLabels?.length,
+        hasDecisionBoundary: !!data.decisionBoundary,
+        nDimensions: data.nDimensions,
+        k: data.k,
+    });
+
     // Clear previous render
     container.selectAll("*").remove();
 
@@ -67,6 +75,12 @@ export function renderKNNTraining({
     const plotPoints = createPlotPoints(plotData, config);
     // Use 0 padding when decision boundary exists (it already has 10% margin from backend)
     const bounds = calculateCombinedBounds(plotData, decisionBoundary, decisionBoundary ? 0 : 0.1);
+
+    console.log("[KNNRenderer] Plotting info:", {
+        plotPointsCount: plotPoints.length,
+        bounds,
+        dimensions_to_render
+    });
 
     // Render options
     const renderOptions = {
@@ -97,6 +111,7 @@ export function renderKNNTraining({
             );
             break;
         case 2:
+        default:
             renderResult = renderScatter2D(
                 container,
                 plotPoints,
