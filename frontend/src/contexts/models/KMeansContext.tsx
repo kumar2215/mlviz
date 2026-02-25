@@ -23,6 +23,7 @@ import React, {
     useContext,
     useEffect,
     useRef,
+    useState,
     type ReactNode,
 } from "react";
 import {
@@ -106,6 +107,15 @@ interface KMeansContextType
     clearSelectedCentroids: () => void;
     isPlacingCentroids: boolean;
     setIsPlacingCentroids: React.Dispatch<React.SetStateAction<boolean>>;
+
+    // Centroid trail history (step mode): oldest → newest snapshot, cleared on reset
+    centroidHistory: number[][][];
+
+    /**
+     * Surgically clears iterative state (centroids, history, step results)
+     * while preserving the base visualization data (points, background).
+     */
+    clearIterationState: () => void;
 }
 
 const KMeansContext = createContext<KMeansContextType | undefined>(undefined);
@@ -265,7 +275,11 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                     setIsPlacingCentroids(false);
                     setIsVisualizationLoading(false);
                     setVisualizationError(null);
-                    setLastParams(params || {});
+                    
+                    // Store only algorithm parameters, not the actual centroids
+                    // This ensures that subsequent calls (like from HUD) don't re-send stale/empty centroid lists
+                    const { centroids: _c, ...lastStoredParams } = (params || {}) as any;
+                    setLastParams(lastStoredParams);
                 }
             } catch (error) {
                 console.error("Error training KMeans:", error);
@@ -280,17 +294,35 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
         [setCurrentModelData, setLastParams, activeDataset],
     );
 
+    const clearIterationState = useCallback(() => {
+        console.log("[KMeansContext] Clearing iterative state (keeping base data)");
+        setStepData(null);
+        setSelectedCentroids([]);
+        selectedCentroidsRef.current = [];
+        setCentroidHistory([]);
+        setStepError(null);
+        setVisualizationError(null);
+    }, []);
+
     const loadVisualization = useCallback(
         async (request: Partial<KMeansTrainRequest> = {}) => {
-            // For KMeans, visualization is the same as training
-            await trainModel(request);
+            // For KMeans, visualization is primarily the data points
+            // Force centroids to empty to avoid premature training when applying hyperparams
+            await trainModel({
+                ...request,
+                centroids: [],
+            });
+            clearIterationState();
+            setIsPlacingCentroids(true);
         },
-        [trainModel],
+        [trainModel, clearIterationState, setIsPlacingCentroids],
     );
 
     // ========================================================================
     // Step Method (for manual iteration control)
     // ========================================================================
+
+    const [centroidHistory, setCentroidHistory] = useState<number[][][]>([]);
 
     const performStep = useCallback(
         async (request: Partial<KMeansStepRequest>) => {
@@ -338,50 +370,58 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                 if (data.success) {
                     setStepData(data);
 
+                    // Record the OLD centroid positions in history before moving to new ones
+                    const prevCentroids = selectedCentroidsRef.current;
+                    if (prevCentroids.length > 0) {
+                        setCentroidHistory((prev: number[][][]) => [...prev, prevCentroids]);
+                    }
+
                     // Update selected centroids to the new positions
                     if (data.new_centroids) {
                         setSelectedCentroids(data.new_centroids);
                     }
 
                     // PERSISTENCE: Update the common model data so it survives refresh
-                    const baseData = {
-                        success: data.success,
-                        data_points: data.data_points,
-                        final_centroids: data.new_centroids,
-                        final_assignments: data.assignments,
-                        metadata: data.metadata,
-                        visualisation_feature_indices: data.visualisation_feature_indices,
-                        visualisation_feature_names: data.visualisation_feature_names,
-                        decision_boundary: data.decision_boundary,
-                        // For step-by-step, we may not have full iteration history, 
-                        // but we can provide the latest one to keep the UI consistent.
-                        iterations: [
-                            {
-                                iteration: (currentModelData?.total_iterations || 0),
-                                assignments: data.assignments,
-                                distance_matrix: data.distance_matrix,
-                                centroids: data.centroids,
-                                new_centroids: data.new_centroids,
-                                centroid_shifts: data.centroid_shifts,
-                                converged: data.converged,
-                                cluster_info: data.cluster_info,
-                            },
-                        ],
-                        total_iterations: (currentModelData?.total_iterations || 0) + 1,
-                        converged: data.converged,
-                        queryPoints: currentModelData?.queryPoints || null,
-                    };
+                    setCurrentModelData((prev) => {
+                        const total_iterations = prev?.total_iterations || 0;
+                        const baseData = {
+                            success: data.success,
+                            data_points: data.data_points,
+                            final_centroids: data.new_centroids,
+                            final_assignments: data.assignments,
+                            metadata: data.metadata,
+                            visualisation_feature_indices: data.visualisation_feature_indices,
+                            visualisation_feature_names: data.visualisation_feature_names,
+                            decision_boundary: data.decision_boundary,
+                            // For step-by-step, we may not have full iteration history, 
+                            // but we can provide the latest one to keep the UI consistent.
+                            iterations: [
+                                {
+                                    iteration: total_iterations,
+                                    assignments: data.assignments,
+                                    distance_matrix: data.distance_matrix,
+                                    centroids: data.centroids,
+                                    new_centroids: data.new_centroids,
+                                    centroid_shifts: data.centroid_shifts,
+                                    converged: data.converged,
+                                    cluster_info: data.cluster_info,
+                                },
+                            ],
+                            total_iterations: total_iterations + 1,
+                            converged: data.converged,
+                            queryPoints: prev?.queryPoints || null,
+                        };
 
-                    if (currentModelData) {
-                        setCurrentModelData({
-                            ...currentModelData,
-                            ...baseData,
-                            // Accumulate iterations if we want to support playback after steps
-                            iterations: [...(currentModelData.iterations || []), ...baseData.iterations],
-                        });
-                    } else {
-                        setCurrentModelData(baseData as KMeansModelData);
-                    }
+                        if (prev) {
+                            return {
+                                ...prev,
+                                ...baseData,
+                                // Accumulate iterations if we want to support playback after steps
+                                iterations: [...(prev.iterations || []), ...baseData.iterations],
+                            };
+                        }
+                        return baseData as KMeansModelData;
+                    });
 
                     setIsPlacingCentroids(false);
                     setIsStepLoading(false);
@@ -402,7 +442,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                 );
             }
         },
-        [currentModelData, setCurrentModelData],
+        [setCurrentModelData],
     );
 
     // ========================================================================
@@ -465,12 +505,10 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                     setQueryPoints(request.query_points || null);
 
                     // Opt-in: persist query points if desired
-                    if (currentModelData) {
-                        setCurrentModelData({
-                            ...currentModelData,
-                            queryPoints: request.query_points || null,
-                        });
-                    }
+                    setCurrentModelData((prev) => prev ? ({
+                        ...prev,
+                        queryPoints: request.query_points || null,
+                    }) : null);
                 } else {
                     throw new Error(
                         "Prediction failed - API returned success: false",
@@ -487,7 +525,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                 );
             }
         },
-        [currentModelData, setCurrentModelData],
+        [setCurrentModelData],
     );
 
     const predict = useCallback(
@@ -523,13 +561,11 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
         setQueryPoints(null);
 
         // Also clear persisted query points
-        if (currentModelData) {
-            setCurrentModelData({
-                ...currentModelData,
-                queryPoints: null,
-            });
-        }
-    }, [currentModelData, setCurrentModelData]);
+        setCurrentModelData((prev) => prev ? ({
+            ...prev,
+            queryPoints: null,
+        }) : null);
+    }, [setCurrentModelData]);
 
     // ========================================================================
     // Auto-load on mount
@@ -567,6 +603,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
         setIsVisualizationLoading(false);
         setIsStepLoading(false);
         setIsPredictionLoading(false);
+        setCentroidHistory([]);
     }, [baseResetModelData]);
 
     // ========================================================================
@@ -597,7 +634,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
             };
         }, [predictionData, getClassNames]);
 
-    const contextValue: KMeansContextType = {
+    const contextValue: KMeansContextType = React.useMemo(() => ({
         // BaseModelContextType
         currentModelData,
         lastParams,
@@ -650,7 +687,22 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
         clearSelectedCentroids,
         isPlacingCentroids,
         setIsPlacingCentroids,
-    };
+
+        // Centroid trail history
+        centroidHistory,
+
+        clearIterationState,
+    }), [
+        currentModelData, lastParams, setCurrentModelData, setLastParams, resetModelData, getLastParams, getParameters,
+        isVisualizationLoading, visualizationError, trainModel,
+        isPredictionLoading, predictionError, predictionResult, predict, clearPrediction,
+        getFeatureNames, getClassNames, getPredictiveFeatureNames,
+        loadVisualization,
+        isStepLoading, stepError, stepData, performStep, predictionData, queryPoints,
+        getClusterCount, getCentroids, isVisualizationReady,
+        selectedCentroids, setSelectedCentroids, clearSelectedCentroids,
+        isPlacingCentroids, setIsPlacingCentroids, centroidHistory, clearIterationState
+    ]);
 
     return (
         <KMeansContext.Provider value={contextValue}>

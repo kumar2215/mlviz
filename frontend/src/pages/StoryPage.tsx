@@ -62,7 +62,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
         }
     };
 
-    const canGoBack = storyState.path.length > 0;
+    const canGoBack = storyState.path?.length > 0;
     console.log("[Navigation] Render - Current state:", {
         currentPageId,
         pathLength: storyState.path.length,

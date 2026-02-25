@@ -61,7 +61,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
               }
             : undefined;
 
-        return {
+        const result = {
             trainingPoints: knnData.training_points || [],
             trainingLabels: knnData.training_labels || [],
             decisionBoundary,
@@ -78,6 +78,8 @@ const Visualisation: React.FC<VisualisationProps> = () => {
             k: (lastVisualizationParams.parameters as any)?.n_neighbors || 5,
             queries: undefined,
         };
+
+        return result;
     }, [knnData, dimensions, lastVisualizationParams.parameters]);
 
     // Create color scale - Use category10 to match renderer

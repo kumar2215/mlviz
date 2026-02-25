@@ -89,6 +89,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 let boundsToSet = {
                     width: innerWidth,
                     height: innerHeight,
+                    margin: MARGIN,
                 };
                 
                 // If initial bounds were configured, scale them proportionally
@@ -98,6 +99,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                     boundsToSet = {
                         width: innerWidth,
                         height: initialBounds.height * heightScale,
+                        margin: MARGIN,
                     };
                 }
                 

@@ -707,7 +707,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
         }
     }, [manualTree]);
 
-    const contextValue: DecisionTreeContextType = {
+    const contextValue: DecisionTreeContextType = React.useMemo(() => ({
         // BaseModelContext (inherited)
         currentModelData,
         lastParams,
@@ -756,7 +756,15 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
             canSplit: canSplitManualNode,
             evaluate: evaluateManualTree,
         },
-    };
+    }), [
+        currentModelData, lastParams, setCurrentModelData, setLastParams, resetModelData, getLastParams, getParameters,
+        isModelLoading, modelError, trainNewModel,
+        isPredicting, predictionError, predictionResult, predict, clearPrediction,
+        getFeatureNames, getClassNames, treeMode, clearStoredModelParams,
+        manualTree, selectedNodePath, manualFeatureStats, selectedFeature, selectedThreshold,
+        initializeManualTree, selectManualNode, loadManualFeatureStats, updateManualThreshold,
+        splitManualNode, markNodeAsLeaf, canSplitManualNode, evaluateManualTree
+    ]);
 
     return (
         <DecisionTreeContext.Provider value={contextValue}>

@@ -35,7 +35,7 @@ interface BaseModelConfig {
 export interface BaseModelContextType<TModelData extends BaseModelData> {
     currentModelData: TModelData | null;
     lastParams: Record<string, any>;
-    setCurrentModelData: (data: TModelData | null) => void;
+    setCurrentModelData: (data: TModelData | null | ((prev: TModelData | null) => TModelData | null)) => void;
     setLastParams: (params: Record<string, any>) => void;
     resetModelData: () => void;
     getLastParams: () => Record<string, any>;
@@ -175,8 +175,8 @@ export function createBaseModelContext<TModelData extends BaseModelData>(
             }
         }, [lastParams]);
 
-        const setCurrentModelData = useCallback((data: TModelData | null) => {
-            console.log(`[BaseModelContext] Setting model data:`, data);
+        const setCurrentModelData = useCallback((data: TModelData | null | ((prev: TModelData | null) => TModelData | null)) => {
+            console.log(`[BaseModelContext] Setting model data:`, typeof data === 'function' ? '(functional update)' : data);
             setCurrentModelDataState(data);
         }, []);
 

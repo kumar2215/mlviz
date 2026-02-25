@@ -11,9 +11,8 @@ import {
     train as trainKNN,
     type KNNPredictionRequest,
     type KNNPredictionResponse,
-    type KNNTrainingRequest,
     type KNNVisualisationRequest,
-    type KNNVisualisationResponse,
+    type KNNVisualisationResponse
 } from "@/api/knn";
 import { useDataset } from "@/contexts/DatasetContext";
 import React, {
@@ -149,16 +148,22 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
             setVisualizationError(null);
 
             try {
-                const requestWithDataset = {
-                    ...request,
+                const { feature_1, feature_2, ...rest } = request as any;
+                const visualisation_features = (feature_1 !== undefined && feature_2 !== undefined) 
+                    ? [Number(feature_1), Number(feature_2)] 
+                    : request.visualisation_features;
+
+                const requestWithDataset: any = {
+                    parameters: rest,
+                    visualisation_features,
                     dataset: request.dataset || activeDataset || undefined,
                 };
                 const data = await getVisualisation(requestWithDataset);
                 if (data.success) {
-                    setCurrentModelData({
+                    setCurrentModelData((prev) => ({
                         ...data,
-                        queryPoints: currentModelData?.queryPoints || null,
-                    });
+                        queryPoints: prev?.queryPoints || null,
+                    }));
                     setIsVisualizationLoading(false);
                     setVisualizationError(null);
                     setLastParams(request);
@@ -177,7 +182,7 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                 );
             }
         },
-        [currentModelData, setCurrentModelData, setLastParams, activeDataset],
+        [setCurrentModelData, setLastParams, activeDataset],
     );
 
     // ========================================================================
@@ -186,19 +191,40 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const trainModel = useCallback(
         async (params?: Partial<KNNVisualisationRequest>) => {
-            // Structure the request properly - params should go in the parameters field
-            const request: Partial<KNNTrainingRequest> = {
-                parameters: params as any, // params contains the KNN parameters (n_neighbors, feature_1, etc.)
-            };
-
             setIsVisualizationLoading(true);
             setVisualizationError(null);
 
             try {
-                const requestWithDataset = {
-                    ...request,
-                    dataset: request.dataset || activeDataset || undefined,
+                // Extract top-level request fields from the flat params object
+                const { 
+                    include_boundary, 
+                    boundary_resolution, 
+                    dataset,
+                    feature_1, 
+                    feature_2, 
+                    ...algorithmParams 
+                } = (params || {}) as any;
+
+                // Build the parameters object for the algorithm (including features for backend validation)
+                const parameters = {
+                    ...algorithmParams,
+                    feature_1: feature_1 !== undefined ? Number(feature_1) : 0,
+                    feature_2: feature_2 !== undefined ? Number(feature_2) : 1,
                 };
+
+                // Map visualization features array
+                const visualisation_features = (feature_1 !== undefined && feature_2 !== undefined) 
+                    ? Number(feature_1) == Number(feature_2) ? [Number(feature_1)] : [Number(feature_1), Number(feature_2)] 
+                    : params?.visualisation_features;
+
+                const requestWithDataset: any = {
+                    parameters,
+                    visualisation_features,
+                    include_boundary,
+                    boundary_resolution,
+                    dataset: dataset || activeDataset || undefined,
+                };
+
                 const data = await trainKNN(requestWithDataset);
 
                 if (data.success) {
@@ -255,7 +281,8 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         if (predictionData?.neighbors_info?.[0]) {
             return predictionData.neighbors_info[0].length;
         }
-        return lastParams?.parameters?.n_neighbors || null;
+        // Support both flat and nested parameter structures
+        return lastParams?.n_neighbors || lastParams?.parameters?.n_neighbors || null;
     }, [predictionData, lastParams]);
 
     const isVisualizationReady = useCallback((): boolean => {
@@ -276,9 +303,35 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
             setPredictionError(null);
 
             try {
-                const requestWithDataset = {
-                    ...request,
-                    dataset: request.dataset || activeDataset || undefined,
+                // Extract top-level request fields from the flat params object
+                const { 
+                    feature_1, 
+                    feature_2, 
+                    include_boundary, 
+                    boundary_resolution, 
+                    dataset, 
+                    query_points,
+                    ...algorithmParams 
+                } = request as any;
+
+                // Build the parameters object for the algorithm
+                const parameters = {
+                    ...algorithmParams,
+                    feature_1: feature_1 !== undefined ? Number(feature_1) : 0,
+                    feature_2: feature_2 !== undefined ? Number(feature_2) : 1,
+                };
+
+                const visualisation_features = (feature_1 !== undefined && feature_2 !== undefined) 
+                    ? [Number(feature_1), Number(feature_2)] 
+                    : request.visualisation_features;
+
+                const requestWithDataset: any = {
+                    parameters,
+                    visualisation_features,
+                    query_points: query_points || request.query_points || undefined,
+                    include_boundary,
+                    boundary_resolution,
+                    dataset: dataset || activeDataset || undefined,
                 };
                 const data = await predictAPI(requestWithDataset);
 
@@ -286,15 +339,14 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                     setPredictionData(data);
                     setIsPredictionLoading(false);
                     setPredictionError(null);
-                    setQueryPoints(request.query_points || null);
+                    const finalQueryPoints = query_points || request.query_points || null;
+                    setQueryPoints(finalQueryPoints);
 
                     // Opt-in: persist query points if desired
-                    if (currentModelData) {
-                        setCurrentModelData({
-                            ...currentModelData,
-                            queryPoints: request.query_points || null,
-                        });
-                    }
+                    setCurrentModelData((prev) => prev ? ({
+                        ...prev,
+                        queryPoints: finalQueryPoints,
+                    }) : null);
                 } else {
                     throw new Error(
                         "Prediction failed - API returned success: false",
@@ -311,7 +363,7 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                 );
             }
         },
-        [currentModelData, setCurrentModelData, activeDataset],
+        [setCurrentModelData, activeDataset],
     );
 
     const predict = useCallback(
@@ -339,13 +391,11 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         setQueryPoints(null);
 
         // Also clear persisted query points
-        if (currentModelData) {
-            setCurrentModelData({
-                ...currentModelData,
-                queryPoints: null,
-            });
-        }
-    }, [currentModelData, setCurrentModelData]);
+        setCurrentModelData((prev) => prev ? ({
+            ...prev,
+            queryPoints: null,
+        }) : null);
+    }, [setCurrentModelData]);
 
     // ========================================================================
     // Auto-load on mount
@@ -389,7 +439,7 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
             };
         }, [predictionData]);
 
-    const contextValue: KNNContextType = {
+    const contextValue: KNNContextType = React.useMemo(() => ({
         // BaseModelContextType
         currentModelData,
         lastParams,
@@ -430,7 +480,14 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         makePrediction,
         getK,
         isVisualizationReady,
-    };
+    }), [
+        currentModelData, lastParams, setCurrentModelData, setLastParams, resetModelData, getLastParams, getParameters,
+        isVisualizationLoading, visualizationError, trainModel,
+        isPredictionLoading, predictionError, predictionResult, predict, clearPrediction,
+        getFeatureNames, getClassNames, getPredictiveFeatureNames,
+        loadVisualization, predictionData, queryPoints,
+        makePrediction, getK, isVisualizationReady
+    ]);
 
     return (
         <KNNContext.Provider value={contextValue}>

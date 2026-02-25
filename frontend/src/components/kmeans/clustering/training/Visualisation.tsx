@@ -4,12 +4,13 @@
  */
 
 import {
+    renderCentroidTrail2D,
     renderKMeansTraining,
     renderSelectedCentroidMarkers,
 } from "@/components/kmeans/clustering/KMeansRenderer";
+import KMeansTrainingHUD from "@/components/kmeans/clustering/training/KMeansTrainingHUD";
 import type { KMeansVisualizationData } from "@/components/kmeans/clustering/types";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
-import { Button } from "@/components/ui/button";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useKMeans } from "@/contexts/models/KMeansContext";
@@ -34,6 +35,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         setSelectedCentroids,
         isPlacingCentroids,
         setIsPlacingCentroids,
+        clearIterationState,
     } = useKMeans();
     const scaleFactor = useScaleFactor();
     const scalesRef = useRef<{
@@ -143,12 +145,18 @@ const Visualisation: React.FC<VisualisationProps> = () => {
     const handleVisualizationClick = useCallback(
         (event: MouseEvent, svg: SVGSVGElement) => {
             if (
-                !isPlacingCentroids ||
                 !scalesRef.current.xScale ||
                 !scalesRef.current.yScale ||
                 !visualizationData
             ) {
                 return;
+            }
+
+            // Automatically reset to placement mode if we add a centroid during result viewing
+            if (!isPlacingCentroids) {
+                console.log("[KMeans Visualisation] New centroid added during result viewing. Resetting to placement mode.");
+                clearIterationState();
+                setIsPlacingCentroids(true);
             }
 
             // Get click coordinates relative to the content group (not SVG root)
@@ -209,6 +217,12 @@ const Visualisation: React.FC<VisualisationProps> = () => {
                         "[KMeans Visualisation] Removing centroid:",
                         nearestPoint,
                     );
+                    
+                    // If we were in result mode, clearing is already handled by the top check.
+                    // But if we're in placing mode, we should still clear any stale iteration data
+                    // just in case (though clearIterationState is surgical).
+                    clearIterationState();
+                    
                     setSelectedCentroids((prev) =>
                         prev.filter((_, i) => i !== alreadySelectedIndex),
                     );
@@ -235,7 +249,7 @@ const Visualisation: React.FC<VisualisationProps> = () => {
             );
             setSelectedCentroids((prev) => [...prev, newCentroid]);
         },
-        [isPlacingCentroids, visualizationData, selectedCentroids],
+        [isPlacingCentroids, visualizationData, selectedCentroids, clearIterationState, setIsPlacingCentroids],
     );
 
 
@@ -270,6 +284,37 @@ const Visualisation: React.FC<VisualisationProps> = () => {
                     xScale: renderResult.xScale,
                     yScale: renderResult.yScale,
                 };
+
+                // Render centroid trail from past iterations
+                const iterationIndex = Math.min(
+                    Math.floor(currentIteration),
+                    visualizationData.iterations.length - 1,
+                );
+                if (iterationIndex > 0) {
+                    const centroidHistory = visualizationData.iterations
+                        .slice(0, iterationIndex)
+                        .map((iter) => iter.centroids);
+
+                    const nClusters = visualizationData.nClusters;
+                    const clusterNames = Array.from(
+                        { length: nClusters },
+                        (_, i) => `Cluster ${i}`,
+                    );
+
+                    const targetGroup = renderResult.contentGroup || container;
+                    renderCentroidTrail2D(
+                        targetGroup,
+                        centroidHistory,
+                        renderResult.xScale,
+                        renderResult.yScale,
+                        {
+                            colorScale,
+                            scaleFactor,
+                            centroidSize: 4 * scaleFactor,
+                            clusterNames,
+                        },
+                    );
+                }
 
                 // Render selected centroids if in placement mode
                 if (isPlacingCentroids && selectedCentroids.length > 0) {
@@ -331,7 +376,9 @@ const Visualisation: React.FC<VisualisationProps> = () => {
         );
 
         // Train with selected centroids (now handled automatically by context if not passed)
-        await train(lastVisualizationParams);
+        // Explicitly strip centroids from lastVisualizationParams to ensure it falls back to current selection
+        const { centroids: _c, ...trainParams } = lastVisualizationParams as any;
+        await train(trainParams);
 
         // Exit placement mode
         setIsPlacingCentroids(false);
@@ -339,14 +386,13 @@ const Visualisation: React.FC<VisualisationProps> = () => {
 
     // Handle clear centroids
     const handleClear = useCallback(() => {
-        setSelectedCentroids([]);
-    }, []);
+        clearIterationState();
+    }, [clearIterationState]);
 
     // Handle reset to placement mode
     const handleReset = useCallback(() => {
-        setIsPlacingCentroids(true);
-        setSelectedCentroids([]);
-    }, []);
+        loadVisualization(lastVisualizationParams);
+    }, [loadVisualization, lastVisualizationParams]);
 
     // Early returns AFTER all hooks
     if (isVisualizationLoading) {
@@ -395,47 +441,13 @@ const Visualisation: React.FC<VisualisationProps> = () => {
 
     return (
         <div className="relative h-full">
-            {/* Centroid placement controls */}
-            {isPlacingCentroids && (
-                <div className="absolute top-4 right-4 z-10 bg-white/95 backdrop-blur-sm rounded-lg shadow-lg p-4 border border-gray-200">
-                    <div className="text-sm font-semibold mb-2">
-                        Click on data points to select centroids
-                    </div>
-                    <div className="text-xs text-gray-600 mb-3">
-                        Selected centroids: {selectedCentroids.length}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button
-                            size="sm"
-                            onClick={handleTrain}
-                            disabled={selectedCentroids.length === 0}
-                        >
-                            Train ({selectedCentroids.length} clusters)
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={handleClear}
-                            disabled={selectedCentroids.length === 0}
-                        >
-                            Clear
-                        </Button>
-                    </div>
-                </div>
-            )}
-
-            {/* Reset button when showing results */}
-            {!isPlacingCentroids && visualizationData.totalIterations > 0 && (
-                <div className="absolute top-4 right-4 z-10">
-                    <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleReset}
-                    >
-                        Place New Centroids
-                    </Button>
-                </div>
-            )}
+            <div className="absolute top-4 right-4 z-10">
+                <KMeansTrainingHUD 
+                    onTrain={handleTrain}
+                    onClear={handleClear}
+                    onReset={handleReset}
+                />
+            </div>
 
             <BaseVisualisation
                 dataConfig={{

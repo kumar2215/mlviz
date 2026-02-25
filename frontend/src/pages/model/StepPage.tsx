@@ -1,13 +1,11 @@
 import ModelOptionsForm from "@/components/input/ModelOptionsForm";
 import { StepComponent } from "@/components/StepComponent";
-import { Button } from "@/components/ui/button";
 import { useModel } from "@/contexts/ModelContext";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
-import { RotateCcw } from "lucide-react";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type StepPageProps = Pick<
     ModelPageProps,
@@ -67,6 +65,22 @@ const StepPage: React.FC<StepPageProps> = ({
         }
     }, [lastParams, parameters]);
 
+    // Auto-load dataset on mount when there is no existing model data.
+    // This populates the scatter plot immediately so the user can start
+    // placing centroids without having to click "Apply Parameters" first.
+    const autoLoadDone = useRef(false);
+    useEffect(() => {
+        if (!autoLoadDone.current) {
+            autoLoadDone.current = true;
+            resetModelData(); // Always start fresh when the step page mounts
+            const trainParams = {
+                ...stepParams,
+                dataset: (stepParams as any)?.dataset || dataset,
+            };
+            train(trainParams);
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentionally runs once on mount
+
     const handleApplyParams = async () => {
         // Applying parameters in Step mode resets the model and starts fresh
         console.log("[StepPage] Applying parameters and resetting data");
@@ -79,11 +93,6 @@ const StepPage: React.FC<StepPageProps> = ({
         };
         await train(trainParams);
         updateParams({ trainParams: stepParams });
-    };
-
-    const handleReset = () => {
-        console.log("[StepPage] Manually resetting model data");
-        resetModelData();
     };
 
     return (
@@ -99,15 +108,6 @@ const StepPage: React.FC<StepPageProps> = ({
                     featureNames={featureNames}
                     buttonLabel="Apply Parameters"
                 />
-
-                <Button
-                    variant="outline"
-                    className="w-full mt-4 flex gap-2 items-center justify-center border-slate-300 text-slate-600 hover:bg-slate-100"
-                    onClick={handleReset}
-                    disabled={isLoading}
-                >
-                    <RotateCcw className="w-4 h-4" /> Reset Centroids
-                </Button>
             </div>
 
             {/* Main Interactive Step Area */}
