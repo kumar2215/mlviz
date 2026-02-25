@@ -15,7 +15,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:8080",
     ]
 
-    # Frontend URL for production (set via FRONTEND_URL env var in Cloud Run)
+    # Frontend URLs for production (set via FRONTEND_URL env var in Cloud Run)
+    # Supports multiple comma-separated URLs, e.g. "https://a.com,https://b.com"
     frontend_url: str | None = None
 
     # Server config
@@ -31,10 +32,10 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
 
     def get_all_origins(self) -> List[str]:
-        """Get all allowed origins including frontend_url if set."""
+        """Get all allowed origins including frontend_url(s) if set."""
         origins = self.allowed_origins.copy()
         if self.frontend_url:
-            origins.append(self.frontend_url)
+            origins.extend(url.strip() for url in self.frontend_url.split(","))
         return origins
 
 
