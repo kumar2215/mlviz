@@ -30,8 +30,9 @@ const config: QuartzConfig = {
       fontOrigin: "googleFonts",
       cdnCaching: true,
       typography: {
-        header: "Roboto Flex",
-        body: "Roboto Flex",
+        title: "Archivo", 
+        header: "Archivo",
+        body: "Archivo",
         code: "Atkinson Hyperlegible Mono",
       },
       colors: {
