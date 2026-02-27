@@ -7,28 +7,54 @@ on:
         paths:
             - "frontend/**"
             - "quartz/**"
-            - ".github/workflows/deploy-frontend-gcs-prod.yml"
+            - ".github/workflows/deploy-prod.yml"
     workflow_dispatch:
 
-permissions:
-    contents: write
-
+# ─── Custom Domain Configuration ────────────────────────────────────────────
+# To move to a custom domain:
+#   1. Set PAGES_DOMAIN to your domain (e.g. "mlviz.example.com")
+#   2. Set PAGES_BASE_PATH to "" (empty string — custom domains use root)
+#   3. Add a CNAME file to your repo and configure DNS
+# To stay on GitHub Pages sub-path (default):
+#   Leave PAGES_DOMAIN empty and set PAGES_BASE_PATH to your repo sub-path.
+# ────────────────────────────────────────────────────────────────────────────
 env:
+    PAGES_DOMAIN: "" 
+    PAGES_BASE_PATH: "/mlviz"
+
     PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
     REGION: ${{ secrets.GCP_REGION }}
-    BUCKET_NAME: mlviz
     BACKEND_SERVICE_NAME: backend
+
+permissions:
+    contents: read
 
 jobs:
     deploy-backend:
         name: Deploy Backend
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
         outputs:
             backend-url: ${{ steps.get-url.outputs.url }}
+            frontend-url: ${{ steps.compute-urls.outputs.frontend_url }}
 
         steps:
             - name: Checkout code
               uses: actions/checkout@v4
+
+            - name: Compute frontend URL
+              id: compute-urls
+              run: |
+                  if [ -n "${{ env.PAGES_DOMAIN }}" ]; then
+                    FRONTEND_URL="https://${{ env.PAGES_DOMAIN }}"
+                  else
+                    REPO="${{ github.repository }}"
+                    ORG="${REPO%%/*}"
+                    FRONTEND_URL="https://${ORG}.github.io${{ env.PAGES_BASE_PATH }}"
+                  fi
+                  echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
+                  echo "Frontend URL: ${FRONTEND_URL}"
 
             - name: Authenticate to Google Cloud
               uses: google-github-actions/auth@v2
@@ -61,7 +87,7 @@ jobs:
                     --cpu 1 \
                     --min-instances 0 \
                     --max-instances 10 \
-                    --set-env-vars "DEBUG=false,FRONTEND_URL=https://local-minima-lab.github.io/mlviz"
+                    --set-env-vars "DEBUG=false,FRONTEND_URL=${{ steps.compute-urls.outputs.frontend_url }}"
 
             - name: Get service URL
               id: get-url
@@ -78,8 +104,8 @@ jobs:
                   curl -f ${{ steps.get-url.outputs.url }}/health || exit 1
                   echo "✅ Health check passed"
 
-    deploy-frontend:
-        name: Deploy Frontend to GitHub Pages
+    build-pages:
+        name: Build Pages Artifact
         runs-on: ubuntu-latest
         if: github.repository == 'local-minima-lab/mlviz'
         needs: deploy-backend
@@ -88,18 +114,35 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Set up Node.js
+            # ── Compute base path ─────────────────────────────────────────
+            - name: Compute base path
+              id: paths
+              run: |
+                  if [ -n "${{ env.PAGES_DOMAIN }}" ]; then
+                    BASE_PATH=""
+                    QUARTZ_BASE_URL="${{ env.PAGES_DOMAIN }}/docs"
+                  else
+                    BASE_PATH="${{ env.PAGES_BASE_PATH }}"
+                    REPO="${{ github.repository }}"
+                    ORG="${REPO%%/*}"
+                    QUARTZ_BASE_URL="${ORG}.github.io${BASE_PATH}/docs"
+                  fi
+                  echo "base_path=${BASE_PATH}" >> $GITHUB_OUTPUT
+                  echo "quartz_base_url=${QUARTZ_BASE_URL}" >> $GITHUB_OUTPUT
+
+            # ── Frontend ──────────────────────────────────────────────────
+            - name: Set up Node.js (frontend)
               uses: actions/setup-node@v4
               with:
                   node-version: "20"
                   cache: "npm"
                   cache-dependency-path: frontend/package-lock.json
 
-            - name: Install dependencies
+            - name: Install frontend dependencies
               working-directory: ./frontend
               run: npm ci
 
-            - name: Build frontend with backend URL
+            - name: Build frontend
               working-directory: ./frontend
               env:
                   VITE_FAVICON: /mlviz.png
@@ -110,34 +153,8 @@ jobs:
                   echo "Building with backend URL: $VITE_API_BASE_URL"
                   npm run build
 
-            - name: Deploy to GitHub Pages
-              uses: peaceiris/actions-gh-pages@v4
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./frontend/dist
-                  destination_dir: .
-                  keep_files: true
-
-            - name: Deployment Summary
-              run: |
-                  echo "======================================"
-                  echo "🚀 Production Frontend Deployed to GitHub Pages"
-                  echo "======================================"
-                  echo "Frontend URL: https://local-minima-lab.github.io/mlviz"
-                  echo "Backend URL:  ${{ needs.deploy-backend.outputs.backend-url }}"
-                  echo "======================================"
-
-    deploy-docs:
-        name: Deploy Documentation
-        runs-on: ubuntu-latest
-        if: github.repository == 'local-minima-lab/mlviz'
-        needs: deploy-frontend
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-
-            - name: Set up Node.js
+            # ── Documentation ─────────────────────────────────────────────
+            - name: Set up Node.js (quartz)
               uses: actions/setup-node@v4
               with:
                   node-version: "22"
@@ -151,24 +168,62 @@ jobs:
             - name: Build Quartz documentation
               working-directory: ./quartz
               env:
-                  QUARTZ_BASE_URL: "local-minima-lab.github.io/mlviz/docs"
+                  QUARTZ_BASE_URL: ${{ steps.paths.outputs.quartz_base_url }}
               run: |
                   echo "Building Quartz with base URL: $QUARTZ_BASE_URL"
                   npx quartz build
 
-            - name: Deploy Docs to GitHub Pages
-              uses: peaceiris/actions-gh-pages@v4
-              with:
-                  github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./quartz/public
-                  destination_dir: docs
-                  keep_files: true
+            # ── Assemble combined artifact ─────────────────────────────────
+            - name: Assemble pages artifact
+              run: |
+                  BASE_PATH="${{ steps.paths.outputs.base_path }}"
+                  SITE_DIR="_site"
 
-            - name: Documentation Deployment Summary
+                  # Strip leading slash from base path for directory layout
+                  SUB="${BASE_PATH#/}"
+
+                  if [ -n "$SUB" ]; then
+                    mkdir -p "${SITE_DIR}/${SUB}"
+                    cp -r frontend/dist/. "${SITE_DIR}/${SUB}/"
+                    mkdir -p "${SITE_DIR}/${SUB}/docs"
+                    cp -r quartz/public/. "${SITE_DIR}/${SUB}/docs/"
+                  else
+                    # Custom domain — deploy to root
+                    mkdir -p "${SITE_DIR}"
+                    cp -r frontend/dist/. "${SITE_DIR}/"
+                    mkdir -p "${SITE_DIR}/docs"
+                    cp -r quartz/public/. "${SITE_DIR}/docs/"
+                  fi
+
+                  echo "Assembled site structure:"
+                  find "${SITE_DIR}" -maxdepth 3 -type f | head -30
+
+            - name: Upload Pages artifact
+              uses: actions/upload-pages-artifact@v3
+              with:
+                  path: _site
+
+    deploy-pages:
+        name: Deploy to GitHub Pages
+        runs-on: ubuntu-latest
+        needs: build-pages
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        permissions:
+            pages: write
+            id-token: write
+
+        steps:
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v4
+
+            - name: Deployment Summary
               run: |
                   echo "======================================"
-                  echo "📚 Documentation Deployed"
+                  echo "� Production Deployed to GitHub Pages"
                   echo "======================================"
-                  echo "Docs URL: https://local-minima-lab.github.io/mlviz/docs/"
+                  echo "Site URL:    ${{ steps.deployment.outputs.page_url }}"
+                  echo "Backend URL: ${{ needs.deploy-backend.outputs.backend-url }}"
                   echo "======================================"
-
