@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+      <title>mlviz</title>
+      <link>https://local-minima-lab.github.io/mlviz/docs</link>
+      <description>Last 10 notes on mlviz</description>
+      <generator>Quartz -- quartz.jzhao.xyz</generator>
+      <item>
+    <title>index</title>
+    <link>https://local-minima-lab.github.io/mlviz/docs/frontend/</link>
+    <guid>https://local-minima-lab.github.io/mlviz/docs/frontend/</guid>
+    <description><![CDATA[ This category of articles refer to how the frontend handles items such as below: visualisations stories . ]]></description>
+    <pubDate>Fri, 27 Feb 2026 21:58:44 GMT</pubDate>
+  </item><item>
+    <title>Stories</title>
+    <link>https://local-minima-lab.github.io/mlviz/docs/frontend/stories</link>
+    <guid>https://local-minima-lab.github.io/mlviz/docs/frontend/stories</guid>
+    <description><![CDATA[ Stories Each story is a page, with each story effectively being a SPA by itself - rendering the parts within the story within the same page. ]]></description>
+    <pubDate>Fri, 27 Feb 2026 21:58:44 GMT</pubDate>
+  </item><item>
+    <title>Visualisations</title>
+    <link>https://local-minima-lab.github.io/mlviz/docs/frontend/visualisations</link>
+    <guid>https://local-minima-lab.github.io/mlviz/docs/frontend/visualisations</guid>
+    <description><![CDATA[ Visualisations Visualisations are done using D3. ]]></description>
+    <pubDate>Fri, 27 Feb 2026 21:58:44 GMT</pubDate>
+  </item><item>
+    <title>tech_stack</title>
+    <link>https://local-minima-lab.github.io/mlviz/docs/general/tech_stack</link>
+    <guid>https://local-minima-lab.github.io/mlviz/docs/general/tech_stack</guid>
+    <description><![CDATA[  ]]></description>
+    <pubDate>Fri, 27 Feb 2026 21:58:44 GMT</pubDate>
+  </item><item>
+    <title>Documentation Index</title>
+    <link>https://local-minima-lab.github.io/mlviz/docs/</link>
+    <guid>https://local-minima-lab.github.io/mlviz/docs/</guid>
+    <description><![CDATA[ This documentation will cover the different aspects of the project, from front-end to back-end. ]]></description>
+    <pubDate>Fri, 27 Feb 2026 21:58:44 GMT</pubDate>
+  </item>
+    </channel>
+  </rss>
