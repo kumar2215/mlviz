@@ -10,6 +10,9 @@ on:
             - ".github/workflows/deploy-frontend-gcs-test.yml"
     workflow_dispatch:
 
+permissions:
+    contents: write
+
 env:
     PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
     REGION: ${{ secrets.GCP_REGION }}
