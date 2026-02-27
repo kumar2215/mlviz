@@ -174,29 +174,17 @@ jobs:
                   npx quartz build
 
             # ── Assemble combined artifact ─────────────────────────────────
+            # GitHub Pages automatically serves the artifact root at the repo
+            # sub-path (e.g. /mlviz), so files always go to _site/ root.
+            # PAGES_BASE_PATH is only used to compute URLs, not directory layout.
             - name: Assemble pages artifact
               run: |
-                  BASE_PATH="${{ steps.paths.outputs.base_path }}"
-                  SITE_DIR="_site"
-
-                  # Strip leading slash from base path for directory layout
-                  SUB="${BASE_PATH#/}"
-
-                  if [ -n "$SUB" ]; then
-                    mkdir -p "${SITE_DIR}/${SUB}"
-                    cp -r frontend/dist/. "${SITE_DIR}/${SUB}/"
-                    mkdir -p "${SITE_DIR}/${SUB}/docs"
-                    cp -r quartz/public/. "${SITE_DIR}/${SUB}/docs/"
-                  else
-                    # Custom domain — deploy to root
-                    mkdir -p "${SITE_DIR}"
-                    cp -r frontend/dist/. "${SITE_DIR}/"
-                    mkdir -p "${SITE_DIR}/docs"
-                    cp -r quartz/public/. "${SITE_DIR}/docs/"
-                  fi
+                  mkdir -p _site/docs
+                  cp -r frontend/dist/. _site/
+                  cp -r quartz/public/. _site/docs/
 
                   echo "Assembled site structure:"
-                  find "${SITE_DIR}" -maxdepth 3 -type f | head -30
+                  find _site -maxdepth 3 -type f | head -30
 
             - name: Upload Pages artifact
               uses: actions/upload-pages-artifact@v3
