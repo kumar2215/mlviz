@@ -1,0 +1,197 @@
+{
+    "datasets": {},
+    "stories": {
+        "decision_tree": {
+            "name": "decision_tree",
+            "description": "Decision tree classifier",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": 1601097160
+                },
+                {
+                    "index": 1767090483
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass"
+                    }
+                }
+            ]
+        },
+        "knn": {
+            "name": "knn",
+            "description": "KNN Classifier",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": 3214981933
+                },
+                {
+                    "index": 2584106709
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass"
+                    }
+                }
+            ]
+        },
+        "kmeans": {
+            "name": "kmeans",
+            "description": "Kmeans clustering",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": 961090416
+                },
+                {
+                    "index": 3734163842
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass"
+                    }
+                }
+            ]
+        }
+    },
+    "pages": {
+        "1601097160": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "manual",
+            "problem_type": "classifier",
+            "parameters": {}
+        },
+        "1767090483": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "parameters": {}
+        },
+        "459510024": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "viz_only",
+            "problem_type": "classifier",
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "include_boundary": true
+            }
+        },
+        "2584106709": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "predict",
+            "problem_type": "classifier"
+        },
+        "3214981933": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "train",
+            "problem_type": "classifier"
+        },
+        "961090416": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "kmeans",
+            "component_type": "step",
+            "problem_type": "clustering",
+            "parameters": {
+                "include_boundary": true,
+                "max_iterations": 100
+            },
+            "note": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum."
+        },
+        "3734163842": {
+            "name": "",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "kmeans",
+            "component_type": "train",
+            "problem_type": "clustering"
+        }
+    }
+}
