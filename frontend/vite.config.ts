@@ -5,7 +5,7 @@ import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-    base: "./",
+    base: process.env.VITE_BASE_PATH || "/",
     plugins: [react(), tailwindcss()],
     resolve: {
         alias: {

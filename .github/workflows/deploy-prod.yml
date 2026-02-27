@@ -121,14 +121,17 @@ jobs:
                   if [ -n "${{ env.PAGES_DOMAIN }}" ]; then
                     BASE_PATH=""
                     QUARTZ_BASE_URL="${{ env.PAGES_DOMAIN }}/docs"
+                    VITE_BASE_PATH="/"
                   else
                     BASE_PATH="${{ env.PAGES_BASE_PATH }}"
                     REPO="${{ github.repository }}"
                     ORG="${REPO%%/*}"
                     QUARTZ_BASE_URL="${ORG}.github.io${BASE_PATH}/docs"
+                    VITE_BASE_PATH="${BASE_PATH}/"
                   fi
                   echo "base_path=${BASE_PATH}" >> $GITHUB_OUTPUT
                   echo "quartz_base_url=${QUARTZ_BASE_URL}" >> $GITHUB_OUTPUT
+                  echo "vite_base_path=${VITE_BASE_PATH}" >> $GITHUB_OUTPUT
 
             # ── Frontend ──────────────────────────────────────────────────
             - name: Set up Node.js (frontend)
@@ -149,6 +152,7 @@ jobs:
                   VITE_TITLE: mlviz
                   VITE_CONFIG_FILE: config
                   VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.backend-url }}
+                  VITE_BASE_PATH: ${{ steps.paths.outputs.vite_base_path }}
               run: |
                   echo "Building with backend URL: $VITE_API_BASE_URL"
                   npm run build

@@ -33,7 +33,7 @@ export function ConfigProvider({ children }: { children: ReactNode }) {
                 const configPath = configParam.includes("/") ? configParam : `config/${configParam}.json`;
                 
                 // Fetch from public folder
-                const response = await fetch(`/${configPath}`);
+                const response = await fetch(`${import.meta.env.BASE_URL}${configPath}`);
                 if (!response.ok) {
                     throw new Error(`Failed to fetch config: ${response.statusText}`);
                 }
