@@ -78,6 +78,7 @@ jobs:
     deploy-frontend:
         name: Deploy Frontend to GCS
         runs-on: ubuntu-latest
+        if: github.repository == 'local-minima-lab/mlviz'
         needs: deploy-backend
 
         steps:
@@ -158,6 +159,7 @@ jobs:
     deploy-docs:
         name: Deploy Documentation
         runs-on: ubuntu-latest
+        if: github.repository == 'local-minima-lab/mlviz'
         needs: deploy-frontend
 
         steps:
@@ -178,37 +180,24 @@ jobs:
             - name: Build Quartz documentation
               working-directory: ./quartz
               env:
-                  QUARTZ_BASE_URL: "${{ env.BUCKET_NAME }}.storage.googleapis.com/docs"
+                  QUARTZ_BASE_URL: "local-minima-lab.github.io/mlviz/docs-test"
               run: |
                   echo "Building Quartz with base URL: $QUARTZ_BASE_URL"
                   npx quartz build
 
-            - name: Authenticate to Google Cloud
-              uses: google-github-actions/auth@v2
+            - name: Deploy Docs to GitHub Pages (Test)
+              uses: peaceiris/actions-gh-pages@v4
               with:
-                  credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-            - name: Set up Cloud SDK
-              uses: google-github-actions/setup-gcloud@v2
-
-            - name: Upload docs to GCS
-              run: |
-                  gsutil -m rsync -r -d quartz/public gs://${{ env.BUCKET_NAME }}/docs
-                  echo "✅ Documentation uploaded to gs://${{ env.BUCKET_NAME }}/docs"
-
-            - name: Set cache control headers for docs
-              run: |
-                  # Cache static assets for 1 year
-                  gsutil -m setmeta -h "Cache-Control:public, max-age=31536000" gs://${{ env.BUCKET_NAME }}/docs/static/** || true
-                  # Don't cache HTML files
-                  gsutil -m setmeta -h "Cache-Control:no-cache, no-store, must-revalidate" "gs://${{ env.BUCKET_NAME }}/docs/**.html" || true
-                  echo "✅ Cache headers set for documentation"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./quartz/public
+                  destination_dir: docs-test
+                  keep_files: true
 
             - name: Documentation Deployment Summary
               run: |
                   echo "======================================"
-                  echo "📚 Documentation Deployed"
+                  echo "📚 Test Documentation Deployed to GitHub Pages"
                   echo "======================================"
-                  echo "Docs URL: https://${{ env.BUCKET_NAME }}.storage.googleapis.com/docs/"
+                  echo "Docs URL: https://local-minima-lab.github.io/mlviz/docs-test/"
                   echo "======================================"
 

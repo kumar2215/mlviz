@@ -58,7 +58,7 @@ jobs:
                     --cpu 1 \
                     --min-instances 0 \
                     --max-instances 10 \
-                    --set-env-vars "DEBUG=false,FRONTEND_URL=https://${{ env.BUCKET_NAME }}.storage.googleapis.com"
+                    --set-env-vars "DEBUG=false,FRONTEND_URL=https://local-minima-lab.github.io/mlviz"
 
             - name: Get service URL
               id: get-url
@@ -76,8 +76,9 @@ jobs:
                   echo "✅ Health check passed"
 
     deploy-frontend:
-        name: Deploy Frontend to GCS
+        name: Deploy Frontend to GitHub Pages
         runs-on: ubuntu-latest
+        if: github.repository == 'local-minima-lab/mlviz'
         needs: deploy-backend
 
         steps:
@@ -106,58 +107,27 @@ jobs:
                   echo "Building with backend URL: $VITE_API_BASE_URL"
                   npm run build
 
-            - name: Authenticate to Google Cloud
-              uses: google-github-actions/auth@v2
+            - name: Deploy to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
               with:
-                  credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-            - name: Set up Cloud SDK
-              uses: google-github-actions/setup-gcloud@v2
-
-            - name: Create bucket if not exists
-              run: |
-                  if ! gsutil ls -b gs://${{ env.BUCKET_NAME }} > /dev/null 2>&1; then
-                    gsutil mb -l ${{ env.REGION }} gs://${{ env.BUCKET_NAME }}
-                    echo "✅ Bucket gs://${{ env.BUCKET_NAME }} created"
-                  else
-                    echo "✅ Bucket gs://${{ env.BUCKET_NAME }} already exists"
-                  fi
-
-            - name: Configure Static Website Hosting
-              run: |
-                  gsutil web set -m index.html -e index.html gs://${{ env.BUCKET_NAME }}
-                  echo "✅ Web hosting configured (index/error: index.html)"
-
-            - name: Upload files to GCS
-              run: |
-                  gsutil -m rsync -r -d frontend/dist gs://${{ env.BUCKET_NAME }}
-                  echo "✅ Files uploaded to gs://${{ env.BUCKET_NAME }}"
-
-            - name: Make objects public
-              run: |
-                  gsutil iam ch allUsers:objectViewer gs://${{ env.BUCKET_NAME }}
-                  echo "✅ Bucket made public (objectViewer)"
-
-            - name: Set cache control headers
-              run: |
-                  # Cache assets for 1 year
-                  gsutil -m setmeta -h "Cache-Control:public, max-age=31536000" gs://${{ env.BUCKET_NAME }}/assets/**
-                  # Don't cache index.html
-                  gsutil setmeta -h "Cache-Control:no-cache, no-store, must-revalidate" gs://${{ env.BUCKET_NAME }}/index.html
-                  echo "✅ Cache headers set"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./frontend/dist
+                  destination_dir: .
+                  keep_files: true
 
             - name: Deployment Summary
               run: |
                   echo "======================================"
-                  echo "🚀 Production Frontend Deployed to GCS"
+                  echo "🚀 Production Frontend Deployed to GitHub Pages"
                   echo "======================================"
-                  echo "Frontend URL: https://${{ env.BUCKET_NAME }}.storage.googleapis.com/index.html"
+                  echo "Frontend URL: https://local-minima-lab.github.io/mlviz"
                   echo "Backend URL:  ${{ needs.deploy-backend.outputs.backend-url }}"
                   echo "======================================"
 
     deploy-docs:
         name: Deploy Documentation
         runs-on: ubuntu-latest
+        if: github.repository == 'local-minima-lab/mlviz'
         needs: deploy-frontend
 
         steps:
@@ -178,37 +148,24 @@ jobs:
             - name: Build Quartz documentation
               working-directory: ./quartz
               env:
-                  QUARTZ_BASE_URL: "${{ env.BUCKET_NAME }}.storage.googleapis.com/docs"
+                  QUARTZ_BASE_URL: "local-minima-lab.github.io/mlviz/docs"
               run: |
                   echo "Building Quartz with base URL: $QUARTZ_BASE_URL"
                   npx quartz build
 
-            - name: Authenticate to Google Cloud
-              uses: google-github-actions/auth@v2
+            - name: Deploy Docs to GitHub Pages
+              uses: peaceiris/actions-gh-pages@v4
               with:
-                  credentials_json: ${{ secrets.GCP_SA_KEY }}
-
-            - name: Set up Cloud SDK
-              uses: google-github-actions/setup-gcloud@v2
-
-            - name: Upload docs to GCS
-              run: |
-                  gsutil -m rsync -r -d quartz/public gs://${{ env.BUCKET_NAME }}/docs
-                  echo "✅ Documentation uploaded to gs://${{ env.BUCKET_NAME }}/docs"
-
-            - name: Set cache control headers for docs
-              run: |
-                  # Cache static assets for 1 year
-                  gsutil -m setmeta -h "Cache-Control:public, max-age=31536000" gs://${{ env.BUCKET_NAME }}/docs/static/** || true
-                  # Don't cache HTML files
-                  gsutil -m setmeta -h "Cache-Control:no-cache, no-store, must-revalidate" "gs://${{ env.BUCKET_NAME }}/docs/**.html" || true
-                  echo "✅ Cache headers set for documentation"
+                  github_token: ${{ secrets.GITHUB_TOKEN }}
+                  publish_dir: ./quartz/public
+                  destination_dir: docs
+                  keep_files: true
 
             - name: Documentation Deployment Summary
               run: |
                   echo "======================================"
                   echo "📚 Documentation Deployed"
                   echo "======================================"
-                  echo "Docs URL: https://${{ env.BUCKET_NAME }}.storage.googleapis.com/docs/"
+                  echo "Docs URL: https://local-minima-lab.github.io/mlviz/docs/"
                   echo "======================================"
 
