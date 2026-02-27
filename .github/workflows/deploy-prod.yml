@@ -51,7 +51,7 @@ jobs:
                   else
                     REPO="${{ github.repository }}"
                     ORG="${REPO%%/*}"
-                    FRONTEND_URL="https://${ORG}.github.io${{ env.PAGES_BASE_PATH }}"
+                    FRONTEND_URL="https://${ORG}.github.io"
                   fi
                   echo "frontend_url=${FRONTEND_URL}" >> $GITHUB_OUTPUT
                   echo "Frontend URL: ${FRONTEND_URL}"
