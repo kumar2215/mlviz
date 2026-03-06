@@ -390,12 +390,18 @@ export const useZoomControls = ({
         [scaleExtent, enablePan, onZoomChange, contentBounds, clickableSelector]
     );
 
+    const resetTransformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
+
+    const setResetTransform = useCallback((transform: d3.ZoomTransform) => {
+        resetTransformRef.current = transform;
+    }, []);
+
     const resetZoom = useCallback(() => {
         if (zoomBehaviorRef.current && svgSelectionRef.current) {
             svgSelectionRef.current
                 .transition()
                 .duration(750)
-                .call(zoomBehaviorRef.current.transform, d3.zoomIdentity);
+                .call(zoomBehaviorRef.current.transform, resetTransformRef.current);
         }
     }, []);
 
@@ -463,6 +469,7 @@ export const useZoomControls = ({
         setZoom,
         zoomTo,
         updateContentBounds,
+        setResetTransform,
         // Make these accessible for BaseVisualization
         contentBounds: dynamicBoundsRef.current,
         panMargin: dynamicPanMarginRef.current,
@@ -471,6 +478,7 @@ export const useZoomControls = ({
         setZoom: typeof setZoom;
         zoomTo: typeof zoomTo;
         updateContentBounds: typeof updateContentBounds;
+        setResetTransform: typeof setResetTransform;
         contentBounds?: UseZoomControlsOptions["contentBounds"];
         panMargin?: number;
     };

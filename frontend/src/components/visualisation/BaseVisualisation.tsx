@@ -156,7 +156,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         if (capabilities.zoomable && zoomControls && (renderContext as any).fitToViewTransform) {
             const extendedZoomControls = zoomControls as any;
             const fitTransform = (renderContext as any).fitToViewTransform;
-            
+
             // Update content bounds with actual tree dimensions if provided
             if (fitTransform.contentWidth && fitTransform.contentHeight && extendedZoomControls.updateContentBounds) {
                 extendedZoomControls.updateContentBounds({
@@ -164,9 +164,17 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                     height: fitTransform.contentHeight,
                 });
             }
-            
-            // Don't apply fit-to-view transform - let tree start at identity position (0,0,1)
-            // This matches the position when reset zoom is clicked
+
+            // Apply centering transform, but only on initial load (not during play step changes)
+            if (!currentZoomTransform || currentZoomTransform === d3.zoomIdentity) {
+                const centeredTransform = d3.zoomIdentity
+                    .translate(fitTransform.x, fitTransform.y)
+                    .scale(fitTransform.k);
+                setTimeout(() => {
+                    extendedZoomControls.setZoom(centeredTransform, false);
+                    extendedZoomControls.setResetTransform?.(centeredTransform);
+                }, 0);
+            }
         }
     // Note: zoomControls is intentionally excluded — useZoomControls returns a new
     // object reference every render, which would cause an infinite re-render loop.
