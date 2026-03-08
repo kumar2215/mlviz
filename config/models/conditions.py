@@ -55,11 +55,18 @@ class PageVisitedCheck(BaseCondition):
     condition_type: Literal["PageVisited"] = "PageVisited"
     page_id: int
 
+class MetricCheck(BaseCondition):
+    """Unlocks when a specific metric reaches a target value."""
+    condition_type: Literal["Metric"] = "Metric"
+    metric: str
+    comparator: Literal["<", "<=", ">=", ">", "="]
+    value: float
+
 # Condition defined LAST, using actual classes
 Condition = Annotated[
     Union[BypassCheck, ParameterCheck, TimeCheck,
           ButtonPress, Lambda, AndCondition, OrCondition, SlideCheck,
-          ActionCountCheck, PageVisitedCheck],
+          ActionCountCheck, PageVisitedCheck, MetricCheck],
     Field(discriminator="condition_type")
 ]
 

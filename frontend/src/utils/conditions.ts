@@ -76,6 +76,21 @@ export function isConditionMet(
             return pagesVisited.includes(condition.page_id);
         }
 
+        case "Metric": {
+            const entries = history?.entries || [];
+            return entries.some((e) => {
+                const metricValue = e.metrics?.[condition.metric];
+                return (
+                    metricValue != null &&
+                    parameterCheck(
+                        condition.value,
+                        metricValue,
+                        condition.comparator
+                    )
+                );
+            });
+        }
+
         default: {
             const exhaustiveCheck: never = condition;
             throw new Error(`Unknown condition type: ${(exhaustiveCheck as any)?.condition_type}`);
@@ -122,6 +137,9 @@ export function displayCondition(condition: Condition): string {
 
         case "PageVisited":
             return `Visit page ${condition.page_id}`;
+
+        case "Metric":
+            return `Achieve ${condition.metric} ${condition.comparator} ${condition.value}`;
 
         default: {
             const exhaustiveCheck: never = condition;

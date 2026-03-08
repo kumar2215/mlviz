@@ -93,9 +93,9 @@ const StepPage: React.FC<StepPageProps> = ({
             ...stepParams,
             dataset: (stepParams as any)?.dataset || dataset,
         };
-        await train(trainParams);
+        const result = await train(trainParams);
         updateParams({ trainParams: stepParams });
-        recordStep(stepParams);
+        recordStep(stepParams, result?.metrics);
     };
 
     return (

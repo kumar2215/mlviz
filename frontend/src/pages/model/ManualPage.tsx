@@ -30,7 +30,7 @@ const ManualPage: React.FC<ManualPageProps> = ({
     useEffect(() => {
         if (currentModelData?.metrics) {
             if (hasInitialData.current) {
-                recordManualEvaluate();
+                recordManualEvaluate(currentModelData.metrics as any);
             } else {
                 hasInitialData.current = true;
             }

@@ -20,6 +20,7 @@ export interface HistoryEntry {
     page_id?: number;    // for page_visit
     button_id?: string;  // for button_click
     params?: Parameters; // for train / step / predict
+    metrics?: Record<string, number>; // for train / step results
 }
 
 export interface StoryHistory {
@@ -90,6 +91,14 @@ export interface PageVisitedCheck extends BaseCondition {
     page_id: number;
 }
 
+export interface MetricCheck extends BaseCondition {
+    condition_type: "Metric";
+    /** The metric name to check (e.g. "accuracy", "error"). */
+    metric: string;
+    comparator: "<" | "<=" | ">=" | ">" | "=";
+    value: number;
+}
+
 export type Condition =
     | ParameterCheck
     | TimeCheck
@@ -100,7 +109,8 @@ export type Condition =
     | AndCheck
     | OrCheck
     | ActionCountCheck
-    | PageVisitedCheck;
+    | PageVisitedCheck
+    | MetricCheck;
 
 export interface EdgeNode {
     local_index: number;

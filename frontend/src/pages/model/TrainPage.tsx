@@ -92,9 +92,9 @@ const TrainPage: React.FC<TrainPageProps> = ({
     const [showAlert, setShowAlert] = useState(false);
 
     const handleTrainModel = async () => {
-        await train(trainingParams);
+        const result = await train(trainingParams);
         updateParams({ trainParams: trainingParams });
-        recordTrain(trainingParams);
+        recordTrain(trainingParams, result?.metrics);
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 2000);
     };

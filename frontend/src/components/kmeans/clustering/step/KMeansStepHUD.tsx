@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useKMeans } from "@/contexts/models/KMeansContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { Check, Move, Play, Plus, RotateCcw, Target } from "lucide-react";
 import React from "react";
@@ -24,6 +25,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
         clearIterationState,
         loadVisualization,
     } = useKMeans();
+    const { recordStep } = useHistoryRecorder();
 
     const handleRunStep = async () => {
         if (selectedCentroids.length === 0) return;
@@ -32,11 +34,16 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
         const params = (lastVisualizationParams as any)?.parameters;
         const includeBoundary = params?.include_boundary !== false;
 
-        await performStep({
+        const result = await performStep({
             ...lastVisualizationParams,
             centroids: selectedCentroids,
             include_boundary: includeBoundary,
         } as any);
+        
+        if (result) {
+            recordStep(lastVisualizationParams || {}, result.metrics);
+        }
+        
         setMode("preview");
     };
 
