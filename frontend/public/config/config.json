@@ -272,9 +272,11 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "ActionCount",
             "name": null,
-            "description": null
+            "description": null,
+            "action": "train",
+            "min": 1
           }
         },
         {

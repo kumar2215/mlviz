@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardFooter, CardTitle } from "@/components/ui/card";
+import { Card, CardTitle } from "@/components/ui/card";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
 import type { Edge } from "@/types/story";
 import { displayCondition, isConditionMet } from "@/utils/conditions";
@@ -22,7 +22,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
 
     const navigate = useNavigate();
 
-    const isNavigable = isConditionMet(edge.condition, storyState.params);
+    const isNavigable = isConditionMet(edge.condition, { ...storyState.params, __history: storyState.history });
 
     const goToNextPage = () => {
         const edgeNode = edge.end;
@@ -41,13 +41,17 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         }
     };
 
+    const statusLabel = isNavigable
+        ? (edge.condition.name ?? (edge.condition.condition_type === "Slide" ? edge.condition.slide_name : "Complete"))
+        : (edge.condition.name ?? "Incomplete");
+
     return (
         <Button
             asChild
             disabled={!isNavigable}
             onClick={goToNextPage}
             className={`
-            w-full min-h-[10dvh] h-auto py-3 transition-all duration-100 shadow-lg hover:shadow-md text-base tracking-tight
+            w-full min-h-[10dvh] h-auto p-0 transition-all duration-100 shadow-lg hover:shadow-md text-base tracking-tight overflow-hidden
             ${
                 isNavigable
                     ? `
@@ -55,8 +59,8 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                         hover:bg-gradient-to-br hover:from-green-500 hover:to-blue-500 hover:text-white hover:shadow-2xl
                     `
                     : `
-                        border-0 bg-gradient-to-br from-grey-100 to-stone-100 text-black
-                        hover:bg-gradient-to-br hover:from-grey-100 hover:to-stone-100
+                        border-0 bg-gradient-to-br from-gray-100 to-stone-100 text-black
+                        hover:bg-gradient-to-br hover:from-gray-100 hover:to-stone-100
                         cursor-not-allowed
                         `
             }
@@ -64,35 +68,31 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         >
             <Card
                 key={`${edge.end.story_name}_${edge.end.local_index}`}
-                className="flex flex-col justify-start items-start shadow-none w-full"
+                className="flex flex-row justify-start items-stretch shadow-none w-full p-0 gap-0"
             >
-                <CardTitle className="flex items-center text-wrap gap-2 px-2 font-medium">
-                    {isNavigable ? (
-                        edge.condition.name ? (
-                            edge.condition.name
-                        ) : edge.condition.condition_type === "Slide" ? (
-                            edge.condition.slide_name
-                        ) : (
-                            <>
-                                <CheckCircle className="w-5 h-5" />
-                                Complete
-                            </>
-                        )
-                    ) : (
-                        <>
-                            <XCircle className="w-5 h-5" />
-                            {edge.condition.name ?? "Incomplete"}
-                        </>
-                    )}
-                </CardTitle>
+                {/* Rotated status label strip on the left */}
+                <div className={`
+                    shrink-0 w-6 flex items-center justify-center
+                    ${isNavigable ? "bg-emerald-200/60" : "bg-stone-200/60"}
+                `}>
+                    <span className="text-[0.5rem] font-semibold tracking-widest uppercase -rotate-90 whitespace-nowrap flex items-center gap-1">
+                        {isNavigable
+                            ? <><CheckCircle className="size-[0.5rem] inline" /> {statusLabel}</>
+                            : <><XCircle className="size-[0.5rem] inline" /> {statusLabel}</>
+                        }
+                    </span>
+                </div>
 
-                <CardFooter className="text-sm text-left px-2 py-2 font-light leading-tight whitespace-normal break-words">
-                    {edge.condition.description ??
-                        displayCondition(edge.condition)}
-                </CardFooter>
+                {/* Main card content */}
+                <div className="flex flex-col justify-start items-start py-3 px-2 flex-1 min-w-0">
+                    <CardTitle className="flex items-center text-wrap gap-2 font-medium text-sm leading-snug">
+                        {edge.condition.description ?? displayCondition(edge.condition)}
+                    </CardTitle>
+                </div>
             </Card>
         </Button>
     );
+
 };
 
 export default NavigationButton;

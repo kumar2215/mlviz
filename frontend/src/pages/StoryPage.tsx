@@ -2,6 +2,7 @@ import NavigationBar from "@/components/navigation/NavigationBar";
 import { Sidenote } from "@/components/Sidenote";
 import { Button } from "@/components/ui/button";
 import { useCurrentStory } from "@/contexts/StoryContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import DynamicPage from "@/pages/DynamicPage";
 import StaticPage from "@/pages/StaticPage";
 import type { Edge, PageUnion, Story } from "@/types/story";
@@ -22,6 +23,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
 }) => {
     const [currentPageId, setCurrentPageId] = useState<number>(initialPageId);
     const { storyState, addEdge, popPath } = useCurrentStory();
+    const { recordPageVisit } = useHistoryRecorder();
 
     const currentPage = pages[story.nodes[currentPageId].index];
 
@@ -40,6 +42,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
         });
         // Record the CURRENT page in history before navigating away
         addEdge({ local_index: currentPageId, story_name: null });
+        recordPageVisit(currentPageId);
         setCurrentPageId(pageId);
     };
 

@@ -2,6 +2,31 @@ import { type components } from "./api";
 
 export type Index = number;
 
+// ============================================================================
+// History Tracking
+// ============================================================================
+
+export type ActionType =
+    | "train"
+    | "predict"
+    | "step"
+    | "manual_evaluate"
+    | "page_visit"
+    | "button_click";
+
+export interface HistoryEntry {
+    type: ActionType;
+    timestamp: number;
+    page_id?: number;    // for page_visit
+    button_id?: string;  // for button_click
+    params?: Parameters; // for train / step / predict
+}
+
+export interface StoryHistory {
+    entries: HistoryEntry[];
+    pagesVisited: number[]; // ordered list of visited page indices
+}
+
 interface BaseCondition {
     condition_type: string;
     name?: string;
@@ -51,6 +76,20 @@ export interface OrCheck extends BaseCondition {
     conditions: Condition[];
 }
 
+export interface ActionCountCheck extends BaseCondition {
+    condition_type: "ActionCount";
+    /** The action type to count (e.g. "train", "step", "predict"). */
+    action: ActionType;
+    /** Minimum number of times the action must have occurred. */
+    min: number;
+}
+
+export interface PageVisitedCheck extends BaseCondition {
+    condition_type: "PageVisited";
+    /** The local_index of the page that must have been visited. */
+    page_id: number;
+}
+
 export type Condition =
     | ParameterCheck
     | TimeCheck
@@ -59,7 +98,9 @@ export type Condition =
     | SlideCheck
     | Lambda
     | AndCheck
-    | OrCheck;
+    | OrCheck
+    | ActionCountCheck
+    | PageVisitedCheck;
 
 export interface EdgeNode {
     local_index: number;

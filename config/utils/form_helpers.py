@@ -209,7 +209,7 @@ def render_edge_list(
                 )
             
             with col_cond:
-                condition_types = ["Bypass", "Parameter", "Time", "Button", "Lambda", "Slide"]
+                condition_types = ["Bypass", "Parameter", "Time", "Button", "Lambda", "Slide", "ActionCount", "PageVisited"]
                 current_cond_type = edge.get("condition", {}).get("condition_type", "Bypass")
                 cond_type = st.selectbox(
                     "Condition",
@@ -354,13 +354,33 @@ def render_condition_config(
         Condition dictionary
     """
     condition = {"condition_type": condition_type}
-    
+
     if condition_type == "Bypass":
         return condition
-    
+
+    # Apply defaults for condition types with required fields so the dict is
+    # always valid even when the ⚙️ config panel has never been opened.
+    if condition_type == "ActionCount":
+        condition["action"] = existing_condition.get("action", "train")
+        condition["min"] = existing_condition.get("min", 1)
+    elif condition_type == "PageVisited":
+        condition["page_id"] = existing_condition.get("page_id", 0)
+    elif condition_type == "Parameter":
+        condition["category"] = existing_condition.get("category", "")
+        condition["parameter"] = existing_condition.get("parameter", "")
+        condition["comparator"] = existing_condition.get("comparator", "=")
+        condition["value"] = existing_condition.get("value", "")
+    elif condition_type == "Button":
+        condition["button_id"] = existing_condition.get("button_id", "")
+    elif condition_type == "Slide":
+        condition["slide_name"] = existing_condition.get("slide_name", "")
+    elif condition_type == "Time":
+        condition["wait"] = existing_condition.get("wait", 5)
+
     # Show detailed config in expander if requested
     if show_details:
         with st.expander(f"⚙️ Configure {condition_type} Condition for Edge {edge_index}", expanded=True):
+
             # Optional display overrides (common to all types)
             cond_name = st.text_input(
                 "Display Name (optional)",
@@ -451,6 +471,39 @@ def render_condition_config(
                 condition["slide_name"] = slide_name
                 if slide_desc:
                     condition["slide_description"] = slide_desc
+
+            elif condition_type == "ActionCount":
+                action_types = ["train", "predict", "step", "manual_evaluate", "page_visit", "button_click"]
+                existing_action = existing_condition.get("action", "train")
+                col_act, col_min = st.columns(2)
+                with col_act:
+                    action = st.selectbox(
+                        "Action",
+                        options=action_types,
+                        index=action_types.index(existing_action) if existing_action in action_types else 0,
+                        key=f"{key_prefix}_action_{edge_index}",
+                        help="The type of user action to count"
+                    )
+                with col_min:
+                    min_count = st.number_input(
+                        "Minimum Count",
+                        min_value=1,
+                        value=existing_condition.get("min", 1),
+                        key=f"{key_prefix}_min_{edge_index}",
+                        help="How many times the action must be performed"
+                    )
+                condition["action"] = action
+                condition["min"] = min_count
+
+            elif condition_type == "PageVisited":
+                page_id = st.number_input(
+                    "Page ID (local_index)",
+                    min_value=0,
+                    value=existing_condition.get("page_id", 0),
+                    key=f"{key_prefix}_page_id_{edge_index}",
+                    help="The local_index of the page the user must have visited"
+                )
+                condition["page_id"] = page_id
             
             # Add display overrides if provided
             if cond_name:

@@ -1,6 +1,8 @@
 from typing import List, Literal, Optional, Any, Annotated, Union
 from pydantic import BaseModel, Field
 
+ActionType = Literal["train", "predict", "step", "manual_evaluate", "page_visit", "button_click"]
+
 class BaseCondition(BaseModel):
     condition_type: str
     name: Optional[str] = None
@@ -42,10 +44,22 @@ class OrCondition(BaseCondition):
     condition_type: Literal["Or"] = "Or"
     conditions: List["Condition"]
 
+class ActionCountCheck(BaseCondition):
+    """Unlocks when the user has performed an action at least `min` times."""
+    condition_type: Literal["ActionCount"] = "ActionCount"
+    action: ActionType
+    min: int
+
+class PageVisitedCheck(BaseCondition):
+    """Unlocks when the user has visited a specific page (by local_index)."""
+    condition_type: Literal["PageVisited"] = "PageVisited"
+    page_id: int
+
 # Condition defined LAST, using actual classes
 Condition = Annotated[
     Union[BypassCheck, ParameterCheck, TimeCheck,
-          ButtonPress, Lambda, AndCondition, OrCondition, SlideCheck],
+          ButtonPress, Lambda, AndCondition, OrCondition, SlideCheck,
+          ActionCountCheck, PageVisitedCheck],
     Field(discriminator="condition_type")
 ]
 

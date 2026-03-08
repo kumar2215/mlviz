@@ -2,6 +2,7 @@ import ModelOptionsForm from "@/components/input/ModelOptionsForm";
 import { StepComponent } from "@/components/StepComponent";
 import { useModel } from "@/contexts/ModelContext";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
@@ -44,6 +45,7 @@ const StepPage: React.FC<StepPageProps> = ({
     const context = useContext(CurrentStoryContext);
     if (!context) throw new Error("No context found.");
     const { updateParams } = context;
+    const { recordStep } = useHistoryRecorder();
 
     const [stepParams, setStepParams] = useState<Parameters>(
         parameters == null ? lastParams : parameters
@@ -93,6 +95,7 @@ const StepPage: React.FC<StepPageProps> = ({
         };
         await train(trainParams);
         updateParams({ trainParams: stepParams });
+        recordStep(stepParams);
     };
 
     return (
