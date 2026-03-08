@@ -245,9 +245,7 @@ export const renderDecisionTree = ({
     props,
     mode,
 }: RenderVisualisationProps & { mode: "training" | "prediction" | "manual" }) => {
-    console.log('[DecisionTreeRenderer] renderDecisionTree called with mode:', mode);
-    console.log('[DecisionTreeRenderer] Props:', props);
-    console.log('[DecisionTreeRenderer] Data:', data);
+
     
     const {
         transformTreeData,
@@ -261,11 +259,11 @@ export const renderDecisionTree = ({
     const { width, height, margin, scaleFactor = 1 } = dimensions;
     const { currentStep = 0 } = state;
 
-    console.log('[DecisionTreeRenderer] data.classes:', data.classes);
+
     // Use external color scale if provided (which should always be the case from BaseVisualisation)
     const colorScale = externalColorScale || ((_className: string) => UNASSIGNED_COLOR);
     
-    console.log('[DecisionTreeRenderer] Color scale initialized');
+
 
 
     const root = d3.hierarchy(transformTreeData(data.tree, 0, currentStep));
@@ -287,16 +285,19 @@ export const renderDecisionTree = ({
     const nodes = root.descendants();
     
     // Normalize coordinates so the bounding box starts at (0,0)
+    let normalizationShiftX = 0;
+    let normalizationShiftY = 0;
+    
     if (nodes.length > 0) {
         const xValues = nodes.map(d => d.x as number);
         const yValues = nodes.map(d => d.y as number);
-        const minX = Math.min(...xValues);
-        const minY = Math.min(...yValues);
+        normalizationShiftX = Math.min(...xValues);
+        normalizationShiftY = Math.min(...yValues);
         
         // Offset all nodes to start at 0,0
         nodes.forEach(d => {
-            d.x = (d.x as number) - minX;
-            d.y = (d.y as number) - minY;
+            d.x = (d.x as number) - normalizationShiftX;
+            d.y = (d.y as number) - normalizationShiftY;
         });
     }
 
@@ -339,9 +340,8 @@ export const renderDecisionTree = ({
     // Calculate horizontal offset for centering
     const offsetX = viewportCenterX - treeCenterX * fitScale;
     
-    // Vertical alignment: position the top edge of the tree exactly 20px below the top
-    const VERTICAL_GAP = 20 * scaleFactor;
-    const offsetY = VERTICAL_GAP - treeBBoxMinY * fitScale;
+    // Vertical alignment: position the tree's bounding box exactly at the top margin
+    const offsetY = -treeBBoxMinY * fitScale;
     
     // Store fit-to-view transform and actual tree dimensions in context
     (context as any).fitToViewTransform = {
@@ -351,6 +351,9 @@ export const renderDecisionTree = ({
         // Actual layout space dimensions normalized to origin
         contentWidth: treeWidth,
         contentHeight: treeHeight,
+        // The origin offset used for normalization (needed for shift compensation)
+        normalizationShiftX,
+        normalizationShiftY,
     };
 
     const renderMode =
@@ -391,7 +394,7 @@ export const renderDecisionTree = ({
             ? calculateInterpolationFactor(d.depth, context)
             : 0;
 
-        console.log("colorScale", externalColorScale)
+
         renderIntegratedSplitNode(
             nodeGroup,
             d,
@@ -426,7 +429,7 @@ export const renderDecisionTree = ({
                     .style('cursor', 'pointer')
                     .on('click', (event) => {
                         event.stopPropagation();
-                        console.log('[ManualTree] Split node clicked at depth', d.depth);
+
                         // Build path to this node
                         const path: number[] = [];
                         let current = d;
@@ -436,7 +439,7 @@ export const renderDecisionTree = ({
                             path.unshift(index);
                             current = current.parent;
                         }
-                        console.log('[ManualTree] Calculated path:', path);
+
                         props.manualCallbacks!.onNodeClick!(path);
                     });
             }
@@ -469,7 +472,7 @@ export const renderDecisionTree = ({
                               props.selectedNodePath.length === nodePath.length &&
                               props.selectedNodePath.every((val, idx) => val === nodePath[idx]);
             
-            console.log('[ManualTree] Rendering leaf node - depth:', d.depth, 'path:', nodePath, 'isSelected:', isSelected);
+
             
             renderExpandableLeafNode(
                 nodeGroup,
@@ -483,12 +486,12 @@ export const renderDecisionTree = ({
             
             // Add click handler for node selection in manual mode
             if (!isSelected && props.manualCallbacks?.onNodeClick) {
-                console.log('[ManualTree] Adding click handler to node at depth', d.depth);
+
                 nodeGroup
                     .style('cursor', 'pointer')
                     .on('click', (event) => {
                         event.stopPropagation();
-                        console.log('[ManualTree] Node clicked at depth', d.depth);
+
                         // Build path to this node
                         const path: number[] = [];
                         let current = d;
@@ -498,7 +501,7 @@ export const renderDecisionTree = ({
                             path.unshift(index);
                             current = current.parent;
                         }
-                        console.log('[ManualTree] Calculated path:', path);
+
                         props.manualCallbacks!.onNodeClick!(path);
                     });
             }

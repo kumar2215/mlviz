@@ -235,16 +235,6 @@ export const useZoomControls = ({
                             const constrainedX = Math.max(minX, Math.min(maxX, currentTransform.x));
                             const constrainedY = Math.max(minY, Math.min(maxY, currentTransform.y));
 
-                            /* 
-                            console.log("[useZoomControls] Snap-back check:", {
-                                current: { x: currentTransform.x, y: currentTransform.y },
-                                constrained: { x: constrainedX, y: constrainedY },
-                                bounds: { minX, maxX, minY, maxY },
-                                viewport: { viewportWidth, viewportHeight },
-                                scaled: { scaledWidth, scaledHeight }
-                            });
-                            */
-
                             // Only snap back if we're outside bounds
                             const deltaX = Math.abs(currentTransform.x - constrainedX);
                             const deltaY = Math.abs(currentTransform.y - constrainedY);
