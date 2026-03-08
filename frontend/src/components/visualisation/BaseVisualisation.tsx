@@ -116,9 +116,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 currentZoomTransform &&
                 currentZoomTransform !== d3.zoomIdentity
             ) {
-                setTimeout(() => {
-                    extendedZoomControls.setZoom(currentZoomTransform, false);
-                }, 0);
+                extendedZoomControls.setZoom(currentZoomTransform, false);
             }
         }
 
@@ -165,16 +163,20 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 });
             }
 
-            // Apply centering transform, but only on initial load (not during play step changes)
-            if (!currentZoomTransform || currentZoomTransform === d3.zoomIdentity) {
-                const centeredTransform = d3.zoomIdentity
-                    .translate(fitTransform.x, fitTransform.y)
-                    .scale(fitTransform.k);
-                setTimeout(() => {
-                    extendedZoomControls.setZoom(centeredTransform, false);
-                    extendedZoomControls.setResetTransform?.(centeredTransform);
-                }, 0);
-            }
+            // Always compute the canonical centered transform for this render.
+            const centeredTransform = d3.zoomIdentity
+                .translate(fitTransform.x, fitTransform.y)
+                .scale(fitTransform.k);
+
+            // On initial load (no prior transform) → center the tree.
+            // On re-renders (e.g. StrictMode double-invoke, parent re-renders) → restore the
+            // existing position so the tree doesn't jump to its raw D3 layout position.
+            // In both cases we MUST call setZoom because svg.selectAll("*").remove() above has
+            // already cleared the visual transform of the contentGroup.
+            const isInitialLoad = !currentZoomTransform || currentZoomTransform === d3.zoomIdentity;
+            extendedZoomControls.setZoom(isInitialLoad ? centeredTransform : currentZoomTransform, false);
+            // Always keep reset-button target at the canonical centered position.
+            extendedZoomControls.setResetTransform?.(centeredTransform);
         }
     // Note: zoomControls is intentionally excluded — useZoomControls returns a new
     // object reference every render, which would cause an infinite re-render loop.

@@ -113,17 +113,20 @@ export const useZoomControls = ({
                         maxX = 0;
                         minX = viewportWidth - scaledWidth;
                     } else {
-                        // Align to top-left of the inner area (offset 0 relative to margin-translated parent)
+                        // For content smaller than viewport, allow it to be positioned 
+                        // anywhere from the left edge to the right edge (enabling centering)
                         minX = -currentPanMargin;
-                        maxX = currentPanMargin;
+                        maxX = (viewportWidth - scaledWidth) + currentPanMargin;
                     }
 
                     if (scaledHeight >= viewportHeight - tolerance) {
                         maxY = 0;
                         minY = viewportHeight - scaledHeight;
                     } else {
+                        // For content smaller than viewport, allow it to be positioned 
+                        // anywhere from the top edge to the bottom edge (enabling centering)
                         minY = -currentPanMargin;
-                        maxY = currentPanMargin;
+                        maxY = (viewportHeight - scaledHeight) + currentPanMargin;
                     }
 
                     const isOutsideBounds =
@@ -217,7 +220,7 @@ export const useZoomControls = ({
                                 maxX = 0;
                             } else {
                                 minX = -currentPanMargin;
-                                maxX = currentPanMargin;
+                                maxX = (viewportWidth - scaledWidth) + currentPanMargin;
                             }
 
                             if (scaledHeight >= viewportHeight) {
@@ -225,13 +228,14 @@ export const useZoomControls = ({
                                 maxY = 0;
                             } else {
                                 minY = -currentPanMargin;
-                                maxY = currentPanMargin;
+                                maxY = (viewportHeight - scaledHeight) + currentPanMargin;
                             }
 
                             // Constrain to bounds
                             const constrainedX = Math.max(minX, Math.min(maxX, currentTransform.x));
                             const constrainedY = Math.max(minY, Math.min(maxY, currentTransform.y));
 
+                            /* 
                             console.log("[useZoomControls] Snap-back check:", {
                                 current: { x: currentTransform.x, y: currentTransform.y },
                                 constrained: { x: constrainedX, y: constrainedY },
@@ -239,6 +243,7 @@ export const useZoomControls = ({
                                 viewport: { viewportWidth, viewportHeight },
                                 scaled: { scaledWidth, scaledHeight }
                             });
+                            */
 
                             // Only snap back if we're outside bounds
                             const deltaX = Math.abs(currentTransform.x - constrainedX);

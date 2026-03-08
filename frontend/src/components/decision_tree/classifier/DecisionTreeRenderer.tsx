@@ -284,8 +284,23 @@ export const renderDecisionTree = ({
         d.y = d.depth * depthSpacing + nodeHeight / 2;
     });
 
-    // Calculate actual tree bounds for fit-to-view zoom
     const nodes = root.descendants();
+    
+    // Normalize coordinates so the bounding box starts at (0,0)
+    if (nodes.length > 0) {
+        const xValues = nodes.map(d => d.x as number);
+        const yValues = nodes.map(d => d.y as number);
+        const minX = Math.min(...xValues);
+        const minY = Math.min(...yValues);
+        
+        // Offset all nodes to start at 0,0
+        nodes.forEach(d => {
+            d.x = (d.x as number) - minX;
+            d.y = (d.y as number) - minY;
+        });
+    }
+
+    // Now calculate tree bounds for fit-to-view zoom using normalized coordinates
     let treeBounds = { minX: 0, maxX: contentWidth, minY: 0, maxY: contentHeight };
     
     if (nodes.length > 0) {
@@ -310,33 +325,32 @@ export const renderDecisionTree = ({
     const fitScale = Math.min(scaleX, scaleY, 1.0); // Don't zoom in by default, max 1.0
     
     // Calculate centering offset
-    // The tree's bounding box in layout coordinates (with padding)
+    // The tree's bounding box in layout coordinates (with padding, now starting at -nodePadding)
     const treeBBoxMinX = treeBounds.minX - nodePadding;
     const treeBBoxMinY = treeBounds.minY - nodePadding;
     const treeBBoxMaxX = treeBounds.maxX + nodePadding;
-    const treeBBoxMaxY = treeBounds.maxY + nodePadding;
     
-    // Center of the tree's bounding box in layout coordinates
+    // Horizontal center of the tree's bounding box in layout coordinates
     const treeCenterX = (treeBBoxMinX + treeBBoxMaxX) / 2;
-    const treeCenterY = (treeBBoxMinY + treeBBoxMaxY) / 2;
     
-    // Where we want the tree center to appear (viewport center)
+    // Where we want the tree horizontal center to appear (viewport center)
     const viewportCenterX = contentWidth / 2;
-    const viewportCenterY = contentHeight / 2;
     
-    // Calculate offset to move tree center to viewport center
+    // Calculate horizontal offset for centering
     const offsetX = viewportCenterX - treeCenterX * fitScale;
-    const offsetY = viewportCenterY - treeCenterY * fitScale;
+    
+    // Vertical alignment: position the top edge of the tree exactly 20px below the top
+    const VERTICAL_GAP = 20 * scaleFactor;
+    const offsetY = VERTICAL_GAP - treeBBoxMinY * fitScale;
     
     // Store fit-to-view transform and actual tree dimensions in context
     (context as any).fitToViewTransform = {
         x: offsetX,
         y: offsetY,
         k: fitScale,
-        // Actual layout space dimensions (what d3 tree layout uses)
-        // This is the coordinate space that nodes are positioned in
-        contentWidth: contentWidth * 1.2,
-        contentHeight: contentHeight * 1.5,
+        // Actual layout space dimensions normalized to origin
+        contentWidth: treeWidth,
+        contentHeight: treeHeight,
     };
 
     const renderMode =
