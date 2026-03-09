@@ -21,6 +21,14 @@ class ClassificationMetrics(BaseModel):
     f1: float
 
 
+class RegressionMetrics(BaseModel):
+    """Metrics for regression model responses."""
+    r2: float
+    mse: float
+    rmse: float
+    mae: float
+
+
 class ClassificationMetadata(BaseModel):
     """Metadata for classifier responses."""
     feature_names: list[str]

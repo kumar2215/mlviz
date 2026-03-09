@@ -1,0 +1,44 @@
+{
+  "parameters": [
+    {
+      "name": "feature_x",
+      "type": "select",
+      "default": 0,
+      "options": "dynamic:features",
+      "description": "Feature to use as the predictor on the x-axis of the scatter plot."
+    },
+    {
+      "name": "fit_intercept",
+      "type": "select",
+      "default": true,
+      "options": [true, false],
+      "description": "Whether the model should include an intercept (bias) term."
+    },
+    {
+      "name": "learning_rate",
+      "type": "float",
+      "default": 0.01,
+      "min": 0.0001,
+      "max": 1.0,
+      "step": 0.001,
+      "description": "Step size for each gradient descent update. Smaller values are more stable but converge slower."
+    },
+    {
+      "name": "test_size",
+      "type": "float",
+      "default": 0.2,
+      "min": 0.05,
+      "max": 0.5,
+      "step": 0.05,
+      "description": "Fraction of the dataset held out for evaluation."
+    },
+    {
+      "name": "random_state",
+      "type": "int",
+      "default": 42,
+      "min": 0,
+      "max": 9999,
+      "description": "Random seed for reproducible train/test splits."
+    }
+  ]
+}

@@ -10,19 +10,30 @@ from models import (
     HistogramData,
     KMeansParameters,
     KNNParameters,
+    LinearRegressionParameters,
     ManualFeatureStatsParameters,
     NeighborInfo,
     NodeStatistics,
     NodeStatParameters,
     PredefinedDataset,
+    PredefinedRegressionDataset,
+    RegressionDataset,
+    RegressionMetadata,
+    RegressionMetrics,
     SplitStatistics,
     ThresholdStatistics,
     TreeNode,
 )
 from pydantic import BaseModel, Field, Discriminator
 
-# Create a discriminated union type for Dataset
+# Create a discriminated union type for Classification Dataset
 DatasetUnion = Annotated[Union[Dataset, PredefinedDataset], Field(discriminator="type")]
+
+# Create a discriminated union type for Regression Dataset
+RegressionDatasetUnion = Annotated[
+    Union[RegressionDataset, PredefinedRegressionDataset],
+    Field(discriminator="type"),
+]
 
 
 class DecisionTreeTrainingRequest(DecisionTreeParameters):
@@ -651,3 +662,109 @@ class KMeansPredictResponse(BaseModel):
     centroids: List[List[float]] = Field(
         description="The centroids used"
     )
+
+
+# ---------------------------------------------------------------------------
+# Linear Regression Models
+# ---------------------------------------------------------------------------
+
+
+class LinearRegressionVisualisationRequest(BaseModel):
+    """Request model for linear regression scatter visualisation."""
+
+    parameters: LinearRegressionParameters = Field(
+        default_factory=LinearRegressionParameters,
+        description="Linear regression parameters",
+    )
+    dataset: Optional[RegressionDatasetUnion] = Field(
+        None,
+        description="Regression dataset. Defaults to sklearn diabetes.",
+    )
+
+
+class LinearRegressionVisualisationResponse(BaseModel):
+    """Response model for linear regression scatter visualisation."""
+
+    success: bool
+    points: List[List[float]] = Field(
+        description="Scatter points as [[x, y], ...] using the chosen feature vs target"
+    )
+    x_range: List[float] = Field(description="[min, max] range for the x-axis (with margin)")
+    y_range: List[float] = Field(description="[min, max] range for the y-axis (with margin)")
+    metadata: RegressionMetadata
+
+
+class LinearRegressionTrainRequest(BaseModel):
+    """Request model for linear regression OLS training."""
+
+    parameters: LinearRegressionParameters = Field(
+        default_factory=LinearRegressionParameters,
+        description="Linear regression parameters",
+    )
+    dataset: Optional[RegressionDatasetUnion] = Field(
+        None,
+        description="Regression dataset. Defaults to sklearn diabetes.",
+    )
+
+
+class LinearRegressionTrainResponse(BaseModel):
+    """Response model for linear regression OLS training."""
+
+    success: bool
+    points: List[List[float]] = Field(
+        description="All scatter points [[x, y], ...] for display"
+    )
+    x_range: List[float] = Field(description="[min, max] range for the x-axis (with margin)")
+    y_range: List[float] = Field(description="[min, max] range for the y-axis (with margin)")
+    line: Dict[str, float] = Field(
+        description="Optimal OLS line: { slope, intercept }"
+    )
+    train_metrics: RegressionMetrics = Field(
+        description="Regression metrics on the training set"
+    )
+    test_metrics: RegressionMetrics = Field(
+        description="Regression metrics on the test set"
+    )
+    metadata: RegressionMetadata
+
+
+class LinearRegressionStepRequest(BaseModel):
+    """Request model for a single gradient descent step."""
+
+    slope: float = Field(description="Current slope of the line")
+    intercept: float = Field(description="Current intercept of the line")
+    learning_rate: float = Field(
+        0.01, gt=0, description="Step size for gradient descent"
+    )
+    points: List[List[float]] = Field(
+        description="Data points [[x, y], ...] to compute gradients on"
+    )
+    fit_intercept: bool = Field(
+        True, description="Whether the intercept should be updated"
+    )
+
+
+class LinearRegressionStepResponse(BaseModel):
+    """Response model for a single gradient descent step."""
+
+    success: bool
+
+    # Current state
+    slope: float = Field(description="Current slope (before update)")
+    intercept: float = Field(description="Current intercept (before update)")
+    metrics_before: RegressionMetrics = Field(
+        description="Regression metrics for the current line"
+    )
+
+    # Proposed new state
+    new_slope: float = Field(description="Proposed slope after one gradient descent step")
+    new_intercept: float = Field(description="Proposed intercept after one gradient descent step")
+    metrics_after: RegressionMetrics = Field(
+        description="Regression metrics for the proposed new line"
+    )
+
+    # Gradient information (for display)
+    grad_slope: float = Field(description="Gradient of loss w.r.t. slope")
+    grad_intercept: float = Field(description="Gradient of loss w.r.t. intercept")
+    loss_before: float = Field(description="MSE loss before the update")
+    loss_after: float = Field(description="MSE loss after the proposed update")
