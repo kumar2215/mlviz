@@ -13,8 +13,8 @@ class DatasetInfo(BaseModel):
     target_type: Literal["classification", "regression"] = "classification"
 
 
-class Dataset(BaseModel):
-    """Complete dataset with features and targets."""
+class ClassificationDataset(BaseModel):
+    """Complete dataset with features and targets (for classification)."""
     type: Literal["custom"] = Field("custom", description="Discriminator for Union type")
     X: List[List[float]] = Field(..., description="Feature matrix")
     y: List[int] = Field(..., description="Target vector")
@@ -99,8 +99,45 @@ class Dataset(BaseModel):
 
 
 class PredefinedDataset(BaseModel):
-    """Reference to a predefined dataset."""
+    """Reference to a predefined (classification) dataset."""
     type: Literal["predefined"] = Field("predefined", description="Discriminator for Union type")
     name: Literal["iris", "wine", "breast_cancer", "digits"]
     test_size: float = Field(0.25, ge=0, le=0.9)
     random_state: int = Field(2025, ge=0)
+
+
+class RegressionDataset(BaseModel):
+    """Complete dataset with features and a continuous numeric target (for regression)."""
+    type: Literal["custom_regression"] = Field("custom_regression", description="Discriminator for Union type")
+    X: List[List[float]] = Field(..., description="Feature matrix")
+    y: List[float] = Field(..., description="Continuous target vector")
+    feature_names: Optional[List[str]] = None
+    target_name: Optional[str] = "target"
+    info: Optional[DatasetInfo] = None
+
+    # Training configuration
+    test_size: float = Field(0.25, ge=0, le=0.9)
+    random_state: int = Field(2025, ge=0)
+
+    def to_numpy(self):
+        """Convert to numpy arrays for sklearn."""
+        import numpy as np
+        return np.array(self.X), np.array(self.y)
+
+    def get_feature_names(self) -> List[str]:
+        """Get feature names, generating defaults if needed."""
+        if self.feature_names:
+            return self.feature_names
+        return [f"feature_{i}" for i in range(len(self.X[0]))]
+
+
+class PredefinedRegressionDataset(BaseModel):
+    """Reference to a predefined regression dataset."""
+    type: Literal["predefined_regression"] = Field("predefined_regression", description="Discriminator for Union type")
+    name: Literal["diabetes", "california_housing"] = "diabetes"
+    test_size: float = Field(0.25, ge=0, le=0.9)
+    random_state: int = Field(2025, ge=0)
+
+
+# Backward-compatibility alias
+Dataset = ClassificationDataset

@@ -9,8 +9,9 @@ from models import (
     KNNParameters,
     NeighborInfo,
     DecisionBoundaryData,
-    ClassificationMetrics,
     ClassificationMetadata,
+    ClassificationMetrics,
+    ClassificationMetricValues,
     Dataset,
     PredefinedDataset,
 )
@@ -547,18 +548,39 @@ class KNNService:
         model = KNeighborsClassifier(**sklearn_params)
         model.fit(X_train, y_train)
         
-        # Evaluate on test set (using visualization features)
-        y_pred = model.predict(X_test)
+        # Evaluate on training set (using visualization features)
+        y_pred_train = model.predict(X_train)
         
-        # Calculate confusion matrix and metrics
-        cm = confusion_matrix(y_test, y_pred)
+        # Calculate confusion matrix and metrics on training set
+        cm_train = confusion_matrix(y_train, y_pred_train)
         
+        train_metric_values = ClassificationMetricValues(
+            confusion_matrix=cm_train.tolist(),
+            accuracy=float(accuracy_score(y_train, y_pred_train)),
+            precision=float(precision_score(y_train, y_pred_train, average='weighted', zero_division=0)),
+            recall=float(recall_score(y_train, y_pred_train, average='weighted', zero_division=0)),
+            f1=float(f1_score(y_train, y_pred_train, average='weighted', zero_division=0)),
+        )
+
+        # Evaluate on testing set (using visualization features)
+        test_metric_values = None
+        if len(y_test) > 0:
+            y_pred_test = model.predict(X_test)
+            
+            # Calculate confusion matrix and metrics on testing set
+            cm_test = confusion_matrix(y_test, y_pred_test)
+            
+            test_metric_values = ClassificationMetricValues(
+                confusion_matrix=cm_test.tolist(),
+                accuracy=float(accuracy_score(y_test, y_pred_test)),
+                precision=float(precision_score(y_test, y_pred_test, average='weighted', zero_division=0)),
+                recall=float(recall_score(y_test, y_pred_test, average='weighted', zero_division=0)),
+                f1=float(f1_score(y_test, y_pred_test, average='weighted', zero_division=0)),
+            )
+
         metrics = ClassificationMetrics(
-            confusion_matrix=cm.tolist(),
-            accuracy=float(accuracy_score(y_test, y_pred)),
-            precision=float(precision_score(y_test, y_pred, average='weighted', zero_division=0)),
-            recall=float(recall_score(y_test, y_pred, average='weighted', zero_division=0)),
-            f1=float(f1_score(y_test, y_pred, average='weighted', zero_division=0)),
+            train=train_metric_values,
+            test=test_metric_values
         )
         
         # Generate visualization data using training set only

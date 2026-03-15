@@ -3,6 +3,7 @@ import { PredictComponent } from "@/components/PredictComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelPage as ModelPageProps } from "@/types/story";
 import React, { useContext, useEffect, useRef, useState } from "react";
 
@@ -16,6 +17,7 @@ const PredictPage: React.FC<PredictPageProps> = ({
     const context = useContext(CurrentStoryContext);
     if (!context) throw new Error("No context found.");
     const { updateParams } = context;
+    const { recordPredict } = useHistoryRecorder();
 
     const {
         currentModelData,
@@ -84,6 +86,7 @@ const PredictPage: React.FC<PredictPageProps> = ({
     const handlePredict = (newPoints: Record<string, number>) => {
         setPredictionInputPoints(newPoints);
         updateParams({ predictParams: newPoints });
+        recordPredict(newPoints);
         // Trigger prediction immediately on user action
         predict(newPoints);
         lastPredictedPointsRef.current = JSON.stringify(newPoints) + currentFeatures.join(",");

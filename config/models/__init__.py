@@ -67,6 +67,17 @@ from .kmeans_page import (
     KMeansTrainParameters,
 )
 
+# Linear Regression Pages
+from .linear_regression_page import (
+    LinearRegressionPage,
+    LinearRegressionPageUnion,
+    LinearRegressionStepPage,
+    LinearRegressionTrainPage,
+    LinearRegressionTrainParameters,
+    LinearRegressionVizPage,
+    LinearRegressionVizParameters,
+)
+
 # KNN Pages
 from .knn_page import (
     KNNPage,
@@ -102,6 +113,9 @@ model_pages = {
     "KNN: Predict": KNNPredictPage,
     "KMeans: Train": KMeansTrainPage,
     "KMeans: Predict": KMeansPredictPage,
+    "Linear Regression: Visualise": LinearRegressionVizPage,
+    "Linear Regression: Train": LinearRegressionTrainPage,
+    "Linear Regression: Step": LinearRegressionStepPage,
 }
 
 __all__ = [
@@ -156,6 +170,14 @@ __all__ = [
     "KMeansTrainPage",
     "KMeansPredictPage",
     "KMeansPageUnion",
+    # Linear Regression
+    "LinearRegressionVizParameters",
+    "LinearRegressionTrainParameters",
+    "LinearRegressionPage",
+    "LinearRegressionVizPage",
+    "LinearRegressionTrainPage",
+    "LinearRegressionStepPage",
+    "LinearRegressionPageUnion",
     # Story
     "EdgeNode",
     "Edge",

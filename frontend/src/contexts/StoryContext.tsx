@@ -1,4 +1,4 @@
-import type { EdgeNode, Parameters } from "@/types/story";
+import type { EdgeNode, HistoryEntry, Parameters, StoryHistory } from "@/types/story";
 import {
     createContext,
     useContext,
@@ -10,12 +10,14 @@ import {
 interface StoryState {
     path: EdgeNode[];
     params: Record<string, Parameters>;
+    history: StoryHistory;
 }
 
-const generateDefaultStoryState = () => {
+const generateDefaultStoryState = (): StoryState => {
     return {
         path: [],
         params: {},
+        history: { entries: [], pagesVisited: [] },
     };
 };
 
@@ -25,6 +27,7 @@ interface StoryContextType {
     resetStoryState: (storyId: string) => void;
     addEdge: (storyId: string, edge: EdgeNode) => void;
     popPath: (storyId: string) => EdgeNode | undefined;
+    recordAction: (storyId: string, action: HistoryEntry) => void;
 }
 
 export const StoryContext = createContext<StoryContextType | null>(null);
@@ -37,6 +40,7 @@ interface CurrentStoryContextType {
     resetStoryState: () => void;
     addEdge: (edge: EdgeNode) => void;
     popPath: () => EdgeNode | undefined;
+    recordAction: (action: HistoryEntry) => void;
 }
 
 export const CurrentStoryContext =
@@ -135,6 +139,27 @@ export function StoryProvider({ children }: { children: ReactNode }) {
         return poppedEdge;
     };
 
+    const recordAction = (storyId: string, action: HistoryEntry) => {
+        setStories((prev) => {
+            const currentState = prev[storyId] || generateDefaultStoryState();
+            const currentHistory = currentState.history || { entries: [], pagesVisited: [] };
+            const newEntries = [...currentHistory.entries, action];
+            const newPagesVisited =
+                action.type === "page_visit" && action.page_id !== undefined
+                    ? currentHistory.pagesVisited.includes(action.page_id)
+                        ? currentHistory.pagesVisited
+                        : [...currentHistory.pagesVisited, action.page_id]
+                    : currentHistory.pagesVisited;
+            return {
+                ...prev,
+                [storyId]: {
+                    ...currentState,
+                    history: { entries: newEntries, pagesVisited: newPagesVisited },
+                },
+            };
+        });
+    };
+
     const resetStoryState = (storyId: string) => {
         setStories((prev) => ({
             ...prev,
@@ -150,6 +175,7 @@ export function StoryProvider({ children }: { children: ReactNode }) {
                 resetStoryState,
                 addEdge,
                 popPath,
+                recordAction,
             }}
         >
             {children}
@@ -190,6 +216,7 @@ export function CurrentStoryProvider({
         resetStoryState: () => globalContext.resetStoryState(storyId),
         addEdge: (edge) => globalContext.addEdge(storyId, edge),
         popPath: () => globalContext.popPath(storyId),
+        recordAction: (action) => globalContext.recordAction(storyId, action),
     };
 
     return (

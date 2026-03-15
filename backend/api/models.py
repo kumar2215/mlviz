@@ -10,19 +10,30 @@ from models import (
     HistogramData,
     KMeansParameters,
     KNNParameters,
+    LinearRegressionParameters,
     ManualFeatureStatsParameters,
     NeighborInfo,
     NodeStatistics,
     NodeStatParameters,
     PredefinedDataset,
+    PredefinedRegressionDataset,
+    RegressionDataset,
+    RegressionMetadata,
+    RegressionMetrics,
     SplitStatistics,
     ThresholdStatistics,
     TreeNode,
 )
-from pydantic import BaseModel, Field, Discriminator
+from pydantic import BaseModel, Discriminator, Field
 
-# Create a discriminated union type for Dataset
+# Create a discriminated union type for Classification Dataset
 DatasetUnion = Annotated[Union[Dataset, PredefinedDataset], Field(discriminator="type")]
+
+# Create a discriminated union type for Regression Dataset
+RegressionDatasetUnion = Annotated[
+    Union[RegressionDataset, PredefinedRegressionDataset],
+    Field(discriminator="type"),
+]
 
 
 class DecisionTreeTrainingRequest(DecisionTreeParameters):
@@ -461,9 +472,7 @@ class KMeansStepResponse(BaseModel):
     )
 
     # Cluster assignments
-    assignments: List[int] = Field(
-        description="Cluster index for each data point"
-    )
+    assignments: List[int] = Field(description="Cluster index for each data point")
 
     # Distance information
     distance_matrix: List[List[float]] = Field(
@@ -471,20 +480,14 @@ class KMeansStepResponse(BaseModel):
     )
 
     # Centroids
-    centroids: List[List[float]] = Field(
-        description="Original centroids passed in"
-    )
+    centroids: List[List[float]] = Field(description="Original centroids passed in")
     new_centroids: List[List[float]] = Field(
         description="Updated centroids after iteration"
     )
-    centroid_shifts: List[float] = Field(
-        description="Distance each centroid moved"
-    )
+    centroid_shifts: List[float] = Field(description="Distance each centroid moved")
 
     # Convergence
-    converged: bool = Field(
-        description="Whether the algorithm has converged"
-    )
+    converged: bool = Field(description="Whether the algorithm has converged")
 
     # Cluster info
     cluster_info: List[KMeansClusterInfo] = Field(
@@ -531,7 +534,7 @@ class KMeansTrainRequest(BaseModel):
     )
     centroids: Optional[List[List[float]]] = Field(
         None,
-        description="Initial centroid positions [[x, y], ...]. If not provided or empty, will initialize with one random centroid."
+        description="Initial centroid positions [[x, y], ...]. If not provided or empty, will initialize with one random centroid.",
     )
     dataset: Optional[DatasetUnion] = Field(
         None, description="Dataset to use. Defaults to Iris dataset."
@@ -562,9 +565,7 @@ class KMeansTrainResponse(BaseModel):
     )
 
     # All iterations
-    iterations: List[KMeansIterationData] = Field(
-        description="Data for each iteration"
-    )
+    iterations: List[KMeansIterationData] = Field(description="Data for each iteration")
     total_iterations: int = Field(description="Total number of iterations run")
 
     # Final results
@@ -593,7 +594,7 @@ class KMeansStepRequest(BaseModel):
     )
     centroids: Optional[List[List[float]]] = Field(
         None,
-        description="Current centroid positions [[x, y], ...]. If not provided or empty, will initialize with one random centroid."
+        description="Current centroid positions [[x, y], ...]. If not provided or empty, will initialize with one random centroid.",
     )
     dataset: Optional[DatasetUnion] = Field(
         None, description="Dataset to use. Defaults to Iris dataset."
@@ -616,9 +617,7 @@ class KMeansPredictRequest(BaseModel):
     parameters: KMeansParameters = Field(
         default_factory=KMeansParameters, description="K-Means algorithm parameters"
     )
-    centroids: List[List[float]] = Field(
-        description="Centroid positions [[x, y], ...]"
-    )
+    centroids: List[List[float]] = Field(description="Centroid positions [[x, y], ...]")
     query_points: List[List[float]] = Field(
         description="Points to assign to clusters [[x, y], ...]"
     )
@@ -630,14 +629,10 @@ class KMeansPredictResponse(BaseModel):
     success: bool
 
     # Query points
-    query_points: List[List[float]] = Field(
-        description="The input points"
-    )
+    query_points: List[List[float]] = Field(description="The input points")
 
     # Assignments
-    assignments: List[int] = Field(
-        description="Cluster index for each query point"
-    )
+    assignments: List[int] = Field(description="Cluster index for each query point")
 
     # Distance information
     distance_matrix: List[List[float]] = Field(
@@ -648,6 +643,134 @@ class KMeansPredictResponse(BaseModel):
     )
 
     # Centroids
-    centroids: List[List[float]] = Field(
-        description="The centroids used"
+    centroids: List[List[float]] = Field(description="The centroids used")
+
+
+# ---------------------------------------------------------------------------
+# Linear Regression Models
+# ---------------------------------------------------------------------------
+
+
+class LinearRegressionVisualisationRequest(BaseModel):
+    """Request model for linear regression scatter visualisation."""
+
+    parameters: LinearRegressionParameters = Field(
+        default_factory=LinearRegressionParameters,
+        description="Linear regression parameters",
     )
+    dataset: Optional[RegressionDatasetUnion] = Field(
+        None,
+        description="Regression dataset. Defaults to sklearn diabetes.",
+    )
+
+
+class LinearRegressionVisualisationResponse(BaseModel):
+    """Response model for linear regression scatter visualisation."""
+
+    success: bool
+    points: List[List[float]] = Field(
+        description="Scatter points as [[x, y], ...] using the chosen feature vs target"
+    )
+    x_range: List[float] = Field(
+        description="[min, max] range for the x-axis (with margin)"
+    )
+    y_range: List[float] = Field(
+        description="[min, max] range for the y-axis (with margin)"
+    )
+    metadata: RegressionMetadata
+
+
+class LinearRegressionTrainRequest(BaseModel):
+    """Request model for linear regression OLS training."""
+
+    parameters: LinearRegressionParameters = Field(
+        default_factory=LinearRegressionParameters,
+        description="Linear regression parameters",
+    )
+    dataset: Optional[RegressionDatasetUnion] = Field(
+        None,
+        description="Regression dataset. Defaults to sklearn diabetes.",
+    )
+
+
+class LinearRegressionTrainResponse(BaseModel):
+    """Response model for linear regression OLS training."""
+
+    success: bool
+    points: List[List[float]] = Field(
+        description="All scatter points [[x, y], ...] for display"
+    )
+    x_range: List[float] = Field(
+        description="[min, max] range for the x-axis (with margin)"
+    )
+    y_range: List[float] = Field(
+        description="[min, max] range for the y-axis (with margin)"
+    )
+    line: Dict[str, float] = Field(description="Optimal OLS line: { slope, intercept }")
+    metrics: RegressionMetrics = Field(
+        description="Regression metrics on the training set"
+    )
+    metadata: RegressionMetadata
+
+
+class LinearRegressionStepRequest(BaseModel):
+    """Request model for a single gradient descent step."""
+
+    slope: float = Field(description="Current slope of the line")
+    intercept: float = Field(description="Current intercept of the line")
+    learning_rate: float = Field(
+        0.01, gt=0, description="Step size for gradient descent"
+    )
+    points: List[List[float]] = Field(
+        description="Data points [[x, y], ...] to compute gradients on"
+    )
+    fit_intercept: bool = Field(
+        True, description="Whether the intercept should be updated"
+    )
+
+
+class LinearRegressionEvaluateRequest(BaseModel):
+    """Request model for evaluating an arbitrary line."""
+
+    slope: float = Field(description="Slope of the line to evaluate")
+    intercept: float = Field(description="Intercept of the line to evaluate")
+    points: List[List[float]] = Field(
+        description="Data points [[x, y], ...] to evaluate on"
+    )
+
+
+class LinearRegressionEvaluateResponse(BaseModel):
+    """Response model for line evaluation."""
+
+    success: bool
+    metrics: RegressionMetrics = Field(description="Regression metrics for the line")
+
+
+class LinearRegressionStepResponse(BaseModel):
+    """Response model for a single gradient descent step."""
+
+    success: bool
+
+    # Current state
+    slope: float = Field(description="Current slope (before update)")
+    intercept: float = Field(description="Current intercept (before update)")
+    metrics_before: RegressionMetrics = Field(
+        description="Regression metrics for the current line"
+    )
+
+    # Proposed new state
+    new_slope: float = Field(
+        description="Proposed slope after one gradient descent step"
+    )
+    new_intercept: float = Field(
+        description="Proposed intercept after one gradient descent step"
+    )
+    metrics_after: RegressionMetrics = Field(
+        description="Regression metrics for the proposed new line"
+    )
+
+    # Gradient information (for display)
+    grad_slope: float = Field(description="Gradient of loss w.r.t. slope")
+    grad_intercept: float = Field(description="Gradient of loss w.r.t. intercept")
+    loss_before: float = Field(description="MSE loss before the update")
+    loss_after: float = Field(description="MSE loss after the proposed update")

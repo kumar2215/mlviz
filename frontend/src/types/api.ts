@@ -591,6 +591,164 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/linear/params": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Parameters
+         * @description Get the parameters for Linear Regression.
+         *
+         *     Returns:
+         *         List[ParameterInfo]: List of parameters for Linear Regression
+         */
+        get: operations["get_parameters_api_linear_params_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/linear/visualise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Visualise
+         * @description Return raw scatter data for the chosen feature vs target.
+         *
+         *     No model fitting is performed. The frontend renders the scatter plot
+         *     and computes R² live for any user-controlled line.
+         *
+         *     Args:
+         *         request: Visualisation request with parameters and optional dataset
+         *
+         *     Raises:
+         *         HTTPException: If visualisation data generation fails
+         *
+         *     Returns:
+         *         LinearRegressionVisualisationResponse: Scatter points, axis ranges, metadata
+         */
+        post: operations["visualise_api_linear_visualise_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/linear/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Train
+         * @description Fit an OLS Linear Regression model and return the optimal line + metrics.
+         *
+         *     Splits the dataset into train/test sets, fits on the chosen feature (feature_x),
+         *     and returns the optimal slope and intercept alongside full regression metrics.
+         *
+         *     The frontend uses the optimal line as the "target" the user tries to
+         *     match interactively with a slider. R² is computed on the frontend from
+         *     the returned points.
+         *
+         *     Args:
+         *         request: Training request with parameters and optional dataset
+         *
+         *     Raises:
+         *         HTTPException: If training fails
+         *
+         *     Returns:
+         *         LinearRegressionTrainResponse: Scatter points, optimal line, train/test metrics
+         */
+        post: operations["train_api_linear_train_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/linear/step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Step
+         * @description Perform a single gradient descent step.
+         *
+         *     Fully stateless — the frontend owns the current slope/intercept and
+         *     passes them on each 'Next Step' button press. The server computes one
+         *     gradient descent update and returns the proposed new line.
+         *
+         *     The user can then:
+         *     - **Accept**: update frontend state with new_slope/new_intercept
+         *     - **Reject**: keep the current slope/intercept
+         *
+         *     Args:
+         *         request: Current line parameters + data points
+         *
+         *     Raises:
+         *         HTTPException: If gradient descent step fails
+         *
+         *     Returns:
+         *         LinearRegressionStepResponse: Proposed new line, gradients, loss before/after,
+         *             and full regression metrics for both current and proposed states
+         */
+        post: operations["step_api_linear_step_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/linear/evaluate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Evaluate
+         * @description Evaluate an arbitrary line against the given points.
+         *
+         *     Args:
+         *         request: Slope, intercept, and data points
+         *
+         *     Raises:
+         *         HTTPException: If evaluation fails
+         *
+         *     Returns:
+         *         LinearRegressionEvaluateResponse: Regression metrics for the line
+         */
+        post: operations["evaluate_api_linear_evaluate_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -647,39 +805,10 @@ export interface components {
             keys: string[] | string;
         };
         /**
-         * ClassificationMetadata
-         * @description Metadata for classifier responses.
+         * ClassificationDataset
+         * @description Complete dataset with features and targets (for classification).
          */
-        ClassificationMetadata: {
-            /** Feature Names */
-            feature_names: string[];
-            /** Class Names */
-            class_names: string[];
-            /** N Features */
-            n_features: number;
-            /** N Classes */
-            n_classes: number;
-            /** Dataset Name */
-            dataset_name?: string | null;
-        };
-        /** ClassificationMetrics */
-        ClassificationMetrics: {
-            /** Confusion Matrix */
-            confusion_matrix: number[][];
-            /** Accuracy */
-            accuracy: number;
-            /** Precision */
-            precision: number;
-            /** Recall */
-            recall: number;
-            /** F1 */
-            f1: number;
-        };
-        /**
-         * Dataset
-         * @description Complete dataset with features and targets.
-         */
-        Dataset: {
+        ClassificationDataset: {
             /**
              * @description Discriminator for Union type (enum property replaced by openapi-typescript)
              * @enum {string}
@@ -710,6 +839,40 @@ export interface components {
              * @default 2025
              */
             random_state: number;
+        };
+        /**
+         * ClassificationMetadata
+         * @description Metadata for classifier responses.
+         */
+        ClassificationMetadata: {
+            /** Feature Names */
+            feature_names: string[];
+            /** Class Names */
+            class_names: string[];
+            /** N Features */
+            n_features: number;
+            /** N Classes */
+            n_classes: number;
+            /** Dataset Name */
+            dataset_name?: string | null;
+        };
+        /** ClassificationMetricValues */
+        ClassificationMetricValues: {
+            /** Confusion Matrix */
+            confusion_matrix: number[][];
+            /** Accuracy */
+            accuracy: number;
+            /** Precision */
+            precision: number;
+            /** Recall */
+            recall: number;
+            /** F1 */
+            f1: number;
+        };
+        /** ClassificationMetrics */
+        ClassificationMetrics: {
+            train: components["schemas"]["ClassificationMetricValues"];
+            test?: components["schemas"]["ClassificationMetricValues"] | null;
         };
         /**
          * DatasetInfo
@@ -849,7 +1012,7 @@ export interface components {
              * Dataset
              * @description Dataset to use for training
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
         };
         /**
          * DecisionTreeTrainingResponse
@@ -1155,7 +1318,7 @@ export interface components {
              * Dataset
              * @description Dataset to use. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices for visualization (defaults to [feature_1, feature_2])
@@ -1245,7 +1408,7 @@ export interface components {
              * Dataset
              * @description Dataset to use. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices for visualization (defaults to [feature_1, feature_2])
@@ -1383,7 +1546,7 @@ export interface components {
              * Dataset
              * @description Training dataset with X, y, feature_names, class_names. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
             /**
              * Query Points
              * @description Test points to classify
@@ -1474,7 +1637,7 @@ export interface components {
              * Dataset
              * @description Training dataset. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices to visualise (1-3 features)
@@ -1529,7 +1692,7 @@ export interface components {
              * Dataset
              * @description Training dataset. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices to visualise (1-3 features)
@@ -1618,6 +1781,241 @@ export interface components {
             type: "leaf";
         };
         /**
+         * LinearRegressionEvaluateRequest
+         * @description Request model for evaluating an arbitrary line.
+         */
+        LinearRegressionEvaluateRequest: {
+            /**
+             * Slope
+             * @description Slope of the line to evaluate
+             */
+            slope: number;
+            /**
+             * Intercept
+             * @description Intercept of the line to evaluate
+             */
+            intercept: number;
+            /**
+             * Points
+             * @description Data points [[x, y], ...] to evaluate on
+             */
+            points: number[][];
+        };
+        /**
+         * LinearRegressionEvaluateResponse
+         * @description Response model for line evaluation.
+         */
+        LinearRegressionEvaluateResponse: {
+            /** Success */
+            success: boolean;
+            /** @description Regression metrics for the line */
+            metrics: components["schemas"]["RegressionMetrics"];
+        };
+        /**
+         * LinearRegressionParameters
+         * @description Parameters for Simple Linear Regression.
+         */
+        LinearRegressionParameters: {
+            /**
+             * Feature X
+             * @description Index of the feature to use as the predictor (x-axis)
+             * @default 0
+             */
+            feature_x: number;
+            /**
+             * Fit Intercept
+             * @description Whether to include an intercept (bias) term in the model
+             * @default true
+             */
+            fit_intercept: boolean;
+            /**
+             * Test Size
+             * @description Proportion of data to hold out as the test set
+             * @default 0.2
+             */
+            test_size: number;
+            /**
+             * Random State
+             * @description Random seed for reproducibility of the train/test split
+             * @default 42
+             */
+            random_state: number;
+            /**
+             * Learning Rate
+             * @description Step size for each gradient descent iteration
+             * @default 0.01
+             */
+            learning_rate: number;
+        };
+        /**
+         * LinearRegressionStepRequest
+         * @description Request model for a single gradient descent step.
+         */
+        LinearRegressionStepRequest: {
+            /**
+             * Slope
+             * @description Current slope of the line
+             */
+            slope: number;
+            /**
+             * Intercept
+             * @description Current intercept of the line
+             */
+            intercept: number;
+            /**
+             * Learning Rate
+             * @description Step size for gradient descent
+             * @default 0.01
+             */
+            learning_rate: number;
+            /**
+             * Points
+             * @description Data points [[x, y], ...] to compute gradients on
+             */
+            points: number[][];
+            /**
+             * Fit Intercept
+             * @description Whether the intercept should be updated
+             * @default true
+             */
+            fit_intercept: boolean;
+        };
+        /**
+         * LinearRegressionStepResponse
+         * @description Response model for a single gradient descent step.
+         */
+        LinearRegressionStepResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * Slope
+             * @description Current slope (before update)
+             */
+            slope: number;
+            /**
+             * Intercept
+             * @description Current intercept (before update)
+             */
+            intercept: number;
+            /** @description Regression metrics for the current line */
+            metrics_before: components["schemas"]["RegressionMetrics"];
+            /**
+             * New Slope
+             * @description Proposed slope after one gradient descent step
+             */
+            new_slope: number;
+            /**
+             * New Intercept
+             * @description Proposed intercept after one gradient descent step
+             */
+            new_intercept: number;
+            /** @description Regression metrics for the proposed new line */
+            metrics_after: components["schemas"]["RegressionMetrics"];
+            /**
+             * Grad Slope
+             * @description Gradient of loss w.r.t. slope
+             */
+            grad_slope: number;
+            /**
+             * Grad Intercept
+             * @description Gradient of loss w.r.t. intercept
+             */
+            grad_intercept: number;
+            /**
+             * Loss Before
+             * @description MSE loss before the update
+             */
+            loss_before: number;
+            /**
+             * Loss After
+             * @description MSE loss after the proposed update
+             */
+            loss_after: number;
+        };
+        /**
+         * LinearRegressionTrainRequest
+         * @description Request model for linear regression OLS training.
+         */
+        LinearRegressionTrainRequest: {
+            /** @description Linear regression parameters */
+            parameters?: components["schemas"]["LinearRegressionParameters"];
+            /**
+             * Dataset
+             * @description Regression dataset. Defaults to sklearn diabetes.
+             */
+            dataset?: (components["schemas"]["RegressionDataset"] | components["schemas"]["PredefinedRegressionDataset"]) | null;
+        };
+        /**
+         * LinearRegressionTrainResponse
+         * @description Response model for linear regression OLS training.
+         */
+        LinearRegressionTrainResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * Points
+             * @description All scatter points [[x, y], ...] for display
+             */
+            points: number[][];
+            /**
+             * X Range
+             * @description [min, max] range for the x-axis (with margin)
+             */
+            x_range: number[];
+            /**
+             * Y Range
+             * @description [min, max] range for the y-axis (with margin)
+             */
+            y_range: number[];
+            /**
+             * Line
+             * @description Optimal OLS line: { slope, intercept }
+             */
+            line: {
+                [key: string]: number;
+            };
+            /** @description Regression metrics on the training set */
+            metrics: components["schemas"]["RegressionMetrics"];
+            metadata: components["schemas"]["RegressionMetadata"];
+        };
+        /**
+         * LinearRegressionVisualisationRequest
+         * @description Request model for linear regression scatter visualisation.
+         */
+        LinearRegressionVisualisationRequest: {
+            /** @description Linear regression parameters */
+            parameters?: components["schemas"]["LinearRegressionParameters"];
+            /**
+             * Dataset
+             * @description Regression dataset. Defaults to sklearn diabetes.
+             */
+            dataset?: (components["schemas"]["RegressionDataset"] | components["schemas"]["PredefinedRegressionDataset"]) | null;
+        };
+        /**
+         * LinearRegressionVisualisationResponse
+         * @description Response model for linear regression scatter visualisation.
+         */
+        LinearRegressionVisualisationResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * Points
+             * @description Scatter points as [[x, y], ...] using the chosen feature vs target
+             */
+            points: number[][];
+            /**
+             * X Range
+             * @description [min, max] range for the x-axis (with margin)
+             */
+            x_range: number[];
+            /**
+             * Y Range
+             * @description [min, max] range for the y-axis (with margin)
+             */
+            y_range: number[];
+            metadata: components["schemas"]["RegressionMetadata"];
+        };
+        /**
          * ManualFeatureStatsRequest
          * @description Request to calculate statistics for all thresholds of a feature.
          */
@@ -1648,7 +2046,7 @@ export interface components {
              * Dataset
              * @description Dataset to use for training
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
         };
         /**
          * ManualFeatureStatsResponse
@@ -1732,7 +2130,7 @@ export interface components {
              * Dataset
              * @description Dataset to use for training
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
         };
         /**
          * ManualNodeStatsResponse
@@ -1782,7 +2180,7 @@ export interface components {
              * Dataset
              * @description Dataset to use for evaluation (defaults to Iris)
              */
-            dataset?: (components["schemas"]["Dataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
         };
         /**
          * ManualTreeEvaluateResponse
@@ -1863,7 +2261,7 @@ export interface components {
         };
         /**
          * PredefinedDataset
-         * @description Reference to a predefined dataset.
+         * @description Reference to a predefined (classification) dataset.
          */
         PredefinedDataset: {
             /**
@@ -1886,6 +2284,114 @@ export interface components {
              * @default 2025
              */
             random_state: number;
+        };
+        /**
+         * PredefinedRegressionDataset
+         * @description Reference to a predefined regression dataset.
+         */
+        PredefinedRegressionDataset: {
+            /**
+             * @description Discriminator for Union type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            type: "predefined_regression";
+            /**
+             * Name
+             * @default diabetes
+             * @enum {string}
+             */
+            name: "diabetes" | "california_housing";
+            /**
+             * Test Size
+             * @default 0.25
+             */
+            test_size: number;
+            /**
+             * Random State
+             * @default 2025
+             */
+            random_state: number;
+        };
+        /**
+         * RegressionDataset
+         * @description Complete dataset with features and a continuous numeric target (for regression).
+         */
+        RegressionDataset: {
+            /**
+             * @description Discriminator for Union type (enum property replaced by openapi-typescript)
+             * @enum {string}
+             */
+            type: "custom_regression";
+            /**
+             * X
+             * @description Feature matrix
+             */
+            X: number[][];
+            /**
+             * Y
+             * @description Continuous target vector
+             */
+            y: number[];
+            /** Feature Names */
+            feature_names?: string[] | null;
+            /**
+             * Target Name
+             * @default target
+             */
+            target_name: string | null;
+            info?: components["schemas"]["DatasetInfo"] | null;
+            /**
+             * Test Size
+             * @default 0.25
+             */
+            test_size: number;
+            /**
+             * Random State
+             * @default 2025
+             */
+            random_state: number;
+        };
+        /**
+         * RegressionMetadata
+         * @description Metadata for regression model responses.
+         */
+        RegressionMetadata: {
+            /** Feature Names */
+            feature_names: string[];
+            /** N Features */
+            n_features: number;
+            /** N Samples */
+            n_samples: number;
+            /** Target Name */
+            target_name: string;
+            /** Dataset Name */
+            dataset_name?: string | null;
+            /** Feature X Index */
+            feature_x_index: number;
+            /** Feature X Name */
+            feature_x_name: string;
+        };
+        /**
+         * RegressionMetricValues
+         * @description Metrics for regression model responses.
+         */
+        RegressionMetricValues: {
+            /** R2 */
+            r2: number;
+            /** Mse */
+            mse: number;
+            /** Rmse */
+            rmse: number;
+            /** Mae */
+            mae: number;
+        };
+        /**
+         * RegressionMetrics
+         * @description Metrics for regression model responses.
+         */
+        RegressionMetrics: {
+            train: components["schemas"]["RegressionMetricValues"];
+            test?: components["schemas"]["RegressionMetricValues"] | null;
         };
         /**
          * SelectParameterInfo
@@ -2579,6 +3085,158 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["KMeansPredictResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_parameters_api_linear_params_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": (components["schemas"]["SelectParameterInfo"] | components["schemas"]["IntParameterInfo"] | components["schemas"]["NumberParameterInfo"] | components["schemas"]["FloatParameterInfo"] | components["schemas"]["AnyParameterInfo"])[];
+                };
+            };
+        };
+    };
+    visualise_api_linear_visualise_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinearRegressionVisualisationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinearRegressionVisualisationResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    train_api_linear_train_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinearRegressionTrainRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinearRegressionTrainResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    step_api_linear_step_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinearRegressionStepRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinearRegressionStepResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    evaluate_api_linear_evaluate_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LinearRegressionEvaluateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LinearRegressionEvaluateResponse"];
                 };
             };
             /** @description Validation Error */

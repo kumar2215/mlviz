@@ -13,12 +13,31 @@ class BaseMLResponse(BaseModel):
     metadata: Dict[str, Any]
 
 
-class ClassificationMetrics(BaseModel):
+class ClassificationMetricValues(BaseModel):
     confusion_matrix: list[list[int]]
     accuracy: float
     precision: float
     recall: float
     f1: float
+
+
+class RegressionMetricValues(BaseModel):
+    """Metrics for regression model responses."""
+    r2: float
+    mse: float
+    rmse: float
+    mae: float
+
+
+class ClassificationMetrics(BaseModel):
+    train: ClassificationMetricValues
+    test: Optional[ClassificationMetricValues] = None
+
+
+class RegressionMetrics(BaseModel):
+    """Metrics for regression model responses."""
+    train: RegressionMetricValues
+    test: Optional[RegressionMetricValues] = None
 
 
 class ClassificationMetadata(BaseModel):

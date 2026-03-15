@@ -1,9 +1,10 @@
-import ClassifierResults from "@/components/ClassifierResults";
 import ModelOptionsForm from "@/components/input/ModelOptionsForm";
+import { Results } from "@/components/results/Results";
 import { TrainComponent } from "@/components/TrainComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
@@ -51,6 +52,7 @@ const TrainPage: React.FC<TrainPageProps> = ({
     const context = useContext(CurrentStoryContext);
     if (!context) throw new Error("No context found.");
     const { updateParams } = context;
+    const { recordTrain } = useHistoryRecorder();
 
     useEffect(() => {
         const fetchParameters = async () => {
@@ -90,8 +92,9 @@ const TrainPage: React.FC<TrainPageProps> = ({
     const [showAlert, setShowAlert] = useState(false);
 
     const handleTrainModel = async () => {
-        await train(trainingParams);
+        const result = await train(trainingParams);
         updateParams({ trainParams: trainingParams });
+        recordTrain(trainingParams, result?.metrics);
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 2000);
     };
@@ -121,14 +124,13 @@ const TrainPage: React.FC<TrainPageProps> = ({
                 />
             </div>
 
-            {problem_type === "classifier" && (
-                <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
-                    <ClassifierResults
-                        metrics={data?.metrics}
-                        metadata={data?.metadata}
-                    />
-                </div>
-            )}
+            <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
+                <Results
+                    problem_type={problem_type}
+                    data={data as any}
+                />
+            </div>
+
         </div>
     );
 };

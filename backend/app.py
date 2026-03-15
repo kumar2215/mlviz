@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 import uvicorn
 
 from core.config import settings
-from api import decision_tree, dataset, knn, kmeans
+from api import decision_tree, dataset, knn, kmeans, linear_regression
 
 app = FastAPI(
     title="MLviz",
@@ -39,6 +39,8 @@ app.include_router(knn.router, prefix="/api/knn",
                    tags=["K-Nearest Neighbors"])
 app.include_router(kmeans.router, prefix="/api/kmeans",
                    tags=["K-Means"])
+app.include_router(linear_regression.router, prefix="/api/linear",
+                   tags=["Linear Regression"])
 
 
 @app.get("/", include_in_schema=False)
