@@ -209,7 +209,7 @@ def render_edge_list(
                 )
             
             with col_cond:
-                condition_types = ["Bypass", "Parameter", "Time", "Button", "Lambda", "Slide"]
+                condition_types = ["Bypass", "Parameter", "Time", "Button", "Lambda", "Slide", "ActionCount", "PageVisited", "Metric"]
                 current_cond_type = edge.get("condition", {}).get("condition_type", "Bypass")
                 cond_type = st.selectbox(
                     "Condition",
@@ -220,12 +220,22 @@ def render_edge_list(
                 )
             
             with col_config:
-                show_config = st.button(
+                # Use a session state toggle instead of a transient button
+                config_key = f"{key_prefix}_show_config_{i}"
+                if config_key not in st.session_state:
+                    st.session_state[config_key] = False
+                
+                if st.button(
                     "⚙️",
-                    key=f"{key_prefix}_config_{i}",
-                    help="Configure condition details",
+                    key=f"{key_prefix}_btn_{i}",
+                    help="Toggle condition configuration panel",
+                    type="secondary" if not st.session_state[config_key] else "primary",
                     disabled=(cond_type == "Bypass")
-                )
+                ):
+                    st.session_state[config_key] = not st.session_state[config_key]
+                    st.rerun()
+                
+                show_config = st.session_state[config_key]
             
             with col_remove:
                 if st.button("🗑️", key=f"{key_prefix}_remove_{i}", help=f"Remove edge {i}"):
@@ -354,21 +364,59 @@ def render_condition_config(
         Condition dictionary
     """
     condition = {"condition_type": condition_type}
+
+    # Helper to pull from session state or fallback to existing
+    def get_field(field_name: str, widget_key: str, default: Any) -> Any:
+        return st.session_state.get(f"{key_prefix}_{widget_key}_{edge_index}", 
+                                   existing_condition.get(field_name, default))
+
+    # Optional display overrides (common to all types)
+    cond_name = get_field("name", "cond_name", "")
+    if cond_name: condition["name"] = cond_name
     
+    cond_desc = get_field("description", "cond_desc", "")
+    if cond_desc: condition["description"] = cond_desc
+
     if condition_type == "Bypass":
         return condition
-    
+
+    # Apply type-specific fields (always pulled from state/existing)
+    if condition_type == "ActionCount":
+        condition["action"] = get_field("action", "action", "train")
+        condition["min"] = get_field("min", "min", 1)
+    elif condition_type == "PageVisited":
+        condition["page_id"] = get_field("page_id", "page_id", 0)
+    elif condition_type == "Parameter":
+        condition["category"] = get_field("category", "cat", "")
+        condition["parameter"] = get_field("parameter", "param", "")
+        condition["comparator"] = get_field("comparator", "comp", "=")
+        condition["value"] = get_field("value", "val", "")
+    elif condition_type == "Button":
+        condition["button_id"] = get_field("button_id", "btn", "")
+    elif condition_type == "Slide":
+        condition["slide_name"] = get_field("slide_name", "slide_name", "")
+        condition["slide_description"] = get_field("slide_description", "slide_desc", "")
+    elif condition_type == "Time":
+        condition["wait"] = get_field("wait", "wait", 5)
+    elif condition_type == "Metric":
+        condition["metric"] = get_field("metric", "metric", "accuracy")
+        condition["comparator"] = get_field("comparator", "mcomp", ">=")
+        condition["value"] = get_field("value", "mval", 0.9)
+    elif condition_type == "Lambda":
+        condition["exec_str"] = get_field("exec_str", "lambda", "")
+
     # Show detailed config in expander if requested
     if show_details:
         with st.expander(f"⚙️ Configure {condition_type} Condition for Edge {edge_index}", expanded=True):
-            # Optional display overrides (common to all types)
-            cond_name = st.text_input(
+
+            # Display overrides UI already updates session state via text_input
+            st.text_input(
                 "Display Name (optional)",
                 value=existing_condition.get("name", "") or "",
                 key=f"{key_prefix}_cond_name_{edge_index}",
                 placeholder="Override navigation button title"
             )
-            cond_description = st.text_area(
+            st.text_area(
                 "Display Description (optional)",
                 value=existing_condition.get("description", "") or "",
                 key=f"{key_prefix}_cond_desc_{edge_index}",
@@ -378,13 +426,13 @@ def render_condition_config(
             if condition_type == "Parameter":
                 col_p1, col_p2, col_p3 = st.columns(3)
                 with col_p1:
-                    category = st.text_input(
+                    st.text_input(
                         "Category",
                         value=existing_condition.get("category", ""),
                         key=f"{key_prefix}_cat_{edge_index}"
                     )
                 with col_p2:
-                    parameter = st.text_input(
+                    st.text_input(
                         "Parameter",
                         value=existing_condition.get("parameter", ""),
                         key=f"{key_prefix}_param_{edge_index}"
@@ -392,71 +440,107 @@ def render_condition_config(
                 with col_p3:
                     comparators = ["<", "<=", ">=", ">", "="]
                     default_comp = existing_condition.get("comparator", "<")
-                    comparator = st.selectbox(
+                    st.selectbox(
                         "Comparator",
                         comparators,
                         index=comparators.index(default_comp) if default_comp in comparators else 0,
                         key=f"{key_prefix}_comp_{edge_index}"
                     )
-                value = st.text_input(
+                st.text_input(
                     "Value",
                     value=str(existing_condition.get("value", "")),
                     key=f"{key_prefix}_val_{edge_index}"
                 )
                 
-                condition.update({
-                    "category": category,
-                    "parameter": parameter,
-                    "comparator": comparator,
-                    "value": value
-                })
-            
             elif condition_type == "Time":
-                wait = st.number_input(
+                st.number_input(
                     "Wait (seconds)",
                     min_value=0,
                     value=existing_condition.get("wait", 5),
                     key=f"{key_prefix}_wait_{edge_index}"
                 )
-                condition["wait"] = wait
             
             elif condition_type == "Button":
-                button_id = st.text_input(
+                st.text_input(
                     "Button ID",
                     value=existing_condition.get("button_id", ""),
                     key=f"{key_prefix}_btn_{edge_index}"
                 )
-                condition["button_id"] = button_id
             
             elif condition_type == "Lambda":
-                exec_str = st.text_area(
+                st.text_area(
                     "Lambda Expression",
                     value=existing_condition.get("exec_str", ""),
                     key=f"{key_prefix}_lambda_{edge_index}",
                     placeholder="e.g., x > 5"
                 )
-                condition["exec_str"] = exec_str
             
             elif condition_type == "Slide":
-                slide_name = st.text_input(
+                st.text_input(
                     "Slide Name",
                     value=existing_condition.get("slide_name", ""),
                     key=f"{key_prefix}_slide_name_{edge_index}"
                 )
-                slide_desc = st.text_input(
+                st.text_input(
                     "Slide Description (optional)",
                     value=existing_condition.get("slide_description", "") or "",
                     key=f"{key_prefix}_slide_desc_{edge_index}"
                 )
-                condition["slide_name"] = slide_name
-                if slide_desc:
-                    condition["slide_description"] = slide_desc
-            
-            # Add display overrides if provided
-            if cond_name:
-                condition["name"] = cond_name
-            if cond_description:
-                condition["description"] = cond_description
+
+            elif condition_type == "ActionCount":
+                action_types = ["train", "predict", "step", "manual_evaluate", "page_visit", "button_click"]
+                existing_action = existing_condition.get("action", "train")
+                col_act, col_min = st.columns(2)
+                with col_act:
+                    st.selectbox(
+                        "Action",
+                        options=action_types,
+                        index=action_types.index(existing_action) if existing_action in action_types else 0,
+                        key=f"{key_prefix}_action_{edge_index}",
+                        help="The type of user action to count"
+                    )
+                with col_min:
+                    st.number_input(
+                        "Minimum Count",
+                        min_value=1,
+                        value=existing_condition.get("min", 1),
+                        key=f"{key_prefix}_min_{edge_index}",
+                        help="How many times the action must be performed"
+                    )
+
+            elif condition_type == "PageVisited":
+                st.number_input(
+                    "Page ID (local_index)",
+                    min_value=0,
+                    value=existing_condition.get("page_id", 0),
+                    key=f"{key_prefix}_page_id_{edge_index}",
+                    help="The local_index of the page the user must have visited"
+                )
+
+            elif condition_type == "Metric":
+                col_m1, col_m2 = st.columns(2)
+                with col_m1:
+                    st.text_input(
+                        "Metric Name",
+                        value=existing_condition.get("metric", "accuracy"),
+                        key=f"{key_prefix}_metric_{edge_index}",
+                        help="e.g., accuracy, Silhouette Score, etc."
+                    )
+                with col_m2:
+                    comparators = ["<", "<=", ">=", ">", "="]
+                    default_comp = existing_condition.get("comparator", ">=")
+                    st.selectbox(
+                        "Comparator",
+                        comparators,
+                        index=comparators.index(default_comp) if default_comp in comparators else 0,
+                        key=f"{key_prefix}_mcomp_{edge_index}"
+                    )
+                st.number_input(
+                    "Target Value",
+                    value=float(existing_condition.get("value", 0.9)),
+                    key=f"{key_prefix}_mval_{edge_index}",
+                    format="%.4f"
+                )
     
     return condition
 

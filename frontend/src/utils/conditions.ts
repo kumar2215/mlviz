@@ -1,5 +1,5 @@
 import type { ModelOption } from "@/types/parameters";
-import type { Condition, Parameters } from "@/types/story";
+import type { Condition, Parameters, StoryHistory } from "@/types/story";
 
 function parameterCheck(expected: any, actual: any, comparator: string) {
     switch (comparator) {
@@ -22,6 +22,9 @@ export function isConditionMet(
     condition: Condition,
     state: Record<string, Parameters>
 ): boolean {
+    // History is passed via the special __history key (see NavigationButton / NavigationBar)
+    const history = state["__history"] as StoryHistory | undefined;
+
     switch (condition.condition_type) {
         case "Bypass":
             return true;
@@ -29,7 +32,7 @@ export function isConditionMet(
         case "Slide":
             return true;
 
-        case "Parameter":
+        case "Parameter": {
             const paramValue = state[condition.category]?.[condition.parameter];
             return (
                 paramValue != null &&
@@ -39,14 +42,18 @@ export function isConditionMet(
                     condition.comparator
                 )
             );
+        }
 
         case "Wait":
-            // TODO: implement
+            // TODO: implement timer-based wait
             return true;
 
-        case "Button":
-            // TODO: implement
-            return true;
+        case "Button": {
+            const entries = history?.entries || [];
+            return entries.some(
+                (e) => e.type === "button_click" && e.button_id === condition.button_id
+            );
+        }
 
         case "Lambda":
             // TODO: implement
@@ -58,9 +65,36 @@ export function isConditionMet(
         case "Or":
             return condition.conditions.some((c) => isConditionMet(c, state));
 
-        default:
+        case "ActionCount": {
+            const entries = history?.entries || [];
+            const count = entries.filter((e) => e.type === condition.action).length;
+            return count >= condition.min;
+        }
+
+        case "PageVisited": {
+            const pagesVisited = history?.pagesVisited || [];
+            return pagesVisited.includes(condition.page_id);
+        }
+
+        case "Metric": {
+            const entries = history?.entries || [];
+            return entries.some((e) => {
+                const metricValue = e.metrics?.[condition.metric];
+                return (
+                    metricValue != null &&
+                    parameterCheck(
+                        condition.value,
+                        metricValue,
+                        condition.comparator
+                    )
+                );
+            });
+        }
+
+        default: {
             const exhaustiveCheck: never = condition;
-            throw new Error(`Unknown condition type: ${exhaustiveCheck}`);
+            throw new Error(`Unknown condition type: ${(exhaustiveCheck as any)?.condition_type}`);
+        }
     }
 }
 
@@ -96,9 +130,21 @@ export function displayCondition(condition: Condition): string {
                 .map((c) => displayCondition(c))
                 .join(" OR \n");
 
-        default:
+        case "ActionCount":
+            return `Perform "${condition.action}" at least ${condition.min} time${
+                condition.min === 1 ? "" : "s"
+            }`;
+
+        case "PageVisited":
+            return `Visit page ${condition.page_id}`;
+
+        case "Metric":
+            return `Achieve ${condition.metric} ${condition.comparator} ${condition.value}`;
+
+        default: {
             const exhaustiveCheck: never = condition;
-            throw new Error(`Unknown condition type: ${exhaustiveCheck}`);
+            throw new Error(`Unknown condition type: ${(exhaustiveCheck as any)?.condition_type}`);
+        }
     }
 }
 

@@ -14,7 +14,7 @@ type ParagraphProps = React.ComponentProps<"p"> & ExtraProps;
 const Paragraph: React.FC<ParagraphProps> = ({ children, node, ...props }) => {
     return (
         <p
-            className="text-gray-800 mb-2"
+            className="text-[clamp(0.75rem,1.5vw,1rem)] text-gray-800 mb-2"
             {...props}
         >
             {children}
@@ -53,7 +53,7 @@ type Heading3Props = React.ComponentProps<"h3"> & ExtraProps;
 const Heading3: React.FC<Heading3Props> = ({ children, node, ...props }) => {
     return (
         <h3
-            className="font-bold text-xl my-4 tracking-tight bg-gradient-to-br from-gray-500 to-slate-400 bg-clip-text text-transparent font-width-expanded"
+            className="font-bold text-[clamp(1rem,2vw,1.25rem)] my-4 tracking-tight bg-gradient-to-br from-gray-500 to-slate-400 bg-clip-text text-transparent font-width-expanded"
             {...props}
         >
             {children}
@@ -66,7 +66,7 @@ type Heading4Props = React.ComponentProps<"h4"> & ExtraProps;
 const Heading4: React.FC<Heading4Props> = ({ children, node, ...props }) => {
     return (
         <h4
-            className="font-bold text-2xl my-4 tracking-tight bg-gradient-to-br from-gray-400 to-slate-300 bg-clip-text text-transparent font-width-expanded"
+            className="font-bold text-[clamp(1.125rem,2.5vw,1.5rem)] my-4 tracking-tight bg-gradient-to-br from-gray-400 to-slate-300 bg-clip-text text-transparent font-width-expanded"
             {...props}
         >
             {children}
@@ -113,7 +113,7 @@ type ListItemProps = React.ComponentProps<"li"> & ExtraProps;
 const ListItem: React.FC<ListItemProps> = ({ children, node, ...props }) => {
     return (
         <li
-            className="text-gray-800 tracking-tight font-light mx-1 leading-none"
+            className="text-[clamp(0.75rem,1.5vw,1rem)] text-gray-800 tracking-tight font-light mx-1 leading-none"
             {...props}
         >
             {children}
@@ -126,7 +126,7 @@ type ImageProps = React.ComponentProps<"img"> & ExtraProps;
 const Image: React.FC<ImageProps> = ({ src, alt, node, ...props }) => {
     return (
         <img
-            className="max-w-full max-h-[40vh] xl:max-h-[50vh] 2xl:max-h-[60vh] w-auto h-auto object-contain my-4 rounded-lg shadow-lg block"
+            className="max-w-full max-h-[clamp(30vh,40vw,60vh)] w-auto h-auto object-contain my-4 rounded-lg shadow-lg block"
             src={src}
             alt={alt}
             {...props}
@@ -273,7 +273,7 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
 
     if (variant === "small") {
         return (
-            <div className="px-2 text-xs leading-tight [&_h1]:text-sm [&_h2]:text-xs [&_h3]:text-xs [&_h4]:text-xs [&_p]:mb-0.5 [&_ul]:my-1 [&_ol]:my-1 [&_li]:mx-0 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-1 [&_h4]:my-1 [&_img]:my-2 [&_p]:text-xs">
+            <div className="px-2 leading-tight [&_h1]:text-[clamp(0.65rem,1.2vw,0.875rem)] [&_h2]:text-[clamp(0.6rem,1vw,0.75rem)] [&_h3]:text-[clamp(0.6rem,1vw,0.75rem)] [&_h4]:text-[clamp(0.6rem,1vw,0.75rem)] [&_p]:text-[clamp(0.6rem,1vw,0.75rem)] [&_li]:text-[clamp(0.6rem,1vw,0.75rem)] [&_p]:mb-0.5 [&_ul]:my-1 [&_ol]:my-1 [&_li]:mx-0 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-1 [&_h4]:my-1 [&_img]:my-2">
                 {content}
             </div>
         );

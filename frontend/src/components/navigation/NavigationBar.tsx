@@ -19,11 +19,13 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ edges, handler, onBack, c
     if (!context) throw new Error("Must be within CurrentStoryProvider");
     const { storyState } = context;
 
+    const conditionState = { ...storyState.params, __history: storyState.history };
+
     const completeEdges = edges.filter((a) =>
-        isConditionMet(a.condition, storyState.params),
+        isConditionMet(a.condition, conditionState),
     );
     const incompleteEdges = edges.filter(
-        (a) => !isConditionMet(a.condition, storyState.params),
+        (a) => !isConditionMet(a.condition, conditionState),
     );
 
     return (

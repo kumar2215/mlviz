@@ -63,15 +63,16 @@ interface KNNContextType
     predictionData: KNNPredictionResponse | null;
     queryPoints: number[][] | null;
 
-    // Visualization state (Original names)
+    // Visualization/Training state (Original names)
     isVisualizationLoading: boolean;
     visualizationError: string | null;
     visualizationData: KNNModelData | null;
     lastVisualizationParams: Partial<KNNVisualisationRequest>;
 
     // Specialized methods
-    makePrediction: (request: Partial<KNNPredictionRequest>) => Promise<void>;
-    getK: () => number | null;
+    loadVisualization: (params?: Partial<KNNVisualisationRequest>) => Promise<KNNModelData | null>;
+    train: (params: Partial<KNNVisualisationRequest>) => Promise<KNNModelData | null>;
+    makePrediction: (params: Partial<KNNPredictionRequest>) => Promise<void>;
     isVisualizationReady: () => boolean;
 }
 
@@ -167,6 +168,7 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                     setIsVisualizationLoading(false);
                     setVisualizationError(null);
                     setLastParams(request);
+                    return { ...data, queryPoints: null } as KNNModelData;
                 } else {
                     throw new Error(
                         "Visualization failed - API returned success: false",
@@ -178,11 +180,12 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                 setVisualizationError(
                     error instanceof Error
                         ? error.message
-                        : "Unknown error loading visualization",
+                        : "Unknown error loading KNN visualization",
                 );
+                return null;
             }
         },
-        [setCurrentModelData, setLastParams, activeDataset],
+        [activeDataset, getVisualisation, setCurrentModelData, setLastParams],
     );
 
     // ========================================================================
@@ -236,19 +239,22 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                     setIsVisualizationLoading(false);
                     setVisualizationError(null);
                     setLastParams(params || {});
+                    return { ...data, queryPoints: null } as KNNModelData;
+                } else {
+                    return null;
                 }
-                console.log("Current model data: ", currentModelData);
             } catch (error) {
                 console.error("Error training KNN:", error);
                 setIsVisualizationLoading(false);
                 setVisualizationError(
                     error instanceof Error
                         ? error.message
-                        : "Unknown error training KNN",
+                        : "Unknown error training KNN model",
                 );
+                return null;
             }
         },
-        [setCurrentModelData, setLastParams, activeDataset],
+        [activeDataset, trainKNN, setCurrentModelData, setLastParams],
     );
 
     // ========================================================================

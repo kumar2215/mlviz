@@ -101,7 +101,7 @@ interface DecisionTreeContextType extends
     // Keep existing method names for backward compatibility
     isModelLoading: boolean;        // = isLoading
     modelError: string | null;      // = error
-    trainNewModel: (params: Parameters) => Promise<void>;  // = train
+    trainNewModel: (params: Parameters) => Promise<DecisionTreeModelData | null>;  // = train
     lastTrainedParams: Parameters;  // = lastParams
     clearStoredModelParams: () => void;
 }
@@ -204,7 +204,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
         }
     }, []);
 
-    const trainNewModel = useCallback(async (params: Parameters = {}) => {
+    const trainNewModel = useCallback(async (params: Parameters = {}): Promise<DecisionTreeModelData | null> => {
         setIsModelLoading(true);
         setModelError(null);
         try {
@@ -216,8 +216,6 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
             const data: DecisionTreeResponse = await initiateTrainModel(requestParams);
             
             console.log('[trainNewModel] API response:', data);
-            console.log('[trainNewModel] data.metadata:', data.metadata);
-            console.log('[trainNewModel] data.metadata?.class_names:', data.metadata?.class_names);
 
             if (data.success) {
                 const modelData: DecisionTreeModelData = {
@@ -236,6 +234,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
                 console.log('[trainNewModel] Setting modelData:', modelData);
                 setCurrentModelData(modelData);
                 setLastParams(params);
+                return modelData;
             } else {
                 throw new Error(
                     "Training failed - API returned success: false"
@@ -249,6 +248,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
                     : "Unknown error training model"
             );
             setCurrentModelData(null);
+            return null;
         } finally {
             setIsModelLoading(false);
         }

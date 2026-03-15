@@ -1,7 +1,7 @@
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { TreeNode } from "@/types/model";
 import { DEFAULT_COLORS } from "@/utils/colorUtils";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import type { RenderVisualisationProps } from "./types";
@@ -120,7 +120,7 @@ const BaseDecisionTreeVisualization: React.FC<
     const actualMaxDepth = data?.tree ? calculateMaxDepth(data.tree) : maxDepth;
     const playableMaxSteps =
         (maxDisplayDepth !== undefined ? maxDisplayDepth : actualMaxDepth) + 1;
-    const capabilities = {
+    const capabilities = useMemo(() => ({
         ...(showPlayControls && {
             playable: {
                 maxSteps: playableMaxSteps,
@@ -140,12 +140,12 @@ const BaseDecisionTreeVisualization: React.FC<
                 // Provide extended content bounds for decision tree layout
                 // Trees use depth spacing and can extend beyond standard content area
                 contentBounds: {
-                    width: 800,  // Will be updated by BaseVisualisation
+                    width: 800, // Will be updated by BaseVisualisation
                     height: 1200, // Extended height for tree depth (1.5x typical)
                 },
             },
         }),
-    };
+    }), [showPlayControls, playableMaxSteps, disableZoom, clickableSelector]);
 
     if (!data) return null;
 

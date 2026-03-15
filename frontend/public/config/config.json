@@ -272,9 +272,11 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
-            "name": null,
-            "description": null
+            "condition_type": "ActionCount",
+            "name": "Train your model!",
+            "description": "Click train model to train your model.",
+            "action": "train",
+            "min": 1
           }
         },
         {
@@ -413,9 +415,12 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Metric",
             "name": null,
-            "description": null
+            "description": null,
+            "metric": "accuracy",
+            "comparator": ">=",
+            "value": 0.9
           }
         },
         {

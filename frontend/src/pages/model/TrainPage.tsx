@@ -4,6 +4,7 @@ import { TrainComponent } from "@/components/TrainComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
@@ -51,6 +52,7 @@ const TrainPage: React.FC<TrainPageProps> = ({
     const context = useContext(CurrentStoryContext);
     if (!context) throw new Error("No context found.");
     const { updateParams } = context;
+    const { recordTrain } = useHistoryRecorder();
 
     useEffect(() => {
         const fetchParameters = async () => {
@@ -90,8 +92,9 @@ const TrainPage: React.FC<TrainPageProps> = ({
     const [showAlert, setShowAlert] = useState(false);
 
     const handleTrainModel = async () => {
-        await train(trainingParams);
+        const result = await train(trainingParams);
         updateParams({ trainParams: trainingParams });
+        recordTrain(trainingParams, result?.metrics);
         setShowAlert(true);
         setTimeout(() => setShowAlert(false), 2000);
     };

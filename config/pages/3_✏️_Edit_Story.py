@@ -37,17 +37,17 @@ if selected_story_name:
 
     # Story name (can be changed)
     new_story_name = st.text_input(
-        "Story Name", value=selected_story_name, key="story_name_input"
+        "Story Name", value=selected_story_name, key=f"story_name_input_{selected_story_name}"
     )
 
     col1, col2 = st.columns(2)
 
     with col1:
         name = st.text_input(
-            "Name", value=existing_story.get("name", selected_story_name)
+            "Name", value=existing_story.get("name", selected_story_name), key=f"story_visual_name_{selected_story_name}"
         )
         description = st.text_area(
-            "Description", value=existing_story.get("description", "")
+            "Description", value=existing_story.get("description", ""), key=f"story_desc_{selected_story_name}"
         )
         existing_nodes = existing_story.get("nodes", [])
         existing_start = existing_story.get("start_page", 0)
@@ -57,6 +57,7 @@ if selected_story_name:
             max_value=max(len(existing_nodes) - 1, 0),
             value=min(existing_start, max(len(existing_nodes) - 1, 0)),
             help="Index of the node to use as the starting page",
+            key=f"story_start_page_{selected_story_name}"
         )
 
     with col2:
@@ -110,6 +111,8 @@ if selected_story_name:
         if st.button("💾 Update Story", type="primary", use_container_width=True):
             if not new_story_name:
                 st.error("Please provide a story name")
+            elif new_story_name != selected_story_name and new_story_name in st.session_state.config["stories"]:
+                st.error(f"⚠️ A story named '{new_story_name}' already exists. Please choose a different name or delete the existing one first.")
             elif not nodes_data:
                 st.error("Please add at least one node to the story")
             else:

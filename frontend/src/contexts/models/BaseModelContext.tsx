@@ -51,7 +51,7 @@ export interface TrainableModelContext<TModelData extends BaseModelData>
     isLoading: boolean;
     error: string | null;
     data: TModelData | null;        // Alias for currentModelData
-    train: (params: Record<string, any>) => Promise<void>;
+    train: (params: Record<string, any>) => Promise<TModelData | null>;
 }
 
 /**
@@ -97,7 +97,7 @@ export interface VisualizableModelContext<TModelData extends BaseModelData>
     isVisualizing: boolean;
     visualizationError: string | null;
     visualizationData: any | null;
-    loadVisualization: (params?: any) => Promise<void>;
+    loadVisualization: (params?: any) => Promise<TModelData | null>;
 }
 
 /**
@@ -110,7 +110,7 @@ export interface StepableModelContext<TModelData extends BaseModelData, TStepRes
     isStepLoading: boolean;
     stepError: string | null;
     stepData: TStepResponse | null;
-    performStep: (params: Record<string, any>) => Promise<void>;
+    performStep: (params: Record<string, any>) => Promise<TModelData | null>;
 }
 
 /**

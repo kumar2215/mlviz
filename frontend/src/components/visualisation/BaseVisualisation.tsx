@@ -1,5 +1,5 @@
 import * as d3 from "d3";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useScaleFactor } from "../../hooks/useScaleFactor";
 import VisualisationControls from "./controls/VisualisationControls";
 import { usePlayControls } from "./hooks/usePlayControls";
@@ -51,16 +51,35 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
           })
         : undefined;
 
-    useEffect(() => {
+    const lastRendererRef = useRef<any>(null);
+    const normalizationRef = useRef<{ x: number; y: number } | null>(null);
+
+    React.useLayoutEffect(() => {
         if (!data || !svgRef.current || !containerRef.current) return;
 
-        const currentZoomTransform =
-            capabilities.zoomable && zoomControls
-                ? zoomControls.getCurrentTransform?.()
-                : null;
-
         const svg = d3.select(svgRef.current);
-        svg.selectAll("*").remove();
+        
+        // Ensure stable content group structure to prevent coordinate flicker
+        let contentGroup = svg.select<SVGGElement>("g.content-container");
+        if (contentGroup.empty()) {
+            contentGroup = svg.append("g")
+                .attr("class", "content-container")
+                .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`);
+        }
+
+        let currentZoomTransform =
+            capabilities.zoomable && zoomControls
+                ? zoomControls.getCurrentTransform?.() || d3.zoomIdentity
+                : d3.zoomIdentity;
+
+        // If the renderer or data has changed fundamentally, we might want a clear,
+        // but for ongoing updates (like tree expansion), we let the renderer's .join() handle it.
+        // We only clear if this is a first-time render or the render function itself changed.
+        if (lastRendererRef.current !== renderContent) {
+            contentGroup.selectAll("*").remove();
+            lastRendererRef.current = renderContent;
+            normalizationRef.current = null;
+        }
 
         const containerWidth =
             containerRef.current.clientWidth || dimensions?.width || 800;
@@ -71,10 +90,6 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
             .attr("height", "100%")
             .attr("viewBox", `0 0 ${containerWidth} ${containerHeight}`);
 
-        const contentGroup = svg
-            .append("g")
-            .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`);
-
         // Calculate inner dimensions
         const innerWidth = containerWidth - MARGIN.left - MARGIN.right;
         const innerHeight = containerHeight - MARGIN.top - MARGIN.bottom;
@@ -83,7 +98,6 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
             const extendedZoomControls = zoomControls as any;
 
             // Update content bounds with actual inner dimensions
-            // If initial bounds were provided, scale proportionally to preserve aspect ratio
             if (extendedZoomControls.updateContentBounds) {
                 const initialBounds = capabilities.zoomable?.contentBounds;
                 let boundsToSet = {
@@ -92,10 +106,8 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                     margin: MARGIN,
                 };
                 
-                // If initial bounds were configured, scale them proportionally
                 if (initialBounds) {
                     const heightScale = innerHeight / (initialBounds.height || 600);
-                    // Use the initial bounds' aspect ratio, scaled to fit actual dimensions
                     boundsToSet = {
                         width: innerWidth,
                         height: initialBounds.height * heightScale,
@@ -111,15 +123,6 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 contentGroup,
                 `translate(${MARGIN.left}, ${MARGIN.top})`
             );
-
-            if (
-                currentZoomTransform &&
-                currentZoomTransform !== d3.zoomIdentity
-            ) {
-                setTimeout(() => {
-                    extendedZoomControls.setZoom(currentZoomTransform, false);
-                }, 0);
-            }
         }
 
         const currentStep = playControls?.currentStep || 0;
@@ -131,7 +134,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 currentStep,
                 maxSteps: playControls?.maxSteps || 0,
                 isPlaying: playControls?.isPlaying || false,
-                zoomTransform: zoomControls?.getCurrentTransform?.(),
+                zoomTransform: currentZoomTransform,
                 interpolation: {
                     currentStepFloor: stepFloor,
                     stepFraction: stepFraction,
@@ -150,28 +153,53 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
             },
         };
 
+        // Render the content into the persistent group
         renderContent(contentGroup, data, renderContext);
         
-        // Apply fit-to-view transform if calculated by renderer
+        // Apply fit-to-view transform or shift-compensation if calculated by renderer
         if (capabilities.zoomable && zoomControls && (renderContext as any).fitToViewTransform) {
             const extendedZoomControls = zoomControls as any;
             const fitTransform = (renderContext as any).fitToViewTransform;
-            
-            // Update content bounds with actual tree dimensions if provided
+
             if (fitTransform.contentWidth && fitTransform.contentHeight && extendedZoomControls.updateContentBounds) {
                 extendedZoomControls.updateContentBounds({
                     width: fitTransform.contentWidth,
                     height: fitTransform.contentHeight,
                 });
             }
+
+            const centeredTransform = d3.zoomIdentity
+                .translate(fitTransform.x, fitTransform.y)
+                .scale(fitTransform.k);
+
+            const isInitialLoad = !normalizationRef.current;
             
-            // Don't apply fit-to-view transform - let tree start at identity position (0,0,1)
-            // This matches the position when reset zoom is clicked
+            if (isInitialLoad) {
+                // Initial load: centers the tree.
+                extendedZoomControls.setZoom(centeredTransform, false);
+                normalizationRef.current = { 
+                    x: fitTransform.normalizationShiftX, 
+                    y: fitTransform.normalizationShiftY 
+                };
+            } else {
+                // Ongoing update (expansion): compensate for normalization shift.
+                // The renderer normalized by (shiftX, shiftY). If shiftX changed, 
+                // all existing nodes shifted by -(newShiftX - oldShiftX) in layout space.
+                // We must shift the zoom transform by (newShiftX - oldShiftX) * scale to compensate.
+                const deltaX = (fitTransform.normalizationShiftX - normalizationRef.current!.x) * currentZoomTransform.k;
+                const deltaY = (fitTransform.normalizationShiftY - normalizationRef.current!.y) * currentZoomTransform.k;
+                
+                const compensatedTransform = currentZoomTransform.translate(-deltaX / currentZoomTransform.k, -deltaY / currentZoomTransform.k);
+                
+                extendedZoomControls.setZoom(compensatedTransform, false);
+                normalizationRef.current = { 
+                    x: fitTransform.normalizationShiftX, 
+                    y: fitTransform.normalizationShiftY 
+                };
+            }
+            
+            extendedZoomControls.setResetTransform?.(centeredTransform);
         }
-    // Note: zoomControls is intentionally excluded — useZoomControls returns a new
-    // object reference every render, which would cause an infinite re-render loop.
-    // Its functions are stable (useCallback with refs) so this is safe.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [
         data,
         renderContent,

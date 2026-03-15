@@ -47,7 +47,7 @@ const IndexPage = () => {
                 </p>
             </div>
 
-            <div className="flex-1 mx-10 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 overflow-y-auto">
+            <div className="flex-1 mx-4 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 overflow-y-auto content-start">
                 {Object.entries(storyConfig.stories).map(([name, s]) => (
                     <Link
                         key={s.name}
@@ -65,7 +65,7 @@ const IndexPage = () => {
                 ))}
             </div>
 
-            <footer className="shrink-0 border-t border-gray-200 px-4 py-2 flex items-center justify-between text-sm tracking-tight">
+            <footer className="mt-auto shrink-0 border-t border-gray-200 px-4 py-2 flex items-center justify-between text-sm tracking-tight">
                 <Link
                     className="px-3 py-1.5 rounded-md bg-gradient-to-r from-fuchsia-400 to-cyan-500 bg-clip-text text-transparent font-bold font-mono hover:opacity-80 transition-opacity"
                     to={"https://github.com/local-minima-lab"}

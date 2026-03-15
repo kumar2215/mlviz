@@ -2,6 +2,7 @@ import NavigationBar from "@/components/navigation/NavigationBar";
 import { Sidenote } from "@/components/Sidenote";
 import { Button } from "@/components/ui/button";
 import { useCurrentStory } from "@/contexts/StoryContext";
+import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import DynamicPage from "@/pages/DynamicPage";
 import StaticPage from "@/pages/StaticPage";
 import type { Edge, PageUnion, Story } from "@/types/story";
@@ -22,6 +23,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
 }) => {
     const [currentPageId, setCurrentPageId] = useState<number>(initialPageId);
     const { storyState, addEdge, popPath } = useCurrentStory();
+    const { recordPageVisit } = useHistoryRecorder();
 
     const currentPage = pages[story.nodes[currentPageId].index];
 
@@ -40,6 +42,7 @@ export const StoryPage: React.FC<StoryPageProps> = ({
         });
         // Record the CURRENT page in history before navigating away
         addEdge({ local_index: currentPageId, story_name: null });
+        recordPageVisit(currentPageId);
         setCurrentPageId(pageId);
     };
 
@@ -105,9 +108,15 @@ export const StoryPage: React.FC<StoryPageProps> = ({
             </div>
 
             <footer className="shrink-0 border-t border-gray-200 px-4 py-2 flex items-center justify-between text-sm tracking-tight">
-                <p className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent font-semibold font-mono">
-                    story/{story.name}
-                </p>
+                <div className="flex flex-row gap-2 items-center">
+                    <p className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent font-semibold font-mono">
+                        story/{story.name}
+                    </p>
+                    <p className="font-mono text-[0.75rem] border-gray-300 border-1 rounded-full py-1 px-2 text-gray-4-0 bg-gray-200">
+                        page {currentPageId}
+                    </p>
+                </div>
+
                 <Link to={"/"}>
                     <Button
                         className="bg-gradient-to-br from-gray-50 to-stone-50 text-gray-800 hover:from-blue-500 hover:to-purple-500 hover:text-white transition-all duration-100 hover:shadow-2xl size-8"
