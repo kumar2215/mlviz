@@ -592,8 +592,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
             !autoLoadAttempted.current &&
             !visualizationData &&
             !isVisualizationLoading &&
-            lastParams &&
-            Object.keys(lastParams).length > 0
+            lastParams
         ) {
             autoLoadAttempted.current = true;
             loadVisualization(lastParams);
