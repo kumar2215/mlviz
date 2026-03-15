@@ -15,6 +15,9 @@ export type HistogramData = components["schemas"]["HistogramData"];
 export type ClassificationMetrics = components["schemas"]["ClassificationMetrics"];
 export type ClassificationMetadata = components["schemas"]["ClassificationMetadata"];
 
+export type RegressionMetrics = components["schemas"]["RegressionMetrics"];
+export type RegressionMetadata = components["schemas"]["RegressionMetadata"];
+
 export interface ModelMetadata {
     created_at: string;
     dataset_info: any;
@@ -35,4 +38,14 @@ export type TrainModelResponse = components["schemas"]["DecisionTreeTrainingResp
 export interface PredictionProps {
     data?: Record<string, any>;
     points?: Record<string, any>;
+}
+
+export interface ClassifierResultData {
+    metrics: ClassificationMetrics;
+    metadata: ClassificationMetadata;
+}
+
+export interface RegressionResultData {
+    metrics: RegressionMetrics;
+    metadata: RegressionMetadata;
 }

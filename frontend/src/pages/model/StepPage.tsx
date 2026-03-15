@@ -23,6 +23,7 @@ const StepPage: React.FC<StepPageProps> = ({
         isLoading, 
         data, 
         train, 
+        loadVisualization,
         getParameters,
         resetModelData
     } = model;
@@ -79,7 +80,7 @@ const StepPage: React.FC<StepPageProps> = ({
                 ...stepParams,
                 dataset: (stepParams as any)?.dataset || dataset,
             };
-            train(trainParams);
+            loadVisualization(trainParams);
         }
     }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentionally runs once on mount
 

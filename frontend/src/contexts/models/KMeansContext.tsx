@@ -76,7 +76,7 @@ interface KMeansContextType
             KMeansPredictionAdditionalData
         >,
         VisualizableModelContext<KMeansModelData>,
-        StepableModelContext<KMeansModelData, KMeansStepResponse & { metrics?: Record<string, number> }> {
+        StepableModelContext<KMeansModelData, KMeansStepResponse, Partial<KMeansStepRequest>> {
     // KMeans-specific properties
     isStepLoading: boolean;
     stepError: string | null;

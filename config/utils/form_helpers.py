@@ -229,8 +229,7 @@ def render_edge_list(
                     "⚙️",
                     key=f"{key_prefix}_btn_{i}",
                     help="Toggle condition configuration panel",
-                    type="secondary" if not st.session_state[config_key] else "primary",
-                    disabled=(cond_type == "Bypass")
+                    type="secondary" if not st.session_state[config_key] else "primary"
                 ):
                     st.session_state[config_key] = not st.session_state[config_key]
                     st.rerun()
@@ -378,7 +377,7 @@ def render_condition_config(
     if cond_desc: condition["description"] = cond_desc
 
     if condition_type == "Bypass":
-        return condition
+        pass # Allow bypass to show display overrides below
 
     # Apply type-specific fields (always pulled from state/existing)
     if condition_type == "ActionCount":

@@ -11,6 +11,7 @@
 import { DecisionTreeProvider, useDecisionTree } from "@/contexts/models/DecisionTreeContext";
 import { KMeansProvider, useKMeans } from "@/contexts/models/KMeansContext";
 import { KNNProvider, useKNN } from "@/contexts/models/KNNContext";
+import { LinearRegressionProvider, useLinearRegression } from "@/contexts/models/LinearRegressionContext";
 import React, { createContext, useContext } from "react";
 
 interface ModelProviderProps {
@@ -22,7 +23,8 @@ interface ModelProviderProps {
 const providers: Record<string, React.FC<{ children: React.ReactNode }>> = {
     decision_tree: DecisionTreeProvider,
     knn: KNNProvider,
-    kmeans: KMeansProvider
+    kmeans: KMeansProvider,
+    linear: LinearRegressionProvider,
 };
 
 export const ModelProvider: React.FC<ModelProviderProps> = ({
@@ -48,6 +50,7 @@ const hooks: Record<string, any> = {
     decision_tree: useDecisionTree,
     knn: useKNN,
     kmeans: useKMeans,
+    linear: useLinearRegression,
 };
 
 // A generic context to hold the current model name

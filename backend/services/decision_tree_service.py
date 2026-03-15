@@ -7,6 +7,7 @@ import numpy as np
 from models import (
     ClassificationMetadata,
     ClassificationMetrics,
+    ClassificationMetricValues,
     Dataset,
     DecisionTreeParameters,
     HistogramData,
@@ -166,7 +167,7 @@ class DecisionTreeService:
 
     def _calculate_metrics(
         self, model: DecisionTreeClassifier, X_test: np.ndarray, y_test: np.ndarray
-    ) -> ClassificationMetrics:
+    ) -> ClassificationMetricValues:
         """Calculates the accuracy, precision, recall, f1-score, and confusion matrix of a model.
 
         Args:
@@ -175,12 +176,12 @@ class DecisionTreeService:
             y_test (np.ndarray): Y test data
 
         Returns:
-            ClassificationMetrics: confusion matrix, accuracy, precision, recall and f1 scores
+            ClassificationMetricValues: confusion matrix, accuracy, precision, recall and f1 scores
         """
         predictions = model.predict(X_test)
         conf_matrix = confusion_matrix(y_test, predictions).tolist()
 
-        return ClassificationMetrics(
+        return ClassificationMetricValues(
             confusion_matrix=conf_matrix,
             accuracy=accuracy_score(y_test, predictions),
             precision=precision_score(
@@ -257,8 +258,19 @@ class DecisionTreeService:
             dataset_info["y_train"],
         )
 
-        metrics = self._calculate_metrics(
-            model, dataset_info["X_test"], dataset_info["y_test"]
+        train_metric_values = self._calculate_metrics(
+            model, dataset_info["X_train"], dataset_info["y_train"]
+        )
+
+        test_metric_values = None
+        if len(dataset_info["y_test"]) > 0:
+            test_metric_values = self._calculate_metrics(
+                model, dataset_info["X_test"], dataset_info["y_test"]
+            )
+        
+        metrics = ClassificationMetrics(
+            train=train_metric_values,
+            test=test_metric_values
         )
 
         response_data = {
@@ -408,27 +420,55 @@ class DecisionTreeService:
         dataset = await self._resolve_dataset(dataset_param)
         dataset_info = await self.dataset_service.prepare_dataset_for_training(dataset)
 
-        # Make predictions using the manual tree on TEST set
-        predictions = self._predict_with_tree(
+        # Make predictions using the manual tree on TRAIN set
+        predictions_train = self._predict_with_tree(
             tree,
-            dataset_info["X_test"],  # Use test set for evaluation
+            dataset_info["X_train"],
             dataset_info["feature_names"],
         )
 
-        # Calculate metrics using TEST set (includes confusion matrix)
-        y_test = dataset_info["y_test"]  # Use test set labels
-        conf_matrix = confusion_matrix(y_test, predictions).tolist()
+        y_train = dataset_info["y_train"]
+        conf_matrix_train = confusion_matrix(y_train, predictions_train).tolist()
 
-        metrics = ClassificationMetrics(
-            confusion_matrix=conf_matrix,
-            accuracy=accuracy_score(y_test, predictions),
+        train_metric_values = ClassificationMetricValues(
+            confusion_matrix=conf_matrix_train,
+            accuracy=accuracy_score(y_train, predictions_train),
             precision=precision_score(
-                y_test, predictions, average="weighted", zero_division=0
+                y_train, predictions_train, average="weighted", zero_division=0
             ),
             recall=recall_score(
-                y_test, predictions, average="weighted", zero_division=0
+                y_train, predictions_train, average="weighted", zero_division=0
             ),
-            f1=f1_score(y_test, predictions, average="weighted", zero_division=0),
+            f1=f1_score(y_train, predictions_train, average="weighted", zero_division=0),
+        )
+
+        test_metric_values = None
+        # Make predictions using the manual tree on TEST set
+        if len(dataset_info["y_test"]) > 0:
+            predictions_test = self._predict_with_tree(
+                tree,
+                dataset_info["X_test"],
+                dataset_info["feature_names"],
+            )
+
+            y_test = dataset_info["y_test"]
+            conf_matrix_test = confusion_matrix(y_test, predictions_test).tolist()
+
+            test_metric_values = ClassificationMetricValues(
+                confusion_matrix=conf_matrix_test,
+                accuracy=accuracy_score(y_test, predictions_test),
+                precision=precision_score(
+                    y_test, predictions_test, average="weighted", zero_division=0
+                ),
+                recall=recall_score(
+                    y_test, predictions_test, average="weighted", zero_division=0
+                ),
+                f1=f1_score(y_test, predictions_test, average="weighted", zero_division=0),
+            )
+        
+        metrics = ClassificationMetrics(
+            train=train_metric_values,
+            test=test_metric_values,
         )
 
         # Create metadata

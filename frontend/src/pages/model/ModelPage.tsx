@@ -39,6 +39,7 @@ const ModelPage: React.FC<ModelPageProps> = ({
             <ManualPage
                 model_name={model_name}
                 parameters={parameters}
+                problem_type={problem_type}
                 dataset={dataset}
             />
         );

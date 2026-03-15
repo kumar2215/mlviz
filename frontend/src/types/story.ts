@@ -20,7 +20,7 @@ export interface HistoryEntry {
     page_id?: number;    // for page_visit
     button_id?: string;  // for button_click
     params?: Parameters; // for train / step / predict
-    metrics?: Record<string, number>; // for train / step results
+    metrics?: Record<string, any>; // for train / step results
 }
 
 export interface StoryHistory {
@@ -133,7 +133,7 @@ interface BasePage {
     parameters?: Parameters;
     dataset?: 
         | components["schemas"]["PredefinedDataset"] 
-        | components["schemas"]["Dataset"]
+        | components["schemas"]["DatasetResponse"]
         | DatasetReference;
     note?: string;
 }
@@ -183,7 +183,7 @@ export interface Story {
 export interface Config {
     stories: Record<string, Story>;
     pages: Record<Index, PageUnion>;
-    datasets?: Record<string, components["schemas"]["PredefinedDataset"] | components["schemas"]["Dataset"]>;
+    datasets?: Record<string, components["schemas"]["PredefinedDataset"] | components["schemas"]["DatasetResponse"]>;
 }
 
 export type TrainingParameters = Record<string, any>;

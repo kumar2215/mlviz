@@ -1,5 +1,13 @@
-from .base import ClassificationMetadata, ClassificationMetrics
-from .dataset import Dataset, DatasetInfo, PredefinedDataset
+from .base import ClassificationMetadata, ClassificationMetrics, ClassificationMetricValues, RegressionMetrics, RegressionMetricValues
+from .dataset import (
+    ClassificationDataset,
+    Dataset,  # backward-compat alias for ClassificationDataset
+    DatasetInfo,
+    PredefinedDataset,
+    PredefinedRegressionDataset,
+    RegressionDataset,
+)
+from .linear_regression import LinearRegressionParameters, RegressionMetadata
 from .decision_tree import (
     DecisionTreeParameters,
     LeafNode,
@@ -25,9 +33,13 @@ from .util import HistogramData
 __all__ = [
     "ClassificationMetrics",
     "ClassificationMetadata",
+    "RegressionMetrics",
     "HistogramData",
+    "ClassificationDataset",
     "Dataset",
     "PredefinedDataset",
+    "PredefinedRegressionDataset",
+    "RegressionDataset",
     "DatasetInfo",
     "TreeNode",
     "SplitNode",
@@ -43,4 +55,6 @@ __all__ = [
     "DecisionBoundaryData",
     "KMeansParameters",
     "ClusterInfo",
+    "LinearRegressionParameters",
+    "RegressionMetadata",
 ]

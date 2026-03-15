@@ -9,6 +9,8 @@ from .base import ModelPage, ProblemType
 class KNNVizParameters(BaseModel):
     """Parameters for KNN visualization"""
 
+    model_config = {"extra": "allow"}
+
     visualisation_features: list[int] = Field(
         default_factory=lambda: [0, 1], description="Feature indices to visualize"
     )

@@ -417,11 +417,20 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
                     tree: rootNode,
                     // Initial metrics represent single leaf predicting majority class
                     metrics: {
-                        confusion_matrix: initialMatrix,
-                        accuracy: initialAccuracy,
-                        precision: initialAccuracy, // Simplified for single-class prediction
-                        recall: initialAccuracy,
-                        f1: initialAccuracy,
+                        train: {
+                            confusion_matrix: initialMatrix,
+                            accuracy: initialAccuracy,
+                            precision: initialAccuracy, // Simplified for single-class prediction
+                            recall: initialAccuracy,
+                            f1: initialAccuracy,
+                        },
+                        test: {
+                            confusion_matrix: initialMatrix,
+                            accuracy: initialAccuracy,
+                            precision: initialAccuracy, // Simplified for single-class prediction
+                            recall: initialAccuracy,
+                            f1: initialAccuracy,
+                        }
                     },
                     treeMode: 'manual',
                     selectedNodePath: null,
