@@ -1,6 +1,7 @@
 import Markdown, { type Components, type ExtraProps } from "react-markdown";
 import rehypeMathjax from "rehype-mathjax";
 import rehypeRaw from "rehype-raw";
+import remarkFrontmatter from "remark-frontmatter";
 import remarkGfm from "remark-gfm";
 import remarkMath from "remark-math";
 
@@ -260,7 +261,7 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
 }) => {
     const content = (
         <Markdown
-            remarkPlugins={[remarkGfm, remarkMath]}
+            remarkPlugins={[remarkGfm, remarkMath, remarkFrontmatter]}
             rehypePlugins={[
                 [rehypeRaw, { passThrough: ["math", "inlineMath"] }],
                 rehypeMathjax,
