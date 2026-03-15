@@ -382,8 +382,7 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
             !autoLoadAttempted.current &&
             !currentModelData &&
             !isVisualizationLoading &&
-            lastParams &&
-            Object.keys(lastParams).length > 0
+            lastParams
         ) {
             autoLoadAttempted.current = true;
             loadVisualization(lastParams);

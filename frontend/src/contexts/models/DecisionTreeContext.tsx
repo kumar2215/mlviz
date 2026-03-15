@@ -275,7 +275,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
             !currentModelData &&
             !isModelLoading &&
             treeMode !== 'manual' &&
-            Object.keys(lastParams).length > 0
+            lastParams
         ) {
             console.log('[AutoLoad] Attempting to load stored model with params:', lastParams);
             autoLoadAttempted.current = true;
