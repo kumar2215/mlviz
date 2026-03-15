@@ -1,4 +1,5 @@
 import KMeansStep from "@/components/kmeans/clustering/step/Visualisation";
+import LinearRegressionStep from "@/components/linear/regression/step/Visualisation";
 import React from "react";
 
 interface StepComponentProps {
@@ -8,6 +9,7 @@ interface StepComponentProps {
 
 const componentMap: Record<string, React.ComponentType<any>> = {
     kmeans: KMeansStep,
+    linear: LinearRegressionStep,
 } as const;
 
 export const StepComponent: React.FC<StepComponentProps> = ({

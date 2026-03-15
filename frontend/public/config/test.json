@@ -97,30 +97,35 @@
             ],
             "edges": [
                 {
-                    "start": {
-                        "local_index": 0,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 1,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass"
-                    }
+                    "start": { "local_index": 0, "story_name": null },
+                    "end":   { "local_index": 1, "story_name": null },
+                    "condition": { "condition_type": "Bypass" }
                 },
                 {
-                    "start": {
-                        "local_index": 1,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 0,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass"
-                    }
+                    "start": { "local_index": 1, "story_name": null },
+                    "end":   { "local_index": 0, "story_name": null },
+                    "condition": { "condition_type": "Bypass" }
+                }
+            ]
+        },
+        "linear": {
+            "name": "linear",
+            "description": "Linear Regression",
+            "start_page": 0,
+            "nodes": [
+                { "index": 3233669327 },
+                { "index": 3050687251 }
+            ],
+            "edges": [
+                {
+                    "start": { "local_index": 0, "story_name": null },
+                    "end":   { "local_index": 1, "story_name": null },
+                    "condition": { "condition_type": "Bypass" }
+                },
+                {
+                    "start": { "local_index": 1, "story_name": null },
+                    "end":   { "local_index": 0, "story_name": null },
+                    "condition": { "condition_type": "Bypass" }
                 }
             ]
         }
@@ -192,6 +197,36 @@
             "model_name": "kmeans",
             "component_type": "train",
             "problem_type": "clustering"
+        },
+        "3233669327": {
+            "name": "Train: Optimal Line",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "linear",
+            "component_type": "train",
+            "problem_type": "regression",
+            "parameters": {
+                "feature_x": 0,
+                "fit_intercept": true,
+                "test_size": 0.2,
+                "random_state": 42,
+                "learning_rate": 0.01
+            }
+        },
+        "3050687251": {
+            "name": "Step: Gradient Descent",
+            "page_type": "dynamic",
+            "dynamic_type": "model",
+            "model_name": "linear",
+            "component_type": "step",
+            "problem_type": "regression",
+            "parameters": {
+                "feature_x": 0,
+                "fit_intercept": true,
+                "test_size": 0.2,
+                "random_state": 42,
+                "learning_rate": 0.01
+            }
         }
     }
 }

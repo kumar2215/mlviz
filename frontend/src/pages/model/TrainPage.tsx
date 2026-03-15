@@ -1,5 +1,5 @@
-import ClassifierResults from "@/components/ClassifierResults";
 import ModelOptionsForm from "@/components/input/ModelOptionsForm";
+import { Results } from "@/components/results/Results";
 import { TrainComponent } from "@/components/TrainComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
@@ -124,14 +124,13 @@ const TrainPage: React.FC<TrainPageProps> = ({
                 />
             </div>
 
-            {problem_type === "classifier" && (
-                <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
-                    <ClassifierResults
-                        metrics={data?.metrics}
-                        metadata={data?.metadata}
-                    />
-                </div>
-            )}
+            <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
+                <Results
+                    problem_type={problem_type}
+                    data={data as any}
+                />
+            </div>
+
         </div>
     );
 };

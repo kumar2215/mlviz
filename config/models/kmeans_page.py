@@ -9,6 +9,8 @@ from .base import ModelPage, ProblemType
 class KMeansTrainParameters(BaseModel):
     """Parameters for training KMeans"""
 
+    model_config = {"extra": "allow"}
+
     visualisation_features: list[int] = Field(
         default_factory=lambda: [0, 1], description="Feature indices to visualize"
     )

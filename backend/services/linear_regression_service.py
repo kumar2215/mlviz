@@ -13,6 +13,7 @@ from models import (
     LinearRegressionParameters,
     RegressionMetadata,
     RegressionMetrics,
+    RegressionMetricValues,
     RegressionDataset,
     PredefinedRegressionDataset,
 )
@@ -80,13 +81,13 @@ class LinearRegressionService:
         else:
             raise ValueError(f"Unknown predefined regression dataset: {name}")
 
-    def _compute_metrics(self, y_true: np.ndarray, y_pred: np.ndarray) -> RegressionMetrics:
+    def _compute_metrics(self, y_true: np.ndarray, y_pred: np.ndarray) -> RegressionMetricValues:
         """Compute regression metrics given true and predicted values."""
         r2 = float(r2_score(y_true, y_pred))
         mse = float(mean_squared_error(y_true, y_pred))
         rmse = float(np.sqrt(mse))
         mae = float(mean_absolute_error(y_true, y_pred))
-        return RegressionMetrics(r2=r2, mse=mse, rmse=rmse, mae=mae)
+        return RegressionMetricValues(r2=r2, mse=mse, rmse=rmse, mae=mae)
 
     async def visualise(
         self,
@@ -184,11 +185,18 @@ class LinearRegressionService:
 
         # Metrics on train set
         y_pred_train = model.predict(X_train)
-        train_metrics = self._compute_metrics(y_train, y_pred_train)
+        train_metric_values = self._compute_metrics(y_train, y_pred_train)
 
         # Metrics on test set
-        y_pred_test = model.predict(X_test)
-        test_metrics = self._compute_metrics(y_test, y_pred_test)
+        test_metric_values = None
+        if len(y_test) > 0:
+            y_pred_test = model.predict(X_test)
+            test_metric_values = self._compute_metrics(y_test, y_pred_test)
+
+        train_metrics = RegressionMetrics(
+            train=train_metric_values,
+            test=test_metric_values
+        )
 
         # All scatter points (full dataset, for display)
         x_display = X_full[:, feature_x_idx]
@@ -225,9 +233,40 @@ class LinearRegressionService:
                 "slope": slope,
                 "intercept": intercept,
             },
-            "train_metrics": train_metrics.model_dump(),
-            "test_metrics": test_metrics.model_dump(),
+            "metrics": train_metrics.model_dump(),
             "metadata": metadata.model_dump(),
+        }
+
+    async def evaluate(
+        self,
+        slope: float,
+        intercept: float,
+        points: List[List[float]],
+    ) -> Dict[str, Any]:
+        """Evaluate an arbitrary line against the given points.
+
+        Args:
+            slope: Slope of the line
+            intercept: Intercept of the line
+            points: List of [x, y] data points
+
+        Returns:
+            Dict with evaluation metrics.
+        """
+        pts = np.array(points, dtype=float)
+        x_vals = pts[:, 0]
+        y_true = pts[:, 1]
+
+        y_pred = slope * x_vals + intercept
+        metric_values = self._compute_metrics(y_true, y_pred)
+        
+        metrics = RegressionMetrics(
+            train=metric_values,
+        )
+
+        return {
+            "success": True,
+            "metrics": metrics.model_dump(),
         }
 
     async def step(
@@ -285,8 +324,11 @@ class LinearRegressionService:
         loss_after = float(np.mean(residuals_after ** 2))
 
         # Compute metrics for both before and after states
-        metrics_before = self._compute_metrics(y_true, y_pred_before)
-        metrics_after = self._compute_metrics(y_true, y_pred_after)
+        metrics_before_values = self._compute_metrics(y_true, y_pred_before)
+        metrics_after_values = self._compute_metrics(y_true, y_pred_after)
+        
+        metrics_before = RegressionMetrics(train=metrics_before_values)
+        metrics_after = RegressionMetrics(train=metrics_after_values)
 
         return {
             "success": True,

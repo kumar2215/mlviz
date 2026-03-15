@@ -105,12 +105,17 @@ export interface VisualizableModelContext<TModelData extends BaseModelData>
  * Models that support step-by-step interactive training should extend this.
  * This allows specialized pages for iterative algorithms like KMeans.
  */
-export interface StepableModelContext<TModelData extends BaseModelData, TStepResponse = any>
-    extends BaseModelContextType<TModelData> {
+export interface StepableModelContext<
+    TModelData extends BaseModelData,
+    TStepResponse = TModelData,
+    TStepRequest = Record<string, any>
+> extends BaseModelContextType<TModelData> {
     isStepLoading: boolean;
     stepError: string | null;
     stepData: TStepResponse | null;
-    performStep: (params: Record<string, any>) => Promise<TModelData | null>;
+    // Return type is TStepResponse|null; models re-declare performStep with their specific types.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    performStep: (params: TStepRequest) => Promise<any>;
 }
 
 /**

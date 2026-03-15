@@ -6,8 +6,8 @@ from .dataset import PageDataset
 
 # Type definitions
 Index = str
-ModelNames = Literal["decision_tree", "knn", "kmeans"]
-ModelComponentType = Literal["manual", "train", "predict", "viz_only"]
+ModelNames = Literal["decision_tree", "knn", "kmeans", "linear"]
+ModelComponentType = Literal["manual", "train", "predict", "viz_only", "step"]
 ProblemType = Literal["classifier", "clustering", "regression"]
 
 
@@ -53,6 +53,9 @@ class ModelPage(DynamicPageAbstract):
 
 
 class StaticParameters(BaseModel):
+    
+    model_config = {"extra": "allow"}
+
     text: Optional[str] = Field(
         None,
         description="Text content for the page",

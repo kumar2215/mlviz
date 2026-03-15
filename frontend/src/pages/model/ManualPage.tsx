@@ -1,20 +1,22 @@
-import ClassifierResults from "@/components/ClassifierResults";
 import { ManualComponent } from "@/components/ManualComponent";
+import { Results } from "@/components/results/Results";
 import { useModel } from "@/contexts/ModelContext";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelPage as ModelPageProps } from "@/types/story";
 import React, { useEffect, useRef } from "react";
 
-type ManualPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
+type ManualPageProps = Pick<
+    ModelPageProps,
+    "model_name" | "parameters" | "dataset" | "problem_type"
+>;
 
-const ManualPage: React.FC<ManualPageProps> = ({ 
+const ManualPage: React.FC<ManualPageProps> = ({
     model_name,
+    problem_type,
 }) => {
+    console.log("[ManualPage] ", problem_type);
 
-    const {
-        currentModelData,
-        resetModelData
-    } = useModel();
+    const { currentModelData, resetModelData } = useModel();
 
     const { recordManualEvaluate } = useHistoryRecorder();
 
@@ -36,8 +38,8 @@ const ManualPage: React.FC<ManualPageProps> = ({
             }
         }
     }, [currentModelData?.metrics]);
-    
-    console.log(currentModelData)
+
+    console.log(currentModelData);
     return (
         <div className="grid grid-cols-10 mx-auto w-full h-full">
             <div className="col-span-8 shadow-lg overflow-hidden min-h-0">
@@ -46,9 +48,9 @@ const ManualPage: React.FC<ManualPageProps> = ({
 
             <div className="col-span-2 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 min-h-0">
                 {currentModelData && (
-                    <ClassifierResults 
-                        metrics={currentModelData.metrics} 
-                        metadata={currentModelData.metadata} 
+                    <Results
+                        problem_type={problem_type}
+                        data={currentModelData as any}
                     />
                 )}
             </div>

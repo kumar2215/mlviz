@@ -837,6 +837,226 @@
         }
       }
     },
+    "/api/linear/params": {
+      "get": {
+        "tags": [
+          "Linear Regression"
+        ],
+        "summary": "Get Parameters",
+        "description": "Get the parameters for Linear Regression.\n\nReturns:\n    List[ParameterInfo]: List of parameters for Linear Regression",
+        "operationId": "get_parameters_api_linear_params_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/SelectParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/IntParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NumberParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/FloatParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/AnyParameterInfo"
+                      }
+                    ],
+                    "discriminator": {
+                      "propertyName": "type",
+                      "mapping": {
+                        "select": "#/components/schemas/SelectParameterInfo",
+                        "int": "#/components/schemas/IntParameterInfo",
+                        "number": "#/components/schemas/NumberParameterInfo",
+                        "float": "#/components/schemas/FloatParameterInfo",
+                        "any": "#/components/schemas/AnyParameterInfo"
+                      }
+                    }
+                  },
+                  "type": "array",
+                  "title": "Response Get Parameters Api Linear Params Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/linear/visualise": {
+      "post": {
+        "tags": [
+          "Linear Regression"
+        ],
+        "summary": "Visualise",
+        "description": "Return raw scatter data for the chosen feature vs target.\n\nNo model fitting is performed. The frontend renders the scatter plot\nand computes R\u00b2 live for any user-controlled line.\n\nArgs:\n    request: Visualisation request with parameters and optional dataset\n\nRaises:\n    HTTPException: If visualisation data generation fails\n\nReturns:\n    LinearRegressionVisualisationResponse: Scatter points, axis ranges, metadata",
+        "operationId": "visualise_api_linear_visualise_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinearRegressionVisualisationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinearRegressionVisualisationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/linear/train": {
+      "post": {
+        "tags": [
+          "Linear Regression"
+        ],
+        "summary": "Train",
+        "description": "Fit an OLS Linear Regression model and return the optimal line + metrics.\n\nSplits the dataset into train/test sets, fits on the chosen feature (feature_x),\nand returns the optimal slope and intercept alongside full regression metrics.\n\nThe frontend uses the optimal line as the \"target\" the user tries to\nmatch interactively with a slider. R\u00b2 is computed on the frontend from\nthe returned points.\n\nArgs:\n    request: Training request with parameters and optional dataset\n\nRaises:\n    HTTPException: If training fails\n\nReturns:\n    LinearRegressionTrainResponse: Scatter points, optimal line, train/test metrics",
+        "operationId": "train_api_linear_train_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinearRegressionTrainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinearRegressionTrainResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/linear/step": {
+      "post": {
+        "tags": [
+          "Linear Regression"
+        ],
+        "summary": "Step",
+        "description": "Perform a single gradient descent step.\n\nFully stateless \u2014 the frontend owns the current slope/intercept and\npasses them on each 'Next Step' button press. The server computes one\ngradient descent update and returns the proposed new line.\n\nThe user can then:\n- **Accept**: update frontend state with new_slope/new_intercept\n- **Reject**: keep the current slope/intercept\n\nArgs:\n    request: Current line parameters + data points\n\nRaises:\n    HTTPException: If gradient descent step fails\n\nReturns:\n    LinearRegressionStepResponse: Proposed new line, gradients, loss before/after,\n        and full regression metrics for both current and proposed states",
+        "operationId": "step_api_linear_step_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinearRegressionStepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinearRegressionStepResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/linear/evaluate": {
+      "post": {
+        "tags": [
+          "Linear Regression"
+        ],
+        "summary": "Evaluate",
+        "description": "Evaluate an arbitrary line against the given points.\n\nArgs:\n    request: Slope, intercept, and data points\n\nRaises:\n    HTTPException: If evaluation fails\n\nReturns:\n    LinearRegressionEvaluateResponse: Regression metrics for the line",
+        "operationId": "evaluate_api_linear_evaluate_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinearRegressionEvaluateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinearRegressionEvaluateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health Check",
@@ -925,92 +1145,7 @@
         "title": "CacheInfoResponse",
         "description": "Response model for cache information."
       },
-      "ClassificationMetadata": {
-        "properties": {
-          "feature_names": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Feature Names"
-          },
-          "class_names": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Class Names"
-          },
-          "n_features": {
-            "type": "integer",
-            "title": "N Features"
-          },
-          "n_classes": {
-            "type": "integer",
-            "title": "N Classes"
-          },
-          "dataset_name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Dataset Name"
-          }
-        },
-        "type": "object",
-        "required": [
-          "feature_names",
-          "class_names",
-          "n_features",
-          "n_classes"
-        ],
-        "title": "ClassificationMetadata",
-        "description": "Metadata for classifier responses."
-      },
-      "ClassificationMetrics": {
-        "properties": {
-          "confusion_matrix": {
-            "items": {
-              "items": {
-                "type": "integer"
-              },
-              "type": "array"
-            },
-            "type": "array",
-            "title": "Confusion Matrix"
-          },
-          "accuracy": {
-            "type": "number",
-            "title": "Accuracy"
-          },
-          "precision": {
-            "type": "number",
-            "title": "Precision"
-          },
-          "recall": {
-            "type": "number",
-            "title": "Recall"
-          },
-          "f1": {
-            "type": "number",
-            "title": "F1"
-          }
-        },
-        "type": "object",
-        "required": [
-          "confusion_matrix",
-          "accuracy",
-          "precision",
-          "recall",
-          "f1"
-        ],
-        "title": "ClassificationMetrics"
-      },
-      "Dataset": {
+      "ClassificationDataset": {
         "properties": {
           "type": {
             "type": "string",
@@ -1078,8 +1213,8 @@
           },
           "test_size": {
             "type": "number",
-            "maximum": 0.5,
-            "minimum": 0.1,
+            "maximum": 0.9,
+            "minimum": 0.0,
             "title": "Test Size",
             "default": 0.25
           },
@@ -1095,8 +1230,115 @@
           "X",
           "y"
         ],
-        "title": "Dataset",
-        "description": "Complete dataset with features and targets."
+        "title": "ClassificationDataset",
+        "description": "Complete dataset with features and targets (for classification)."
+      },
+      "ClassificationMetadata": {
+        "properties": {
+          "feature_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Feature Names"
+          },
+          "class_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Class Names"
+          },
+          "n_features": {
+            "type": "integer",
+            "title": "N Features"
+          },
+          "n_classes": {
+            "type": "integer",
+            "title": "N Classes"
+          },
+          "dataset_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_names",
+          "class_names",
+          "n_features",
+          "n_classes"
+        ],
+        "title": "ClassificationMetadata",
+        "description": "Metadata for classifier responses."
+      },
+      "ClassificationMetricValues": {
+        "properties": {
+          "confusion_matrix": {
+            "items": {
+              "items": {
+                "type": "integer"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Confusion Matrix"
+          },
+          "accuracy": {
+            "type": "number",
+            "title": "Accuracy"
+          },
+          "precision": {
+            "type": "number",
+            "title": "Precision"
+          },
+          "recall": {
+            "type": "number",
+            "title": "Recall"
+          },
+          "f1": {
+            "type": "number",
+            "title": "F1"
+          }
+        },
+        "type": "object",
+        "required": [
+          "confusion_matrix",
+          "accuracy",
+          "precision",
+          "recall",
+          "f1"
+        ],
+        "title": "ClassificationMetricValues"
+      },
+      "ClassificationMetrics": {
+        "properties": {
+          "train": {
+            "$ref": "#/components/schemas/ClassificationMetricValues"
+          },
+          "test": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ClassificationMetricValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "train"
+        ],
+        "title": "ClassificationMetrics"
       },
       "DatasetInfo": {
         "properties": {
@@ -1359,7 +1601,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -1368,7 +1610,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -2051,7 +2293,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -2060,7 +2302,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -2261,7 +2503,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -2270,7 +2512,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -2521,7 +2763,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -2530,7 +2772,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -2734,7 +2976,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -2743,7 +2985,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -2906,7 +3148,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -2915,7 +3157,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -3129,6 +3371,404 @@
         "title": "LeafNode",
         "description": "Leaf node in a decision tree (no further splits)."
       },
+      "LinearRegressionEvaluateRequest": {
+        "properties": {
+          "slope": {
+            "type": "number",
+            "title": "Slope",
+            "description": "Slope of the line to evaluate"
+          },
+          "intercept": {
+            "type": "number",
+            "title": "Intercept",
+            "description": "Intercept of the line to evaluate"
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points",
+            "description": "Data points [[x, y], ...] to evaluate on"
+          }
+        },
+        "type": "object",
+        "required": [
+          "slope",
+          "intercept",
+          "points"
+        ],
+        "title": "LinearRegressionEvaluateRequest",
+        "description": "Request model for evaluating an arbitrary line."
+      },
+      "LinearRegressionEvaluateResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/RegressionMetrics",
+            "description": "Regression metrics for the line"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "metrics"
+        ],
+        "title": "LinearRegressionEvaluateResponse",
+        "description": "Response model for line evaluation."
+      },
+      "LinearRegressionParameters": {
+        "properties": {
+          "feature_x": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Feature X",
+            "description": "Index of the feature to use as the predictor (x-axis)",
+            "default": 0
+          },
+          "fit_intercept": {
+            "type": "boolean",
+            "title": "Fit Intercept",
+            "description": "Whether to include an intercept (bias) term in the model",
+            "default": true
+          },
+          "test_size": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": 0.05,
+            "title": "Test Size",
+            "description": "Proportion of data to hold out as the test set",
+            "default": 0.2
+          },
+          "random_state": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Random State",
+            "description": "Random seed for reproducibility of the train/test split",
+            "default": 42
+          },
+          "learning_rate": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 1e-06,
+            "title": "Learning Rate",
+            "description": "Step size for each gradient descent iteration",
+            "default": 0.01
+          }
+        },
+        "type": "object",
+        "title": "LinearRegressionParameters",
+        "description": "Parameters for Simple Linear Regression."
+      },
+      "LinearRegressionStepRequest": {
+        "properties": {
+          "slope": {
+            "type": "number",
+            "title": "Slope",
+            "description": "Current slope of the line"
+          },
+          "intercept": {
+            "type": "number",
+            "title": "Intercept",
+            "description": "Current intercept of the line"
+          },
+          "learning_rate": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Learning Rate",
+            "description": "Step size for gradient descent",
+            "default": 0.01
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points",
+            "description": "Data points [[x, y], ...] to compute gradients on"
+          },
+          "fit_intercept": {
+            "type": "boolean",
+            "title": "Fit Intercept",
+            "description": "Whether the intercept should be updated",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "slope",
+          "intercept",
+          "points"
+        ],
+        "title": "LinearRegressionStepRequest",
+        "description": "Request model for a single gradient descent step."
+      },
+      "LinearRegressionStepResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "slope": {
+            "type": "number",
+            "title": "Slope",
+            "description": "Current slope (before update)"
+          },
+          "intercept": {
+            "type": "number",
+            "title": "Intercept",
+            "description": "Current intercept (before update)"
+          },
+          "metrics_before": {
+            "$ref": "#/components/schemas/RegressionMetrics",
+            "description": "Regression metrics for the current line"
+          },
+          "new_slope": {
+            "type": "number",
+            "title": "New Slope",
+            "description": "Proposed slope after one gradient descent step"
+          },
+          "new_intercept": {
+            "type": "number",
+            "title": "New Intercept",
+            "description": "Proposed intercept after one gradient descent step"
+          },
+          "metrics_after": {
+            "$ref": "#/components/schemas/RegressionMetrics",
+            "description": "Regression metrics for the proposed new line"
+          },
+          "grad_slope": {
+            "type": "number",
+            "title": "Grad Slope",
+            "description": "Gradient of loss w.r.t. slope"
+          },
+          "grad_intercept": {
+            "type": "number",
+            "title": "Grad Intercept",
+            "description": "Gradient of loss w.r.t. intercept"
+          },
+          "loss_before": {
+            "type": "number",
+            "title": "Loss Before",
+            "description": "MSE loss before the update"
+          },
+          "loss_after": {
+            "type": "number",
+            "title": "Loss After",
+            "description": "MSE loss after the proposed update"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "slope",
+          "intercept",
+          "metrics_before",
+          "new_slope",
+          "new_intercept",
+          "metrics_after",
+          "grad_slope",
+          "grad_intercept",
+          "loss_before",
+          "loss_after"
+        ],
+        "title": "LinearRegressionStepResponse",
+        "description": "Response model for a single gradient descent step."
+      },
+      "LinearRegressionTrainRequest": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/components/schemas/LinearRegressionParameters",
+            "description": "Linear regression parameters"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/RegressionDataset"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PredefinedRegressionDataset"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "custom_regression": "#/components/schemas/RegressionDataset",
+                    "predefined_regression": "#/components/schemas/PredefinedRegressionDataset"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset",
+            "description": "Regression dataset. Defaults to sklearn diabetes."
+          }
+        },
+        "type": "object",
+        "title": "LinearRegressionTrainRequest",
+        "description": "Request model for linear regression OLS training."
+      },
+      "LinearRegressionTrainResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points",
+            "description": "All scatter points [[x, y], ...] for display"
+          },
+          "x_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X Range",
+            "description": "[min, max] range for the x-axis (with margin)"
+          },
+          "y_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y Range",
+            "description": "[min, max] range for the y-axis (with margin)"
+          },
+          "line": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Line",
+            "description": "Optimal OLS line: { slope, intercept }"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/RegressionMetrics",
+            "description": "Regression metrics on the training set"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RegressionMetadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "points",
+          "x_range",
+          "y_range",
+          "line",
+          "metrics",
+          "metadata"
+        ],
+        "title": "LinearRegressionTrainResponse",
+        "description": "Response model for linear regression OLS training."
+      },
+      "LinearRegressionVisualisationRequest": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/components/schemas/LinearRegressionParameters",
+            "description": "Linear regression parameters"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/RegressionDataset"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PredefinedRegressionDataset"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "custom_regression": "#/components/schemas/RegressionDataset",
+                    "predefined_regression": "#/components/schemas/PredefinedRegressionDataset"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset",
+            "description": "Regression dataset. Defaults to sklearn diabetes."
+          }
+        },
+        "type": "object",
+        "title": "LinearRegressionVisualisationRequest",
+        "description": "Request model for linear regression scatter visualisation."
+      },
+      "LinearRegressionVisualisationResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points",
+            "description": "Scatter points as [[x, y], ...] using the chosen feature vs target"
+          },
+          "x_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X Range",
+            "description": "[min, max] range for the x-axis (with margin)"
+          },
+          "y_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y Range",
+            "description": "[min, max] range for the y-axis (with margin)"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/RegressionMetadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "points",
+          "x_range",
+          "y_range",
+          "metadata"
+        ],
+        "title": "LinearRegressionVisualisationResponse",
+        "description": "Response model for linear regression scatter visualisation."
+      },
       "ManualFeatureStatsRequest": {
         "properties": {
           "feature": {
@@ -3170,7 +3810,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -3179,7 +3819,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -3321,7 +3961,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -3330,7 +3970,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -3445,7 +4085,7 @@
               {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/Dataset"
+                    "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
                     "$ref": "#/components/schemas/PredefinedDataset"
@@ -3454,7 +4094,7 @@
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
-                    "custom": "#/components/schemas/Dataset",
+                    "custom": "#/components/schemas/ClassificationDataset",
                     "predefined": "#/components/schemas/PredefinedDataset"
                   }
                 }
@@ -3647,8 +4287,8 @@
           },
           "test_size": {
             "type": "number",
-            "maximum": 0.5,
-            "minimum": 0.1,
+            "maximum": 0.9,
+            "minimum": 0.0,
             "title": "Test Size",
             "default": 0.25
           },
@@ -3664,7 +4304,234 @@
           "name"
         ],
         "title": "PredefinedDataset",
-        "description": "Reference to a predefined dataset."
+        "description": "Reference to a predefined (classification) dataset."
+      },
+      "PredefinedRegressionDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "predefined_regression",
+            "title": "Type",
+            "description": "Discriminator for Union type",
+            "default": "predefined_regression"
+          },
+          "name": {
+            "type": "string",
+            "enum": [
+              "diabetes",
+              "california_housing"
+            ],
+            "title": "Name",
+            "default": "diabetes"
+          },
+          "test_size": {
+            "type": "number",
+            "maximum": 0.9,
+            "minimum": 0.0,
+            "title": "Test Size",
+            "default": 0.25
+          },
+          "random_state": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Random State",
+            "default": 2025
+          }
+        },
+        "type": "object",
+        "title": "PredefinedRegressionDataset",
+        "description": "Reference to a predefined regression dataset."
+      },
+      "RegressionDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "custom_regression",
+            "title": "Type",
+            "description": "Discriminator for Union type",
+            "default": "custom_regression"
+          },
+          "X": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "X",
+            "description": "Feature matrix"
+          },
+          "y": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y",
+            "description": "Continuous target vector"
+          },
+          "feature_names": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feature Names"
+          },
+          "target_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Target Name",
+            "default": "target"
+          },
+          "info": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DatasetInfo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "test_size": {
+            "type": "number",
+            "maximum": 0.9,
+            "minimum": 0.0,
+            "title": "Test Size",
+            "default": 0.25
+          },
+          "random_state": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Random State",
+            "default": 2025
+          }
+        },
+        "type": "object",
+        "required": [
+          "X",
+          "y"
+        ],
+        "title": "RegressionDataset",
+        "description": "Complete dataset with features and a continuous numeric target (for regression)."
+      },
+      "RegressionMetadata": {
+        "properties": {
+          "feature_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Feature Names"
+          },
+          "n_features": {
+            "type": "integer",
+            "title": "N Features"
+          },
+          "n_samples": {
+            "type": "integer",
+            "title": "N Samples"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "dataset_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Name"
+          },
+          "feature_x_index": {
+            "type": "integer",
+            "title": "Feature X Index"
+          },
+          "feature_x_name": {
+            "type": "string",
+            "title": "Feature X Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_names",
+          "n_features",
+          "n_samples",
+          "target_name",
+          "feature_x_index",
+          "feature_x_name"
+        ],
+        "title": "RegressionMetadata",
+        "description": "Metadata for regression model responses."
+      },
+      "RegressionMetricValues": {
+        "properties": {
+          "r2": {
+            "type": "number",
+            "title": "R2"
+          },
+          "mse": {
+            "type": "number",
+            "title": "Mse"
+          },
+          "rmse": {
+            "type": "number",
+            "title": "Rmse"
+          },
+          "mae": {
+            "type": "number",
+            "title": "Mae"
+          }
+        },
+        "type": "object",
+        "required": [
+          "r2",
+          "mse",
+          "rmse",
+          "mae"
+        ],
+        "title": "RegressionMetricValues",
+        "description": "Metrics for regression model responses."
+      },
+      "RegressionMetrics": {
+        "properties": {
+          "train": {
+            "$ref": "#/components/schemas/RegressionMetricValues"
+          },
+          "test": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RegressionMetricValues"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "train"
+        ],
+        "title": "RegressionMetrics",
+        "description": "Metrics for regression model responses."
       },
       "SelectParameterInfo": {
         "properties": {

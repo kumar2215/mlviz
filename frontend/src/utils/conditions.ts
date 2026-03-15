@@ -1,6 +1,12 @@
 import type { ModelOption } from "@/types/parameters";
 import type { Condition, Parameters, StoryHistory } from "@/types/story";
 
+function getNestedValue(obj: any, path: string): any {
+    if (!obj || !path) return undefined;
+    if (obj[path] !== undefined) return obj[path]; // Fallback for flat structure
+    return path.split('.').reduce((acc, part) => (acc && acc[part] !== undefined) ? acc[part] : undefined, obj);
+}
+
 function parameterCheck(expected: any, actual: any, comparator: string) {
     switch (comparator) {
         case "=":
@@ -79,7 +85,7 @@ export function isConditionMet(
         case "Metric": {
             const entries = history?.entries || [];
             return entries.some((e) => {
-                const metricValue = e.metrics?.[condition.metric];
+                const metricValue = getNestedValue(e.metrics, condition.metric);
                 return (
                     metricValue != null &&
                     parameterCheck(

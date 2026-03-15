@@ -1,4 +1,4 @@
-from .base import ClassificationMetadata, ClassificationMetrics, RegressionMetrics
+from .base import ClassificationMetadata, ClassificationMetrics, ClassificationMetricValues, RegressionMetrics, RegressionMetricValues
 from .dataset import (
     ClassificationDataset,
     Dataset,  # backward-compat alias for ClassificationDataset

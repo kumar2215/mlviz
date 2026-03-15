@@ -719,11 +719,8 @@ class LinearRegressionTrainResponse(BaseModel):
     line: Dict[str, float] = Field(
         description="Optimal OLS line: { slope, intercept }"
     )
-    train_metrics: RegressionMetrics = Field(
+    metrics: RegressionMetrics = Field(
         description="Regression metrics on the training set"
-    )
-    test_metrics: RegressionMetrics = Field(
-        description="Regression metrics on the test set"
     )
     metadata: RegressionMetadata
 
@@ -742,6 +739,23 @@ class LinearRegressionStepRequest(BaseModel):
     fit_intercept: bool = Field(
         True, description="Whether the intercept should be updated"
     )
+
+
+class LinearRegressionEvaluateRequest(BaseModel):
+    """Request model for evaluating an arbitrary line."""
+
+    slope: float = Field(description="Slope of the line to evaluate")
+    intercept: float = Field(description="Intercept of the line to evaluate")
+    points: List[List[float]] = Field(
+        description="Data points [[x, y], ...] to evaluate on"
+    )
+
+
+class LinearRegressionEvaluateResponse(BaseModel):
+    """Response model for line evaluation."""
+
+    success: bool
+    metrics: RegressionMetrics = Field(description="Regression metrics for the line")
 
 
 class LinearRegressionStepResponse(BaseModel):

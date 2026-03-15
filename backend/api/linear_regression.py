@@ -7,6 +7,8 @@ from .models import (
     LinearRegressionTrainResponse,
     LinearRegressionStepRequest,
     LinearRegressionStepResponse,
+    LinearRegressionEvaluateRequest,
+    LinearRegressionEvaluateResponse,
     ParameterInfo,
 )
 from services import linear_regression_service
@@ -117,5 +119,31 @@ async def step(
             fit_intercept=request.fit_intercept,
         )
         return LinearRegressionStepResponse(**result)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/evaluate", response_model=LinearRegressionEvaluateResponse)
+async def evaluate(
+    request: LinearRegressionEvaluateRequest,
+) -> LinearRegressionEvaluateResponse:
+    """Evaluate an arbitrary line against the given points.
+
+    Args:
+        request: Slope, intercept, and data points
+
+    Raises:
+        HTTPException: If evaluation fails
+
+    Returns:
+        LinearRegressionEvaluateResponse: Regression metrics for the line
+    """
+    try:
+        result = await linear_regression_service.evaluate(
+            slope=request.slope,
+            intercept=request.intercept,
+            points=request.points,
+        )
+        return LinearRegressionEvaluateResponse(**result)
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

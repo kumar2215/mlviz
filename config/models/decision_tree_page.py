@@ -9,23 +9,19 @@ from .base import ModelPage, ProblemType
 class DTreeManualParameters(BaseModel):
     """Parameters for manual decision tree building"""
 
-    pass
+    model_config = {"extra": "allow"}
 
 
 class DTreeTrainParameters(BaseModel):
     """Parameters for training a decision tree"""
 
-    max_depth: Optional[int] = Field(None, description="Maximum depth of the tree")
-    min_samples_split: int = Field(2, description="Minimum samples required to split")
-    min_samples_leaf: int = Field(
-        1, description="Minimum samples required at leaf node"
-    )
+    model_config = {"extra": "allow"}
 
 
 class DTreePredictParameters(BaseModel):
     """Parameters for decision tree prediction"""
 
-    pass
+    model_config = {"extra": "allow"}
 
 
 # Pages
