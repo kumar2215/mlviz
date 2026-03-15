@@ -50,9 +50,25 @@ export function isConditionMet(
             );
         }
 
-        case "Wait":
-            // TODO: implement timer-based wait
-            return true;
+        case "Wait": {
+            const history = state["__history"] as StoryHistory | undefined;
+            const now = (state["__now"] as unknown as number | undefined) ?? Date.now();
+            const entries = history?.entries || [];
+
+            let lastVisitTime = 0;
+            // Find the most recent page_visit where the timer started
+            for (let i = entries.length - 1; i >= 0; i--) {
+                if (entries[i].type === "page_visit") {
+                    lastVisitTime = entries[i].timestamp;
+                    break;
+                }
+            }
+            
+            if (lastVisitTime > 0) {
+                return (now - lastVisitTime) / 1000 >= condition.wait;
+            }
+            return false;
+        }
 
         case "Button": {
             const entries = history?.entries || [];
@@ -84,6 +100,25 @@ export function isConditionMet(
 
         case "Metric": {
             const entries = history?.entries || [];
+            const mode = condition.evaluation_mode || "any";
+
+            if (mode === "latest") {
+                // Find the latest entry that has the target metric
+                for (let i = entries.length - 1; i >= 0; i--) {
+                    const e = entries[i];
+                    const metricValue = getNestedValue(e.metrics, condition.metric);
+                    if (metricValue != null) {
+                        return parameterCheck(
+                            condition.value,
+                            metricValue,
+                            condition.comparator
+                        );
+                    }
+                }
+                return false;
+            }
+
+            // "any" mode: look at all entries
             return entries.some((e) => {
                 const metricValue = getNestedValue(e.metrics, condition.metric);
                 return (
@@ -145,7 +180,8 @@ export function displayCondition(condition: Condition): string {
             return `Visit page ${condition.page_id}`;
 
         case "Metric":
-            return `Achieve ${condition.metric} ${condition.comparator} ${condition.value}`;
+            const modeText = condition.evaluation_mode === "latest" ? " (latest result)" : "";
+            return `Achieve ${condition.metric} ${condition.comparator} ${condition.value}${modeText}`;
 
         default: {
             const exhaustiveCheck: never = condition;
