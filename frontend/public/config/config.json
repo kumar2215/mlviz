@@ -54,9 +54,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "Using decision trees?",
-            "description": "Learn how decision trees can be used"
+            "description": "Learn how decision trees can be used",
+            "wait": 2
           }
         },
         {
@@ -69,9 +70,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "Terminologies",
-            "description": "Learn about terminologies within decision tree"
+            "description": "Learn about terminologies within decision tree",
+            "wait": 2
           }
         },
         {
@@ -84,9 +86,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "What is Iris?",
-            "description": "Learn about the dataset we'll be playing with"
+            "description": "Learn about the dataset we'll be playing with",
+            "wait": 2
           }
         },
         {
@@ -99,9 +102,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "Sample prediction",
-            "description": "Try out how a \"set of questions\" works as a decision tree!"
+            "description": "Try out how a \"set of questions\" works as a decision tree!",
+            "wait": 2
           }
         },
         {
@@ -148,9 +152,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "Training with hyperparameters",
-            "description": "Play around with hyperparameters!"
+            "description": "Play around with hyperparameters!",
+            "wait": 2
           }
         },
         {
@@ -182,9 +187,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "Build your own tree!",
-            "description": "Try to build your own tree, using the same information the algorithms do!"
+            "description": "Try to build your own tree, using the same information the algorithms do!",
+            "wait": 2
           }
         },
         {
@@ -202,7 +208,8 @@
             "description": "Get your accuracy >= 0.9!",
             "metric": "test.accuracy",
             "comparator": ">=",
-            "value": 0.9
+            "value": 0.9,
+            "evaluation_mode": "latest"
           }
         },
         {
@@ -215,9 +222,10 @@
             "story_name": null
           },
           "condition": {
-            "condition_type": "Bypass",
+            "condition_type": "Wait",
             "name": "Wrap up!",
-            "description": "Congrats!"
+            "description": "Congrats!",
+            "wait": 2
           }
         }
       ]

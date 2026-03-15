@@ -24,6 +24,14 @@ export const StoryPage: React.FC<StoryPageProps> = ({
     const [currentPageId, setCurrentPageId] = useState<number>(initialPageId);
     const { storyState, addEdge, popPath } = useCurrentStory();
     const { recordPageVisit } = useHistoryRecorder();
+    const prevRecordedPage = React.useRef<number | null>(null);
+
+    React.useEffect(() => {
+        if (prevRecordedPage.current !== currentPageId) {
+            recordPageVisit(currentPageId);
+            prevRecordedPage.current = currentPageId;
+        }
+    }, [currentPageId]);
 
     const currentPage = pages[story.nodes[currentPageId].index];
 
@@ -42,7 +50,6 @@ export const StoryPage: React.FC<StoryPageProps> = ({
         });
         // Record the CURRENT page in history before navigating away
         addEdge({ local_index: currentPageId, story_name: null });
-        recordPageVisit(currentPageId);
         setCurrentPageId(pageId);
     };
 

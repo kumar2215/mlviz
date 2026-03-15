@@ -209,7 +209,7 @@ def render_edge_list(
                 )
             
             with col_cond:
-                condition_types = ["Bypass", "Parameter", "Time", "Button", "Lambda", "Slide", "ActionCount", "PageVisited", "Metric"]
+                condition_types = ["Bypass", "Parameter", "Wait", "Button", "Lambda", "Slide", "ActionCount", "PageVisited", "Metric"]
                 current_cond_type = edge.get("condition", {}).get("condition_type", "Bypass")
                 cond_type = st.selectbox(
                     "Condition",
@@ -395,12 +395,13 @@ def render_condition_config(
     elif condition_type == "Slide":
         condition["slide_name"] = get_field("slide_name", "slide_name", "")
         condition["slide_description"] = get_field("slide_description", "slide_desc", "")
-    elif condition_type == "Time":
+    elif condition_type == "Wait":
         condition["wait"] = get_field("wait", "wait", 5)
     elif condition_type == "Metric":
         condition["metric"] = get_field("metric", "metric", "accuracy")
         condition["comparator"] = get_field("comparator", "mcomp", ">=")
         condition["value"] = get_field("value", "mval", 0.9)
+        condition["evaluation_mode"] = get_field("evaluation_mode", "mevalmode", "any")
     elif condition_type == "Lambda":
         condition["exec_str"] = get_field("exec_str", "lambda", "")
 
@@ -451,7 +452,7 @@ def render_condition_config(
                     key=f"{key_prefix}_val_{edge_index}"
                 )
                 
-            elif condition_type == "Time":
+            elif condition_type == "Wait":
                 st.number_input(
                     "Wait (seconds)",
                     min_value=0,
@@ -539,6 +540,15 @@ def render_condition_config(
                     value=float(existing_condition.get("value", 0.9)),
                     key=f"{key_prefix}_mval_{edge_index}",
                     format="%.4f"
+                )
+                eval_modes = ["any", "latest"]
+                default_eval_mode = existing_condition.get("evaluation_mode", "any")
+                st.selectbox(
+                    "Evaluation Mode",
+                    eval_modes,
+                    index=eval_modes.index(default_eval_mode) if default_eval_mode in eval_modes else 0,
+                    key=f"{key_prefix}_mevalmode_{edge_index}",
+                    help="Choose whether to evaluate against 'any' past metric entry or only the 'latest' one."
                 )
     
     return condition
