@@ -414,8 +414,7 @@ const KNNProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
             !autoLoadAttempted.current &&
             !visualizationData &&
             !isVisualizationLoading &&
-            lastParams &&
-            Object.keys(lastParams).length > 0
+            lastParams
         ) {
             autoLoadAttempted.current = true;
             loadVisualization(lastParams);
