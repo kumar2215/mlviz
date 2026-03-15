@@ -2,10 +2,10 @@ import NavigationButton from "@/components/navigation/NavigationButton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
-import type { Edge } from "@/types/story";
+import type { Edge, Parameters } from "@/types/story";
 import { displayCondition, isConditionMet } from "@/utils/conditions";
 import { ArrowLeft, Route } from "lucide-react";
-import { useContext } from "react";
+import { useContext, useEffect, useState } from "react";
 
 interface NavigationBarProps {
     edges: Edge[];
@@ -19,7 +19,21 @@ const NavigationBar: React.FC<NavigationBarProps> = ({ edges, handler, onBack, c
     if (!context) throw new Error("Must be within CurrentStoryProvider");
     const { storyState } = context;
 
-    const conditionState = { ...storyState.params, __history: storyState.history };
+    // Timer state for "Wait" conditions
+    const [now, setNow] = useState(Date.now());
+
+    useEffect(() => {
+        const hasWaitConditions = edges.some(e => e.condition.condition_type === "Wait");
+        if (!hasWaitConditions) return;
+
+        const intervalId = setInterval(() => {
+            setNow(Date.now());
+        }, 250); // Re-evaluate roughly 4 times a second
+
+        return () => clearInterval(intervalId);
+    }, [edges]);
+
+    const conditionState = { ...storyState.params, __history: storyState.history, __now: now } as unknown as Record<string, Parameters>;
 
     const completeEdges = edges.filter((a) =>
         isConditionMet(a.condition, conditionState),

@@ -97,6 +97,7 @@ export interface MetricCheck extends BaseCondition {
     metric: string;
     comparator: "<" | "<=" | ">=" | ">" | "=";
     value: number;
+    evaluation_mode?: "any" | "latest";
 }
 
 export type Condition =

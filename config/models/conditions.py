@@ -24,7 +24,7 @@ class ParameterCheck(BaseCondition):
     value: Any
 
 class TimeCheck(BaseCondition):
-    condition_type: Literal["Time"] = "Time"
+    condition_type: Literal["Wait"] = "Wait"
     wait: int
 
 class ButtonPress(BaseCondition):
@@ -61,6 +61,7 @@ class MetricCheck(BaseCondition):
     metric: str
     comparator: Literal["<", "<=", ">=", ">", "="]
     value: float
+    evaluation_mode: Optional[Literal["any", "latest"]] = "any"
 
 # Condition defined LAST, using actual classes
 Condition = Annotated[
