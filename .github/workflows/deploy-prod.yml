@@ -19,7 +19,7 @@ on:
 #   Leave PAGES_DOMAIN empty and set PAGES_BASE_PATH to your repo sub-path.
 # ────────────────────────────────────────────────────────────────────────────
 env:
-    PAGES_DOMAIN: "viz.minima.fit"
+    PAGES_DOMAIN: ""
     PAGES_BASE_PATH: "/mlviz"
 
     PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
