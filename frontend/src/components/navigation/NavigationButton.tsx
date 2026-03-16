@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
-import type { Edge } from "@/types/story";
-import { displayCondition, isConditionMet } from "@/utils/conditions";
+import type { Edge, Parameters } from "@/types/story";
+import { displayCondition, getWaitTimeRemaining, isConditionMet } from "@/utils/conditions";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -10,11 +10,13 @@ import { useNavigate } from "react-router-dom";
 interface NavigationButtonProps {
     edge: Edge;
     handler: (h: number) => void;
+    conditionState?: Record<string, Parameters>;
 }
 
 const NavigationButton: React.FC<NavigationButtonProps> = ({
     edge,
     handler,
+    conditionState,
 }) => {
     const context = useContext(CurrentStoryContext);
     if (!context) throw new Error("Must be within CurrentStoryProvider");
@@ -22,10 +24,12 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
 
     const navigate = useNavigate();
 
-    const isNavigable = isConditionMet(edge.condition, {
+    const _conditionState = conditionState ?? ({
         ...storyState.params,
         __history: storyState.history,
-    });
+    } as unknown as Record<string, Parameters>);
+
+    const isNavigable = isConditionMet(edge.condition, _conditionState);
 
     const goToNextPage = () => {
         const edgeNode = edge.end;
@@ -44,7 +48,14 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         }
     };
 
-    const statusText = isNavigable ? "Complete" : "Incomplete";
+    let statusText = isNavigable ? "Complete" : "Incomplete";
+    if (!isNavigable && edge.condition.condition_type === "Wait") {
+        const remaining = getWaitTimeRemaining(edge.condition, _conditionState);
+        if (remaining > 0) {
+            statusText = `${Math.ceil(remaining)}s`;
+        }
+    }
+    
     const title = edge.condition.name ?? displayCondition(edge.condition);
     const description = edge.condition.description;
 
@@ -81,11 +92,11 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                         ${isNavigable ? "bg-emerald-200/60" : "bg-stone-200/60 hover:"}
                         `}
                     >
-                        <span className="text-[0.5rem] font-semibold tracking-widest uppercase -rotate-90 whitespace-nowrap flex items-center gap-1">
+                        <span className="text-[0.6rem] font-semibold tracking-widest uppercase -rotate-90 whitespace-nowrap flex items-center gap-1">
                             {isNavigable ? (
-                                <CheckCircle className="size-[0.5rem] shrink-0" />
+                                <CheckCircle className="size-[0.6rem] shrink-0" />
                             ) : (
-                                <XCircle className="size-[0.5rem] shrink-0" />
+                                <XCircle className="size-[0.6rem] shrink-0" />
                             )}
                             <span className="hidden @[180px]:inline">
                                 {statusText}
@@ -94,12 +105,12 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                     </div>
 
                     {/* Main card content */}
-                    <div className="flex flex-col justify-start items-start py-3 px-2 flex-1 min-w-0">
-                        <CardTitle className="text-wrap font-medium text-sm leading-snug">
+                    <div className="flex flex-col justify-start items-start py-3 px-3 flex-1 min-w-0">
+                        <CardTitle className="text-wrap font-medium text-base leading-snug">
                             {title}
                         </CardTitle>
                         {description && (
-                            <p className="text-xs text-muted-foreground mt-0.5 text-wrap leading-snug">
+                            <p className="text-sm text-muted-foreground mt-1 text-wrap leading-snug">
                                 {description}
                             </p>
                         )}
