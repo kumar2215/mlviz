@@ -139,6 +139,32 @@ export function isConditionMet(
     }
 }
 
+export function getWaitTimeRemaining(
+    condition: Condition,
+    state: Record<string, Parameters>
+): number {
+    if (condition.condition_type !== "Wait") return 0;
+    
+    const history = state["__history"] as StoryHistory | undefined;
+    const now = (state["__now"] as unknown as number | undefined) ?? Date.now();
+    const entries = history?.entries || [];
+
+    let lastVisitTime = 0;
+    for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].type === "page_visit") {
+            lastVisitTime = entries[i].timestamp;
+            break;
+        }
+    }
+    
+    if (lastVisitTime > 0) {
+        const remainingStr = condition.wait - ((now - lastVisitTime) / 1000);
+        return remainingStr > 0 ? remainingStr : 0;
+    }
+    
+    return condition.wait;
+}
+
 export function displayCondition(condition: Condition): string {
     switch (condition.condition_type) {
         case "Bypass":
