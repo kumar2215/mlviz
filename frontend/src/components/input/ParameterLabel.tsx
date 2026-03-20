@@ -15,7 +15,7 @@ interface ParameterLabelProps {
 
 const ParameterLabel = ({ option, htmlFor }: ParameterLabelProps) => {
     return (
-        <div className="flex flex-row gap-4 items-center">
+        <div className="flex flex-row gap-4 items-center justify-between">
             <Label
                 className="text-clip"
                 htmlFor={htmlFor}
@@ -27,7 +27,7 @@ const ParameterLabel = ({ option, htmlFor }: ParameterLabelProps) => {
                     <Info />
                 </TooltipTrigger>
                 <TooltipContent>
-                    <p className="text-xs w-80">{option.description}</p>
+                    <p className="text-xs max-w-[15vw]">{option.description}</p>
                 </TooltipContent>
             </Tooltip>
         </div>
