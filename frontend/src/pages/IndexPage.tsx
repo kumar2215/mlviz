@@ -67,13 +67,13 @@ const IndexPage = () => {
 
             <footer className="mt-auto shrink-0 border-t border-gray-200 px-4 py-2 flex items-center justify-between text-sm tracking-tight">
                 <Link
-                    className="px-3 py-1.5 rounded-md bg-gradient-to-r from-fuchsia-400 to-cyan-500 bg-clip-text text-transparent font-bold font-mono hover:opacity-80 transition-opacity"
+                    className="px-3 py-1.5 rounded-md bg-gradient-to-r from-fuchsia-600 to-cyan-600 bg-clip-text text-transparent font-bold font-mono hover:opacity-80 transition-opacity hover:underline"
                     to={"https://github.com/local-minima-lab"}
                 >
                     a project by Local Minima Lab
                 </Link>
                 <Link
-                    className="px-3 py-1.5 rounded-md bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent font-mono hover:opacity-80 transition-opacity"
+                    className="px-3 py-1.5 rounded-md bg-gradient-to-r from-fuchsia-600 to-cyan-600 bg-clip-text text-transparent font-mono hover:opacity-80 transition-opacity hover:underline"
                     to={"https://github.com/zaidansani"}
                 >
                     @zaidansani
