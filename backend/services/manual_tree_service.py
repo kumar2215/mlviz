@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict, List, Any
 from collections import Counter
 
-from models import NodeStatistics, SplitStatistics, HistogramData, Dataset, PredefinedDataset, ThresholdStatistics
+from models import NodeStatistics, SplitStatistics, HistogramData, ClassificationDataset, PredefinedClassificationDataset, ThresholdStatistics
 from api.models import ManualNodeStatsRequest, ManualNodeStatsResponse, ManualFeatureStatsRequest, ManualFeatureStatsResponse
 from .dataset_service import dataset_service
 
@@ -15,20 +15,20 @@ class ManualTreeService:
         # Cache datasets for the session to avoid reloading
         self._dataset_cache: Dict[str, Any] = {}
 
-    async def _resolve_dataset(self, dataset_param: Dict[str, Any] | PredefinedDataset | Dataset | None) -> Dataset:
-        """Resolve dataset parameter to Dataset object."""
+    async def _resolve_dataset(self, dataset_param: Dict[str, Any] | PredefinedClassificationDataset | ClassificationDataset | None) -> ClassificationDataset:
+        """Resolve dataset parameter to ClassificationDataset object."""
         if dataset_param is None:
             return await self.dataset_service.load_predefined_dataset(
-                PredefinedDataset(name="iris")
+                PredefinedClassificationDataset(name="iris")
             )
         elif isinstance(dataset_param, dict):
             if "name" in dataset_param:
                 return await self.dataset_service.load_predefined_dataset(
-                    PredefinedDataset(**dataset_param)
+                    PredefinedClassificationDataset(**dataset_param)
                 )
             else:
-                return Dataset(**dataset_param)
-        elif isinstance(dataset_param, PredefinedDataset):
+                return ClassificationDataset(**dataset_param)
+        elif isinstance(dataset_param, PredefinedClassificationDataset):
             return await self.dataset_service.load_predefined_dataset(dataset_param)
         else:
             return dataset_param

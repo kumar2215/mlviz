@@ -303,7 +303,7 @@ export interface paths {
          *     and metadata needed for visualization.
          *
          *     Args:
-         *         name: Dataset name (defaults to "iris")
+         *         name: ClassificationDataset name (defaults to "iris")
          *         test_size: Test set proportion (defaults to 0.25)
          *         random_state: Random seed (defaults to 2025)
          *
@@ -933,7 +933,7 @@ export interface components {
              * @description Names of target classes
              */
             target_names: string[];
-            /** @description Dataset metadata */
+            /** @description ClassificationDataset metadata */
             info: components["schemas"]["DatasetInfo"];
             /**
              * Test Size
@@ -1010,9 +1010,9 @@ export interface components {
             random_state: number | null;
             /**
              * Dataset
-             * @description Dataset to use for training
+             * @description ClassificationDataset to use for training
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
         };
         /**
          * DecisionTreeTrainingResponse
@@ -1316,9 +1316,9 @@ export interface components {
             centroids?: number[][] | null;
             /**
              * Dataset
-             * @description Dataset to use. Defaults to Iris dataset.
+             * @description ClassificationDataset to use. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices for visualization (defaults to [feature_1, feature_2])
@@ -1406,9 +1406,9 @@ export interface components {
             centroids?: number[][] | null;
             /**
              * Dataset
-             * @description Dataset to use. Defaults to Iris dataset.
+             * @description ClassificationDataset to use. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices for visualization (defaults to [feature_1, feature_2])
@@ -1546,7 +1546,7 @@ export interface components {
              * Dataset
              * @description Training dataset with X, y, feature_names, class_names. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
             /**
              * Query Points
              * @description Test points to classify
@@ -1637,7 +1637,7 @@ export interface components {
              * Dataset
              * @description Training dataset. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices to visualise (1-3 features)
@@ -1692,7 +1692,7 @@ export interface components {
              * Dataset
              * @description Training dataset. Defaults to Iris dataset.
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
             /**
              * Visualisation Features
              * @description Feature indices to visualise (1-3 features)
@@ -2044,9 +2044,9 @@ export interface components {
             max_thresholds: number;
             /**
              * Dataset
-             * @description Dataset to use for training
+             * @description ClassificationDataset to use for training
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
         };
         /**
          * ManualFeatureStatsResponse
@@ -2128,9 +2128,9 @@ export interface components {
             criterion: string;
             /**
              * Dataset
-             * @description Dataset to use for training
+             * @description ClassificationDataset to use for training
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
         };
         /**
          * ManualNodeStatsResponse
@@ -2178,9 +2178,9 @@ export interface components {
             tree: components["schemas"]["SplitNode-Input"] | components["schemas"]["LeafNode"];
             /**
              * Dataset
-             * @description Dataset to use for evaluation (defaults to Iris)
+             * @description ClassificationDataset to use for evaluation (defaults to Iris)
              */
-            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedDataset"]) | null;
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
         };
         /**
          * ManualTreeEvaluateResponse
@@ -2260,10 +2260,10 @@ export interface components {
             step?: number | null;
         };
         /**
-         * PredefinedDataset
+         * PredefinedClassificationDataset
          * @description Reference to a predefined (classification) dataset.
          */
-        PredefinedDataset: {
+        PredefinedClassificationDataset: {
             /**
              * @description Discriminator for Union type (enum property replaced by openapi-typescript)
              * @enum {string}
@@ -2297,10 +2297,10 @@ export interface components {
             type: "predefined_regression";
             /**
              * Name
-             * @default diabetes
+             * @default simple
              * @enum {string}
              */
-            name: "diabetes" | "california_housing";
+            name: "simple" | "diabetes" | "california_housing";
             /**
              * Test Size
              * @default 0.25
@@ -2827,7 +2827,7 @@ export interface operations {
     load_dataset_api_dataset_load_get: {
         parameters: {
             query?: {
-                /** @description Dataset name (iris, wine, breast_cancer, digits) */
+                /** @description ClassificationDataset name (iris, wine, breast_cancer, digits) */
                 name?: string | null;
                 /** @description Proportion of dataset to use for test split */
                 test_size?: number | null;

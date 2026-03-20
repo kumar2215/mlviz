@@ -3,7 +3,11 @@
  * Draws a scatter plot and an interactive regression line.
  */
 
-import { renderManualLegend, type LegendFilterCallback, type LegendItem } from "@/components/plots/utils/legendHelper";
+import {
+    renderManualLegend,
+    type LegendFilterCallback,
+    type LegendItem,
+} from "@/components/plots/utils/legendHelper";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import * as d3 from "d3";
 
@@ -32,6 +36,8 @@ export interface RenderLinearRegressionProps {
     legendItems?: LegendItem[];
     /** Set of focused labels for toggling visibility */
     focusedLabels?: Set<string> | null;
+    /** Draw vertical residual lines from each point to the current line */
+    showErrorLines?: boolean;
 }
 
 export interface RenderResult {
@@ -41,10 +47,11 @@ export interface RenderResult {
 }
 
 const SCATTER_COLOR = "#64748b";
-const USER_LINE_COLOR = "#6366f1";    // indigo — user's line
+const ERROR_LINE_COLOR = "#ef4444"; // red — residual error lines
+const USER_LINE_COLOR = "#6366f1"; // indigo — user's line
 const OPTIMAL_LINE_COLOR = "#10b981"; // emerald — OLS optimal line
 const PROPOSED_LINE_COLOR = "#f97316"; // orange — proposed next step
-const TEST_COLOR = "#f97316";         // orange — test set points
+const TEST_COLOR = "#f97316"; // orange — test set points
 
 export function renderLinearRegression({
     container,
@@ -64,6 +71,7 @@ export function renderLinearRegression({
     trainMask,
     legendItems,
     focusedLabels,
+    showErrorLines = false,
 }: RenderLinearRegressionProps): RenderResult {
     const { width, height, margin } = context.dimensions;
     const innerWidth = width - margin.left - margin.right;
@@ -83,33 +91,90 @@ export function renderLinearRegression({
         .nice();
 
     // ---- Clear previous render ----
-    container.selectAll(".lr-axis-x, .lr-axis-y, .lr-scatter, .lr-line-user, .lr-line-opt, .lr-line-proposed, .lr-label, .manual-legend").remove();
-
-    // ---- Axes ----
-    const xAxis = d3.axisBottom(xScale).ticks(6);
-    const yAxis = d3.axisLeft(yScale).ticks(6);
-
     container
+        .selectAll(
+            ".zoom-content, .axes-fixed, .lr-label",
+        )
+        .remove();
+
+    // ---- Group structure (mirrors scatter2D pattern for zoom support) ----
+    // .zoom-content  — zoomable: scatter, lines, error lines
+    // .axes-fixed    — fixed: axes + white backgrounds + axis labels
+    const contentGroup = container.append("g").attr("class", "zoom-content");
+    const axesGroup = container.append("g").attr("class", "axes-fixed");
+
+    // ---- Axes (fixed, on top of content) ----
+    // White backgrounds so zoomed content doesn't bleed under axes
+    const leftCoverage = margin.left + 10;
+    const bottomCoverage = margin.bottom + 20;
+
+    axesGroup
+        .append("rect")
+        .attr("x", -leftCoverage)
+        .attr("y", innerHeight - 1)
+        .attr("width", innerWidth + leftCoverage + (margin.right + 10))
+        .attr("height", bottomCoverage)
+        .attr("fill", "white")
+        .attr("opacity", 1);
+
+    axesGroup
+        .append("rect")
+        .attr("x", -leftCoverage)
+        .attr("y", -10)
+        .attr("width", leftCoverage)
+        .attr("height", innerHeight + 20)
+        .attr("fill", "white")
+        .attr("opacity", 1);
+
+    axesGroup
+        .append("rect")
+        .attr("x", -leftCoverage)
+        .attr("y", -(margin.top + 10))
+        .attr("width", innerWidth + leftCoverage + (margin.right + 10))
+        .attr("height", margin.top + 10)
+        .attr("fill", "white")
+        .attr("opacity", 1);
+
+    axesGroup
+        .append("rect")
+        .attr("x", innerWidth)
+        .attr("y", -10)
+        .attr("width", margin.right + 10)
+        .attr("height", innerHeight + 20)
+        .attr("fill", "white")
+        .attr("opacity", 1);
+
+    const xAxisGroup = axesGroup
         .append("g")
-        .attr("class", "lr-axis-x")
+        .attr("class", "lr-axis-x x-axis")
         .attr("transform", `translate(0, ${innerHeight})`)
-        .call(xAxis)
+        .call(d3.axisBottom(xScale).ticks(6))
         .call((g) => {
-            g.selectAll("text").style("font-size", "11px").style("fill", "#94a3b8");
+            g.selectAll("text")
+                .style("font-size", "11px")
+                .style("fill", "#94a3b8");
             g.selectAll("line, path").style("stroke", "#e2e8f0");
         });
 
-    container
+    // Store original scale for zoom rescaling
+    (xAxisGroup.node() as any).__xScale__ = xScale.copy();
+
+    const yAxisGroup = axesGroup
         .append("g")
-        .attr("class", "lr-axis-y")
-        .call(yAxis)
+        .attr("class", "lr-axis-y y-axis")
+        .call(d3.axisLeft(yScale).ticks(6))
         .call((g) => {
-            g.selectAll("text").style("font-size", "11px").style("fill", "#94a3b8");
+            g.selectAll("text")
+                .style("font-size", "11px")
+                .style("fill", "#94a3b8");
             g.selectAll("line, path").style("stroke", "#e2e8f0");
         });
+
+    // Store original scale for zoom rescaling
+    (yAxisGroup.node() as any).__yScale__ = yScale.copy();
 
     // Axis labels
-    container
+    axesGroup
         .append("text")
         .attr("class", "lr-label")
         .attr("x", innerWidth / 2)
@@ -119,7 +184,7 @@ export function renderLinearRegression({
         .style("fill", "#64748b")
         .text(xLabel);
 
-    container
+    axesGroup
         .append("text")
         .attr("class", "lr-label")
         .attr("transform", "rotate(-90)")
@@ -130,10 +195,31 @@ export function renderLinearRegression({
         .style("fill", "#64748b")
         .text(yLabel);
 
+    // ---- Residual error lines (rendered before points so points sit on top) ----
+    if (showErrorLines) {
+        const errorVisible =
+            focusedLabels === null ||
+            focusedLabels === undefined ||
+            focusedLabels.has("Error lines");
+        const errorGroup = contentGroup
+            .append("g")
+            .attr("class", "lr-error-lines");
+        errorGroup
+            .selectAll("line")
+            .data(points)
+            .join("line")
+            .attr("x1", (d) => xScale(d[0]))
+            .attr("x2", (d) => xScale(d[0]))
+            .attr("y1", (d) => yScale(d[1]))
+            .attr("y2", (d) => yScale(currentSlope * d[0] + currentIntercept))
+            .attr("stroke", ERROR_LINE_COLOR)
+            .attr("stroke-width", 1)
+            .attr("stroke-opacity", errorVisible ? 0.4 : 0)
+            .style("stroke-dasharray", "3, 3");
+    }
+
     // ---- Scatter points ----
-    const scatterGroup = container
-        .append("g")
-        .attr("class", "lr-scatter");
+    const scatterGroup = contentGroup.append("g").attr("class", "lr-scatter");
 
     scatterGroup
         .selectAll("circle")
@@ -147,11 +233,15 @@ export function renderLinearRegression({
                 ? trainMask[i]
                     ? SCATTER_COLOR
                     : TEST_COLOR
-                : SCATTER_COLOR
+                : SCATTER_COLOR,
         )
         .attr("fill-opacity", 0.55)
         .attr("stroke", (_, i) =>
-            trainMask ? (trainMask[i] ? SCATTER_COLOR : TEST_COLOR) : SCATTER_COLOR
+            trainMask
+                ? trainMask[i]
+                    ? SCATTER_COLOR
+                    : TEST_COLOR
+                : SCATTER_COLOR,
         )
         .attr("stroke-width", 0.5)
         .attr("stroke-opacity", 0.7);
@@ -164,7 +254,7 @@ export function renderLinearRegression({
         color: string,
         strokeWidth = 2,
         dashed = false,
-        opacity = 1
+        opacity = 1,
     ) => {
         const [x0, x1] = xScale.domain();
         const lineData: [number, number][] = [
@@ -176,7 +266,7 @@ export function renderLinearRegression({
             .x((d) => xScale(d[0]))
             .y((d) => yScale(d[1]));
 
-        container
+        contentGroup
             .append("path")
             .attr("class", className)
             .datum(lineData)
@@ -202,15 +292,16 @@ export function renderLinearRegression({
             OPTIMAL_LINE_COLOR,
             2,
             true,
-            (focusedLabels === null || focusedLabels === undefined || focusedLabels.has("Optimal line")) ? 1 : 0
+            focusedLabels === null ||
+                focusedLabels === undefined ||
+                focusedLabels.has("Optimal line")
+                ? 1
+                : 0,
         );
     }
 
     // ---- Proposed next step line (dimmed dash, indigo) ----
-    if (
-        proposedSlope !== undefined &&
-        proposedIntercept !== undefined
-    ) {
+    if (proposedSlope !== undefined && proposedIntercept !== undefined) {
         drawLine(
             proposedSlope,
             proposedIntercept,
@@ -218,34 +309,65 @@ export function renderLinearRegression({
             PROPOSED_LINE_COLOR,
             2,
             true,
-            (focusedLabels === null || focusedLabels === undefined || focusedLabels.has("Proposed update")) ? 0.5 : 0
+            focusedLabels === null ||
+                focusedLabels === undefined ||
+                focusedLabels.has("Proposed update")
+                ? 0.5
+                : 0,
         );
     }
 
     // ---- User-controlled line (solid, indigo) ----
-    const userLineOpacity = (focusedLabels === null || focusedLabels === undefined || focusedLabels.has("Your line")) ? 1 : 0;
-    drawLine(currentSlope, currentIntercept, "lr-line-user", USER_LINE_COLOR, 2.5, false, userLineOpacity);
+    const userLineOpacity =
+        focusedLabels === null ||
+        focusedLabels === undefined ||
+        focusedLabels.has("Your line")
+            ? 1
+            : 0;
+    drawLine(
+        currentSlope,
+        currentIntercept,
+        "lr-line-user",
+        USER_LINE_COLOR,
+        2.5,
+        false,
+        userLineOpacity,
+    );
 
     // ---- Legend ----
     const finalLegendItems: LegendItem[] = legendItems || [];
     if (!legendItems) {
         finalLegendItems.push({ label: "Your line", color: USER_LINE_COLOR });
         if (showOptimalLine && optimalSlope !== undefined) {
-            finalLegendItems.push({ label: "Optimal line", color: OPTIMAL_LINE_COLOR, dashed: true });
+            finalLegendItems.push({
+                label: "Optimal line",
+                color: OPTIMAL_LINE_COLOR,
+                dashed: true,
+            });
         }
         if (proposedSlope !== undefined) {
-            finalLegendItems.push({ label: "Proposed update", color: PROPOSED_LINE_COLOR, dashed: true });
+            finalLegendItems.push({
+                label: "Proposed update",
+                color: PROPOSED_LINE_COLOR,
+                dashed: true,
+            });
+        }
+        if (showErrorLines) {
+            finalLegendItems.push({
+                label: "Error lines",
+                color: ERROR_LINE_COLOR,
+            });
         }
     }
 
     const legend = renderManualLegend(
-        container,
+        axesGroup,
         finalLegendItems,
         innerWidth,
         innerHeight,
         { position: "bottom-left" },
         context.dimensions.width / 800, // Scale factor based on width
-        focusedLabels
+        focusedLabels,
     );
 
     return { xScale, yScale, legend };

@@ -163,27 +163,27 @@ export function renderLegend(
 
         rows.set(name, row);
 
-        // Click handler for toggling focus
+        // Click handler: toggles the clicked item off/on
         row.on("click", (event: MouseEvent) => {
             event.stopPropagation();
 
             if (focusedNames === null) {
-                // Nothing is focused yet — focus only this class
-                focusedNames = new Set([name]);
+                // All visible — hide just this item (keep all others visible)
+                focusedNames = new Set(filteredNames.filter((n) => n !== name));
             } else if (focusedNames.has(name)) {
-                // This class is already focused
+                // Item is visible — hide it
                 if (focusedNames.size === 1) {
-                    // Only this class is focused — clear filter (show all)
+                    // Last visible item — show all again
                     focusedNames = null;
                 } else {
-                    // Multiple focused — remove this one
-                    focusedNames.delete(name);
-                    focusedNames = new Set(focusedNames); // new ref
+                    focusedNames = new Set([...focusedNames].filter((n) => n !== name));
                 }
             } else {
-                // This class is not focused — add it
-                focusedNames.add(name);
-                focusedNames = new Set(focusedNames); // new ref
+                // Item is hidden — show it again
+                focusedNames = new Set([...focusedNames, name]);
+                if (focusedNames.size === filteredNames.length) {
+                    focusedNames = null; // all visible → back to null
+                }
             }
 
             updateRowStyles();
@@ -320,19 +320,25 @@ export function renderManualLegend(
         row.on("click", (event: MouseEvent) => {
             event.stopPropagation();
             const label = item.label;
+            const allLabels = items.map((i) => i.label);
 
             if (focusedNames === null) {
-                focusedNames = new Set([label]);
+                // All visible — hide just this item
+                focusedNames = new Set(allLabels.filter((l) => l !== label));
             } else if (focusedNames.has(label)) {
+                // Item is visible — hide it
                 if (focusedNames.size === 1) {
+                    // Last visible item — show all again
                     focusedNames = null;
                 } else {
-                    focusedNames.delete(label);
-                    focusedNames = new Set(focusedNames);
+                    focusedNames = new Set([...focusedNames].filter((l) => l !== label));
                 }
             } else {
-                focusedNames.add(label);
-                focusedNames = new Set(focusedNames);
+                // Item is hidden — show it again
+                focusedNames = new Set([...focusedNames, label]);
+                if (focusedNames.size === allLabels.length) {
+                    focusedNames = null; // all visible → back to null
+                }
             }
 
             updateRowStyles();

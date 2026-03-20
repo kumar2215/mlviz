@@ -7,7 +7,9 @@
 
 import { renderLinearRegression } from "@/components/linear/regression/LinearRegressionRenderer";
 import LineControlHUD from "@/components/linear/regression/LineControlHUD";
-import GDStepHUD, { type GDStepMode } from "@/components/linear/regression/step/GDStepHUD";
+import GDStepHUD, {
+    type GDStepMode,
+} from "@/components/linear/regression/step/GDStepHUD";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
@@ -28,7 +30,9 @@ const Visualisation: React.FC = () => {
         randomizeLine,
     } = useLinearRegression();
 
-    const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
+    const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(
+        null,
+    );
 
     const [mode, setMode] = useState<GDStepMode>("idle");
     const [learningRate, setLearningRate] = useState(0.01);
@@ -40,10 +44,10 @@ const Visualisation: React.FC = () => {
             loadVisualization(
                 Object.keys(lastVisualizationParams).length > 0
                     ? lastVisualizationParams
-                    : {}
+                    : {},
             );
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Once data arrives for the first time, randomize the line
@@ -58,7 +62,7 @@ const Visualisation: React.FC = () => {
         (
             container: d3.Selection<SVGGElement, unknown, null, undefined>,
             _data: unknown,
-            context: VisualisationRenderContext
+            context: VisualisationRenderContext,
         ) => {
             if (!visualizationData) return;
 
@@ -69,7 +73,9 @@ const Visualisation: React.FC = () => {
                 currentSlope,
                 currentIntercept,
                 proposedSlope: showProposed ? stepData!.new_slope : undefined,
-                proposedIntercept: showProposed ? stepData!.new_intercept : undefined,
+                proposedIntercept: showProposed
+                    ? stepData!.new_intercept
+                    : undefined,
                 xRange: visualizationData.x_range as [number, number],
                 yRange: visualizationData.y_range as [number, number],
                 xLabel: visualizationData.metadata?.feature_x_name ?? "x",
@@ -82,7 +88,14 @@ const Visualisation: React.FC = () => {
                 renderResult.legend.onFilterChange(setFocusedLabels);
             }
         },
-        [visualizationData, currentSlope, currentIntercept, mode, stepData, focusedLabels]
+        [
+            visualizationData,
+            currentSlope,
+            currentIntercept,
+            mode,
+            stepData,
+            focusedLabels,
+        ],
     );
 
     if (isVisualizationLoading) {
@@ -101,7 +114,9 @@ const Visualisation: React.FC = () => {
             <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8">
                     <p className="text-destructive mb-2">Error loading data</p>
-                    <p className="text-sm text-muted-foreground">{visualizationError}</p>
+                    <p className="text-sm text-muted-foreground">
+                        {visualizationError}
+                    </p>
                 </div>
             </div>
         );
@@ -119,8 +134,7 @@ const Visualisation: React.FC = () => {
 
     return (
         <div className="relative h-full w-full">
-            {/* Line control — left side */}
-            <div className="absolute top-6 left-6 z-20">
+            <div className="absolute top-18 left-4 z-20">
                 <LineControlHUD />
             </div>
 
@@ -133,8 +147,6 @@ const Visualisation: React.FC = () => {
                     onLearningRateChange={setLearningRate}
                 />
             </div>
-
-            {/* Legend HUD removed - now rendered inside SVG */}
 
             <BaseVisualisation
                 dataConfig={{

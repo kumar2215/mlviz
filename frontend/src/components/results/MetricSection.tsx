@@ -23,7 +23,7 @@ const MetricSection: React.FC<MetricSectionProps> = ({ title, metrics, children 
                         <p className="font-semibold text-slate-600 capitalize">
                             {metric}
                         </p>
-                        <p className="font-mono text-slate-800">
+                        <p className="font-mono text-slate-800 w-24 text-right tabular-nums">
                             {formatMetric(value)}
                         </p>
                     </div>

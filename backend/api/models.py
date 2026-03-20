@@ -3,7 +3,7 @@ from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 from models import (
     ClassificationMetadata,
     ClassificationMetrics,
-    Dataset,
+    ClassificationDataset,
     DatasetInfo,
     DecisionBoundaryData,
     DecisionTreeParameters,
@@ -15,7 +15,7 @@ from models import (
     NeighborInfo,
     NodeStatistics,
     NodeStatParameters,
-    PredefinedDataset,
+    PredefinedClassificationDataset,
     PredefinedRegressionDataset,
     RegressionDataset,
     RegressionMetadata,
@@ -26,10 +26,10 @@ from models import (
 )
 from pydantic import BaseModel, Discriminator, Field
 
-# Create a discriminated union type for Classification Dataset
-DatasetUnion = Annotated[Union[Dataset, PredefinedDataset], Field(discriminator="type")]
+# Create a discriminated union type for Classification ClassificationDataset
+DatasetUnion = Annotated[Union[ClassificationDataset, PredefinedClassificationDataset], Field(discriminator="type")]
 
-# Create a discriminated union type for Regression Dataset
+# Create a discriminated union type for Regression ClassificationDataset
 RegressionDatasetUnion = Annotated[
     Union[RegressionDataset, PredefinedRegressionDataset],
     Field(discriminator="type"),
@@ -40,7 +40,7 @@ class DecisionTreeTrainingRequest(DecisionTreeParameters):
     """Request model for Decision Tree."""
 
     dataset: Optional[DatasetUnion] = Field(
-        None, description="Dataset to use for training"
+        None, description="ClassificationDataset to use for training"
     )
 
 
@@ -76,7 +76,7 @@ class ManualNodeStatsRequest(NodeStatParameters):
     """Request to calculate statistics for a potential node split."""
 
     dataset: Optional[DatasetUnion] = Field(
-        None, description="Dataset to use for training"
+        None, description="ClassificationDataset to use for training"
     )
 
 
@@ -102,7 +102,7 @@ class ManualFeatureStatsRequest(ManualFeatureStatsParameters):
     """Request to calculate statistics for all thresholds of a feature."""
 
     dataset: Optional[DatasetUnion] = Field(
-        None, description="Dataset to use for training"
+        None, description="ClassificationDataset to use for training"
     )
 
 
@@ -137,7 +137,7 @@ class ManualTreeEvaluateRequest(BaseModel):
 
     tree: TreeNode = Field(description="Root node of the manual tree")
     dataset: Optional[DatasetUnion] = Field(
-        None, description="Dataset to use for evaluation (defaults to Iris)"
+        None, description="ClassificationDataset to use for evaluation (defaults to Iris)"
     )
 
 
@@ -252,7 +252,7 @@ class DatasetResponse(BaseModel):
     y: List[int] = Field(description="Target vector")
     feature_names: List[str] = Field(description="Names of features")
     target_names: List[str] = Field(description="Names of target classes")
-    info: DatasetInfo = Field(description="Dataset metadata")
+    info: DatasetInfo = Field(description="ClassificationDataset metadata")
     test_size: float = Field(description="Test set proportion")
     random_state: int = Field(description="Random seed for reproducibility")
 
@@ -537,7 +537,7 @@ class KMeansTrainRequest(BaseModel):
         description="Initial centroid positions [[x, y], ...]. If not provided or empty, will initialize with one random centroid.",
     )
     dataset: Optional[DatasetUnion] = Field(
-        None, description="Dataset to use. Defaults to Iris dataset."
+        None, description="ClassificationDataset to use. Defaults to Iris dataset."
     )
     visualisation_features: Optional[List[int]] = Field(
         None,
@@ -597,7 +597,7 @@ class KMeansStepRequest(BaseModel):
         description="Current centroid positions [[x, y], ...]. If not provided or empty, will initialize with one random centroid.",
     )
     dataset: Optional[DatasetUnion] = Field(
-        None, description="Dataset to use. Defaults to Iris dataset."
+        None, description="ClassificationDataset to use. Defaults to Iris dataset."
     )
     visualisation_features: Optional[List[int]] = Field(
         None,
