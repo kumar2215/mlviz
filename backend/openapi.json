@@ -393,7 +393,7 @@
           "Dataset"
         ],
         "summary": "Load Dataset",
-        "description": "Load a dataset with its full data for visualization.\n\nDefaults to the Iris dataset if no name is provided.\nReturns the complete dataset including feature values, labels,\nand metadata needed for visualization.\n\nArgs:\n    name: Dataset name (defaults to \"iris\")\n    test_size: Test set proportion (defaults to 0.25)\n    random_state: Random seed (defaults to 2025)\n\nReturns:\n    DatasetResponse: Complete dataset with features, labels, and metadata\n\nRaises:\n    HTTPException: If dataset loading fails",
+        "description": "Load a dataset with its full data for visualization.\n\nDefaults to the Iris dataset if no name is provided.\nReturns the complete dataset including feature values, labels,\nand metadata needed for visualization.\n\nArgs:\n    name: ClassificationDataset name (defaults to \"iris\")\n    test_size: Test set proportion (defaults to 0.25)\n    random_state: Random seed (defaults to 2025)\n\nReturns:\n    DatasetResponse: Complete dataset with features, labels, and metadata\n\nRaises:\n    HTTPException: If dataset loading fails",
         "operationId": "load_dataset_api_dataset_load_get",
         "parameters": [
           {
@@ -409,11 +409,11 @@
                   "type": "null"
                 }
               ],
-              "description": "Dataset name (iris, wine, breast_cancer, digits)",
+              "description": "ClassificationDataset name (iris, wine, breast_cancer, digits)",
               "default": "iris",
               "title": "Name"
             },
-            "description": "Dataset name (iris, wine, breast_cancer, digits)"
+            "description": "ClassificationDataset name (iris, wine, breast_cancer, digits)"
           },
           {
             "name": "test_size",
@@ -1449,7 +1449,7 @@
           },
           "info": {
             "$ref": "#/components/schemas/DatasetInfo",
-            "description": "Dataset metadata"
+            "description": "ClassificationDataset metadata"
           },
           "test_size": {
             "type": "number",
@@ -1604,14 +1604,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -1620,7 +1620,7 @@
               }
             ],
             "title": "Dataset",
-            "description": "Dataset to use for training"
+            "description": "ClassificationDataset to use for training"
           }
         },
         "type": "object",
@@ -2296,14 +2296,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -2312,7 +2312,7 @@
               }
             ],
             "title": "Dataset",
-            "description": "Dataset to use. Defaults to Iris dataset."
+            "description": "ClassificationDataset to use. Defaults to Iris dataset."
           },
           "visualisation_features": {
             "anyOf": [
@@ -2506,14 +2506,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -2522,7 +2522,7 @@
               }
             ],
             "title": "Dataset",
-            "description": "Dataset to use. Defaults to Iris dataset."
+            "description": "ClassificationDataset to use. Defaults to Iris dataset."
           },
           "visualisation_features": {
             "anyOf": [
@@ -2766,14 +2766,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -2979,14 +2979,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -3151,14 +3151,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -3813,14 +3813,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -3829,7 +3829,7 @@
               }
             ],
             "title": "Dataset",
-            "description": "Dataset to use for training"
+            "description": "ClassificationDataset to use for training"
           }
         },
         "type": "object",
@@ -3964,14 +3964,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -3980,7 +3980,7 @@
               }
             ],
             "title": "Dataset",
-            "description": "Dataset to use for training"
+            "description": "ClassificationDataset to use for training"
           }
         },
         "type": "object",
@@ -4088,14 +4088,14 @@
                     "$ref": "#/components/schemas/ClassificationDataset"
                   },
                   {
-                    "$ref": "#/components/schemas/PredefinedDataset"
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 ],
                 "discriminator": {
                   "propertyName": "type",
                   "mapping": {
                     "custom": "#/components/schemas/ClassificationDataset",
-                    "predefined": "#/components/schemas/PredefinedDataset"
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
                   }
                 }
               },
@@ -4104,7 +4104,7 @@
               }
             ],
             "title": "Dataset",
-            "description": "Dataset to use for evaluation (defaults to Iris)"
+            "description": "ClassificationDataset to use for evaluation (defaults to Iris)"
           }
         },
         "type": "object",
@@ -4266,7 +4266,7 @@
         "title": "NumberParameterInfo",
         "description": "Number parameter with optional range and step."
       },
-      "PredefinedDataset": {
+      "PredefinedClassificationDataset": {
         "properties": {
           "type": {
             "type": "string",
@@ -4303,7 +4303,7 @@
         "required": [
           "name"
         ],
-        "title": "PredefinedDataset",
+        "title": "PredefinedClassificationDataset",
         "description": "Reference to a predefined (classification) dataset."
       },
       "PredefinedRegressionDataset": {
@@ -4318,11 +4318,12 @@
           "name": {
             "type": "string",
             "enum": [
+              "simple",
               "diabetes",
               "california_housing"
             ],
             "title": "Name",
-            "default": "diabetes"
+            "default": "simple"
           },
           "test_size": {
             "type": "number",

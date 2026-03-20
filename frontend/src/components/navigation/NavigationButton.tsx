@@ -2,7 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
 import type { Edge, Parameters } from "@/types/story";
-import { displayCondition, getWaitTimeRemaining, isConditionMet } from "@/utils/conditions";
+import {
+    displayCondition,
+    getWaitTimeRemaining,
+    isConditionMet,
+} from "@/utils/conditions";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
@@ -24,10 +28,12 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
 
     const navigate = useNavigate();
 
-    const _conditionState = conditionState ?? ({
-        ...storyState.params,
-        __history: storyState.history,
-    } as unknown as Record<string, Parameters>);
+    const _conditionState =
+        conditionState ??
+        ({
+            ...storyState.params,
+            __history: storyState.history,
+        } as unknown as Record<string, Parameters>);
 
     const isNavigable = isConditionMet(edge.condition, _conditionState);
 
@@ -55,7 +61,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
             statusText = `${Math.ceil(remaining)}s`;
         }
     }
-    
+
     const title = edge.condition.name ?? displayCondition(edge.condition);
     const description = edge.condition.description;
 
@@ -66,7 +72,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                 disabled={!isNavigable}
                 onClick={goToNextPage}
                 className={`
-                w-full min-h-[10dvh] h-auto p-0 transition-all duration-100 shadow-lg hover:shadow-md text-base tracking-tight overflow-hidden
+                group w-full min-h-[10dvh] h-auto p-0 transition-all duration-100 shadow-lg hover:shadow-md text-base tracking-tight overflow-hidden
                 ${
                     isNavigable
                         ? `
@@ -75,7 +81,6 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                         `
                         : `
                             border-0 bg-gradient-to-br from-gray-100 to-stone-100 text-black
-                            hover:bg-gradient-to-br hover:from-gray-100 hover:to-stone-100
                             cursor-not-allowed
                             `
                 }
@@ -104,7 +109,6 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                         </span>
                     </div>
 
-                    {/* Main card content */}
                     <div className="flex flex-col justify-start items-start py-3 px-3 flex-1 min-w-0">
                         <CardTitle className="text-wrap font-medium text-base leading-snug">
                             {title}

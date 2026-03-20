@@ -39,11 +39,22 @@ class CustomDataset(BaseModel):
     random_state: int = Field(2025, ge=0, description="Random state for reproducibility")
 
 
+class PredefinedRegressionDataset(BaseModel):
+    """A predefined regression dataset."""
+
+    type: Literal["predefined_regression"] = "predefined_regression"
+    name: Literal["simple", "diabetes", "california_housing"] = Field(
+        ..., description="Name of the predefined regression dataset"
+    )
+    test_size: float = Field(0.25, ge=0, le=0.9, description="Test split ratio")
+    random_state: int = Field(2025, ge=0, description="Random state for reproducibility")
+
+
 # A dataset entry in the top-level datasets dict (custom only)
 DatasetEntry = CustomDataset
 
 # A dataset on a page (reference to top-level, or inline predefined)
 PageDataset = Annotated[
-    Union[DatasetReference, PredefinedDataset],
+    Union[DatasetReference, PredefinedDataset, PredefinedRegressionDataset],
     Field(discriminator="type"),
 ]

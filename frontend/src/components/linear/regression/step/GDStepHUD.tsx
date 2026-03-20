@@ -4,6 +4,7 @@
  * The user can: Run Step → see proposal → Accept / Reject.
  */
 import { Button } from "@/components/ui/button";
+import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
 import { useLinearRegression } from "@/contexts/models/LinearRegressionContext";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { ArrowRight, Check, Play, X } from "lucide-react";
@@ -69,21 +70,11 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
         v >= 0.9 ? "text-emerald-600" : v >= 0.7 ? "text-blue-600" : v >= 0.5 ? "text-amber-600" : "text-red-500";
 
     return (
-        <div
-            className="bg-gradient-to-br from-slate-50 to-indigo-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200"
-            style={{ padding: fs(20), width: fs(290) }}
+        <CollapsibleHUD
+            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-indigo-500" />}
+            title="Gradient Descent"
+            style={{ width: fs(290) }}
         >
-            <h3
-                className="font-bold text-slate-800 flex items-center mb-4"
-                style={{ gap: fs(8), fontSize: fs(15) }}
-            >
-                <ArrowRight
-                    style={{ width: fs(15), height: fs(15) }}
-                    className="text-indigo-500"
-                />
-                Gradient Descent
-            </h3>
-
             {/* Learning Rate */}
             <div className="flex flex-col mb-4" style={{ gap: fs(4) }}>
                 <div className="flex justify-between">
@@ -204,7 +195,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                     </div>
                 </div>
             )}
-        </div>
+        </CollapsibleHUD>
     );
 };
 

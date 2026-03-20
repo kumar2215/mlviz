@@ -98,12 +98,12 @@
             "edges": [
                 {
                     "start": { "local_index": 0, "story_name": null },
-                    "end":   { "local_index": 1, "story_name": null },
+                    "end": { "local_index": 1, "story_name": null },
                     "condition": { "condition_type": "Bypass" }
                 },
                 {
                     "start": { "local_index": 1, "story_name": null },
-                    "end":   { "local_index": 0, "story_name": null },
+                    "end": { "local_index": 0, "story_name": null },
                     "condition": { "condition_type": "Bypass" }
                 }
             ]
@@ -112,19 +112,16 @@
             "name": "linear",
             "description": "Linear Regression",
             "start_page": 0,
-            "nodes": [
-                { "index": 3233669327 },
-                { "index": 3050687251 }
-            ],
+            "nodes": [{ "index": 3233669327 }, { "index": 3050687251 }],
             "edges": [
                 {
                     "start": { "local_index": 0, "story_name": null },
-                    "end":   { "local_index": 1, "story_name": null },
+                    "end": { "local_index": 1, "story_name": null },
                     "condition": { "condition_type": "Bypass" }
                 },
                 {
                     "start": { "local_index": 1, "story_name": null },
-                    "end":   { "local_index": 0, "story_name": null },
+                    "end": { "local_index": 0, "story_name": null },
                     "condition": { "condition_type": "Bypass" }
                 }
             ]
@@ -211,6 +208,10 @@
                 "test_size": 0.2,
                 "random_state": 42,
                 "learning_rate": 0.01
+            },
+            "dataset": {
+                "type": "predefined_regression",
+                "name": "simple"
             }
         },
         "3050687251": {

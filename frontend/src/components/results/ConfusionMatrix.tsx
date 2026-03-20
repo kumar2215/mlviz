@@ -1,8 +1,8 @@
+import { applyFont } from "@/components/visualisation/config/fonts";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
+import { useScaleFactor } from "@/hooks/useScaleFactor";
 import * as d3 from "d3";
 import React, { useEffect, useRef, useState } from "react";
-import { useScaleFactor } from "../hooks/useScaleFactor";
-import { applyFont } from "./visualisation/config/fonts";
 
 interface TooltipData {
     actual: string;

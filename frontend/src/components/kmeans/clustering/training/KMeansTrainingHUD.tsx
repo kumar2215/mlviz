@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
 import { useKMeans } from "@/contexts/models/KMeansContext";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { Play, Plus, RotateCcw, Target } from "lucide-react";
@@ -24,30 +25,11 @@ const KMeansTrainingHUD: React.FC<KMeansTrainingHUDProps> = ({
     } = useKMeans();
 
     return (
-        <div
-            className="bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200"
-            style={{
-                padding: `${20 * scaleFactor}px`,
-                width: `${288 * scaleFactor}px`,
-            }}
+        <CollapsibleHUD
+            icon={<Target style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} className="text-primary" />}
+            title="K-Means Training"
+            style={{ width: `${288 * scaleFactor}px` }}
         >
-            <h3
-                className="font-bold text-slate-800 flex items-center mb-4"
-                style={{
-                    gap: `${8 * scaleFactor}px`,
-                    fontSize: `${16 * scaleFactor}px`,
-                }}
-            >
-                <Target
-                    style={{
-                        width: `${16 * scaleFactor}px`,
-                        height: `${16 * scaleFactor}px`,
-                    }}
-                    className="text-primary"
-                />
-                K-Means Training
-            </h3>
-
             <div style={{ gap: `${16 * scaleFactor}px` }} className="flex flex-col">
                 {isPlacingCentroids ? (
                     <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
@@ -155,7 +137,7 @@ const KMeansTrainingHUD: React.FC<KMeansTrainingHUDProps> = ({
                     </div>
                 )}
             </div>
-        </div>
+        </CollapsibleHUD>
     );
 };
 

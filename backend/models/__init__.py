@@ -1,9 +1,8 @@
 from .base import ClassificationMetadata, ClassificationMetrics, ClassificationMetricValues, RegressionMetrics, RegressionMetricValues
 from .dataset import (
     ClassificationDataset,
-    Dataset,  # backward-compat alias for ClassificationDataset
     DatasetInfo,
-    PredefinedDataset,
+    PredefinedClassificationDataset,
     PredefinedRegressionDataset,
     RegressionDataset,
 )
@@ -36,8 +35,7 @@ __all__ = [
     "RegressionMetrics",
     "HistogramData",
     "ClassificationDataset",
-    "Dataset",
-    "PredefinedDataset",
+    "PredefinedClassificationDataset",
     "PredefinedRegressionDataset",
     "RegressionDataset",
     "DatasetInfo",

@@ -5,14 +5,14 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from models import (
+    ClassificationDataset,
     ClassificationMetadata,
     ClassificationMetrics,
     ClassificationMetricValues,
-    Dataset,
     DecisionTreeParameters,
     HistogramData,
     LeafNode,
-    PredefinedDataset,
+    PredefinedClassificationDataset,
     SplitNode,
     TreeNode,
 )
@@ -48,20 +48,25 @@ class DecisionTreeService:
         return self.param_config["parameters"]
 
     async def _resolve_dataset(
-        self, dataset_param: Optional[Union[Dict[str, Any], PredefinedDataset, Dataset]]
-    ) -> Dataset:
+        self,
+        dataset_param: Optional[
+            Union[
+                Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset
+            ]
+        ],
+    ) -> ClassificationDataset:
         if dataset_param is None:
             return await self.dataset_service.load_predefined_dataset(
-                PredefinedDataset(name="iris")
+                PredefinedClassificationDataset(name="iris")
             )
         elif isinstance(dataset_param, dict):
             if "name" in dataset_param:
                 return await self.dataset_service.load_predefined_dataset(
-                    PredefinedDataset(**dataset_param)
+                    PredefinedClassificationDataset(**dataset_param)
                 )
             else:
-                return Dataset(**dataset_param)
-        elif isinstance(dataset_param, PredefinedDataset):
+                return ClassificationDataset(**dataset_param)
+        elif isinstance(dataset_param, PredefinedClassificationDataset):
             return await self.dataset_service.load_predefined_dataset(dataset_param)
         else:
             return dataset_param
@@ -229,7 +234,9 @@ class DecisionTreeService:
         self,
         training_params: DecisionTreeParameters,
         dataset_param: Optional[
-            Union[Dict[str, Any], PredefinedDataset, Dataset]
+            Union[
+                Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset
+            ]
         ] = None,
     ) -> Dict[str, Any]:
         """Train a decision tree model with caching."""
@@ -267,10 +274,9 @@ class DecisionTreeService:
             test_metric_values = self._calculate_metrics(
                 model, dataset_info["X_test"], dataset_info["y_test"]
             )
-        
+
         metrics = ClassificationMetrics(
-            train=train_metric_values,
-            test=test_metric_values
+            train=train_metric_values, test=test_metric_values
         )
 
         response_data = {
@@ -296,7 +302,10 @@ class DecisionTreeService:
         return response_data
 
     async def get_predict_params(
-        self, dataset_param: Optional[Union[PredefinedDataset, Dataset]] = None
+        self,
+        dataset_param: Optional[
+            Union[PredefinedClassificationDataset, ClassificationDataset]
+        ] = None,
     ) -> List[str]:
         dataset = await self._resolve_dataset(dataset_param)
         return dataset.get_feature_names()
@@ -405,14 +414,16 @@ class DecisionTreeService:
         self,
         tree: TreeNode,
         dataset_param: Optional[
-            Union[Dict[str, Any], PredefinedDataset, Dataset]
+            Union[
+                Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset
+            ]
         ] = None,
     ) -> Dict[str, Any]:
         """Evaluate a manually built tree against test data.
 
         Args:
             tree: Root node of the manual tree
-            dataset_param: Dataset to use for evaluation (defaults to Iris)
+            dataset_param: ClassificationDataset to use for evaluation (defaults to Iris)
 
         Returns:
             Dictionary with scores and confusion matrix
@@ -439,7 +450,9 @@ class DecisionTreeService:
             recall=recall_score(
                 y_train, predictions_train, average="weighted", zero_division=0
             ),
-            f1=f1_score(y_train, predictions_train, average="weighted", zero_division=0),
+            f1=f1_score(
+                y_train, predictions_train, average="weighted", zero_division=0
+            ),
         )
 
         test_metric_values = None
@@ -463,9 +476,11 @@ class DecisionTreeService:
                 recall=recall_score(
                     y_test, predictions_test, average="weighted", zero_division=0
                 ),
-                f1=f1_score(y_test, predictions_test, average="weighted", zero_division=0),
+                f1=f1_score(
+                    y_test, predictions_test, average="weighted", zero_division=0
+                ),
             )
-        
+
         metrics = ClassificationMetrics(
             train=train_metric_values,
             test=test_metric_values,

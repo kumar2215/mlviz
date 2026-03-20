@@ -236,6 +236,63 @@ const Strong: React.FC<StrongProps> = ({ children, node, ...props }) => {
     );
 };
 
+type VideoProps = React.ComponentProps<"video"> & ExtraProps;
+
+const isYouTubeUrl = (src: string) =>
+    src.includes("youtube.com") || src.includes("youtu.be");
+
+const Video: React.FC<VideoProps> = ({ src, node, ...props }) => {
+    if (!src) return null;
+    const wrapperClass = "my-6 flex justify-center";
+    const innerClass =
+        "w-full max-w-2xl aspect-video rounded-lg overflow-hidden shadow-lg";
+    if (isYouTubeUrl(src)) {
+        // Normalise watch?v= links to embed format
+        const embedSrc = src
+            .replace("watch?v=", "embed/")
+            .replace("youtu.be/", "www.youtube.com/embed/");
+        return (
+            <div className={wrapperClass}>
+                <div className={innerClass}>
+                    <iframe
+                        className="w-full h-full"
+                        src={embedSrc}
+                        title="YouTube video"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                    />
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className={wrapperClass}>
+            <div className={innerClass}>
+                <video
+                    className="w-full h-full"
+                    src={src}
+                    controls
+                    {...props}
+                />
+            </div>
+        </div>
+    );
+};
+
+type LinkProps = React.ComponentProps<"a"> & ExtraProps;
+
+const Link: React.FC<LinkProps> = ({ children, node, ...props }) => {
+    return (
+        <a
+            className="bg-gradient-to-br from-blue-700 to-purple-600 bg-clip-text text-transparent underline"
+            {...props}
+            target="_blank"
+        >
+            {children}
+        </a>
+    );
+};
+
 const DefaultComponentMap: Components = {
     strong: Strong,
     p: Paragraph,
@@ -246,7 +303,9 @@ const DefaultComponentMap: Components = {
     ul: UnorderedList,
     ol: OrderedList,
     li: ListItem,
+    a: Link,
     img: Image,
+    video: Video,
     table: Table,
     thead: TableHead,
     tbody: TableBody,

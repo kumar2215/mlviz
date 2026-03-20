@@ -1,4 +1,4 @@
-import ConfusionMatrix from "@/components/ConfusionMatrix";
+import ConfusionMatrix from "@/components/results/ConfusionMatrix";
 import type { ClassifierResultData } from "@/types/model";
 import { ChartColumnIncreasing } from "lucide-react";
 import MetricSection from "./MetricSection";
@@ -23,7 +23,10 @@ const Results = ({ metrics, metadata }: ClassifierResultData) => {
             </p>
 
             <div className="flex flex-col gap-6">
-                <MetricSection title="Train Set" metrics={formatClassificationMetrics(train)}>
+                <MetricSection
+                    title="Train Set"
+                    metrics={formatClassificationMetrics(train)}
+                >
                     <ConfusionMatrix
                         classes={metadata.class_names}
                         matrix={train.confusion_matrix}
@@ -32,7 +35,10 @@ const Results = ({ metrics, metadata }: ClassifierResultData) => {
 
                 {test && (
                     <div className="w-full pt-4 border-t border-slate-200">
-                        <MetricSection title="Test Set" metrics={formatClassificationMetrics(test)}>
+                        <MetricSection
+                            title="Test Set"
+                            metrics={formatClassificationMetrics(test)}
+                        >
                             <ConfusionMatrix
                                 classes={metadata.class_names}
                                 matrix={test.confusion_matrix}
