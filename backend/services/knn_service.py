@@ -1,20 +1,20 @@
 import json
-import numpy as np
-from typing import Dict, List, Optional, Any, Union
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
 
-from sklearn.neighbors import KNeighborsClassifier
-
+import numpy as np
 from models import (
-    KNNParameters,
-    NeighborInfo,
-    DecisionBoundaryData,
+    ClassificationDataset,
     ClassificationMetadata,
     ClassificationMetrics,
     ClassificationMetricValues,
-    Dataset,
-    PredefinedDataset,
+    DecisionBoundaryData,
+    KNNParameters,
+    NeighborInfo,
+    PredefinedClassificationDataset,
 )
+from sklearn.neighbors import KNeighborsClassifier
+
 from .dataset_service import dataset_service
 
 
@@ -26,8 +26,7 @@ class KNNService:
         self._load_parameter_config()
 
     def _load_parameter_config(self):
-        config_path = Path(__file__).parent.parent / \
-            "config" / "knn_params.json"
+        config_path = Path(__file__).parent.parent / "config" / "knn_params.json"
         with open(config_path) as f:
             self.param_config = json.load(f)
 
@@ -36,21 +35,21 @@ class KNNService:
         return self.param_config["parameters"]
 
     async def _resolve_dataset(
-        self, dataset_param: Optional[Union[Dict[str, Any], PredefinedDataset, Dataset]]
-    ) -> Dataset:
-        """Resolve dataset parameter to Dataset object."""
+        self, dataset_param: Optional[Union[Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset]]
+    ) -> ClassificationDataset:
+        """Resolve dataset parameter to ClassificationDataset object."""
         if dataset_param is None:
             return await self.dataset_service.load_predefined_dataset(
-                PredefinedDataset(name="iris")
+                PredefinedClassificationDataset(name="iris")
             )
         elif isinstance(dataset_param, dict):
             if "name" in dataset_param:
                 return await self.dataset_service.load_predefined_dataset(
-                    PredefinedDataset(**dataset_param)
+                    PredefinedClassificationDataset(**dataset_param)
                 )
             else:
-                return Dataset(**dataset_param)
-        elif isinstance(dataset_param, PredefinedDataset):
+                return ClassificationDataset(**dataset_param)
+        elif isinstance(dataset_param, PredefinedClassificationDataset):
             return await self.dataset_service.load_predefined_dataset(dataset_param)
         else:
             return dataset_param
@@ -259,18 +258,16 @@ class KNNService:
 
         # Validate visualization_features
         if len(visualisation_features) > 3:
-            raise ValueError(
-                "visualization_features can have at most 3 features")
+            raise ValueError("visualization_features can have at most 3 features")
         if len(visualisation_features) < 1:
-            raise ValueError(
-                "visualization_features must have at least 1 feature")
+            raise ValueError("visualization_features must have at least 1 feature")
         if max(visualisation_features) >= n_features:
             raise ValueError(
-                f"Feature index {max(visualisation_features)} out of range for dataset with {n_features} features")
+                f"Feature index {max(visualisation_features)} out of range for dataset with {n_features} features"
+            )
 
         # Extract visualization feature names
-        viz_feature_names = [feature_names_full[i]
-                             for i in visualisation_features]
+        viz_feature_names = [feature_names_full[i] for i in visualisation_features]
 
         # Automatically disable boundary for >3D if no visualization features specified
         # or if visualization features still result in >3D
@@ -280,17 +277,16 @@ class KNNService:
         # Extract data for visualization (subset of features)
         X_train_viz = X_train_full[:, visualisation_features]
 
-        # Fit KNN model. 
-        # If visualisation_features provided, we fit ONLY on those features for consistency 
+        # Fit KNN model.
+        # If visualisation_features provided, we fit ONLY on those features for consistency
         # with the WYSIWYG model shown in the TrainPage and visualization.
         sklearn_params = parameters.to_sklearn_params()
         model = KNeighborsClassifier(**sklearn_params)
-        
+
         if visualisation_features is not None:
             model.fit(X_train_viz, y_train)
         else:
             model.fit(X_train_full, y_train)
-
 
         # Make predictions
         # Handle query points slicing if they were provided as full vectors
@@ -298,7 +294,9 @@ class KNNService:
         query_points = np.array(query_points)
         if query_points.shape[1] == n_features:
             query_array_viz = query_points[:, visualisation_features]
-            query_array_predict = query_array_viz if visualisation_features is not None else query_array
+            query_array_predict = (
+                query_array_viz if visualisation_features is not None else query_array
+            )
             query_array_for_neighbors = query_array_predict
         else:
             # Assume query points are already the subset
@@ -310,7 +308,9 @@ class KNNService:
         predictions = [class_names[int(idx)] for idx in predictions_idx]
 
         # Use the appropriate training set for neighbor calculations
-        X_train_for_neighbors = X_train_viz if visualisation_features is not None else X_train_full
+        X_train_for_neighbors = (
+            X_train_viz if visualisation_features is not None else X_train_full
+        )
 
         # Get neighbor information for each query point
         neighbors_info = []
@@ -413,19 +413,16 @@ class KNNService:
 
         # Validate visualisation_features
         if len(visualisation_features) > 3:
-            raise ValueError(
-                "visualisation_features can have at most 3 features")
+            raise ValueError("visualisation_features can have at most 3 features")
         if len(visualisation_features) < 1:
-            raise ValueError(
-                "visualisation_features must have at least 1 feature")
+            raise ValueError("visualisation_features must have at least 1 feature")
         if max(visualisation_features) >= n_features:
             raise ValueError(
                 f"Feature index {max(visualisation_features)} out of range for dataset with {n_features} features"
             )
 
         # Extract visualisation feature names
-        viz_feature_names = [feature_names_full[i]
-                             for i in visualisation_features]
+        viz_feature_names = [feature_names_full[i] for i in visualisation_features]
 
         # Auto-disable boundary for >3D
         if len(visualisation_features) > 3:
@@ -477,16 +474,18 @@ class KNNService:
     async def train(
         self,
         parameters: KNNParameters,
-        dataset_param: Optional[Union[Dict[str, Any], PredefinedDataset, Dataset]] = None,
+        dataset_param: Optional[
+            Union[Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset]
+        ] = None,
         visualisation_features: Optional[List[int]] = None,
         include_boundary: bool = True,
         boundary_resolution: int = 50,
     ) -> Dict[str, Any]:
         """Train KNN and return visualization data + evaluation metrics.
-        
+
         WYSIWYG: Trains and evaluates ONLY on the visualization features.
         This ensures the model metrics match what's displayed in the visualization.
-        
+
         This combines visualization (like visualise()) with evaluation metrics
         (like DecisionTree's train()). It:
         1. Loads and splits dataset (train/test)
@@ -494,100 +493,119 @@ class KNNService:
         3. Trains KNN on ONLY visualization features
         4. Evaluates on test set using ONLY visualization features → confusion matrix + scores
         5. Generates visualization data (decision boundary, etc.)
-        
+
         Args:
             parameters: KNN algorithm parameters
-            dataset_param: Dataset to use (defaults to Iris)
+            dataset_param: ClassificationDataset to use (defaults to Iris)
             visualisation_features: Feature indices for visualization (defaults to [0, 1])
             include_boundary: Whether to include decision boundary
             boundary_resolution: Resolution of boundary mesh
-            
+
         Returns:
             Dict containing visualization data AND metrics (matrix, scores)
         """
-        from sklearn.model_selection import train_test_split
         from sklearn.metrics import (
-            confusion_matrix,
             accuracy_score,
+            confusion_matrix,
+            f1_score,
             precision_score,
             recall_score,
-            f1_score,
         )
-        
+        from sklearn.model_selection import train_test_split
+
         # Load full dataset
         dataset = await self._resolve_dataset(dataset_param)
         X_full = np.array(dataset.X)
         y_full = np.array(dataset.y)
         n_features = X_full.shape[1]
-        
+
         # Determine visualization features (default to first 2)
         if visualisation_features is None:
-                visualisation_features = [0, 1]
-        
+            visualisation_features = [0, 1]
+
         if len(visualisation_features) < 1:
             visualisation_features = [0, 1] if n_features >= 2 else [0]
-            
+
         # Validate and auto-correct visualisation_features if out of bounds
         max_idx = max(visualisation_features)
         if max_idx >= n_features:
             # Fallback to defaults if indices are invalid for this dataset
             # (e.g. switching from 4-feature dataset to 2-feature dataset)
-            print(f"Feature indices {visualisation_features} out of bounds for {n_features} features. Resetting to defaults.")
+            print(
+                f"Feature indices {visualisation_features} out of bounds for {n_features} features. Resetting to defaults."
+            )
             visualisation_features = [0, 1] if n_features >= 2 else [0]
-        
+
         # Extract ONLY visualization features for WYSIWYG
         X_viz = X_full[:, visualisation_features]
-        
+
         # Split into train/test (80/20) using ONLY visualization features
         X_train, X_test, y_train, y_test = train_test_split(
             X_viz, y_full, test_size=0.2, random_state=42, stratify=y_full
         )
-        
+
         # Train KNN model on visualization features ONLY
         sklearn_params = parameters.to_sklearn_params()
         model = KNeighborsClassifier(**sklearn_params)
         model.fit(X_train, y_train)
-        
+
         # Evaluate on training set (using visualization features)
         y_pred_train = model.predict(X_train)
-        
+
         # Calculate confusion matrix and metrics on training set
         cm_train = confusion_matrix(y_train, y_pred_train)
-        
+
         train_metric_values = ClassificationMetricValues(
             confusion_matrix=cm_train.tolist(),
             accuracy=float(accuracy_score(y_train, y_pred_train)),
-            precision=float(precision_score(y_train, y_pred_train, average='weighted', zero_division=0)),
-            recall=float(recall_score(y_train, y_pred_train, average='weighted', zero_division=0)),
-            f1=float(f1_score(y_train, y_pred_train, average='weighted', zero_division=0)),
+            precision=float(
+                precision_score(
+                    y_train, y_pred_train, average="weighted", zero_division=0
+                )
+            ),
+            recall=float(
+                recall_score(y_train, y_pred_train, average="weighted", zero_division=0)
+            ),
+            f1=float(
+                f1_score(y_train, y_pred_train, average="weighted", zero_division=0)
+            ),
         )
 
         # Evaluate on testing set (using visualization features)
         test_metric_values = None
         if len(y_test) > 0:
             y_pred_test = model.predict(X_test)
-            
+
             # Calculate confusion matrix and metrics on testing set
             cm_test = confusion_matrix(y_test, y_pred_test)
-            
+
             test_metric_values = ClassificationMetricValues(
                 confusion_matrix=cm_test.tolist(),
                 accuracy=float(accuracy_score(y_test, y_pred_test)),
-                precision=float(precision_score(y_test, y_pred_test, average='weighted', zero_division=0)),
-                recall=float(recall_score(y_test, y_pred_test, average='weighted', zero_division=0)),
-                f1=float(f1_score(y_test, y_pred_test, average='weighted', zero_division=0)),
+                precision=float(
+                    precision_score(
+                        y_test, y_pred_test, average="weighted", zero_division=0
+                    )
+                ),
+                recall=float(
+                    recall_score(
+                        y_test, y_pred_test, average="weighted", zero_division=0
+                    )
+                ),
+                f1=float(
+                    f1_score(y_test, y_pred_test, average="weighted", zero_division=0)
+                ),
             )
 
         metrics = ClassificationMetrics(
-            train=train_metric_values,
-            test=test_metric_values
+            train=train_metric_values, test=test_metric_values
         )
-        
+
         # Generate visualization data using training set only
         # X_train is ALREADY the visualization features (sliced before split)
         # So we use X_train directly, NO re-slicing needed
         X_train_viz = X_train
-        
+
         # Compute distance matrix and neighbor indices
         distance_matrix = self._compute_distance_matrix(
             X_train_viz, parameters.metric, parameters.p
@@ -595,30 +613,32 @@ class KNNService:
         neighbor_indices = self._compute_neighbor_indices(
             X_train_viz, parameters.n_neighbors, parameters.metric, parameters.p
         )
-        
+
         # Generate decision boundary if requested
         decision_boundary = None
         if include_boundary:
             sklearn_params = parameters.to_sklearn_params()
             model_viz = KNeighborsClassifier(**sklearn_params)
             model_viz.fit(X_train_viz, y_train)
-            
+
             decision_boundary = self._generate_decision_boundary(
                 model_viz, X_train_viz, dataset.target_names, boundary_resolution
             )
-        
+
         # Create metadata to match DecisionTree service structure
         # Ensure we return valid strings for feature names
-        viz_feature_names = [str(dataset.feature_names[i]) for i in visualisation_features]
-        
+        viz_feature_names = [
+            str(dataset.feature_names[i]) for i in visualisation_features
+        ]
+
         metadata = ClassificationMetadata(
             feature_names=dataset.feature_names,
             class_names=dataset.target_names,
             n_features=len(dataset.feature_names),
             n_classes=len(dataset.target_names),
-            dataset_name=dataset.name if hasattr(dataset, 'name') else None
+            dataset_name=dataset.name if hasattr(dataset, "name") else None,
         )
-        
+
         # Return visualization data + metrics + metadata
         return {
             "success": True,
@@ -631,11 +651,11 @@ class KNNService:
             ),
             "metadata": metadata.model_dump(),
             "visualisation_feature_indices": visualisation_features,
-            "visualisation_feature_names": [dataset.feature_names[i] for i in visualisation_features],
+            "visualisation_feature_names": [
+                dataset.feature_names[i] for i in visualisation_features
+            ],
             "metrics": metrics.model_dump(),
         }
-
-
 
 
 # Global service instance

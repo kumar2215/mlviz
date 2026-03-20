@@ -2,7 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 from .models import DatasetListResponse, DatasetResponse
 from services import dataset_service
-from models import PredefinedDataset
+from models import PredefinedClassificationDataset
 
 
 router = APIRouter()
@@ -26,7 +26,7 @@ async def get_available_datasets():
 async def load_dataset(
     name: Optional[str] = Query(
         "iris",
-        description="Dataset name (iris, wine, breast_cancer, digits)"
+        description="ClassificationDataset name (iris, wine, breast_cancer, digits)"
     ),
     test_size: Optional[float] = Query(
         0.25,
@@ -47,7 +47,7 @@ async def load_dataset(
     and metadata needed for visualization.
 
     Args:
-        name: Dataset name (defaults to "iris")
+        name: ClassificationDataset name (defaults to "iris")
         test_size: Test set proportion (defaults to 0.25)
         random_state: Random seed (defaults to 2025)
 
@@ -59,7 +59,7 @@ async def load_dataset(
     """
     try:
         # Load the predefined dataset
-        dataset_ref = PredefinedDataset(
+        dataset_ref = PredefinedClassificationDataset(
             name=name,
             test_size=test_size,
             random_state=random_state

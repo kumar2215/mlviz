@@ -4,10 +4,10 @@ from typing import Any, Dict, List, Optional, Union
 
 import numpy as np
 from models import (
-    Dataset,
+    ClassificationDataset,
     DecisionBoundaryData,
     KMeansParameters,
-    PredefinedDataset,
+    PredefinedClassificationDataset,
 )
 from sklearn.cluster import KMeans
 
@@ -31,21 +31,21 @@ class KMeansService:
         return self.param_config["parameters"]
 
     async def _resolve_dataset(
-        self, dataset_param: Optional[Union[Dict[str, Any], PredefinedDataset, Dataset]]
-    ) -> Dataset:
-        """Resolve dataset parameter to Dataset object."""
+        self, dataset_param: Optional[Union[Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset]]
+    ) -> ClassificationDataset:
+        """Resolve dataset parameter to ClassificationDataset object."""
         if dataset_param is None:
             return await self.dataset_service.load_predefined_dataset(
-                PredefinedDataset(name="iris")
+                PredefinedClassificationDataset(name="iris")
             )
         elif isinstance(dataset_param, dict):
             if "name" in dataset_param:
                 return await self.dataset_service.load_predefined_dataset(
-                    PredefinedDataset(**dataset_param)
+                    PredefinedClassificationDataset(**dataset_param)
                 )
             else:
-                return Dataset(**dataset_param)
-        elif isinstance(dataset_param, PredefinedDataset):
+                return ClassificationDataset(**dataset_param)
+        elif isinstance(dataset_param, PredefinedClassificationDataset):
             return await self.dataset_service.load_predefined_dataset(dataset_param)
         else:
             return dataset_param
@@ -264,7 +264,7 @@ class KMeansService:
         self,
         parameters: KMeansParameters,
         centroids: Optional[List[List[float]]] = None,
-        dataset_param: Optional[Union[Dict[str, Any], PredefinedDataset, Dataset]] = None,
+        dataset_param: Optional[Union[Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset]] = None,
         visualisation_features: Optional[List[int]] = None,
         include_boundary: bool = True,
         boundary_resolution: int = 50,
@@ -274,7 +274,7 @@ class KMeansService:
         Args:
             parameters: K-Means parameters (metric, n_clusters)
             centroids: Current centroid positions [[x, y], ...]
-            dataset_param: Dataset to use (defaults to Iris)
+            dataset_param: ClassificationDataset to use (defaults to Iris)
             visualisation_features: Feature indices for visualization (defaults to [0, 1])
             include_boundary: Whether to generate decision boundary
             boundary_resolution: Resolution of boundary mesh
@@ -385,7 +385,7 @@ class KMeansService:
         self,
         parameters: KMeansParameters,
         centroids: Optional[List[List[float]]] = None,
-        dataset_param: Optional[Union[Dict[str, Any], PredefinedDataset, Dataset]] = None,
+        dataset_param: Optional[Union[Dict[str, Any], PredefinedClassificationDataset, ClassificationDataset]] = None,
         visualisation_features: Optional[List[int]] = None,
         max_iterations: int = 100,
         include_boundary: bool = True,
@@ -396,7 +396,7 @@ class KMeansService:
         Args:
             parameters: K-Means parameters (metric, n_clusters)
             centroids: Initial centroid positions [[x, y], ...]
-            dataset_param: Dataset to use (defaults to Iris)
+            dataset_param: ClassificationDataset to use (defaults to Iris)
             visualisation_features: Feature indices for visualization (defaults to [0, 1])
             max_iterations: Maximum number of iterations before stopping
             include_boundary: Whether to generate decision boundary

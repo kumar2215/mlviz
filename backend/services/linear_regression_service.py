@@ -1,13 +1,11 @@
 import json
 import numpy as np
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_error
-from sklearn.datasets import load_diabetes
-from sklearn.preprocessing import StandardScaler
 
 from models import (
     LinearRegressionParameters,
@@ -15,8 +13,8 @@ from models import (
     RegressionMetrics,
     RegressionMetricValues,
     RegressionDataset,
-    PredefinedRegressionDataset,
 )
+from services.dataset_service import dataset_service
 
 
 class LinearRegressionService:
@@ -36,50 +34,9 @@ class LinearRegressionService:
 
     async def _resolve_dataset(
         self,
-        dataset_param: Optional[Union[Dict[str, Any], PredefinedRegressionDataset, RegressionDataset]],
+        dataset_param: Optional[Any],
     ) -> RegressionDataset:
-        """Resolve a dataset parameter to a RegressionDataset object.
-        
-        Defaults to sklearn diabetes dataset if None provided.
-        """
-        if dataset_param is None or (
-            isinstance(dataset_param, dict) and dataset_param.get("name") == "diabetes"
-        ) or isinstance(dataset_param, PredefinedRegressionDataset):
-            return self._load_predefined_dataset(
-                dataset_param.name if isinstance(dataset_param, PredefinedRegressionDataset)
-                else (dataset_param.get("name", "diabetes") if isinstance(dataset_param, dict) else "diabetes")
-            )
-        elif isinstance(dataset_param, dict):
-            if dataset_param.get("type") in ("predefined_regression",):
-                return self._load_predefined_dataset(dataset_param.get("name", "diabetes"))
-            else:
-                return RegressionDataset(**dataset_param)
-        else:
-            return dataset_param
-
-    def _load_predefined_dataset(self, name: str) -> RegressionDataset:
-        """Load a sklearn predefined regression dataset."""
-        if name == "diabetes":
-            data = load_diabetes()
-            return RegressionDataset(
-                type="custom_regression",
-                X=data.data.tolist(),
-                y=data.target.tolist(),
-                feature_names=list(data.feature_names),
-                target_name="disease progression",
-            )
-        elif name == "california_housing":
-            from sklearn.datasets import fetch_california_housing
-            data = fetch_california_housing()
-            return RegressionDataset(
-                type="custom_regression",
-                X=data.data.tolist(),
-                y=data.target.tolist(),
-                feature_names=list(data.feature_names),
-                target_name="median house value",
-            )
-        else:
-            raise ValueError(f"Unknown predefined regression dataset: {name}")
+        return await dataset_service.resolve_regression_dataset(dataset_param)
 
     def _compute_metrics(self, y_true: np.ndarray, y_pred: np.ndarray) -> RegressionMetricValues:
         """Compute regression metrics given true and predicted values."""

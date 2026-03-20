@@ -59,6 +59,7 @@ const Visualisation: React.FC = () => {
                 optimalSlope,
                 optimalIntercept,
                 showOptimalLine: true,
+                showErrorLines: true,
                 xRange: visualizationData.x_range as [number, number],
                 yRange: visualizationData.y_range as [number, number],
                 xLabel: visualizationData.metadata?.feature_x_name ?? "x",

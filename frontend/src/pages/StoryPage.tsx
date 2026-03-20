@@ -115,18 +115,12 @@ export const StoryPage: React.FC<StoryPageProps> = ({
             </div>
 
             <footer className="shrink-0 border-t border-gray-200 px-4 py-2 flex items-center justify-between text-sm tracking-tight">
-                <div className="flex flex-row gap-2 items-center">
-                    <p className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent font-semibold font-mono">
-                        story/{story.name}
-                    </p>
-                    <p className="font-mono text-[0.75rem] border-gray-300 border-1 rounded-full py-1 px-2 text-gray-4-0 bg-gray-200">
-                        page {currentPageId}
-                    </p>
-                </div>
-
+                <p className="bg-gradient-to-r text-xs from-fuchsia-700 to-cyan-700 bg-clip-text text-transparent font-semibold font-mono">
+                    story/{story.name} [page {currentPageId}]
+                </p>
                 <Link to={"/"}>
                     <Button
-                        className="bg-gradient-to-br from-gray-50 to-stone-50 text-gray-800 hover:from-blue-500 hover:to-purple-500 hover:text-white transition-all duration-100 hover:shadow-2xl size-8"
+                        className="bg-gradient-to-br from-fuchsia-500 to-purple-500 text-gray-800 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-100 hover:shadow-2xl size-8"
                         size="icon"
                     >
                         <House />

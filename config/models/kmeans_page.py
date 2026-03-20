@@ -37,7 +37,12 @@ class KMeansPredictPage(KMeansPage):
     component_type: Literal["predict"] = "predict"
 
 
+class KMeansStepPage(KMeansPage):
+    component_type: Literal["step"] = "step"
+    parameters: KMeansTrainParameters = Field(default_factory=KMeansTrainParameters)
+
+
 # Union
 KMeansPageUnion = Annotated[
-    Union[KMeansTrainPage, KMeansPredictPage], Field(discriminator="component_type")
+    Union[KMeansTrainPage, KMeansPredictPage, KMeansStepPage], Field(discriminator="component_type")
 ]
