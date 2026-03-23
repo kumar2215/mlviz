@@ -10,6 +10,7 @@ import LineControlHUD from "@/components/linear/regression/LineControlHUD";
 import GDStepHUD, {
     type GDStepMode,
 } from "@/components/linear/regression/step/GDStepHUD";
+import LossMapHUD from "@/components/linear/regression/step/LossMapHUD";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
@@ -136,6 +137,11 @@ const Visualisation: React.FC = () => {
         <div className="relative h-full w-full">
             <div className="absolute top-18 left-4 z-20">
                 <LineControlHUD />
+            </div>
+
+            {/* Loss map — bottom right */}
+            <div className="absolute bottom-6 right-6 z-20">
+                <LossMapHUD />
             </div>
 
             {/* GD step control — right side */}

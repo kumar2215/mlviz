@@ -92,6 +92,8 @@ interface LinearRegressionContextType
 
     /** Compute R² live on the frontend from the scatter points */
     computeR2: (slope: number, intercept: number) => number;
+    /** Compute MSE live on the frontend from the scatter points */
+    computeMSE: (slope: number, intercept: number) => number;
     /** Randomize the current line based on data range */
     randomizeLine: () => void;
 }
@@ -200,6 +202,18 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
                 0
             );
             return 1 - ssRes / ssTot;
+        },
+        [currentModelData?.points]
+    );
+
+    const computeMSE = useCallback(
+        (slope: number, intercept: number): number => {
+            const points = currentModelData?.points;
+            if (!points || points.length === 0) return 0;
+            return points.reduce(
+                (s, p) => s + (p[1] - (slope * p[0] + intercept)) ** 2,
+                0
+            ) / points.length;
         },
         [currentModelData?.points]
     );
@@ -441,6 +455,7 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
             currentIntercept,
             setCurrentLine,
             computeR2,
+            computeMSE,
 
             isEvaluating,
             evaluateLine,
@@ -452,7 +467,7 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
             isVisualizationLoading, visualizationError, trainModel,
             visualizationData, loadVisualization,
             isStepLoading, stepError, stepData, performStep,
-            currentSlope, currentIntercept, setCurrentLine, computeR2,
+            currentSlope, currentIntercept, setCurrentLine, computeR2, computeMSE,
             isEvaluating, evaluateLine, randomizeLine,
         ]
     );

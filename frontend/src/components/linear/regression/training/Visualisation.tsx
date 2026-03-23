@@ -9,6 +9,7 @@
 
 import { renderLinearRegression } from "@/components/linear/regression/LinearRegressionRenderer";
 import LineControlHUD from "@/components/linear/regression/LineControlHUD";
+import LossMapHUD from "@/components/linear/regression/step/LossMapHUD";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
@@ -112,6 +113,11 @@ const Visualisation: React.FC = () => {
             {/* Line control HUD */}
             <div className="absolute top-6 right-6 z-20">
                 <LineControlHUD />
+            </div>
+
+            {/* Loss map — bottom right */}
+            <div className="absolute bottom-6 right-6 z-20">
+                <LossMapHUD />
             </div>
 
             {/* Legend HUD removed - now rendered inside SVG */}
