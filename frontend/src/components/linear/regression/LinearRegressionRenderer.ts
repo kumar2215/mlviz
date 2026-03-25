@@ -38,6 +38,8 @@ export interface RenderLinearRegressionProps {
     focusedLabels?: Set<string> | null;
     /** Draw vertical residual lines from each point to the current line */
     showErrorLines?: boolean;
+    /** Predicted point [x, y] to highlight on the line */
+    predictionPoint?: [number, number] | null;
 }
 
 export interface RenderResult {
@@ -52,6 +54,8 @@ const USER_LINE_COLOR = "#6366f1"; // indigo — user's line
 const OPTIMAL_LINE_COLOR = "#10b981"; // emerald — OLS optimal line
 const PROPOSED_LINE_COLOR = "#f97316"; // orange — proposed next step
 const TEST_COLOR = "#f97316"; // orange — test set points
+
+const PREDICTION_POINT_COLOR = "#e11d48"; // rose — predicted point
 
 export function renderLinearRegression({
     container,
@@ -72,6 +76,7 @@ export function renderLinearRegression({
     legendItems,
     focusedLabels,
     showErrorLines = false,
+    predictionPoint = null,
 }: RenderLinearRegressionProps): RenderResult {
     const { width, height, margin } = context.dimensions;
     const innerWidth = width - margin.left - margin.right;
@@ -246,6 +251,65 @@ export function renderLinearRegression({
         .attr("stroke-width", 0.5)
         .attr("stroke-opacity", 0.7);
 
+    // ---- Predicted point ----
+    const predictionVisible =
+        focusedLabels === null ||
+        focusedLabels === undefined ||
+        focusedLabels.has("Prediction");
+
+    if (predictionPoint) {
+        const predGroup = contentGroup
+            .append("g")
+            .attr("class", "lr-prediction-point")
+            .attr("opacity", predictionVisible ? 1 : 0);
+
+        // Vertical dashed drop line from point down to x-axis
+        predGroup
+            .append("line")
+            .attr("x1", xScale(predictionPoint[0]))
+            .attr("x2", xScale(predictionPoint[0]))
+            .attr("y1", yScale(predictionPoint[1]))
+            .attr("y2", innerHeight)
+            .attr("stroke", PREDICTION_POINT_COLOR)
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "4 3")
+            .attr("stroke-opacity", 0.6);
+
+        // Horizontal dashed line from point to y-axis
+        predGroup
+            .append("line")
+            .attr("x1", 0)
+            .attr("x2", xScale(predictionPoint[0]))
+            .attr("y1", yScale(predictionPoint[1]))
+            .attr("y2", yScale(predictionPoint[1]))
+            .attr("stroke", PREDICTION_POINT_COLOR)
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "4 3")
+            .attr("stroke-opacity", 0.6);
+
+        // Outer ring
+        predGroup
+            .append("circle")
+            .attr("cx", xScale(predictionPoint[0]))
+            .attr("cy", yScale(predictionPoint[1]))
+            .attr("r", 10)
+            .attr("fill", "none")
+            .attr("stroke", PREDICTION_POINT_COLOR)
+            .attr("stroke-width", 2)
+            .attr("stroke-opacity", 0.5);
+
+        // Filled dot
+        predGroup
+            .append("circle")
+            .attr("cx", xScale(predictionPoint[0]))
+            .attr("cy", yScale(predictionPoint[1]))
+            .attr("r", 6)
+            .attr("fill", PREDICTION_POINT_COLOR)
+            .attr("fill-opacity", 0.9)
+            .attr("stroke", "white")
+            .attr("stroke-width", 1.5);
+    }
+
     // ---- Line drawing helper ----
     const drawLine = (
         slope: number,
@@ -356,6 +420,12 @@ export function renderLinearRegression({
             finalLegendItems.push({
                 label: "Error lines",
                 color: ERROR_LINE_COLOR,
+            });
+        }
+        if (predictionPoint) {
+            finalLegendItems.push({
+                label: "Prediction",
+                color: PREDICTION_POINT_COLOR,
             });
         }
     }
