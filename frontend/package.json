@@ -5,7 +5,8 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "devhost": "vite --host",
+        "dev:bypass": "VITE_BYPASS_CONDITIONS=true vite",
+        "dev:host": "vite --host",
         "build": "tsc --noEmit && vite build",
         "lint": "eslint .",
         "preview": "vite preview",

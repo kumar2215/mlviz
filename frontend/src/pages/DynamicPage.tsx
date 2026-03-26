@@ -9,8 +9,27 @@ interface DynamicPageProps {
     page: DynamicPageUnion;
 }
 
+const REGRESSION_DATASET_TYPES = new Set([
+    "predefined_regression",
+    "custom_regression",
+]);
+const CLASSIFICATION_DATASET_TYPES = new Set(["predefined", "custom"]);
+
+function isDatasetCompatible(
+    datasetType: string,
+    problemType: string,
+): boolean {
+    if (problemType === "regression") {
+        return REGRESSION_DATASET_TYPES.has(datasetType);
+    }
+    if (problemType === "classifier" || problemType === "clustering") {
+        return CLASSIFICATION_DATASET_TYPES.has(datasetType);
+    }
+    return true;
+}
+
 const DynamicPage: React.FC<DynamicPageProps> = ({ page }) => {
-    const { activeDataset, setDataset } = useDataset();
+    const { activeDataset, setDataset, clearDataset } = useDataset();
     const { config } = useConfig();
 
     // Resolve dataset if it's a reference
@@ -19,16 +38,23 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page }) => {
             ? config?.datasets?.[page.dataset.name]
             : page.dataset;
 
+    const problemType =
+        page.dynamic_type === "model" ? page.problem_type : undefined;
+
     useEffect(() => {
         if (resolvedDataset) {
             console.log("[DynamicPage] Setting dataset:", resolvedDataset);
             setDataset(resolvedDataset);
+        } else if (problemType && activeDataset) {
+            if (!isDatasetCompatible(activeDataset.type, problemType)) {
+                console.log(
+                    `[DynamicPage] Clearing incompatible dataset (type="${activeDataset.type}") for problem_type="${problemType}"`,
+                );
+                clearDataset();
+            }
         }
-    }, [resolvedDataset, setDataset]);
+    }, [resolvedDataset, problemType, activeDataset, setDataset, clearDataset]);
 
-    // Wait until the dataset context has been updated before rendering children.
-    // Without this gate, children mount and read the old/null activeDataset
-    // before the useEffect above has propagated the new value.
     if (resolvedDataset && activeDataset !== resolvedDataset) {
         return null;
     }
