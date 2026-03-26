@@ -44,6 +44,21 @@
                 },
                 {
                     "index": "34680342"
+                },
+                {
+                    "index": "705804919"
+                },
+                {
+                    "index": "3929557980"
+                },
+                {
+                    "index": "1094533493"
+                },
+                {
+                    "index": "3915783174"
+                },
+                {
+                    "index": "3050687251"
                 }
             ],
             "edges": [
@@ -253,13 +268,13 @@
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 0,
-                        "story_name": "knn"
+                        "local_index": 13,
+                        "story_name": null
                     },
                     "condition": {
                         "condition_type": "Bypass",
                         "name": "Check out the KNN visualisations",
-                        "description": "Optional exploration of our (WIP) K-Nearest Neighbours visualisation"
+                        "description": "Optional exploration of our K-Nearest Neighbours visualisation"
                     }
                 },
                 {
@@ -268,13 +283,13 @@
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 0,
-                        "story_name": "kmeans"
+                        "local_index": 15,
+                        "story_name": null
                     },
                     "condition": {
                         "condition_type": "Bypass",
                         "name": "Check out the KMeans visualisations",
-                        "description": "Optional exploration of our (WIP) K-Means visualisation"
+                        "description": "Optional exploration of our K-Means visualisation"
                     }
                 },
                 {
@@ -283,37 +298,22 @@
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 0,
-                        "story_name": "linear"
+                        "local_index": 16,
+                        "story_name": null
                     },
                     "condition": {
                         "condition_type": "Bypass",
-                        "name": "Linear Regression",
-                        "description": "Optional exploration of our (WIP)  Linear Regression visualisation"
+                        "name": "Check out the Linear Regression visualisations",
+                        "description": "Optional exploration of our Linear Regression visualisation"
                     }
-                }
-            ]
-        },
-        "knn": {
-            "name": "knn",
-            "description": "KNN Classifier",
-            "start_page": 0,
-            "nodes": [
-                {
-                    "index": "705804919"
                 },
                 {
-                    "index": "3929557980"
-                }
-            ],
-            "edges": [
-                {
                     "start": {
-                        "local_index": 0,
+                        "local_index": 13,
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 1,
+                        "local_index": 14,
                         "story_name": null
                     },
                     "condition": {
@@ -324,11 +324,11 @@
                 },
                 {
                     "start": {
-                        "local_index": 1,
+                        "local_index": 14,
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 0,
+                        "local_index": 13,
                         "story_name": null
                     },
                     "condition": {
@@ -336,40 +336,44 @@
                         "name": "Back to the visualisation",
                         "description": "See how the dataset is split within KNN"
                     }
-                }
-            ]
-        },
-        "kmeans": {
-            "name": "kmeans",
-            "description": "Kmeans clustering",
-            "start_page": 0,
-            "nodes": [
-                {
-                    "index": "1094533493"
-                }
-            ],
-            "edges": []
-        },
-        "linear": {
-            "name": "linear",
-            "description": "Linear Regression",
-            "start_page": 0,
-            "nodes": [
-                {
-                    "index": "3915783174"
                 },
                 {
-                    "index": "3050687251"
-                }
-            ],
-            "edges": [
-                {
                     "start": {
-                        "local_index": 0,
+                        "local_index": 14,
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 1,
+                        "local_index": 12,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Back to story",
+                        "description": "Return to the main story"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 15,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 12,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Back to story",
+                        "description": "Return to the main story"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 16,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 17,
                         "story_name": null
                     },
                     "condition": {
@@ -380,17 +384,32 @@
                 },
                 {
                     "start": {
-                        "local_index": 1,
+                        "local_index": 17,
                         "story_name": null
                     },
                     "end": {
-                        "local_index": 0,
+                        "local_index": 16,
                         "story_name": null
                     },
                     "condition": {
                         "condition_type": "Bypass",
                         "name": "Train visualisation with OLS",
                         "description": "Train the visualisation using OLS."
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 17,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 12,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Back to story",
+                        "description": "Return to the main story"
                     }
                 }
             ]
@@ -483,7 +502,7 @@
         "3548984691": {
             "name": "decision_tree_train_wparams",
             "page_type": "dynamic",
-            "note": "",
+            "note": "The `max-depth` parameter refers to the depth of the tree: effectively, how many questions can you ask?",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "train",
@@ -496,7 +515,7 @@
         "3719022735": {
             "name": "decision_tree_train_noparams",
             "page_type": "dynamic",
-            "note": "The `max-depth` parameter refers to the depth of the tree: effectively, how many questions can you ask?",
+            "note": "",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "train",
@@ -522,7 +541,7 @@
             "page_type": "static",
             "note": "",
             "parameters": {
-                "text": "# Congratulations!\n\nYou've learnt about what a decision tree does!",
+                "text": "# Congratulations!\n\nYou've learnt about what a decision tree does!\n\nOptionally, you can check out our current work on the remaining visualisations!",
                 "link": null
             }
         },
