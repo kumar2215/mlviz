@@ -1,5 +1,6 @@
 from typing import Annotated, Any, Dict, List, Literal, Optional, Union
 
+
 from models import (
     ClassificationMetadata,
     ClassificationMetrics,
@@ -23,6 +24,8 @@ from models import (
     SplitStatistics,
     ThresholdStatistics,
     TreeNode,
+    SVMParameters,
+    SVMMetadata,
 )
 from pydantic import BaseModel, Discriminator, Field
 
@@ -774,3 +777,159 @@ class LinearRegressionStepResponse(BaseModel):
     grad_intercept: float = Field(description="Gradient of loss w.r.t. intercept")
     loss_before: float = Field(description="MSE loss before the update")
     loss_after: float = Field(description="MSE loss after the proposed update")
+
+
+# ---------------------------------------------------------------------------
+# SVM Classification Models
+# ---------------------------------------------------------------------------
+
+
+class SVMVisualisationRequest(BaseModel):
+    """Request model for SVM scatter visualisation."""
+
+    parameters: SVMParameters = Field(
+        default_factory=SVMParameters,
+        description="SVM parameters",
+    )
+    dataset: Optional[DatasetUnion] = Field(
+        None,
+        description="Classification dataset. Defaults to sklearn iris.",
+    )
+    boundary_resolution: int = Field(
+        50, ge=10, le=200, description="Resolution of boundary mesh"
+    )
+
+
+
+class SVMVisualisationResponse(BaseModel):
+    """Response model for SVM scatter visualisation."""
+
+    success: bool
+    points: List[List[float]] = Field(
+        description="Scatter points as [[x, y], ...] using the chosen features"
+    )
+    labels: List[int] = Field(description="Class labels for points")
+    x_range: List[float] = Field(
+        description="[min, max] range for the x-axis (with margin)"
+    )
+    y_range: List[float] = Field(
+        description="[min, max] range for the y-axis (with margin)"
+    )
+    decision_boundary: Optional[DecisionBoundaryData] = Field(
+        None, description="Decision boundary visualisation data"
+    )
+    metadata: SVMMetadata
+
+
+class SVMTrainRequest(BaseModel):
+    """Request model for SVM training."""
+
+    parameters: SVMParameters = Field(
+        default_factory=SVMParameters,
+        description="SVM parameters",
+    )
+    dataset: Optional[DatasetUnion] = Field(
+        None,
+        description="Classification dataset.",
+    )
+    boundary_resolution: int = Field(
+        50, ge=10, le=200, description="Resolution of boundary mesh"
+    )
+
+
+
+class SVMTrainResponse(BaseModel):
+    """Response model for SVM training."""
+
+    success: bool
+    points: List[List[float]] = Field(description="All scatter points [[x, y], ...]")
+    labels: List[int] = Field(description="Class labels")
+    x_range: List[float] = Field(description="[min, max] range for x-axis")
+    y_range: List[float] = Field(description="[min, max] range for y-axis")
+    optimal_w1: float = Field(description="Optimal w1 (feature x weight)")
+    optimal_w2: float = Field(description="Optimal w2 (feature y weight)")
+    optimal_b: float = Field(description="Optimal bias")
+    support_vector_indices: List[int] = Field(description="Indices of support vectors")
+    sv_contributions: List[Dict[str, Any]] = Field(
+        default_factory=list,
+        description="Per-SV contribution info: sv_index, alpha_y, sv_coords, mean_abs_contribution, heatmap (per-mesh-point signed contributions)"
+    )
+    boundary_resolution: int = Field(
+        50, description="Resolution of the boundary/heatmap mesh (grid is resolution x resolution)"
+    )
+    metrics: ClassificationMetrics = Field(
+        description="Classification metrics on the training set"
+    )
+    decision_boundary: Optional[DecisionBoundaryData] = Field(
+        None, description="Decision boundary visualisation data"
+    )
+    metadata: SVMMetadata
+
+
+class SVMStepRequest(BaseModel):
+    """Request model for a mock gradient descent step for SVM."""
+
+    current_w1: float = Field(description="Current w1")
+    current_w2: float = Field(description="Current w2")
+    current_b: float = Field(description="Current bias")
+    learning_rate: float = Field(
+        0.01, gt=0, description="Step size for gradient descent"
+    )
+    parameters: SVMParameters = Field(
+        default_factory=SVMParameters,
+        description="Algorithm parameters"
+    )
+    dataset: Optional[DatasetUnion] = Field(
+        None,
+        description="Dataset to compute loss against",
+    )
+    boundary_resolution: int = Field(
+        50, ge=10, le=200, description="Resolution of boundary mesh"
+    )
+
+
+
+class SVMStepResponse(BaseModel):
+    """Response model for a gradient step update."""
+
+    success: bool
+    new_w1: float = Field(description="Proposed new w1")
+    new_w2: float = Field(description="Proposed new w2")
+    new_b: float = Field(description="Proposed new bias")
+    loss: float = Field(description="Hinge loss after the step")
+    decision_boundary: Optional[DecisionBoundaryData] = Field(
+        None, description="Decision boundary visualisation data"
+    )
+
+
+
+class SVMPredictRequest(BaseModel):
+    """Request model for evaluating an arbitrary SVM boundary."""
+
+    w1: float = Field(description="w1")
+    w2: float = Field(description="w2")
+    b: float = Field(description="bias")
+    parameters: SVMParameters = Field(
+        default_factory=SVMParameters,
+        description="Algorithm parameters"
+    )
+    dataset: Optional[DatasetUnion] = Field(
+        None,
+        description="Dataset for evaluation",
+    )
+    boundary_resolution: int = Field(
+        50, ge=10, le=200, description="Resolution of boundary mesh"
+    )
+
+
+class SVMPredictResponse(BaseModel):
+    """Response model for SVM boundary evaluation."""
+
+    success: bool
+    loss: float = Field(description="Calculated Hinge Loss value")
+    metrics: ClassificationMetrics = Field(description="Classification metrics for boundary")
+    decision_boundary: Optional[DecisionBoundaryData] = Field(
+        None, description="Decision boundary visualisation data"
+    )
+
+

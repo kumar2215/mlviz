@@ -1057,6 +1057,222 @@
         }
       }
     },
+    "/api/svm/params": {
+      "get": {
+        "tags": [
+          "Support Vector Machine"
+        ],
+        "summary": "Get Parameters",
+        "description": "Get the parameters for SVM Classification.",
+        "operationId": "get_parameters_api_svm_params_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "oneOf": [
+                      {
+                        "$ref": "#/components/schemas/SelectParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/IntParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/NumberParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/FloatParameterInfo"
+                      },
+                      {
+                        "$ref": "#/components/schemas/AnyParameterInfo"
+                      }
+                    ],
+                    "discriminator": {
+                      "propertyName": "type",
+                      "mapping": {
+                        "select": "#/components/schemas/SelectParameterInfo",
+                        "int": "#/components/schemas/IntParameterInfo",
+                        "number": "#/components/schemas/NumberParameterInfo",
+                        "float": "#/components/schemas/FloatParameterInfo",
+                        "any": "#/components/schemas/AnyParameterInfo"
+                      }
+                    }
+                  },
+                  "type": "array",
+                  "title": "Response Get Parameters Api Svm Params Get"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/svm/visualise": {
+      "post": {
+        "tags": [
+          "Support Vector Machine"
+        ],
+        "summary": "Visualise",
+        "operationId": "visualise_api_svm_visualise_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SVMVisualisationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SVMVisualisationResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/svm/train": {
+      "post": {
+        "tags": [
+          "Support Vector Machine"
+        ],
+        "summary": "Train",
+        "operationId": "train_api_svm_train_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SVMTrainRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SVMTrainResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/svm/step": {
+      "post": {
+        "tags": [
+          "Support Vector Machine"
+        ],
+        "summary": "Step",
+        "operationId": "step_api_svm_step_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SVMStepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SVMStepResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/svm/predict": {
+      "post": {
+        "tags": [
+          "Support Vector Machine"
+        ],
+        "summary": "Predict",
+        "operationId": "predict_api_svm_predict_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SVMPredictRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SVMPredictResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health Check",
@@ -4281,7 +4497,10 @@
               "iris",
               "wine",
               "breast_cancer",
-              "digits"
+              "digits",
+              "simple_binary",
+              "moons",
+              "circles"
             ],
             "title": "Name"
           },
@@ -4533,6 +4752,644 @@
         ],
         "title": "RegressionMetrics",
         "description": "Metrics for regression model responses."
+      },
+      "SVMMetadata": {
+        "properties": {
+          "feature_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Feature Names"
+          },
+          "n_features": {
+            "type": "integer",
+            "title": "N Features"
+          },
+          "n_samples": {
+            "type": "integer",
+            "title": "N Samples"
+          },
+          "target_name": {
+            "type": "string",
+            "title": "Target Name"
+          },
+          "dataset_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset Name"
+          },
+          "feature_x_index": {
+            "type": "integer",
+            "title": "Feature X Index"
+          },
+          "feature_x_name": {
+            "type": "string",
+            "title": "Feature X Name"
+          },
+          "feature_y_index": {
+            "type": "integer",
+            "title": "Feature Y Index"
+          },
+          "feature_y_name": {
+            "type": "string",
+            "title": "Feature Y Name"
+          },
+          "class_names": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Class Names"
+          }
+        },
+        "type": "object",
+        "required": [
+          "feature_names",
+          "n_features",
+          "n_samples",
+          "target_name",
+          "feature_x_index",
+          "feature_x_name",
+          "feature_y_index",
+          "feature_y_name",
+          "class_names"
+        ],
+        "title": "SVMMetadata",
+        "description": "Metadata for SVM model responses."
+      },
+      "SVMParameters": {
+        "properties": {
+          "feature_x": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Feature X",
+            "description": "Index of first feature to use as predictor (x-axis)",
+            "default": 0
+          },
+          "feature_y": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 0.0,
+            "title": "Feature Y",
+            "description": "Index of second feature to use as predictor (y-axis)",
+            "default": 1
+          },
+          "C": {
+            "type": "number",
+            "minimum": 1e-05,
+            "title": "C",
+            "description": "Regularization parameter",
+            "default": 1.0
+          },
+          "kernel": {
+            "type": "string",
+            "title": "Kernel",
+            "description": "Kernel type to be used",
+            "default": "linear"
+          },
+          "gamma": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Gamma",
+            "description": "Kernel coefficient for 'rbf', 'poly'"
+          },
+          "degree": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Degree",
+            "description": "Degree of polynomial kernel function",
+            "default": 3
+          },
+          "test_size": {
+            "type": "number",
+            "maximum": 0.5,
+            "minimum": 0.05,
+            "title": "Test Size",
+            "description": "Proportion of data to hold out as the test set",
+            "default": 0.2
+          },
+          "random_state": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Random State",
+            "description": "Random seed for reproducibility of the train/test split",
+            "default": 42
+          },
+          "learning_rate": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 1e-06,
+            "title": "Learning Rate",
+            "description": "Step size for each gradient descent iteration",
+            "default": 0.01
+          }
+        },
+        "type": "object",
+        "title": "SVMParameters",
+        "description": "Parameters for Support Vector Machine Classification."
+      },
+      "SVMPredictRequest": {
+        "properties": {
+          "w1": {
+            "type": "number",
+            "title": "W1",
+            "description": "w1"
+          },
+          "w2": {
+            "type": "number",
+            "title": "W2",
+            "description": "w2"
+          },
+          "b": {
+            "type": "number",
+            "title": "B",
+            "description": "bias"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/SVMParameters",
+            "description": "Algorithm parameters"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ClassificationDataset"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "custom": "#/components/schemas/ClassificationDataset",
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset",
+            "description": "Dataset for evaluation"
+          },
+          "boundary_resolution": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 10.0,
+            "title": "Boundary Resolution",
+            "description": "Resolution of boundary mesh",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "required": [
+          "w1",
+          "w2",
+          "b"
+        ],
+        "title": "SVMPredictRequest",
+        "description": "Request model for evaluating an arbitrary SVM boundary."
+      },
+      "SVMPredictResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "Calculated Hinge Loss value"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/ClassificationMetrics",
+            "description": "Classification metrics for boundary"
+          },
+          "decision_boundary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBoundaryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Decision boundary visualisation data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "loss",
+          "metrics"
+        ],
+        "title": "SVMPredictResponse",
+        "description": "Response model for SVM boundary evaluation."
+      },
+      "SVMStepRequest": {
+        "properties": {
+          "current_w1": {
+            "type": "number",
+            "title": "Current W1",
+            "description": "Current w1"
+          },
+          "current_w2": {
+            "type": "number",
+            "title": "Current W2",
+            "description": "Current w2"
+          },
+          "current_b": {
+            "type": "number",
+            "title": "Current B",
+            "description": "Current bias"
+          },
+          "learning_rate": {
+            "type": "number",
+            "exclusiveMinimum": 0.0,
+            "title": "Learning Rate",
+            "description": "Step size for gradient descent",
+            "default": 0.01
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/SVMParameters",
+            "description": "Algorithm parameters"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ClassificationDataset"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "custom": "#/components/schemas/ClassificationDataset",
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset",
+            "description": "Dataset to compute loss against"
+          },
+          "boundary_resolution": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 10.0,
+            "title": "Boundary Resolution",
+            "description": "Resolution of boundary mesh",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "required": [
+          "current_w1",
+          "current_w2",
+          "current_b"
+        ],
+        "title": "SVMStepRequest",
+        "description": "Request model for a mock gradient descent step for SVM."
+      },
+      "SVMStepResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "new_w1": {
+            "type": "number",
+            "title": "New W1",
+            "description": "Proposed new w1"
+          },
+          "new_w2": {
+            "type": "number",
+            "title": "New W2",
+            "description": "Proposed new w2"
+          },
+          "new_b": {
+            "type": "number",
+            "title": "New B",
+            "description": "Proposed new bias"
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "Hinge loss after the step"
+          },
+          "decision_boundary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBoundaryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Decision boundary visualisation data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "new_w1",
+          "new_w2",
+          "new_b",
+          "loss"
+        ],
+        "title": "SVMStepResponse",
+        "description": "Response model for a gradient step update."
+      },
+      "SVMTrainRequest": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/components/schemas/SVMParameters",
+            "description": "SVM parameters"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ClassificationDataset"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "custom": "#/components/schemas/ClassificationDataset",
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset",
+            "description": "Classification dataset."
+          },
+          "boundary_resolution": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 10.0,
+            "title": "Boundary Resolution",
+            "description": "Resolution of boundary mesh",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "title": "SVMTrainRequest",
+        "description": "Request model for SVM training."
+      },
+      "SVMTrainResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points",
+            "description": "All scatter points [[x, y], ...]"
+          },
+          "labels": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Labels",
+            "description": "Class labels"
+          },
+          "x_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X Range",
+            "description": "[min, max] range for x-axis"
+          },
+          "y_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y Range",
+            "description": "[min, max] range for y-axis"
+          },
+          "optimal_w1": {
+            "type": "number",
+            "title": "Optimal W1",
+            "description": "Optimal w1 (feature x weight)"
+          },
+          "optimal_w2": {
+            "type": "number",
+            "title": "Optimal W2",
+            "description": "Optimal w2 (feature y weight)"
+          },
+          "optimal_b": {
+            "type": "number",
+            "title": "Optimal B",
+            "description": "Optimal bias"
+          },
+          "support_vector_indices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Support Vector Indices",
+            "description": "Indices of support vectors"
+          },
+          "sv_contributions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Sv Contributions",
+            "description": "Per-support-vector contribution info: sv_index, alpha_y, sv_coords, total_contribution, mean_abs_contribution"
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/ClassificationMetrics",
+            "description": "Classification metrics on the training set"
+          },
+          "decision_boundary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBoundaryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Decision boundary visualisation data"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/SVMMetadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "points",
+          "labels",
+          "x_range",
+          "y_range",
+          "optimal_w1",
+          "optimal_w2",
+          "optimal_b",
+          "support_vector_indices",
+          "metrics",
+          "metadata"
+        ],
+        "title": "SVMTrainResponse",
+        "description": "Response model for SVM training."
+      },
+      "SVMVisualisationRequest": {
+        "properties": {
+          "parameters": {
+            "$ref": "#/components/schemas/SVMParameters",
+            "description": "SVM parameters"
+          },
+          "dataset": {
+            "anyOf": [
+              {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/ClassificationDataset"
+                  },
+                  {
+                    "$ref": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                ],
+                "discriminator": {
+                  "propertyName": "type",
+                  "mapping": {
+                    "custom": "#/components/schemas/ClassificationDataset",
+                    "predefined": "#/components/schemas/PredefinedClassificationDataset"
+                  }
+                }
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dataset",
+            "description": "Classification dataset. Defaults to sklearn iris."
+          },
+          "boundary_resolution": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 10.0,
+            "title": "Boundary Resolution",
+            "description": "Resolution of boundary mesh",
+            "default": 50
+          }
+        },
+        "type": "object",
+        "title": "SVMVisualisationRequest",
+        "description": "Request model for SVM scatter visualisation."
+      },
+      "SVMVisualisationResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success"
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points",
+            "description": "Scatter points as [[x, y], ...] using the chosen features"
+          },
+          "labels": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Labels",
+            "description": "Class labels for points"
+          },
+          "x_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X Range",
+            "description": "[min, max] range for the x-axis (with margin)"
+          },
+          "y_range": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y Range",
+            "description": "[min, max] range for the y-axis (with margin)"
+          },
+          "decision_boundary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBoundaryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Decision boundary visualisation data"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/SVMMetadata"
+          }
+        },
+        "type": "object",
+        "required": [
+          "success",
+          "points",
+          "labels",
+          "x_range",
+          "y_range",
+          "metadata"
+        ],
+        "title": "SVMVisualisationResponse",
+        "description": "Response model for SVM scatter visualisation."
       },
       "SelectParameterInfo": {
         "properties": {

@@ -749,6 +749,94 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/svm/params": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Parameters
+         * @description Get the parameters for SVM Classification.
+         */
+        get: operations["get_parameters_api_svm_params_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/svm/visualise": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Visualise */
+        post: operations["visualise_api_svm_visualise_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/svm/train": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Train */
+        post: operations["train_api_svm_train_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/svm/step": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Step */
+        post: operations["step_api_svm_step_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/svm/predict": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Predict */
+        post: operations["predict_api_svm_predict_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -2273,7 +2361,7 @@ export interface components {
              * Name
              * @enum {string}
              */
-            name: "iris" | "wine" | "breast_cancer" | "digits";
+            name: "iris" | "wine" | "breast_cancer" | "digits" | "simple_binary" | "moons" | "circles";
             /**
              * Test Size
              * @default 0.25
@@ -2392,6 +2480,341 @@ export interface components {
         RegressionMetrics: {
             train: components["schemas"]["RegressionMetricValues"];
             test?: components["schemas"]["RegressionMetricValues"] | null;
+        };
+        /**
+         * SVMMetadata
+         * @description Metadata for SVM model responses.
+         */
+        SVMMetadata: {
+            /** Feature Names */
+            feature_names: string[];
+            /** N Features */
+            n_features: number;
+            /** N Samples */
+            n_samples: number;
+            /** Target Name */
+            target_name: string;
+            /** Dataset Name */
+            dataset_name?: string | null;
+            /** Feature X Index */
+            feature_x_index: number;
+            /** Feature X Name */
+            feature_x_name: string;
+            /** Feature Y Index */
+            feature_y_index: number;
+            /** Feature Y Name */
+            feature_y_name: string;
+            /** Class Names */
+            class_names: string[];
+        };
+        /**
+         * SVMParameters
+         * @description Parameters for Support Vector Machine Classification.
+         */
+        SVMParameters: {
+            /**
+             * Feature X
+             * @description Index of first feature to use as predictor (x-axis)
+             * @default 0
+             */
+            feature_x: number;
+            /**
+             * Feature Y
+             * @description Index of second feature to use as predictor (y-axis)
+             * @default 1
+             */
+            feature_y: number;
+            /**
+             * C
+             * @description Regularization parameter
+             * @default 1
+             */
+            C: number;
+            /**
+             * Kernel
+             * @description Kernel type to be used
+             * @default linear
+             */
+            kernel: string;
+            /**
+             * Gamma
+             * @description Kernel coefficient for 'rbf', 'poly'
+             */
+            gamma?: number | null;
+            /**
+             * Degree
+             * @description Degree of polynomial kernel function
+             * @default 3
+             */
+            degree: number;
+            /**
+             * Test Size
+             * @description Proportion of data to hold out as the test set
+             * @default 0.2
+             */
+            test_size: number;
+            /**
+             * Random State
+             * @description Random seed for reproducibility of the train/test split
+             * @default 42
+             */
+            random_state: number;
+            /**
+             * Learning Rate
+             * @description Step size for each gradient descent iteration
+             * @default 0.01
+             */
+            learning_rate: number;
+        };
+        /**
+         * SVMPredictRequest
+         * @description Request model for evaluating an arbitrary SVM boundary.
+         */
+        SVMPredictRequest: {
+            /**
+             * W1
+             * @description w1
+             */
+            w1: number;
+            /**
+             * W2
+             * @description w2
+             */
+            w2: number;
+            /**
+             * B
+             * @description bias
+             */
+            b: number;
+            /** @description Algorithm parameters */
+            parameters?: components["schemas"]["SVMParameters"];
+            /**
+             * Dataset
+             * @description Dataset for evaluation
+             */
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
+            /**
+             * Boundary Resolution
+             * @description Resolution of boundary mesh
+             * @default 50
+             */
+            boundary_resolution: number;
+        };
+        /**
+         * SVMPredictResponse
+         * @description Response model for SVM boundary evaluation.
+         */
+        SVMPredictResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * Loss
+             * @description Calculated Hinge Loss value
+             */
+            loss: number;
+            /** @description Classification metrics for boundary */
+            metrics: components["schemas"]["ClassificationMetrics"];
+            /** @description Decision boundary visualisation data */
+            decision_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
+        };
+        /**
+         * SVMStepRequest
+         * @description Request model for a mock gradient descent step for SVM.
+         */
+        SVMStepRequest: {
+            /**
+             * Current W1
+             * @description Current w1
+             */
+            current_w1: number;
+            /**
+             * Current W2
+             * @description Current w2
+             */
+            current_w2: number;
+            /**
+             * Current B
+             * @description Current bias
+             */
+            current_b: number;
+            /**
+             * Learning Rate
+             * @description Step size for gradient descent
+             * @default 0.01
+             */
+            learning_rate: number;
+            /** @description Algorithm parameters */
+            parameters?: components["schemas"]["SVMParameters"];
+            /**
+             * Dataset
+             * @description Dataset to compute loss against
+             */
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
+            /**
+             * Boundary Resolution
+             * @description Resolution of boundary mesh
+             * @default 50
+             */
+            boundary_resolution: number;
+        };
+        /**
+         * SVMStepResponse
+         * @description Response model for a gradient step update.
+         */
+        SVMStepResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * New W1
+             * @description Proposed new w1
+             */
+            new_w1: number;
+            /**
+             * New W2
+             * @description Proposed new w2
+             */
+            new_w2: number;
+            /**
+             * New B
+             * @description Proposed new bias
+             */
+            new_b: number;
+            /**
+             * Loss
+             * @description Hinge loss after the step
+             */
+            loss: number;
+            /** @description Decision boundary visualisation data */
+            decision_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
+        };
+        /**
+         * SVMTrainRequest
+         * @description Request model for SVM training.
+         */
+        SVMTrainRequest: {
+            /** @description SVM parameters */
+            parameters?: components["schemas"]["SVMParameters"];
+            /**
+             * Dataset
+             * @description Classification dataset.
+             */
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
+            /**
+             * Boundary Resolution
+             * @description Resolution of boundary mesh
+             * @default 50
+             */
+            boundary_resolution: number;
+        };
+        /**
+         * SVMTrainResponse
+         * @description Response model for SVM training.
+         */
+        SVMTrainResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * Points
+             * @description All scatter points [[x, y], ...]
+             */
+            points: number[][];
+            /**
+             * Labels
+             * @description Class labels
+             */
+            labels: number[];
+            /**
+             * X Range
+             * @description [min, max] range for x-axis
+             */
+            x_range: number[];
+            /**
+             * Y Range
+             * @description [min, max] range for y-axis
+             */
+            y_range: number[];
+            /**
+             * Optimal W1
+             * @description Optimal w1 (feature x weight)
+             */
+            optimal_w1: number;
+            /**
+             * Optimal W2
+             * @description Optimal w2 (feature y weight)
+             */
+            optimal_w2: number;
+            /**
+             * Optimal B
+             * @description Optimal bias
+             */
+            optimal_b: number;
+            /**
+             * Support Vector Indices
+             * @description Indices of support vectors
+             */
+            support_vector_indices: number[];
+            /**
+             * Sv Contributions
+             * @description Per-support-vector contribution info: sv_index, alpha_y, sv_coords, total_contribution, mean_abs_contribution
+             */
+            sv_contributions?: {
+                [key: string]: unknown;
+            }[];
+            /** @description Classification metrics on the training set */
+            metrics: components["schemas"]["ClassificationMetrics"];
+            /** @description Decision boundary visualisation data */
+            decision_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
+            metadata: components["schemas"]["SVMMetadata"];
+        };
+        /**
+         * SVMVisualisationRequest
+         * @description Request model for SVM scatter visualisation.
+         */
+        SVMVisualisationRequest: {
+            /** @description SVM parameters */
+            parameters?: components["schemas"]["SVMParameters"];
+            /**
+             * Dataset
+             * @description Classification dataset. Defaults to sklearn iris.
+             */
+            dataset?: (components["schemas"]["ClassificationDataset"] | components["schemas"]["PredefinedClassificationDataset"]) | null;
+            /**
+             * Boundary Resolution
+             * @description Resolution of boundary mesh
+             * @default 50
+             */
+            boundary_resolution: number;
+        };
+        /**
+         * SVMVisualisationResponse
+         * @description Response model for SVM scatter visualisation.
+         */
+        SVMVisualisationResponse: {
+            /** Success */
+            success: boolean;
+            /**
+             * Points
+             * @description Scatter points as [[x, y], ...] using the chosen features
+             */
+            points: number[][];
+            /**
+             * Labels
+             * @description Class labels for points
+             */
+            labels: number[];
+            /**
+             * X Range
+             * @description [min, max] range for the x-axis (with margin)
+             */
+            x_range: number[];
+            /**
+             * Y Range
+             * @description [min, max] range for the y-axis (with margin)
+             */
+            y_range: number[];
+            /** @description Decision boundary visualisation data */
+            decision_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
+            metadata: components["schemas"]["SVMMetadata"];
         };
         /**
          * SelectParameterInfo
@@ -3237,6 +3660,158 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LinearRegressionEvaluateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_parameters_api_svm_params_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": (components["schemas"]["SelectParameterInfo"] | components["schemas"]["IntParameterInfo"] | components["schemas"]["NumberParameterInfo"] | components["schemas"]["FloatParameterInfo"] | components["schemas"]["AnyParameterInfo"])[];
+                };
+            };
+        };
+    };
+    visualise_api_svm_visualise_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SVMVisualisationRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SVMVisualisationResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    train_api_svm_train_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SVMTrainRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SVMTrainResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    step_api_svm_step_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SVMStepRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SVMStepResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    predict_api_svm_predict_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SVMPredictRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SVMPredictResponse"];
                 };
             };
             /** @description Validation Error */

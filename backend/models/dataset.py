@@ -113,7 +113,7 @@ class PredefinedClassificationDataset(BaseModel):
     type: Literal["predefined"] = Field(
         "predefined", description="Discriminator for Union type"
     )
-    name: Literal["iris", "wine", "breast_cancer", "digits"]
+    name: Literal["iris", "wine", "breast_cancer", "digits", "simple_binary", "moons", "circles"]
     test_size: float = Field(0.25, ge=0, le=0.9)
     random_state: int = Field(2025, ge=0)
 

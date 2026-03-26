@@ -2,6 +2,7 @@ import DecisionTree from "@/components/decision_tree/classifier/training/Visuali
 import KMeans from "@/components/kmeans/clustering/training/Visualisation";
 import KNN from "@/components/knn/classifier/training/Visualisation";
 import LinearRegressionTrain from "@/components/linear/regression/training/Visualisation";
+import SVMTrain from "@/components/svm/training/Visualisation";
 
 import type { TrainModelResponse } from "@/types/model";
 import React from "react";
@@ -15,6 +16,7 @@ const componentMap: Record<string, React.ComponentType<any>> = {
     knn: KNN,
     kmeans: KMeans,
     linear: LinearRegressionTrain,
+    svm: SVMTrain,
 } as const;
 
 export const TrainComponent: React.FC<ComponentRegistryProps> = ({

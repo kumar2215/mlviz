@@ -237,12 +237,14 @@ export function renderScatter2D(
 // Helper Functions
 // ============================================================================
 
-function renderDecisionBoundary2D(
+export function renderDecisionBoundary2D(
     g: d3.Selection<SVGGElement, unknown, null, undefined>,
     boundary: DecisionBoundary,
     xScale: d3.ScaleLinear<number, number>,
     yScale: d3.ScaleLinear<number, number>,
     config: Config,
+    opacity: number = 0.3,
+    customColorScale?: (prediction: any) => string,
 ) {
     const { meshPoints, predictions } = boundary;
 
@@ -284,7 +286,9 @@ function renderDecisionBoundary2D(
     Array.from(gridData.values()).forEach((cell) => {
         let fillColor: string;
 
-        if (
+        if (customColorScale) {
+            fillColor = customColorScale(cell.prediction);
+        } else if (
             boundary.type === "classification" ||
             boundary.type === "clustering"
         ) {
@@ -324,7 +328,7 @@ function renderDecisionBoundary2D(
             .attr("width", cellWidth)
             .attr("height", cellHeight)
             .attr("fill", fillColor)
-            .attr("opacity", 0.3)
+            .attr("opacity", opacity)
             .attr("data-prediction", String(cell.prediction));
     });
 }

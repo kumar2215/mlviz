@@ -5,7 +5,7 @@ import { useModel } from "@/contexts/ModelContext";
 import { CurrentStoryContext } from "@/contexts/StoryContext";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelPage as ModelPageProps } from "@/types/story";
-import React, { useContext, useEffect, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 type PredictPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
 
@@ -32,9 +32,11 @@ const PredictPage: React.FC<PredictPageProps> = ({
         Record<string, number>
     >(parameters?.presetPoints || {});
 
-    const currentFeatures: string[] = (typeof getPredictiveFeatureNames === 'function' 
-        ? getPredictiveFeatureNames() 
+    const rawFeatures = (typeof getPredictiveFeatureNames === 'function'
+        ? getPredictiveFeatureNames()
         : getFeatureNames()) || [];
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const currentFeatures = useMemo(() => rawFeatures, [JSON.stringify(rawFeatures)]);
 
     useEffect(() => {
         if (currentFeatures.length > 0) {
