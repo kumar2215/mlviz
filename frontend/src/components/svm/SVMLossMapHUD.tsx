@@ -52,6 +52,7 @@ const SVMLossMapHUD: React.FC<SVMLossMapHUDProps> = ({ mode }) => {
             proposedY={stepData?.new_w2}
             computeLoss={computeFixedLoss}
             mode={mode}
+            extraInfo={<>(Fixed Bias b: {currentBias.toFixed(3)})</>}
         />
     );
 };

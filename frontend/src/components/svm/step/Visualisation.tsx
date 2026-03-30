@@ -3,10 +3,10 @@
  * Manually or automatically steps through gradient updates.
  */
 
-import { renderSVM } from "@/components/svm/SVMRenderer";
-import SVMLossMapHUD from "@/components/svm/step/SVMLossMapHUD";
-import SVMStepHUD, { type SVMStepMode } from "@/components/svm/step/SVMStepHUD";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
+import SVMLossMapHUD from "@/components/svm/SVMLossMapHUD";
+import { renderSVM } from "@/components/svm/SVMRenderer";
+import SVMStepHUD, { type SVMStepMode } from "@/components/svm/step/SVMStepHUD";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useSVMContext } from "@/contexts/models/SVMContext";

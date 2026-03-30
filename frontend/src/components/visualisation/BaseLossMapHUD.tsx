@@ -29,6 +29,7 @@ export interface BaseLossMapHUDProps {
     computeLoss: (x: number, y: number) => number;
     mode?: LossMapMode;
     gridSize?: number;
+    extraInfo?: React.ReactNode;
 }
 
 const MODE_LABELS: Record<LossMapMode, string> = {
@@ -50,6 +51,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
     computeLoss,
     mode: modeProp = "both",
     gridSize = 40,
+    extraInfo,
 }) => {
     const scaleFactor = useScaleFactor();
     const [mode, setMode] = useState<LossMapMode>(modeProp);
@@ -347,6 +349,15 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                         ))}
                     </div>
 
+                    {extraInfo && (
+                        <div 
+                            className="mt-1 text-center font-medium text-slate-800 italic"
+                            style={{ fontSize: fs(9) }}
+                        >
+                            {extraInfo}
+                        </div>
+                    )}
+
                     <svg
                         ref={svgRef}
                         width={svgSize}
@@ -380,7 +391,6 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                         </span>
                     </div>
 
-                    {/* Live Loss readout */}
                     <div
                         className="mt-2 rounded-lg bg-white/70 border border-slate-100 text-center font-mono text-slate-600"
                         style={{ padding: `${fs(4)} ${fs(8)}`, fontSize: fs(11) }}

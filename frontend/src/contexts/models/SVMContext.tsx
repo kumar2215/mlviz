@@ -159,8 +159,10 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         let loss = 0;
         for (let i = 0; i < currentModelData.points.length; i++) {
             const pt = currentModelData.points[i];
-            const y = currentModelData.labels[i];
-            const margin = y * (w1 * pt[0] + w2 * pt[1] + b);
+            const y_01 = currentModelData.labels[i];
+            // SVM uses y in {-1, 1} for loss calculation
+            const y_svm = y_01 === 0 ? -1 : 1;
+            const margin = y_svm * (w1 * pt[0] + w2 * pt[1] + b);
             loss += Math.max(0, 1 - margin);
         }
         return loss / currentModelData.points.length;

@@ -47,16 +47,35 @@ const SVMVisualisationHUD: React.FC<SVMVisualisationHUDProps> = ({
                             }`}
                             style={{ fontSize: fs(10) }}
                         >
-                            Kernel
+                            Projected
                         </button>
                     </div>
                 </div>
                 
-                <p className="text-slate-400 leading-tight italic" style={{ fontSize: fs(9) }}>
-                    {showKernelSpace 
-                        ? "Showing projected kernel space where data is more separable." 
-                        : "Showing original 2D feature dimensions."}
-                </p>
+                <div className="flex flex-col gap-2">
+                    <p className="text-slate-400 leading-tight italic" style={{ fontSize: fs(9) }}>
+                        {showKernelSpace 
+                            ? "Data is 'unfolded' into the feature space where it becomes linearly separable." 
+                            : "Showing original 2D feature dimensions."}
+                    </p>
+
+                    {showKernelSpace && (
+                        <div className="mt-1 flex flex-col gap-1.5 border-t border-slate-100 pt-2">
+                            <div className="flex flex-col">
+                                <span className="text-indigo-600 font-semibold" style={{ fontSize: fs(8.5) }}>X: Decision Score f(x)</span>
+                                <span className="text-slate-500 leading-tight" style={{ fontSize: fs(8.5) }}>
+                                    Distance from the hyperplane. Boundary is at 0, margins at ±1.
+                                </span>
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="text-indigo-600 font-semibold" style={{ fontSize: fs(8.5) }}>Y: Variance Spread</span>
+                                <span className="text-slate-500 leading-tight" style={{ fontSize: fs(8.5) }}>
+                                    Preserves the most remaining data variance for visual clarity.
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
         </CollapsibleHUD>
     );

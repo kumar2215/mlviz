@@ -5,11 +5,12 @@
  * Toggleable "kernel space" view with iterative projection animation.
  */
 
-import { renderSVM } from "@/components/svm/SVMRenderer";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
+import SVMLossMapHUD from "@/components/svm/SVMLossMapHUD";
+import { renderSVM } from "@/components/svm/SVMRenderer";
+import SVMVisualisationHUD from "@/components/svm/training/SVMVisualisationHUD";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import SVMVisualisationHUD from "@/components/svm/training/SVMVisualisationHUD";
 import { useSVMContext } from "@/contexts/models/SVMContext";
 import * as d3 from "d3";
 import { useCallback, useEffect, useState } from "react";
@@ -23,6 +24,10 @@ const Visualisation: React.FC = () => {
         lastVisualizationParams,
         iterations,
         decisionBoundary,
+        currentW1,
+        currentW2,
+        currentBias,
+        setManualWeights,
     } = useSVMContext();
 
     const [showKernelSpace, setShowKernelSpace] = useState(false);
@@ -54,6 +59,15 @@ const Visualisation: React.FC = () => {
                 totalIterations - 1
             );
             const currentIter = iterations[stepIndex];
+
+            // Synchronize weights for Loss Map HUD using a non-recursive update
+            if (currentIter) {
+                const { w1, w2, b } = currentIter;
+                // Only update if different to avoid infinite re-renders
+                if (w1 !== currentW1 || w2 !== currentW2 || b !== currentBias) {
+                    setManualWeights(w1, w2, b);
+                }
+            }
 
             // 2. Decide coordinates and boundary based on view toggle
             const usingKernelSpace = showKernelSpace && currentIter?.kernel_space_points != null;
@@ -169,6 +183,10 @@ const Visualisation: React.FC = () => {
                     />
                 </div>
             )}
+
+            <div className="absolute bottom-6 right-6 z-20">
+                <SVMLossMapHUD />
+            </div>
         </div>
     );
 };
