@@ -5,7 +5,8 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "devhost": "vite --host",
+        "dev:test": "VITE_CONFIG_FILE=test VITE_SHOW_DEV_INFO=true vite",
+        "dev:host": "vite --host",
         "build": "tsc --noEmit && vite build",
         "lint": "eslint .",
         "preview": "vite preview",

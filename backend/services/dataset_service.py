@@ -139,7 +139,7 @@ class DatasetService:
 
     def _load_moons(self) -> ClassificationDataset:
         """Create a moons synthetic dataset (non-linear)."""
-        X, y = make_moons(n_samples=100, noise=0.1, random_state=42)
+        X, y = make_moons(n_samples=50, noise=0.1, random_state=42)
         return ClassificationDataset(
             X=X.tolist(),
             y=y.tolist(),
@@ -157,7 +157,7 @@ class DatasetService:
 
     def _load_circles(self) -> ClassificationDataset:
         """Create a circles synthetic dataset (non-linear)."""
-        X, y = make_circles(n_samples=100, noise=0.1, factor=0.5, random_state=42)
+        X, y = make_circles(n_samples=50, noise=0.1, factor=0.5, random_state=42)
         return ClassificationDataset(
             X=X.tolist(),
             y=y.tolist(),

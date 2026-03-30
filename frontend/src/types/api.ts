@@ -2482,6 +2482,47 @@ export interface components {
             test?: components["schemas"]["RegressionMetricValues"] | null;
         };
         /**
+         * SVMIterationData
+         * @description Data for a single SVM gradient descent iteration.
+         */
+        SVMIterationData: {
+            /**
+             * Iteration
+             * @description Iteration number (0-indexed)
+             */
+            iteration: number;
+            /**
+             * W1
+             * @description Weight for feature x at this iteration (linear kernel only, else 0)
+             */
+            w1: number;
+            /**
+             * W2
+             * @description Weight for feature y at this iteration (linear kernel only, else 0)
+             */
+            w2: number;
+            /**
+             * B
+             * @description Bias at this iteration
+             */
+            b: number;
+            /**
+             * Loss
+             * @description Hinge loss at this iteration
+             */
+            loss: number;
+            /**
+             * Mesh Predictions
+             * @description Pre-computed class prediction at every mesh point (length = resolution²)
+             */
+            mesh_predictions?: string[];
+            /**
+             * Support Vector Indices
+             * @description Global indices (into the full X_2d dataset) of support vectors at this iteration
+             */
+            support_vector_indices?: number[];
+        };
+        /**
          * SVMMetadata
          * @description Metadata for SVM model responses.
          */
@@ -2565,6 +2606,12 @@ export interface components {
              * @default 0.01
              */
             learning_rate: number;
+            /**
+             * Max Iterations
+             * @description Max gradient descent epochs; at most 15 frames are stored for playback
+             * @default 100
+             */
+            max_iterations: number;
         };
         /**
          * SVMPredictRequest
@@ -2750,21 +2797,36 @@ export interface components {
             optimal_b: number;
             /**
              * Support Vector Indices
-             * @description Indices of support vectors
+             * @description Indices of support vectors (final iteration)
              */
             support_vector_indices: number[];
             /**
-             * Sv Contributions
-             * @description Per-support-vector contribution info: sv_index, alpha_y, sv_coords, total_contribution, mean_abs_contribution
+             * Boundary Resolution
+             * @description Resolution of the boundary/heatmap mesh (grid is resolution x resolution)
+             * @default 50
              */
-            sv_contributions?: {
-                [key: string]: unknown;
-            }[];
+            boundary_resolution: number;
             /** @description Classification metrics on the training set */
             metrics: components["schemas"]["ClassificationMetrics"];
             /** @description Decision boundary visualisation data */
             decision_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
             metadata: components["schemas"]["SVMMetadata"];
+            /**
+             * Iterations
+             * @description Per-iteration gradient descent data for playback animation
+             */
+            iterations?: components["schemas"]["SVMIterationData"][];
+            /**
+             * Total Iterations
+             * @description Total number of frames stored for playback
+             * @default 0
+             */
+            total_iterations: number;
+            /**
+             * Kernel Space Points
+             * @description Kernel PCA projection of all data points into 2D kernel feature space. Null for linear kernel (not illustrative). Shape: (n, 2).
+             */
+            kernel_space_points?: number[][] | null;
         };
         /**
          * SVMVisualisationRequest

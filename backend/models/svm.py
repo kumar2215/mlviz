@@ -40,6 +40,10 @@ class SVMParameters(BaseModel):
         0.01, ge=1e-6, le=10.0,
         description="Step size for each gradient descent iteration"
     )
+    max_iterations: int = Field(
+        100, ge=1, le=200,
+        description="Max gradient descent epochs; at most 15 frames are stored for playback"
+    )
 
     def to_sklearn_params(self) -> Dict[str, Any]:
         """Return parameters configured for sklearn SVC."""

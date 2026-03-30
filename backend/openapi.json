@@ -4753,6 +4753,61 @@
         "title": "RegressionMetrics",
         "description": "Metrics for regression model responses."
       },
+      "SVMIterationData": {
+        "properties": {
+          "iteration": {
+            "type": "integer",
+            "title": "Iteration",
+            "description": "Iteration number (0-indexed)"
+          },
+          "w1": {
+            "type": "number",
+            "title": "W1",
+            "description": "Weight for feature x at this iteration (linear kernel only, else 0)"
+          },
+          "w2": {
+            "type": "number",
+            "title": "W2",
+            "description": "Weight for feature y at this iteration (linear kernel only, else 0)"
+          },
+          "b": {
+            "type": "number",
+            "title": "B",
+            "description": "Bias at this iteration"
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss",
+            "description": "Hinge loss at this iteration"
+          },
+          "mesh_predictions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Mesh Predictions",
+            "description": "Pre-computed class prediction at every mesh point (length = resolution\u00b2)"
+          },
+          "support_vector_indices": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Support Vector Indices",
+            "description": "Global indices (into the full X_2d dataset) of support vectors at this iteration"
+          }
+        },
+        "type": "object",
+        "required": [
+          "iteration",
+          "w1",
+          "w2",
+          "b",
+          "loss"
+        ],
+        "title": "SVMIterationData",
+        "description": "Data for a single SVM gradient descent iteration."
+      },
       "SVMMetadata": {
         "properties": {
           "feature_names": {
@@ -4896,6 +4951,14 @@
             "title": "Learning Rate",
             "description": "Step size for each gradient descent iteration",
             "default": 0.01
+          },
+          "max_iterations": {
+            "type": "integer",
+            "maximum": 200.0,
+            "minimum": 1.0,
+            "title": "Max Iterations",
+            "description": "Max gradient descent epochs; at most 15 frames are stored for playback",
+            "default": 100
           }
         },
         "type": "object",
@@ -5231,16 +5294,13 @@
             },
             "type": "array",
             "title": "Support Vector Indices",
-            "description": "Indices of support vectors"
+            "description": "Indices of support vectors (final iteration)"
           },
-          "sv_contributions": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "type": "array",
-            "title": "Sv Contributions",
-            "description": "Per-support-vector contribution info: sv_index, alpha_y, sv_coords, total_contribution, mean_abs_contribution"
+          "boundary_resolution": {
+            "type": "integer",
+            "title": "Boundary Resolution",
+            "description": "Resolution of the boundary/heatmap mesh (grid is resolution x resolution)",
+            "default": 50
           },
           "metrics": {
             "$ref": "#/components/schemas/ClassificationMetrics",
@@ -5259,6 +5319,38 @@
           },
           "metadata": {
             "$ref": "#/components/schemas/SVMMetadata"
+          },
+          "iterations": {
+            "items": {
+              "$ref": "#/components/schemas/SVMIterationData"
+            },
+            "type": "array",
+            "title": "Iterations",
+            "description": "Per-iteration gradient descent data for playback animation"
+          },
+          "total_iterations": {
+            "type": "integer",
+            "title": "Total Iterations",
+            "description": "Total number of frames stored for playback",
+            "default": 0
+          },
+          "kernel_space_points": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kernel Space Points",
+            "description": "Kernel PCA projection of all data points into 2D kernel feature space. Null for linear kernel (not illustrative). Shape: (n, 2)."
           }
         },
         "type": "object",

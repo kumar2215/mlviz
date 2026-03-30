@@ -820,6 +820,34 @@ class SVMVisualisationResponse(BaseModel):
     )
     metadata: SVMMetadata
 
+class SVMIterationData(BaseModel):
+    """Data for a single SVM gradient descent iteration."""
+
+    iteration: int = Field(description="Iteration number (0-indexed)")
+    w1: float = Field(description="Weight for feature x at this iteration (linear kernel only, else 0)")
+    w2: float = Field(description="Weight for feature y at this iteration (linear kernel only, else 0)")
+    b: float = Field(description="Bias at this iteration")
+    loss: float = Field(description="Hinge loss at this iteration")
+    mesh_predictions: List[str] = Field(
+        default_factory=list,
+        description="Pre-computed class prediction at every mesh point (length = resolution²)"
+    )
+    support_vector_indices: List[int] = Field(
+        default_factory=list,
+        description="Global indices (into the full X_2d dataset) of support vectors at this iteration"
+    )
+    kernel_space_points: Optional[List[List[float]]] = Field(
+        None,
+        description="Kernel PCA projection points at this iteration. Shape: (n, 2)."
+    )
+    kernel_space_boundary: Optional[DecisionBoundaryData] = Field(
+        None,
+        description="Decision boundary in kernel space at this iteration."
+    )
+    alphas: Optional[List[float]] = Field(
+        None,
+        description="Dual coefficients (alpha) for each training sample at this iteration."
+    )
 
 class SVMTrainRequest(BaseModel):
     """Request model for SVM training."""
@@ -849,11 +877,7 @@ class SVMTrainResponse(BaseModel):
     optimal_w1: float = Field(description="Optimal w1 (feature x weight)")
     optimal_w2: float = Field(description="Optimal w2 (feature y weight)")
     optimal_b: float = Field(description="Optimal bias")
-    support_vector_indices: List[int] = Field(description="Indices of support vectors")
-    sv_contributions: List[Dict[str, Any]] = Field(
-        default_factory=list,
-        description="Per-SV contribution info: sv_index, alpha_y, sv_coords, mean_abs_contribution, heatmap (per-mesh-point signed contributions)"
-    )
+    support_vector_indices: List[int] = Field(description="Indices of support vectors (final iteration)")
     boundary_resolution: int = Field(
         50, description="Resolution of the boundary/heatmap mesh (grid is resolution x resolution)"
     )
@@ -864,6 +888,12 @@ class SVMTrainResponse(BaseModel):
         None, description="Decision boundary visualisation data"
     )
     metadata: SVMMetadata
+    # Iteration data for playback
+    iterations: List[SVMIterationData] = Field(
+        default_factory=list,
+        description="Per-iteration gradient descent data for playback animation"
+    )
+    total_iterations: int = Field(0, description="Total number of frames stored for playback")
 
 
 class SVMStepRequest(BaseModel):

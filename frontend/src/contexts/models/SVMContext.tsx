@@ -19,7 +19,7 @@ import {
     type TrainableModelContext,
     type VisualizableModelContext,
 } from "@/contexts/models/BaseModelContext";
-import React, { createContext, useContext, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useCallback } from "react";
 import type { ReactNode } from "react";
 
 /**
@@ -56,6 +56,20 @@ interface SVMContextType
     currentBias: number;
     stepData: SVMStepResponse | null;
     predictionData: SVMPredictResponse | null;
+    iterations: Array<{
+        iteration: number;
+        w1: number;
+        w2: number;
+        b: number;
+        loss: number;
+        mesh_predictions?: string[];
+        support_vector_indices?: number[];
+        kernel_space_points?: number[][];
+        kernel_space_boundary?: DecisionBoundary;
+        alphas?: number[];
+    }>;
+    kernelSpacePoints: number[][] | null;
+    kernelSpaceBoundary: DecisionBoundary | null;
 
     // Visualization Aliases
     isVisualizationLoading: boolean;
@@ -109,6 +123,21 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [stepData, setStepData] = React.useState<SVMStepResponse | null>(null);
     const [predictionData, setPredictionData] = React.useState<SVMPredictResponse | null>(null);
 
+    // Iterations are kept in memory only — never persisted to localStorage
+    // because the mesh_predictions arrays are too large (~2500 strings × 10 iter).
+    const [iterations, setIterations] = React.useState<Array<{
+        iteration: number;
+        w1: number;
+        w2: number;
+        b: number;
+        loss: number;
+        mesh_predictions?: string[];
+        support_vector_indices?: number[];
+        kernel_space_points?: number[][];
+        kernel_space_boundary?: DecisionBoundary;
+        alphas?: number[];
+    }>>([]);
+
     // Initialise randomized weights if empty/NaN 
     const randomizeWeights = useCallback(() => {
         setCurrentW1(Math.random() * 2 - 1);
@@ -161,8 +190,16 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
 
                 const result = await trainSVM(request);
 
+                // Extract iterations and strip them from the persisted model data
+                // to avoid exceeding the localStorage quota.
+                const { iterations: resultIterations, ...resultWithoutIterations } = result as any;
+                setIterations(resultIterations?.map((it: any) => ({
+                    ...it,
+                    kernel_space_boundary: mapDecisionBoundary(it.kernel_space_boundary)
+                })) ?? []);
+
                 const modelData: SVMModelData = {
-                    ...result,
+                    ...resultWithoutIterations,
                     metrics: result.metrics,
                     metadata: {
                         ...(result.metadata as any || {}),
@@ -270,6 +307,7 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         setCurrentBias(0);
         setStepData(null);
         setPredictionData(null);
+        setIterations([]);
     }, [baseResetModelData]);
 
     const visualizationData = currentModelData ?? null;
@@ -321,6 +359,9 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         isVisualizationLoading: isLoading || isVisualizing,
         lastVisualizationParams: lastParams as any,
         decisionBoundary: mapDecisionBoundary(stepData?.decision_boundary || predictionData?.decision_boundary || currentModelData?.decision_boundary),
+        iterations,
+        kernelSpacePoints: null, // Now iterations-based
+        kernelSpaceBoundary: null, // Now iterations-based
     };
 
 
