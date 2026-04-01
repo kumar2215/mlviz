@@ -31,6 +31,7 @@ const Visualisation: React.FC = () => {
     } = useSVMContext();
 
     const [showKernelSpace, setShowKernelSpace] = useState(false);
+    const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
 
     useEffect(() => {
         if (!visualizationData && !isVisualizationLoading) {
@@ -119,9 +120,11 @@ const Visualisation: React.FC = () => {
                 bias: currentIter?.b ?? visualizationData.optimal_b,
                 isLinear: (visualizationData.metadata?.kernel ?? (lastVisualizationParams?.parameters?.kernel ?? (lastVisualizationParams as any)?.kernel)) === "linear",
                 isKernelSpace: usingKernelSpace,
+                onLegendFilterChange: setFocusedLabels,
+                focusedLabels,
             });
         },
-        [visualizationData, iterations, decisionBoundary, showKernelSpace, totalIterations]
+        [visualizationData, iterations, decisionBoundary, showKernelSpace, totalIterations, focusedLabels]
     );
 
     if (isVisualizationLoading) {

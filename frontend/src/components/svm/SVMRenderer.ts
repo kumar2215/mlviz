@@ -3,8 +3,12 @@
  * Draws a scatter plot colored by class, with the decision boundary heatmap.
  */
 
-import { renderDecisionBoundary2D } from "@/components/plots/dimensions/scatter2DrendererUtils";
-import type { DecisionBoundary } from "@/components/plots/types";
+import { renderScatter2D } from "@/components/plots/dimensions/scatter2DrendererUtils";
+import type {
+    ClassificationConfig,
+    DecisionBoundary,
+} from "@/components/plots/types";
+import { createPlotPoints } from "@/components/plots/utils/dataTransformers";
 import { renderLegend } from "@/components/plots/utils/legendHelper";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { createColorScale } from "@/utils/colorUtils";
@@ -30,6 +34,14 @@ export interface RenderSVMProps {
     bias?: number;
     isLinear?: boolean;
     isKernelSpace?: boolean;
+    /** Interaction callback for legend */
+    onLegendFilterChange?: (focusedNames: Set<string> | null) => void;
+    /** Set of focused labels for toggling visibility */
+    focusedLabels?: Set<string> | null;
+    /** Optional prediction point [x, y] coordinates */
+    predictionPoint?: [number, number];
+    /** Optional predicted class index for coloring the prediction point */
+    predictedClassIndex?: number;
 }
 
 export interface RenderResult {
@@ -56,50 +68,187 @@ export function renderSVM({
     bias,
     isLinear,
     isKernelSpace,
+    onLegendFilterChange,
+    focusedLabels,
+    predictionPoint,
+    predictedClassIndex,
 }: RenderSVMProps): RenderResult {
-    const { width, height, margin } = context.dimensions;
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    // ---- Scales ----
-    const xScale = d3.scaleLinear().domain(x_range).range([0, innerWidth]);
-    const yScale = d3.scaleLinear().domain(y_range).range([innerHeight, 0]);
+    const { width, height, margin, scaleFactor = 1 } = context.dimensions;
 
     // ---- Clear previous render ----
-    container
-        .selectAll(".zoom-content, .axes-fixed, .svm-label, .svm-clip")
-        .remove();
+    container.selectAll("*").remove();
 
-    // ---- Clip path so all content stays within the axes bounds ----
-    const clipId = "svm-clip-" + Math.random().toString(36).slice(2);
-    container
-        .append("clipPath")
-        .attr("class", "svm-clip")
-        .attr("id", clipId)
-        .append("rect")
-        .attr("width", innerWidth)
-        .attr("height", innerHeight);
+    // ---- Prepare Plot Data ----
+    const config: ClassificationConfig = {
+        type: "classification",
+        classNames,
+        labels: labels.map((l) => classNames[l] ?? String(l)),
+    };
 
-    const contentGroup = container
-        .append("g")
-        .attr("class", "zoom-content")
-        .attr("clip-path", `url(#${clipId})`);
-    const axesGroup = container.append("g").attr("class", "axes-fixed");
+    const plotPoints = createPlotPoints(points, config);
+    const bounds = {
+        min: [x_range[0], y_range[0]],
+        max: [x_range[1], y_range[1]],
+    };
 
-    // ---- Color scale keyed by class name ----
-    const colorScale = createColorScale(classNames, "default");
+    // ---- Main Render via Plot Utils ----
+    const renderResult = renderScatter2D(
+        container,
+        plotPoints,
+        bounds,
+        [xLabel, yLabel],
+        config,
+        decisionBoundary,
+        {
+            width,
+            height,
+            margin,
+            pointRadius: 4 * scaleFactor,
+            pointOpacity: 0.7,
+            showGrid: true,
+            showLegend: true,
+            showAxes: true,
+            useNiceScales: false, // SVM typically uses fixed ranges
+            scaleFactor,
+            boundaryOpacity: 0.15,
+            onPointHover: (index) => {
+                if (index === null) {
+                    tooltip.style("visibility", "hidden");
+                    return;
+                }
+                updateTooltip(index);
+            },
+        },
+    );
 
-    // ---- Background regions (Decision Boundary heatmap) ----
-    if (decisionBoundary) {
-        renderDecisionBoundary2D(
-            contentGroup,
-            decisionBoundary,
-            xScale,
-            yScale,
-            { type: "classification", labels: [], classNames } as any,
-            0.15,
-            colorScale as any,
-        );
+    const { xScale, yScale, contentGroup, axesGroup } = renderResult;
+
+    // ---- Legend ----
+    const legend = renderLegend(
+        axesGroup,
+        config,
+        width - margin.left - margin.right,
+        height - margin.top - margin.bottom,
+        { position: "bottom-left" },
+        scaleFactor,
+    );
+
+    if (legend && onLegendFilterChange) {
+        legend.onFilterChange(onLegendFilterChange);
+    }
+
+    // ---- Custom SV Tooltip & Styling ----
+    let tooltip = d3.select("body").select<HTMLDivElement>("#svm-tooltip");
+    if (tooltip.empty()) {
+        tooltip = d3
+            .select("body")
+            .append("div")
+            .attr("id", "svm-tooltip")
+            .style("position", "absolute")
+            .style("visibility", "hidden")
+            .style("background", "rgba(255, 255, 255, 0.95)")
+            .style("backdrop-filter", "blur(4px)")
+            .style("border", "1px solid #e2e8f0")
+            .style("border-radius", "8px")
+            .style("padding", "8px 12px")
+            .style("font-size", "12px")
+            .style("font-family", "inherit")
+            .style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.1)")
+            .style("pointer-events", "none")
+            .style("z-index", "1000")
+            .style("color", "#1e293b");
+    }
+
+    const updateTooltip = (i: number) => {
+        const alphaVal = alphas && alphas[i] !== undefined ? alphas[i] : 0;
+        const isSV =
+            (supportVectorIndices && supportVectorIndices.includes(i)) ||
+            alphaVal > 1e-7;
+        const statusBadge = isSV
+            ? `<div style="display: inline-block; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Support Vector</div>`
+            : "";
+
+        let reason = "";
+        if (isSV) {
+            const score = scores ? scores[i] : null;
+            const absScore = score !== null ? Math.abs(score) : null;
+
+            if (absScore !== null) {
+                if (absScore > 0.9 && absScore < 1.1) {
+                    reason =
+                        "Lies exactly on the margin boundary (the critical separator).";
+                } else if (absScore < 0.9) {
+                    reason =
+                        "Breaches the margin or is misclassified—requires a 'Slack' variable to handle.";
+                } else {
+                    reason =
+                        "Influences the decision boundary due to a non-zero Lagrange coefficient (alpha).";
+                }
+            } else {
+                reason =
+                    "This point is a support vector because its dual coefficient (alpha) is non-zero.";
+            }
+        }
+
+        const explanation = isSV
+            ? `<div style="margin-top: 6px; font-style: italic; color: #64748b; font-size: 10.5px; line-height: 1.3;">${reason}</div>`
+            : "";
+
+        const alphaStr =
+            alphas && alphas[i] !== undefined
+                ? `<div style="margin-top: 4px; border-top: 1px solid #e2e8f0; padding-top: 4px; font-weight: 600; color: #3b82f6;">Alpha: ${alphaVal.toFixed(6)}</div>`
+                : "";
+
+        const devInfo =
+            import.meta.env.VITE_SHOW_DEV_INFO === "true"
+                ? `<div style="margin-top: 4px; color: #94a3b8; font-size: 9px; font-family: monospace;">Index: ${i}</div>`
+                : "";
+
+        tooltip.style("visibility", "visible").html(`
+            ${statusBadge}
+            <div style="font-weight: 600; margin-bottom: 2px;">${classNames[labels[i]] ?? labels[i]}</div>
+            <div style="color: #64748b; font-size: 11px;">
+                ${xLabel}: ${points[i][0].toFixed(2)}<br/>
+                ${yLabel}: ${points[i][1].toFixed(2)}
+            </div>
+            ${alphaStr}
+            ${explanation}
+            ${devInfo}
+        `);
+
+        tooltip
+            .style("top", d3.pointer(event)[1] - 10 + "px")
+            .style("left", d3.pointer(event)[0] + 10 + "px");
+    };
+
+    // Update point styling and filtering
+    contentGroup
+        .selectAll("circle")
+        .attr("stroke", (_, i) => {
+            const isSV =
+                supportVectorIndices && supportVectorIndices.includes(i);
+            return isSV ? "#27272a" : "white";
+        })
+        .attr("stroke-width", (_, i) => {
+            const isSV =
+                supportVectorIndices && supportVectorIndices.includes(i);
+            return (isSV ? 2 : 0.5) * scaleFactor;
+        })
+        .attr("fill-opacity", (_, i) => {
+            if (!focusedLabels) return 0.7;
+            const name = classNames[labels[i]] ?? String(labels[i]);
+            return focusedLabels.has(name) ? 0.7 : 0.1;
+        });
+
+    // Handle decision boundary filtering
+    const boundaryRects = contentGroup
+        .select(".decision-boundary")
+        .selectAll<SVGRectElement, unknown>("rect");
+    if (!boundaryRects.empty() && focusedLabels) {
+        boundaryRects.attr("opacity", function () {
+            const prediction = d3.select(this).attr("data-prediction");
+            return focusedLabels.has(prediction) ? 0.15 : 0.05;
+        });
     }
 
     // ---- Geometric Decision Line ----
@@ -137,9 +286,7 @@ export function renderSVM({
         w2 !== undefined &&
         bias !== undefined
     ) {
-        // Only draw if we have meaningful weights (avoiding [0,0] initial state)
         if (Math.abs(w1) > 1e-6 || Math.abs(w2) > 1e-6) {
-            // Main decision boundary: w1*x + w2*y + b = 0
             drawDecisionLine(
                 contentGroup,
                 w1,
@@ -150,8 +297,6 @@ export function renderSVM({
                 "#1e293b",
                 2.5,
             );
-
-            // Soft-margin boundaries: w1*x + w2*y + b = ±1
             drawMarginBand(contentGroup, w1, w2, bias, xScale, yScale);
             drawDecisionLine(
                 contentGroup,
@@ -169,8 +314,7 @@ export function renderSVM({
                    <b>w·x + b = +1</b><br/><br/>
                    Support vectors of the positive class sit on or<br/>
                    inside this line. Points between the margins have<br/>
-                   a slack variable ξ &gt; 0 — the <b>C</b> parameter<br/>
-                   controls how much this is penalised.
+                   a slack variable ξ &gt; 0.
                  </div>`,
             );
             drawDecisionLine(
@@ -189,251 +333,97 @@ export function renderSVM({
                    <b>w·x + b = −1</b><br/><br/>
                    Support vectors of the negative class sit on or<br/>
                    inside this line. Points between the margins have<br/>
-                   a slack variable ξ &gt; 0 — the <b>C</b> parameter<br/>
-                   controls how much this is penalised.
+                   a slack variable ξ &gt; 0.
                  </div>`,
             );
         }
     }
 
-    // ---- Axes ----
-    const xAxisGroup = axesGroup
-        .append("g")
-        .attr("class", "svm-axis-x x-axis")
-        .attr("transform", `translate(0, ${innerHeight})`)
-        .call(d3.axisBottom(xScale).ticks(6))
-        .call((g) => {
-            g.selectAll("text")
-                .style("font-size", "11px")
-                .style("fill", "#94a3b8");
-            g.selectAll("line, path").style("stroke", "#e2e8f0");
-        });
-    const yAxisGroup = axesGroup
-        .append("g")
-        .attr("class", "svm-axis-y y-axis")
-        .call(d3.axisLeft(yScale).ticks(6))
-        .call((g) => {
-            g.selectAll("text")
-                .style("font-size", "11px")
-                .style("fill", "#94a3b8");
-            g.selectAll("line, path").style("stroke", "#e2e8f0");
-        });
+    // ---- Predicted Point (Special Marker for Manual Input) ----
+    if (predictionPoint && !isKernelSpace) {
+        const [px, py] = predictionPoint;
+        const pxScaled = xScale(px);
+        const pyScaled = yScale(py);
+        
+        const colorScale = createColorScale(classNames, "default");
+        const pointColor = predictedClassIndex !== undefined 
+            ? colorScale(classNames[predictedClassIndex] ?? String(predictedClassIndex))
+            : "#14b8a6";
 
-    (xAxisGroup.node() as any).__xScale__ = xScale.copy();
-    (yAxisGroup.node() as any).__yScale__ = yScale.copy();
+        const gPredict = contentGroup.append("g")
+            .attr("class", "svm-prediction-point")
+            .attr("transform", `translate(${pxScaled}, ${pyScaled})`);
+            
+        // Dashed reference lines to axes
+        gPredict.append("line")
+            .attr("class", "prediction-axis-line x-line")
+            .attr("x1", 0)
+            .attr("x2", 0)
+            .attr("y1", 0)
+            .attr("y2", innerHeight - pyScaled)
+            .attr("stroke", pointColor)
+            .attr("stroke-width", 1.5 * scaleFactor)
+            .attr("stroke-dasharray", "4 4")
+            .attr("opacity", 0.5);
 
-    axesGroup
-        .append("text")
-        .attr("class", "svm-label")
-        .attr("x", innerWidth / 2)
-        .attr("y", innerHeight + margin.bottom - 4)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#64748b")
-        .text(xLabel);
-    axesGroup
-        .append("text")
-        .attr("class", "svm-label")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 14)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#64748b")
-        .text(yLabel);
+        gPredict.append("line")
+            .attr("class", "prediction-axis-line y-line")
+            .attr("x1", 0)
+            .attr("x2", -pxScaled)
+            .attr("y1", 0)
+            .attr("y2", 0)
+            .attr("stroke", pointColor)
+            .attr("stroke-width", 1.5 * scaleFactor)
+            .attr("stroke-dasharray", "4 4")
+            .attr("opacity", 0.5);
 
-    // ---- Custom Tooltip ----
-    let tooltip = d3.select("body").select<HTMLDivElement>("#svm-tooltip");
-    if (tooltip.empty()) {
-        tooltip = d3
-            .select("body")
-            .append("div")
-            .attr("id", "svm-tooltip")
-            .style("position", "absolute")
-            .style("visibility", "hidden")
-            .style("background", "rgba(255, 255, 255, 0.95)")
-            .style("backdrop-filter", "blur(4px)")
-            .style("border", "1px solid #e2e8f0")
-            .style("border-radius", "8px")
-            .style("padding", "8px 12px")
-            .style("font-size", "12px")
-            .style("font-family", "inherit")
-            .style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.1)")
+        // Point marker (slightly bigger than others)
+        gPredict.append("circle")
+            .attr("r", 6 * scaleFactor)
+            .attr("fill", pointColor)
+            .attr("stroke", "#1e293b")
+            .attr("stroke-width", 1.5 * scaleFactor)
+            .attr("class", "animate-pulse"); 
+
+        // Question mark on point
+        gPredict.append("text")
+            .attr("text-anchor", "middle")
+            .attr("dy", "0.35em")
+            .style("font-size", `${10 * scaleFactor}px`)
+            .style("font-weight", "800")
+            .style("fill", "white")
             .style("pointer-events", "none")
-            .style("z-index", "1000")
-            .style("color", "#1e293b");
-    }
+            .text("?");
 
-    // ---- Scatter points ----
-    const scatterGroup = contentGroup
-        .append("g")
-        .attr("class", "svm-scatter")
-        .style("pointer-events", "all");
-
-    const isSV = (i: number) =>
-        supportVectorIndices && supportVectorIndices.includes(i);
-
-    const circles = scatterGroup
-        .selectAll("circle.pt")
-        .data(points)
-        .join("circle")
-        .attr("class", "pt")
-        .attr("cx", (d) => xScale(d[0]))
-        .attr("cy", (d) => yScale(d[1]))
-        .attr("r", () => 4)
-        .attr("fill", (_, i) =>
-            colorScale(classNames[labels[i]] ?? String(labels[i])),
-        )
-        .attr("fill-opacity", 0.7)
-        .attr("stroke", (_, i) => (isSV(i) ? "#27272a" : "white"))
-        .attr("stroke-width", (_, i) => (isSV(i) ? 2 : 0.5))
-        .attr(
-            "data-class",
-            (_, i) => classNames[labels[i]] ?? String(labels[i]),
-        )
-        .attr("cursor", "pointer");
-
-    circles
-        .on("mouseover", function (_event, d) {
-            const i = circles.nodes().indexOf(this);
-            const alphaVal = alphas && alphas[i] !== undefined ? alphas[i] : 0;
-            const isSupport = isSV(i) || alphaVal > 1e-7;
-            const statusBadge = isSupport
-                ? `<div style="display: inline-block; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Support Vector</div>`
-                : "";
-
-            let reason = "";
-            if (isSupport) {
-                const score = scores ? scores[i] : null;
-                const absScore = score !== null ? Math.abs(score) : null;
-
-                if (absScore !== null) {
-                    if (absScore > 0.9 && absScore < 1.1) {
-                        reason =
-                            "Lies exactly on the margin boundary (the critical separator).";
-                    } else if (absScore < 0.9) {
-                        reason =
-                            "Breaches the margin or is misclassified—requires a 'Slack' variable to handle.";
-                    } else {
-                        reason =
-                            "Influences the decision boundary due to a non-zero Lagrange coefficient (alpha).";
-                    }
-                } else {
-                    reason =
-                        "This point is a support vector because its dual coefficient (alpha) is non-zero.";
-                }
-            }
-
-            const explanation = isSupport
-                ? `<div style="margin-top: 6px; font-style: italic; color: #64748b; font-size: 10.5px; line-height: 1.3;">${reason}</div>`
-                : "";
-
-            const alphaStr =
-                alphas && alphas[i] !== undefined
-                    ? `<div style="margin-top: 4px; border-top: 1px solid #e2e8f0; padding-top: 4px; font-weight: 600; color: #3b82f6;">Alpha: ${alphaVal.toFixed(6)}</div>`
-                    : "";
-
-            const devInfo =
-                import.meta.env.VITE_SHOW_DEV_INFO === "true"
-                    ? `<div style="margin-top: 4px; color: #94a3b8; font-size: 9px; font-family: monospace;">Index: ${i}</div>`
-                    : "";
-
-            tooltip.style("visibility", "visible").html(`
-                    ${statusBadge}
-                    <div style="font-weight: 600; margin-bottom: 2px;">${classNames[labels[i]] ?? labels[i]}</div>
-                    <div style="color: #64748b; font-size: 11px;">
-                        ${xLabel}: ${d[0].toFixed(2)}<br/>
-                        ${yLabel}: ${d[1].toFixed(2)}
-                    </div>
-                    ${alphaStr}
-                    ${explanation}
-                    ${devInfo}
-                `);
-
-            d3.select(this)
-                .transition()
-                .duration(150)
-                .attr("r", isSV(i) ? 8 : 6)
-                .attr("fill-opacity", 1)
-                .attr("stroke", "#1e293b");
-        })
-        .on("mousemove", function (event) {
-            tooltip
-                .style("top", event.pageY - 10 + "px")
-                .style("left", event.pageX + 10 + "px");
-        })
-        .on("mouseout", function () {
-            const i = circles.nodes().indexOf(this);
-            tooltip.style("visibility", "hidden");
-
-            d3.select(this)
-                .transition()
-                .duration(150)
-                .attr("r", () => 4)
-                .attr("fill-opacity", 0.7)
-                .attr("stroke", isSV(i) ? "#27272a" : "white");
-        });
-
-    // ---- Legend (tied to points + boundary regions) ----
-    const config = { type: "classification" as const, classNames, labels: [] };
-    const scaleFactor = width / 800;
-    const legend = renderLegend(
-        axesGroup,
-        config,
-        innerWidth,
-        innerHeight,
-        { position: "bottom-left" },
-        scaleFactor,
-    );
-
-    if (legend) {
-        legend.onFilterChange((focusedNames) => {
-            // Dim/restore scatter points
-            scatterGroup
-                .selectAll<SVGCircleElement, unknown>("circle.pt")
-                .transition()
-                .duration(200)
-                .attr("fill", function (_, i) {
-                    const name = classNames[labels[i]] ?? String(labels[i]);
-                    if (focusedNames === null) return colorScale(name);
-                    return focusedNames.has(name)
-                        ? colorScale(name)
-                        : "#d1d5db";
-                })
-                .attr("fill-opacity", function (_, i) {
-                    if (focusedNames === null) return 0.7;
-                    const name = classNames[labels[i]] ?? String(labels[i]);
-                    return focusedNames.has(name) ? 0.7 : 0.3;
-                });
-
-            // Dim/restore decision boundary regions
-            const boundaryRects = contentGroup
-                .select(".decision-boundary")
-                .selectAll<SVGRectElement, unknown>("rect");
-            if (!boundaryRects.empty()) {
-                const categoricalScale = colorScale;
-                boundaryRects
-                    .transition()
-                    .duration(200)
-                    .attr("fill", function () {
-                        const prediction = d3
-                            .select(this)
-                            .attr("data-prediction");
-                        if (focusedNames === null)
-                            return categoricalScale(prediction);
-                        return focusedNames.has(prediction)
-                            ? categoricalScale(prediction)
-                            : "#e5e7eb";
-                    })
-                    .attr("opacity", function () {
-                        if (focusedNames === null) return 0.15;
-                        const prediction = d3
-                            .select(this)
-                            .attr("data-prediction");
-                        return focusedNames.has(prediction) ? 0.15 : 0.05;
-                    });
-            }
-        });
+        // Interaction area
+        gPredict.append("circle")
+            .attr("r", 15 * scaleFactor)
+            .attr("fill", "transparent")
+            .style("cursor", "default")
+            .on("mouseover", function(event) {
+                const tooltip = d3.select("body").select<HTMLDivElement>("#svm-tooltip");
+                tooltip.style("visibility", "visible")
+                    .html(`
+                        <div style="font-weight:700; color:${pointColor}; margin-bottom:4px;">Predicted Point</div>
+                        <div style="font-size:11px; color:#64748b;">
+                            Class: <b>${predictedClassIndex !== undefined ? classNames[predictedClassIndex] : "Unknown"}</b><br/>
+                            X: ${px.toFixed(3)}<br/>
+                            Y: ${py.toFixed(3)}
+                        </div>
+                    `);
+                tooltip
+                    .style("top", event.pageY - 10 + "px")
+                    .style("left", event.pageX + 14 + "px");
+            })
+            .on("mousemove", function(event) {
+                const tooltip = d3.select("body").select<HTMLDivElement>("#svm-tooltip");
+                tooltip.style("top", (event.pageY - 10) + "px")
+                    .style("left", (event.pageX + 14) + "px");
+            })
+            .on("mouseout", function() {
+                const tooltip = d3.select("body").select<HTMLDivElement>("#svm-tooltip");
+                tooltip.style("visibility", "hidden");
+            });
     }
 
     return { xScale, yScale };

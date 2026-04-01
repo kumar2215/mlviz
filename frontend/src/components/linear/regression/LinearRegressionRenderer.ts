@@ -3,6 +3,9 @@
  * Draws a scatter plot and an interactive regression line.
  */
 
+import { renderScatter2D } from "@/components/plots/dimensions/scatter2DrendererUtils";
+import type { RegressionConfig } from "@/components/plots/types";
+import { createPlotPoints } from "@/components/plots/utils/dataTransformers";
 import {
     renderManualLegend,
     type LegendFilterCallback,
@@ -38,25 +41,32 @@ export interface RenderLinearRegressionProps {
     focusedLabels?: Set<string> | null;
     /** Draw vertical residual lines from each point to the current line */
     showErrorLines?: boolean;
-    /** Predicted point [x, y] to highlight on the line */
+    /** Interaction callback for legend */
+    onLegendFilterChange?: LegendFilterCallback;
+    /** Highlighted prediction point (blue dot) */
     predictionPoint?: [number, number] | null;
 }
 
 export interface RenderResult {
     xScale: d3.ScaleLinear<number, number>;
     yScale: d3.ScaleLinear<number, number>;
-    legend: { onFilterChange: (cb: LegendFilterCallback) => void } | null;
+    legend: {
+        onFilterChange: (cb: LegendFilterCallback) => void;
+    } | null;
 }
 
-const SCATTER_COLOR = "#64748b";
-const ERROR_LINE_COLOR = "#ef4444"; // red — residual error lines
-const USER_LINE_COLOR = "#6366f1"; // indigo — user's line
-const OPTIMAL_LINE_COLOR = "#10b981"; // emerald — OLS optimal line
-const PROPOSED_LINE_COLOR = "#f97316"; // orange — proposed next step
-const TEST_COLOR = "#f97316"; // orange — test set points
+const TRAIN_COLOR = "#64748b"; // slate-500
+const TEST_COLOR = "#94a3b8"; // slate-400
+const USER_LINE_COLOR = "#3b82f6"; // blue-500
+const OPTIMAL_LINE_COLOR = "#10b981"; // emerald-500
+const PROPOSED_LINE_COLOR = "#6366f1"; // indigo-500
+const ERROR_LINE_COLOR = "#ef4444"; // red-500
+const PREDICTION_POINT_COLOR = "#3b82f6"; // blue-500
 
-const PREDICTION_POINT_COLOR = "#e11d48"; // rose — predicted point
-
+/**
+ * Main render function for Linear Regression.
+ * Uses renderScatter2D for the base plot and layers regression lines on top.
+ */
 export function renderLinearRegression({
     container,
     points,
@@ -71,332 +81,155 @@ export function renderLinearRegression({
     xLabel,
     yLabel,
     context,
-    showOptimalLine = false,
+    showOptimalLine = true,
     trainMask,
     legendItems,
     focusedLabels,
     showErrorLines = false,
-    predictionPoint = null,
+    onLegendFilterChange,
+    predictionPoint,
 }: RenderLinearRegressionProps): RenderResult {
-    const { width, height, margin } = context.dimensions;
-    const innerWidth = width - margin.left - margin.right;
-    const innerHeight = height - margin.top - margin.bottom;
-
-    // ---- Scales ----
-    const xScale = d3
-        .scaleLinear()
-        .domain(xRange)
-        .range([0, innerWidth])
-        .nice();
-
-    const yScale = d3
-        .scaleLinear()
-        .domain(yRange)
-        .range([innerHeight, 0])
-        .nice();
+    const { width, height, margin, scaleFactor = 1 } = context.dimensions;
 
     // ---- Clear previous render ----
-    container
-        .selectAll(
-            ".zoom-content, .axes-fixed, .lr-label",
-        )
-        .remove();
+    container.selectAll("*").remove();
 
-    // ---- Group structure (mirrors scatter2D pattern for zoom support) ----
-    // .zoom-content  — zoomable: scatter, lines, error lines
-    // .axes-fixed    — fixed: axes + white backgrounds + axis labels
-    const contentGroup = container.append("g").attr("class", "zoom-content");
-    const axesGroup = container.append("g").attr("class", "axes-fixed");
-
-    // ---- Axes (fixed, on top of content) ----
-    // White backgrounds so zoomed content doesn't bleed under axes
-    const leftCoverage = margin.left + 10;
-    const bottomCoverage = margin.bottom + 20;
-
-    axesGroup
-        .append("rect")
-        .attr("x", -leftCoverage)
-        .attr("y", innerHeight - 1)
-        .attr("width", innerWidth + leftCoverage + (margin.right + 10))
-        .attr("height", bottomCoverage)
-        .attr("fill", "white")
-        .attr("opacity", 1);
-
-    axesGroup
-        .append("rect")
-        .attr("x", -leftCoverage)
-        .attr("y", -10)
-        .attr("width", leftCoverage)
-        .attr("height", innerHeight + 20)
-        .attr("fill", "white")
-        .attr("opacity", 1);
-
-    axesGroup
-        .append("rect")
-        .attr("x", -leftCoverage)
-        .attr("y", -(margin.top + 10))
-        .attr("width", innerWidth + leftCoverage + (margin.right + 10))
-        .attr("height", margin.top + 10)
-        .attr("fill", "white")
-        .attr("opacity", 1);
-
-    axesGroup
-        .append("rect")
-        .attr("x", innerWidth)
-        .attr("y", -10)
-        .attr("width", margin.right + 10)
-        .attr("height", innerHeight + 20)
-        .attr("fill", "white")
-        .attr("opacity", 1);
-
-    const xAxisGroup = axesGroup
-        .append("g")
-        .attr("class", "lr-axis-x x-axis")
-        .attr("transform", `translate(0, ${innerHeight})`)
-        .call(d3.axisBottom(xScale).ticks(6))
-        .call((g) => {
-            g.selectAll("text")
-                .style("font-size", "11px")
-                .style("fill", "#94a3b8");
-            g.selectAll("line, path").style("stroke", "#e2e8f0");
-        });
-
-    // Store original scale for zoom rescaling
-    (xAxisGroup.node() as any).__xScale__ = xScale.copy();
-
-    const yAxisGroup = axesGroup
-        .append("g")
-        .attr("class", "lr-axis-y y-axis")
-        .call(d3.axisLeft(yScale).ticks(6))
-        .call((g) => {
-            g.selectAll("text")
-                .style("font-size", "11px")
-                .style("fill", "#94a3b8");
-            g.selectAll("line, path").style("stroke", "#e2e8f0");
-        });
-
-    // Store original scale for zoom rescaling
-    (yAxisGroup.node() as any).__yScale__ = yScale.copy();
-
-    // Axis labels
-    axesGroup
-        .append("text")
-        .attr("class", "lr-label")
-        .attr("x", innerWidth / 2)
-        .attr("y", innerHeight + margin.bottom - 4)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#64748b")
-        .text(xLabel);
-
-    axesGroup
-        .append("text")
-        .attr("class", "lr-label")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 14)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .style("fill", "#64748b")
-        .text(yLabel);
-
-    // ---- Residual error lines (rendered before points so points sit on top) ----
-    if (showErrorLines) {
-        const errorVisible =
-            focusedLabels === null ||
-            focusedLabels === undefined ||
-            focusedLabels.has("Error lines");
-        const errorGroup = contentGroup
-            .append("g")
-            .attr("class", "lr-error-lines");
-        errorGroup
-            .selectAll("line")
-            .data(points)
-            .join("line")
-            .attr("x1", (d) => xScale(d[0]))
-            .attr("x2", (d) => xScale(d[0]))
-            .attr("y1", (d) => yScale(d[1]))
-            .attr("y2", (d) => yScale(currentSlope * d[0] + currentIntercept))
-            .attr("stroke", ERROR_LINE_COLOR)
-            .attr("stroke-width", 1)
-            .attr("stroke-opacity", errorVisible ? 0.4 : 0)
-            .style("stroke-dasharray", "3, 3");
-    }
-
-    // ---- Scatter points ----
-    const scatterGroup = contentGroup.append("g").attr("class", "lr-scatter");
-
-    scatterGroup
-        .selectAll("circle")
-        .data(points)
-        .join("circle")
-        .attr("cx", (d) => xScale(d[0]))
-        .attr("cy", (d) => yScale(d[1]))
-        .attr("r", 4)
-        .attr("fill", (_, i) =>
-            trainMask
-                ? trainMask[i]
-                    ? SCATTER_COLOR
-                    : TEST_COLOR
-                : SCATTER_COLOR,
-        )
-        .attr("fill-opacity", 0.55)
-        .attr("stroke", (_, i) =>
-            trainMask
-                ? trainMask[i]
-                    ? SCATTER_COLOR
-                    : TEST_COLOR
-                : SCATTER_COLOR,
-        )
-        .attr("stroke-width", 0.5)
-        .attr("stroke-opacity", 0.7);
-
-    // ---- Predicted point ----
-    const predictionVisible =
-        focusedLabels === null ||
-        focusedLabels === undefined ||
-        focusedLabels.has("Prediction");
-
-    if (predictionPoint) {
-        const predGroup = contentGroup
-            .append("g")
-            .attr("class", "lr-prediction-point")
-            .attr("opacity", predictionVisible ? 1 : 0);
-
-        // Vertical dashed drop line from point down to x-axis
-        predGroup
-            .append("line")
-            .attr("x1", xScale(predictionPoint[0]))
-            .attr("x2", xScale(predictionPoint[0]))
-            .attr("y1", yScale(predictionPoint[1]))
-            .attr("y2", innerHeight)
-            .attr("stroke", PREDICTION_POINT_COLOR)
-            .attr("stroke-width", 1.5)
-            .attr("stroke-dasharray", "4 3")
-            .attr("stroke-opacity", 0.6);
-
-        // Horizontal dashed line from point to y-axis
-        predGroup
-            .append("line")
-            .attr("x1", 0)
-            .attr("x2", xScale(predictionPoint[0]))
-            .attr("y1", yScale(predictionPoint[1]))
-            .attr("y2", yScale(predictionPoint[1]))
-            .attr("stroke", PREDICTION_POINT_COLOR)
-            .attr("stroke-width", 1.5)
-            .attr("stroke-dasharray", "4 3")
-            .attr("stroke-opacity", 0.6);
-
-        // Outer ring
-        predGroup
-            .append("circle")
-            .attr("cx", xScale(predictionPoint[0]))
-            .attr("cy", yScale(predictionPoint[1]))
-            .attr("r", 10)
-            .attr("fill", "none")
-            .attr("stroke", PREDICTION_POINT_COLOR)
-            .attr("stroke-width", 2)
-            .attr("stroke-opacity", 0.5);
-
-        // Filled dot
-        predGroup
-            .append("circle")
-            .attr("cx", xScale(predictionPoint[0]))
-            .attr("cy", yScale(predictionPoint[1]))
-            .attr("r", 6)
-            .attr("fill", PREDICTION_POINT_COLOR)
-            .attr("fill-opacity", 0.9)
-            .attr("stroke", "white")
-            .attr("stroke-width", 1.5);
-    }
-
-    // ---- Line drawing helper ----
-    const drawLine = (
-        slope: number,
-        intercept: number,
-        className: string,
-        color: string,
-        strokeWidth = 2,
-        dashed = false,
-        opacity = 1,
-    ) => {
-        const [x0, x1] = xScale.domain();
-        const lineData: [number, number][] = [
-            [x0, slope * x0 + intercept],
-            [x1, slope * x1 + intercept],
-        ];
-        const lineGen = d3
-            .line<[number, number]>()
-            .x((d) => xScale(d[0]))
-            .y((d) => yScale(d[1]));
-
-        contentGroup
-            .append("path")
-            .attr("class", className)
-            .datum(lineData)
-            .attr("d", lineGen)
-            .attr("fill", "none")
-            .attr("stroke", color)
-            .attr("stroke-width", strokeWidth)
-            .attr("stroke-dasharray", dashed ? "6 4" : null)
-            .attr("stroke-linecap", "round")
-            .attr("opacity", opacity);
+    // ---- Prepare Plot Data ----
+    const config: RegressionConfig = {
+        type: "regression",
+        values: points.map((_, i) => (trainMask ? (trainMask[i] ? 1 : 0) : 0)),
+        colorScheme: "blues",
     };
 
-    // ---- Optimal OLS line (dashed, green) ----
-    if (
-        showOptimalLine &&
-        optimalSlope !== undefined &&
-        optimalIntercept !== undefined
-    ) {
-        drawLine(
-            optimalSlope,
-            optimalIntercept,
-            "lr-line-opt",
-            OPTIMAL_LINE_COLOR,
-            2,
-            true,
-            focusedLabels === null ||
-                focusedLabels === undefined ||
-                focusedLabels.has("Optimal line")
-                ? 1
-                : 0,
-        );
-    }
+    const plotPoints = createPlotPoints(points, config);
+    const bounds = {
+        min: [xRange[0], yRange[0]],
+        max: [xRange[1], yRange[1]],
+    };
 
-    // ---- Proposed next step line (dimmed dash, indigo) ----
-    if (proposedSlope !== undefined && proposedIntercept !== undefined) {
-        drawLine(
-            proposedSlope,
-            proposedIntercept,
-            "lr-line-proposed",
-            PROPOSED_LINE_COLOR,
-            2,
-            true,
-            focusedLabels === null ||
-                focusedLabels === undefined ||
-                focusedLabels.has("Proposed update")
-                ? 0.5
-                : 0,
-        );
-    }
-
-    // ---- User-controlled line (solid, indigo) ----
-    const userLineOpacity =
-        focusedLabels === null ||
-        focusedLabels === undefined ||
-        focusedLabels.has("Your line")
-            ? 1
-            : 0;
-    drawLine(
-        currentSlope,
-        currentIntercept,
-        "lr-line-user",
-        USER_LINE_COLOR,
-        2.5,
-        false,
-        userLineOpacity,
+    // ---- Main Render via Plot Utils ----
+    const renderResult = renderScatter2D(
+        container,
+        plotPoints,
+        bounds,
+        [xLabel, yLabel],
+        config,
+        undefined, 
+        {
+            width,
+            height,
+            margin,
+            pointRadius: 4 * scaleFactor,
+            pointOpacity: 0.8,
+            showGrid: true,
+            showLegend: false, 
+            showAxes: true,
+            useNiceScales: false,
+            scaleFactor,
+        },
     );
+
+    const { xScale, yScale, contentGroup, axesGroup } = renderResult;
+
+    // ---- Apply Train/Test split coloring if mask exists ----
+    if (trainMask) {
+        contentGroup
+            .selectAll("circle")
+            .attr("fill", (_, i) => (trainMask[i] ? TRAIN_COLOR : TEST_COLOR))
+            .attr("fill-opacity", (_, i) => {
+                if (!focusedLabels) return 0.8;
+                const label = trainMask[i] ? "Train" : "Test";
+                return focusedLabels.has(label) ? 0.8 : 0.15;
+            });
+    }
+
+    // ---- Optimal OLS Line ----
+    if (showOptimalLine && optimalSlope !== undefined && optimalIntercept !== undefined) {
+        const isVisible = !focusedLabels || focusedLabels.has("Optimal line");
+        if (isVisible) {
+            drawLine(
+                contentGroup,
+                optimalSlope,
+                optimalIntercept,
+                xScale,
+                yScale,
+                OPTIMAL_LINE_COLOR,
+                2 * scaleFactor,
+                "4 2",
+                0.6,
+            );
+        }
+    }
+
+    // ---- Proposed Gradient Step Line (Ghost line) ----
+    if (proposedSlope !== undefined && proposedIntercept !== undefined) {
+        const isVisible = !focusedLabels || focusedLabels.has("Proposed update");
+        if (isVisible) {
+            drawLine(
+                contentGroup,
+                proposedSlope,
+                proposedIntercept,
+                xScale,
+                yScale,
+                PROPOSED_LINE_COLOR,
+                2 * scaleFactor,
+                "10 5",
+                0.4,
+            );
+        }
+    }
+
+    // ---- Current User/Model Line ----
+    const isUserVisible = !focusedLabels || focusedLabels.has("Your line");
+    if (isUserVisible) {
+        drawLine(
+            contentGroup,
+            currentSlope,
+            currentIntercept,
+            xScale,
+            yScale,
+            USER_LINE_COLOR,
+            3 * scaleFactor,
+            "",
+            1.0,
+        );
+    }
+
+    // ---- Error (Residual) Lines ----
+    if (showErrorLines) {
+        const isVisible = !focusedLabels || focusedLabels.has("Error lines");
+        if (isVisible) {
+            contentGroup
+                .selectAll("line.error")
+                .data(points)
+                .join("line")
+                .attr("class", "error")
+                .attr("x1", (d) => xScale(d[0]))
+                .attr("y1", (d) => yScale(d[1]))
+                .attr("x2", (d) => xScale(d[0]))
+                .attr("y2", (d) => yScale(currentSlope * d[0] + currentIntercept))
+                .attr("stroke", ERROR_LINE_COLOR)
+                .attr("stroke-width", 1 * scaleFactor)
+                .attr("stroke-dasharray", "2 2")
+                .attr("opacity", 0.5);
+        }
+    }
+
+    // ---- Highlight Prediction Point ----
+    if (predictionPoint) {
+        const isVisible = !focusedLabels || focusedLabels.has("Prediction");
+        if (isVisible) {
+            contentGroup
+                .append("circle")
+                .attr("cx", xScale(predictionPoint[0]))
+                .attr("cy", yScale(predictionPoint[1]))
+                .attr("r", 7 * scaleFactor)
+                .attr("fill", PREDICTION_POINT_COLOR)
+                .attr("stroke", "white")
+                .attr("stroke-width", 2 * scaleFactor)
+                .attr("filter", "drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))");
+        }
+    }
 
     // ---- Legend ----
     const finalLegendItems: LegendItem[] = legendItems || [];
@@ -433,12 +266,47 @@ export function renderLinearRegression({
     const legend = renderManualLegend(
         axesGroup,
         finalLegendItems,
-        innerWidth,
-        innerHeight,
+        width - margin.left - margin.right,
+        height - margin.top - margin.bottom,
         { position: "bottom-left" },
-        context.dimensions.width / 800, // Scale factor based on width
+        scaleFactor,
         focusedLabels,
     );
 
+    if (legend && onLegendFilterChange) {
+        legend.onFilterChange(onLegendFilterChange);
+    }
+
     return { xScale, yScale, legend };
+}
+
+/**
+ * Generic line drawing helper
+ */
+function drawLine(
+    container: d3.Selection<SVGGElement, unknown, null, undefined>,
+    slope: number,
+    intercept: number,
+    xScale: d3.ScaleLinear<number, number>,
+    yScale: d3.ScaleLinear<number, number>,
+    color: string,
+    strokeWidth: number,
+    dashArray: string = "",
+    opacity: number = 1,
+) {
+    const [x0, x1] = xScale.domain();
+    const y0 = slope * x0 + intercept;
+    const y1 = slope * x1 + intercept;
+
+    container
+        .append("line")
+        .attr("x1", xScale(x0))
+        .attr("y1", yScale(y0))
+        .attr("x2", xScale(x1))
+        .attr("y2", yScale(y1))
+        .attr("stroke", color)
+        .attr("stroke-width", strokeWidth)
+        .attr("stroke-dasharray", dashArray || null)
+        .attr("stroke-linecap", "round")
+        .attr("opacity", opacity);
 }

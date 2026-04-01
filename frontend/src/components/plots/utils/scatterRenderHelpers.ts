@@ -34,6 +34,8 @@ export interface ScatterRenderOptions {
     onPointClick?: (index: number, point: number[]) => void;
     onPointHover?: (index: number | null) => void;
     scaleFactor?: number;
+    boundaryOpacity?: number; // Opacity for decision boundary regions (default: 0.3)
+    zoomable?: boolean; // Whether to enable zoom (default: true)
 }
 
 // ============================================================================
@@ -43,6 +45,7 @@ export interface ScatterRenderOptions {
 export const DEFAULT_MARGIN = { top: 20, right: 20, bottom: 50, left: 60 };
 export const DEFAULT_POINT_RADIUS = 5;
 export const DEFAULT_POINT_OPACITY = 0.8;
+export const DEFAULT_BOUNDARY_OPACITY = 0.3;
 
 // 1D specific constants
 export const STRIP_HEIGHT_RATIO = 0.3;

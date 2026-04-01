@@ -125,6 +125,10 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const [stepData, setStepData] = React.useState<SVMStepResponse | null>(null);
     const [predictionData, setPredictionData] = React.useState<SVMPredictResponse | null>(null);
+    const [singlePointPrediction, setSinglePointPrediction] = React.useState<{
+        predictedClass: string;
+        predictedClassIndex: number;
+    } | null>(null);
 
     // Iterations are kept in memory only — never persisted to localStorage
     // because the mesh_predictions arrays are too large (~2500 strings × 10 iter).
@@ -331,8 +335,8 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
 
     const predictionResult: PredictionResult<SVMPredictResponse> | null = 
         predictionData ? {
-            predictedClass: predictionData.loss < 0.5 ? "Good split" : "Bad split", 
-            predictedClassIndex: 0,
+            predictedClass: singlePointPrediction?.predictedClass ?? (predictionData.loss < 0.5 ? "Good split" : "Bad split"), 
+            predictedClassIndex: singlePointPrediction?.predictedClassIndex ?? 0,
             additionalData: predictionData
         } : null;
 
@@ -350,6 +354,24 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         setIsPredicting(true);
         setPredictionError(null);
         try {
+            // Perform frontend-only prediction for immediate feedback on the Predict page
+            const meta = currentModelData?.metadata as any;
+            if (meta) {
+                const xVal = points[meta.feature_x_name] ?? 0;
+                const yVal = points[meta.feature_y_name] ?? 0;
+                
+                // SVM decision function: f(x) = w1*x + w2*y + b
+                const score = currentW1 * xVal + currentW2 * yVal + currentBias;
+                const classIndex = score > 0 ? 1 : 0;
+                const classNames = meta.class_names ?? ["Class 0", "Class 1"];
+                const predictedClass = classNames[classIndex] ?? `Class ${classIndex}`;
+
+                setSinglePointPrediction({
+                    predictedClass,
+                    predictedClassIndex: classIndex
+                });
+            }
+
             // Predict needs the full params from last visualizations
             const result = await makePrediction({
                 ...lastParams,
@@ -370,6 +392,7 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     const clearPrediction = useCallback(() => {
         setPredictionData(null);
         setPredictionError(null);
+        setSinglePointPrediction(null);
     }, []);
 
 

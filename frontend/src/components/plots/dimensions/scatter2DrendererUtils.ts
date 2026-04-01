@@ -5,6 +5,7 @@
 
 import {
     createScatterColorScale,
+    DEFAULT_BOUNDARY_OPACITY,
     DEFAULT_MARGIN,
     DEFAULT_POINT_OPACITY,
     DEFAULT_POINT_RADIUS,
@@ -57,6 +58,7 @@ export function renderScatter2D(
         onPointClick,
         onPointHover,
         scaleFactor = 1,
+        boundaryOpacity = DEFAULT_BOUNDARY_OPACITY,
     } = options;
 
     const scaledPointRadius = pointRadius * scaleFactor;
@@ -136,6 +138,7 @@ export function renderScatter2D(
             xScale,
             yScale,
             config,
+            boundaryOpacity,
         );
     }
 

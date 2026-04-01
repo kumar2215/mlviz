@@ -10,7 +10,11 @@ import type { VisualisationRenderContext } from "@/components/visualisation/type
 import { useSVMContext } from "@/contexts/models/SVMContext";
 import { useCallback, useEffect } from "react";
 
-const Visualisation: React.FC = () => {
+interface VisualisationProps {
+    points?: Record<string, number> | null;
+}
+
+const Visualisation: React.FC<VisualisationProps> = ({ points }) => {
     const {
         visualizationData,
         isVisualizationLoading,
@@ -22,7 +26,8 @@ const Visualisation: React.FC = () => {
         currentBias,
         decisionBoundary,
         makePrediction,
-        predictionData
+        predictionData,
+        predictionResult
     } = useSVMContext();
 
     // Auto-reload on mount
@@ -49,6 +54,16 @@ const Visualisation: React.FC = () => {
         }
     }, [currentW1, currentW2, currentBias, visualizationData, lastVisualizationParams, makePrediction]);
 
+    // Derive prediction point from 'points' record
+    const predictionPoint: [number, number] | null = (() => {
+        if (!points || !visualizationData?.metadata) return null;
+        const meta = visualizationData.metadata as any;
+        const x = points[meta.feature_x_name];
+        const y = points[meta.feature_y_name];
+        if (x === undefined || y === undefined) return null;
+        return [x, y];
+    })();
+
     const renderCallback = useCallback(
         (
             container: d3.Selection<SVGGElement, unknown, null, undefined>,
@@ -72,9 +87,11 @@ const Visualisation: React.FC = () => {
                 bias: currentBias,
                 isLinear: (visualizationData.metadata?.kernel ?? (lastVisualizationParams?.parameters?.kernel ?? (lastVisualizationParams as any)?.kernel)) === "linear",
                 isKernelSpace: false,
+                predictionPoint: predictionPoint ?? undefined,
+                predictedClassIndex: predictionResult?.predictedClassIndex,
             });
         },
-        [visualizationData, decisionBoundary, currentW1, currentW2, currentBias]
+        [visualizationData, decisionBoundary, currentW1, currentW2, currentBias, predictionPoint, predictionResult]
     );
 
     if (isVisualizationLoading) {
