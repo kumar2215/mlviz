@@ -1,7 +1,32 @@
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Tuple
 
 import numpy as np
 from pydantic import BaseModel, Field, field_validator
+
+
+class SynthClassificationParams(BaseModel):
+    """Parameters for synthetic classification dataset generation."""
+
+    n_samples: int = 100
+    random_state: int = 42
+    n_features: int = 2
+    n_classes: int = 2
+    n_informative: int = 2
+    n_redundant: int = 0
+    n_clusters_per_class: int = 1
+    noise: Optional[float] = None
+    factor: Optional[float] = None
+
+
+class SynthRegressionParams(BaseModel):
+    """Parameters for synthetic regression dataset generation."""
+
+    n_samples: int = 100
+    random_state: int = 42
+    slope: float = 1.0
+    intercept: float = 0.0
+    noise: float = 0.1
+    x_range: Tuple[float, float] = (-3.0, 3.0)
 
 
 class DatasetInfo(BaseModel):

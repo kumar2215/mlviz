@@ -1,12 +1,9 @@
 import {
     getParameters,
     getSVMPrediction,
-    stepSVM,
     trainSVM,
     type SVMPredictRequest,
     type SVMPredictResponse,
-    type SVMStepRequest,
-    type SVMStepResponse,
     type SVMTrainRequest,
     type SVMTrainResponse,
 } from "@/api/svm";
@@ -15,12 +12,13 @@ import type { DecisionBoundary } from "@/components/plots/types";
 import {
     createBaseModelContext,
     type BaseModelData,
-    type StepableModelContext,
+    type PredictableModelContext,
+    type PredictionResult,
     type TrainableModelContext,
     type VisualizableModelContext,
 } from "@/contexts/models/BaseModelContext";
-import React, { createContext, useContext, useCallback } from "react";
 import type { ReactNode } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 
 /**
  * SVM Model Context
@@ -48,13 +46,12 @@ interface SVMContextType
     extends
         TrainableModelContext<SVMModelData>,
         VisualizableModelContext<SVMModelData>,
-        StepableModelContext<SVMModelData, SVMStepResponse, Partial<SVMStepRequest>> {
-    
+        PredictableModelContext<SVMModelData, SVMPredictResponse> {
+
     // SVM-specific properties
     currentW1: number;
     currentW2: number;
     currentBias: number;
-    stepData: SVMStepResponse | null;
     predictionData: SVMPredictResponse | null;
     iterations: Array<{
         iteration: number;
@@ -75,7 +72,11 @@ interface SVMContextType
     isVisualizationLoading: boolean;
     lastVisualizationParams: Partial<SVMTrainRequest>;
     decisionBoundary: DecisionBoundary | null;
-    predictionResult: { predictedClass: string; predictedClassIndex: number; additionalData: SVMPredictResponse } | null;
+    
+    // Prediction extension (inherited from PredictableModelContext)
+    isPredicting: boolean;
+    predictionError: string | null;
+    predictionResult: PredictionResult<SVMPredictResponse> | null;
 
 
     // Actions
@@ -114,6 +115,8 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [stepError, setStepError] = React.useState<string | null>(null);
     const [isVisualizing, setIsVisualizing] = React.useState(false);
     const [visualizationError, setVisualizationError] = React.useState<string | null>(null);
+    const [isPredicting, setIsPredicting] = React.useState(false);
+    const [predictionError, setPredictionError] = React.useState<string | null>(null);
 
     // SVM specific iterative state
     const [currentW1, setCurrentW1] = React.useState<number>(0);
@@ -308,7 +311,9 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         setCurrentW2(0);
         setCurrentBias(0);
         setStepData(null);
+        setStepData(null);
         setPredictionData(null);
+        setPredictionError(null);
         setIterations([]);
     }, [baseResetModelData]);
 
@@ -324,11 +329,48 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         };
     };
 
-    const predictionResult = predictionData ? {
-        predictedClass: predictionData.loss < 0.5 ? "Good split" : "Bad split", 
-        predictedClassIndex: 0,
-        additionalData: predictionData
-    } : null;
+    const predictionResult: PredictionResult<SVMPredictResponse> | null = 
+        predictionData ? {
+            predictedClass: predictionData.loss < 0.5 ? "Good split" : "Bad split", 
+            predictedClassIndex: 0,
+            additionalData: predictionData
+        } : null;
+
+    const getFeatureNames = useCallback((): string[] | null => {
+        if (!currentModelData?.metadata) return null;
+        const meta = currentModelData.metadata as any;
+        return [meta.feature_x_name, meta.feature_y_name];
+    }, [currentModelData?.metadata]);
+
+    const getClassNames = useCallback((): string[] | null => {
+        return currentModelData?.metadata?.class_names ?? null;
+    }, [currentModelData?.metadata?.class_names]);
+
+    const predict = useCallback(async (points: Record<string, number>) => {
+        setIsPredicting(true);
+        setPredictionError(null);
+        try {
+            // Predict needs the full params from last visualizations
+            const result = await makePrediction({
+                ...lastParams,
+                w1: currentW1,
+                w2: currentW2,
+                b: currentBias,
+                // The points are passed as a record, but the API expects a specific format if needed
+                // Currently makePrediction handles its own mapping if we pass w/b
+            });
+            if (!result) setPredictionError("Failed to get prediction");
+        } catch (err) {
+            setPredictionError(err instanceof Error ? err.message : "Prediction error");
+        } finally {
+            setIsPredicting(false);
+        }
+    }, [makePrediction, lastParams, currentW1, currentW2, currentBias]);
+
+    const clearPrediction = useCallback(() => {
+        setPredictionData(null);
+        setPredictionError(null);
+    }, []);
 
 
 
@@ -353,6 +395,12 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         predictionResult,
         predictionData,
         makePrediction,
+        getFeatureNames,
+        getClassNames,
+        isPredicting,
+        predictionError,
+        predict,
+        clearPrediction,
         setManualWeights,
         randomizeWeights,
         computeHingeLoss,

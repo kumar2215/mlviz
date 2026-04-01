@@ -1,11 +1,8 @@
 import json
-import numpy as np
-from typing import Dict, List, Optional, Any, Tuple
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score, f1_score
-
+import numpy as np
 from models import (
     ClassificationDataset,
     ClassificationMetadata,
@@ -13,15 +10,24 @@ from models import (
     ClassificationMetricValues,
     DecisionBoundaryData,
     PredefinedClassificationDataset,
-    SVMParameters,
     SVMMetadata,
+    SVMParameters,
 )
+from sklearn.metrics import (
+    accuracy_score,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+
 from services.dataset_service import dataset_service
 
 
 class SVMService:
     """Service for SVM classification with a custom SMO optimiser.
-    
+
     Implements the Sequential Minimal Optimization (SMO) algorithm so that
     training iterations are captured and returned for every kernel type
     (linear, rbf, poly), enabling kernel-agnostic animated playback.
@@ -45,7 +51,7 @@ class SVMService:
     ) -> ClassificationDataset:
         if dataset_param is None:
             return await dataset_service.load_predefined_dataset(
-                PredefinedClassificationDataset(name="moons")
+                PredefinedClassificationDataset(name="simple_binary")
             )
         elif isinstance(dataset_param, dict):
             if "name" in dataset_param:
@@ -59,18 +65,24 @@ class SVMService:
         else:
             return dataset_param
 
-    def _compute_metrics(self, y_true: np.ndarray, y_pred: np.ndarray) -> ClassificationMetricValues:
+    def _compute_metrics(
+        self, y_true: np.ndarray, y_pred: np.ndarray
+    ) -> ClassificationMetricValues:
         """Compute classification metrics given true and predicted values."""
         labels = sorted(np.unique(np.concatenate([y_true, y_pred])))
         return ClassificationMetricValues(
             confusion_matrix=confusion_matrix(y_true, y_pred, labels=labels).tolist(),
             accuracy=accuracy_score(y_true, y_pred),
-            precision=precision_score(y_true, y_pred, average="weighted", zero_division=0),
+            precision=precision_score(
+                y_true, y_pred, average="weighted", zero_division=0
+            ),
             recall=recall_score(y_true, y_pred, average="weighted", zero_division=0),
             f1=f1_score(y_true, y_pred, average="weighted", zero_division=0),
         )
 
-    def _get_2d_points(self, X: np.ndarray, y: np.ndarray, feature_x_idx: int, feature_y_idx: int):
+    def _get_2d_points(
+        self, X: np.ndarray, y: np.ndarray, feature_x_idx: int, feature_y_idx: int
+    ):
         X_reduced = X[:, [feature_x_idx, feature_y_idx]]
         unique_classes = np.unique(y)
         if len(unique_classes) > 2:
@@ -115,8 +127,8 @@ class SVMService:
         elif kernel == "rbf":
             # ||x1 - x2||² via identity: ||x1||² + ||x2||² - 2*x1·x2
             sq_dist = (
-                np.sum(X1 ** 2, axis=1, keepdims=True)
-                + np.sum(X2 ** 2, axis=1)
+                np.sum(X1**2, axis=1, keepdims=True)
+                + np.sum(X2**2, axis=1)
                 - 2.0 * X1 @ X2.T
             )
             return np.exp(-gamma * np.clip(sq_dist, 0.0, None))
@@ -138,27 +150,29 @@ class SVMService:
         return np.c_[xx.ravel(), yy.ravel()]
 
     # -------------------------------------------------------------------------
-    # Custom SVM Optimizer: Projected Dual Gradient Ascent
+    # Custom SVM Optimizer: Simplified SMO
     # -------------------------------------------------------------------------
 
     def _gd_train(
         self,
-        X: np.ndarray,          # Training subset
-        y_01: np.ndarray,       # labels in {0, 1}
-        X_full: np.ndarray,     # Full dataset (for kernel space projection)
+        X: np.ndarray,  # Training subset
+        y_01: np.ndarray,  # labels in {0, 1}
+        X_full: np.ndarray,  # Full dataset (for kernel space projection)
         C: float,
         kernel: str,
         gamma: float,
         degree: int,
         mesh_points: np.ndarray,
         class_names: List[str],
-        idx_train: np.ndarray,      # indices mapping X rows → X_full rows
+        idx_train: np.ndarray,  # indices mapping X rows → X_full rows
         boundary_resolution: int = 50,
-        max_iter: int = 100,
-        lr: float = 0.01,
+        max_iter: int = 500,
     ) -> Tuple[List[Dict[str, Any]], np.ndarray, float, np.ndarray]:
         """
-        Projected dual gradient ascent with iterative kernel space recording.
+        Simplified SMO: each pass picks the worst KKT-violating pair,
+        solves the 2-variable subproblem analytically, then updates b.
+        This guarantees sum(alpha*y)=0 exactly at every step and converges
+        to well-defined support vectors.
         """
         n = len(y_01)
         y = np.where(y_01 == 0, -1.0, 1.0)
@@ -182,81 +196,220 @@ class SVMService:
             top_idx = np.argsort(eigvals)[::-1][0]
             pc1_full = eigvecs[:, top_idx] * np.sqrt(np.maximum(eigvals[top_idx], 0))
 
-        # Lipschitz constant for step size
-        Q = (y[:, None] * y[None, :]) * K
-        v = np.ones(len(y))
-        for _ in range(10):
-            v = Q @ v
-            norm = np.linalg.norm(v)
-            if norm > 0: v /= norm
-        lambda_max = float(v @ Q @ v) or 1.0
-        effective_lr = lr / lambda_max
-
-        iterations: List[Dict[str, Any]] = []
+        all_frames: List[Dict[str, Any]] = []
         max_frames = 15
-        store_every = max(1, max_iter // max_frames)
+        sv_tol = max(1e-5, C * 1e-3)
+
+
+        def _record_frame(f_cur: np.ndarray, epoch: int) -> None:
+            scores_mesh = (alpha * y) @ K_mesh + b
+            mesh_preds = [class_names[1 if s > 0.0 else 0] for s in scores_mesh]
+
+            k_points = None
+            k_boundary = None
+            if kernel != "linear":
+                scores_full = (alpha * y) @ K_train_full + b
+                all_sv_mask = alpha > sv_tol
+                if all_sv_mask.any():
+                    avg_sv_score = np.mean(np.abs(scores_full[idx_train][all_sv_mask]))
+                    if avg_sv_score > 1e-8:
+                        scores_full /= avg_sv_score
+                k_points = np.c_[scores_full, pc1_full].tolist()
+                pk = np.abs(k_points).max(axis=0) * 0.2 + 0.1
+                z1 = np.linspace(np.min(scores_full) - pk[0], np.max(scores_full) + pk[0], boundary_resolution)
+                z2 = np.linspace(np.min(pc1_full) - pk[1], np.max(pc1_full) + pk[1], boundary_resolution)
+                zz1, zz2 = np.meshgrid(z1, z2)
+                mesh_k = np.c_[zz1.ravel(), zz2.ravel()]
+                k_boundary = {"mesh_points": mesh_k.tolist(), "predictions": [class_names[1 if s > 0.0 else 0] for s in mesh_k[:, 0]], "dimensions": 2}
+
+            if kernel == "linear":
+                w_it = (alpha * y) @ X
+                w1_it, w2_it, b_it = float(w_it[0]), float(w_it[1]), float(b)
+            else:
+                w1_it, w2_it, b_it = 0.0, 0.0, float(b)
+
+            full_alphas = np.zeros(len(X_full))
+            full_alphas[idx_train] = alpha
+
+            functional_margins = y * f_cur
+            geom_sv_mask = (functional_margins <= 1.0 + 0.15) & (alpha > 1e-7)
+
+            all_frames.append({
+                "iteration": epoch,
+                "w1": w1_it,
+                "w2": w2_it,
+                "b": b_it,
+                "loss": float(np.mean(np.maximum(0.0, 1.0 - y * f_cur))),
+                "mesh_predictions": mesh_preds,
+                "support_vector_indices": idx_train[geom_sv_mask].tolist(),
+                "kernel_space_points": k_points,
+                "kernel_space_boundary": k_boundary,
+                "alphas": full_alphas.tolist(),
+            })
+
+        f = K @ (alpha * y) + b
 
         for epoch in range(max_iter):
-            f = (alpha * y) @ K + b
-            grad = 1.0 - y * f
-            alpha = np.clip(alpha + effective_lr * grad, 0.0, C)
+            # One full pass: try to update every point as i
+            n_changed = 0
+            for i in range(n):
+                f = K @ (alpha * y) + b
+                Ei = float(f[i]) - float(y[i])
+                ri = float(y[i]) * float(f[i]) - 1.0
 
-            # Re-estimate bias
-            sv_mask = (alpha > 1e-5) & (alpha < C - 1e-5)
-            if sv_mask.any():
-                b = float(np.mean(y[sv_mask] - (alpha * y) @ K[:, sv_mask]))
+                # Skip if this point already satisfies KKT
+                kkt_ok = (
+                    (alpha[i] < sv_tol and ri >= -1e-3)
+                    or (alpha[i] > C - sv_tol and ri <= 1e-3)
+                    or (sv_tol <= alpha[i] <= C - sv_tol and abs(ri) <= 1e-3)
+                )
+                if kkt_ok:
+                    continue
 
-            if epoch % store_every == 0 or epoch == max_iter - 1:
-                # 1. Original space mesh
-                scores_mesh = (alpha * y) @ K_mesh + b
-                mesh_preds = [class_names[1 if s > 0.0 else 0] for s in scores_mesh]
+                # Pick j: maximum |Ei - Ej| heuristic
+                E_all = f - y
+                diffs = np.abs(Ei - E_all)
+                diffs[i] = -1.0
+                j = int(np.argmax(diffs))
 
-                # 2. Kernel space projection
-                k_points = None
-                k_boundary = None
-                if kernel != "linear":
-                    scores_full = (alpha * y) @ K_train_full + b
-                    # Normalize by SV margin
-                    all_sv_mask = (alpha > 1e-5)
-                    if all_sv_mask.any():
-                        avg_sv_score = np.mean(np.abs(scores_full[idx_train][all_sv_mask]))
-                        if avg_sv_score > 1e-8: scores_full /= avg_sv_score
-                    
-                    k_points = np.c_[scores_full, pc1_full].tolist()
-                    
-                    # Boundary mesh in kernel space
-                    pk = np.abs(k_points).max(axis=0) * 0.2 + 0.1
-                    z1 = np.linspace(np.min(scores_full) - pk[0], np.max(scores_full) + pk[0], boundary_resolution)
-                    z2 = np.linspace(np.min(pc1_full) - pk[1], np.max(pc1_full) + pk[1], boundary_resolution)
-                    zz1, zz2 = np.meshgrid(z1, z2)
-                    mesh_k = np.c_[zz1.ravel(), zz2.ravel()]
-                    k_boundary = {
-                        "mesh_points": mesh_k.tolist(),
-                        "predictions": [class_names[1 if s > 0.0 else 0] for s in mesh_k[:, 0]],
-                        "dimensions": 2
-                    }
+                ai_old, aj_old = alpha[i], alpha[j]
+                yi, yj = y[i], y[j]
 
-                loss = float(np.mean(np.maximum(0.0, 1.0 - y * f)))
-                w1_it, w2_it = (float(v) for v in (alpha * y) @ X) if kernel == "linear" else (0.0, 0.0)
+                eta = K[i, i] + K[j, j] - 2.0 * K[i, j]
+                if eta <= 1e-12:
+                    continue
 
-                # Record full alpha vector for all points in X_full
-                full_alphas = np.zeros(len(X_full))
-                full_alphas[idx_train] = alpha
+                if yi == yj:
+                    L = max(0.0, aj_old + ai_old - C)
+                    H = min(C, aj_old + ai_old)
+                else:
+                    L = max(0.0, aj_old - ai_old)
+                    H = min(C, C + aj_old - ai_old)
 
-                iterations.append({
-                    "iteration": epoch,
-                    "w1": w1_it,
-                    "w2": w2_it,
-                    "b": float(b),
-                    "loss": loss,
-                    "mesh_predictions": mesh_preds,
-                    "support_vector_indices": idx_train[alpha > 1e-5].tolist(),
-                    "kernel_space_points": k_points,
-                    "kernel_space_boundary": k_boundary,
-                    "alphas": full_alphas.tolist(),
-                })
+                if H <= L + 1e-12:
+                    continue
 
-        sv_indices = np.where(alpha > 1e-5)[0]
+                Ej = float(f[j]) - float(yj)
+                aj_new = np.clip(aj_old + yj * (Ei - Ej) / eta, L, H)
+
+                if abs(aj_new - aj_old) < 1e-8:
+                    continue
+
+                ai_new = ai_old + yi * yj * (aj_old - aj_new)
+                alpha[i], alpha[j] = ai_new, aj_new
+
+                b1 = (
+                    b
+                    - Ei
+                    - yi * (ai_new - ai_old) * K[i, i]
+                    - yj * (aj_new - aj_old) * K[i, j]
+                )
+                b2 = (
+                    b
+                    - Ej
+                    - yi * (ai_new - ai_old) * K[i, j]
+                    - yj * (aj_new - aj_old) * K[j, j]
+                )
+                if 0 < ai_new < C:
+                    b = float(b1)
+                elif 0 < aj_new < C:
+                    b = float(b2)
+                else:
+                    b = float((b1 + b2) / 2.0)
+
+                n_changed += 1
+
+                # Record a frame after each successful (i, j) alpha update
+                f_updated = K @ (alpha * y) + b
+                _record_frame(f_updated, epoch)
+
+            f = K @ (alpha * y) + b
+
+            if n_changed == 0:
+                break  # converged — all points satisfy KKT
+
+        # Always record the final converged state
+        scores_mesh_final = (alpha * y) @ K_mesh + b
+        mesh_preds_final = [class_names[1 if s > 0.0 else 0] for s in scores_mesh_final]
+        full_alphas_final = np.zeros(len(X_full))
+        full_alphas_final[idx_train] = alpha
+        if kernel == "linear":
+            w_final = (alpha * y) @ X
+            w1_f, w2_f, b_f = float(w_final[0]), float(w_final[1]), float(b)
+        else:
+            w1_f, w2_f, b_f = 0.0, 0.0, float(b)
+        f_final = K @ (alpha * y) + b
+        functional_margins_final = y * f_final
+        geom_sv_mask_final = (functional_margins_final <= 1.0 + 0.15) & (alpha > 1e-7)
+
+        k_points_final = None
+        k_boundary_final = None
+        if kernel != "linear":
+            scores_full_final = (alpha * y) @ K_train_full + b
+            all_sv_mask_final = alpha > sv_tol
+            if all_sv_mask_final.any():
+                avg_sv_score_final = np.mean(
+                    np.abs(scores_full_final[idx_train][all_sv_mask_final])
+                )
+                if avg_sv_score_final > 1e-8:
+                    scores_full_final /= avg_sv_score_final
+            k_points_final = np.c_[scores_full_final, pc1_full].tolist()
+            pk_final = np.abs(k_points_final).max(axis=0) * 0.2 + 0.1
+            z1_f = np.linspace(
+                np.min(scores_full_final) - pk_final[0],
+                np.max(scores_full_final) + pk_final[0],
+                boundary_resolution,
+            )
+            z2_f = np.linspace(
+                np.min(pc1_full) - pk_final[1],
+                np.max(pc1_full) + pk_final[1],
+                boundary_resolution,
+            )
+            zz1_f, zz2_f = np.meshgrid(z1_f, z2_f)
+            mesh_k_final = np.c_[zz1_f.ravel(), zz2_f.ravel()]
+            k_boundary_final = {
+                "mesh_points": mesh_k_final.tolist(),
+                "predictions": [
+                    class_names[1 if s > 0.0 else 0] for s in mesh_k_final[:, 0]
+                ],
+                "dimensions": 2,
+            }
+
+        final_frame = {
+            "iteration": epoch,
+            "w1": w1_f,
+            "w2": w2_f,
+            "b": b_f,
+            "loss": float(np.mean(np.maximum(0.0, 1.0 - y * f_final))),
+            "mesh_predictions": mesh_preds_final,
+            "support_vector_indices": idx_train[geom_sv_mask_final].tolist(),
+            "kernel_space_points": k_points_final,
+            "kernel_space_boundary": k_boundary_final,
+            "alphas": full_alphas_final.tolist(),
+        }
+
+        # Downsample all_frames to max_frames evenly, always keeping the final frame
+        if len(all_frames) <= max_frames - 1:
+            iterations = all_frames
+        else:
+            indices = [
+                int(i * (len(all_frames) - 1) / (max_frames - 2))
+                for i in range(max_frames - 1)
+            ]
+            seen = set()
+            iterations = []
+            for idx in indices:
+                if idx not in seen:
+                    seen.add(idx)
+                    iterations.append(all_frames[idx])
+        iterations.append(final_frame)
+
+        # Final SV indices: geometric condition — on or inside the margin
+        f_conv = K @ (alpha * y) + b
+        functional_margins_conv = y * f_conv
+        sv_indices = np.where((functional_margins_conv <= 1.0 + 0.15) & (alpha > 1e-7))[
+            0
+        ]
         return iterations, alpha, b, sv_indices
 
     # -------------------------------------------------------------------------
@@ -269,7 +422,7 @@ class SVMService:
         y_01: np.ndarray,
         X_train: np.ndarray,
         sv_indices_local: np.ndarray,  # indices into X_train
-        sv_indices_global: np.ndarray, # indices into X_2d
+        sv_indices_global: np.ndarray,  # indices into X_2d
         mesh_points: np.ndarray,
         kernel: str,
         gamma: float,
@@ -284,18 +437,24 @@ class SVMService:
         for i, (alpha_y, sv, global_idx) in enumerate(
             zip(dual_coefs, svs, sv_indices_global)
         ):
-            K_sv_mesh = self._kernel(sv[np.newaxis, :], mesh_points, kernel, gamma, degree)[0]
+            K_sv_mesh = self._kernel(
+                sv[np.newaxis, :], mesh_points, kernel, gamma, degree
+            )[0]
             contributions = float(alpha_y) * K_sv_mesh
-            results.append({
-                "sv_index": int(global_idx),
-                "alpha_y": float(alpha_y),
-                "sv_coords": sv.tolist(),
-                "mean_abs_contribution": float(np.mean(np.abs(contributions))),
-                "heatmap": contributions.tolist(),
-            })
+            results.append(
+                {
+                    "sv_index": int(global_idx),
+                    "alpha_y": float(alpha_y),
+                    "sv_coords": sv.tolist(),
+                    "mean_abs_contribution": float(np.mean(np.abs(contributions))),
+                    "heatmap": contributions.tolist(),
+                }
+            )
         return results
 
-    def _compute_hinge_loss(self, X: np.ndarray, y: np.ndarray, w1: float, w2: float, b: float) -> float:
+    def _compute_hinge_loss(
+        self, X: np.ndarray, y: np.ndarray, w1: float, w2: float, b: float
+    ) -> float:
         y_mapped = np.where(y == 0, -1, 1)
         margins = y_mapped * (X[:, 0] * w1 + X[:, 1] * w2 + b)
         loss = np.maximum(0, 1 - margins)
@@ -359,14 +518,20 @@ class SVMService:
         X = np.array(dataset.X)
         y = np.array(dataset.y)
         feature_names = dataset.get_feature_names()
-        target_name = dataset.info.target_name if dataset.info and hasattr(dataset.info, "target_name") else "target"
+        target_name = (
+            dataset.info.target_name
+            if dataset.info and hasattr(dataset.info, "target_name")
+            else "target"
+        )
         class_names = dataset.get_target_names()
 
         n_features = X.shape[1]
         feature_x_idx = min(parameters.feature_x, n_features - 1)
         feature_y_idx = min(parameters.feature_y, n_features - 1)
 
-        X_2d, y_2d, target_class_indices = self._get_2d_points(X, y, feature_x_idx, feature_y_idx)
+        X_2d, y_2d, target_class_indices = self._get_2d_points(
+            X, y, feature_x_idx, feature_y_idx
+        )
         visible_class_names = [class_names[i] for i in target_class_indices]
 
         x_min, x_max = float(X_2d[:, 0].min()), float(X_2d[:, 0].max())
@@ -377,7 +542,6 @@ class SVMService:
         metadata = SVMMetadata(
             feature_names=feature_names,
             n_features=n_features,
-            n_classes=len(np.unique(y)),
             n_samples=len(y),
             target_name=target_name,
             feature_x_index=feature_x_idx,
@@ -386,10 +550,16 @@ class SVMService:
             feature_y_name=feature_names[feature_y_idx],
             class_names=visible_class_names,
             dataset_name=dataset.info.name if dataset.info else None,
+            kernel=parameters.kernel,
         )
 
         # Trivial zero-weight boundary for visualisation
-        mesh_points = self._make_mesh(X_2d, parameters.boundary_resolution if hasattr(parameters, "boundary_resolution") else 50)
+        mesh_points = self._make_mesh(
+            X_2d,
+            parameters.boundary_resolution
+            if hasattr(parameters, "boundary_resolution")
+            else 50,
+        )
         decision_boundary = DecisionBoundaryData(
             mesh_points=mesh_points.tolist(),
             predictions=[visible_class_names[0]] * len(mesh_points),
@@ -425,36 +595,49 @@ class SVMService:
         feature_x_idx = min(parameters.feature_x, n_features - 1)
         feature_y_idx = min(parameters.feature_y, n_features - 1)
 
-        X_2d, y_2d, target_class_indices = self._get_2d_points(X_full, y_full, feature_x_idx, feature_y_idx)
+        X_2d, y_2d, target_class_indices = self._get_2d_points(
+            X_full, y_full, feature_x_idx, feature_y_idx
+        )
         visible_class_names = [class_names[i] for i in target_class_indices]
 
         indices = np.arange(len(X_2d))
         idx_train, idx_test, y_train, y_test = train_test_split(
-            indices, y_2d,
-            test_size=parameters.test_size,
-            random_state=parameters.random_state,
+            indices,
+            y_2d,
+            test_size=0.2,
+            random_state=42,
             stratify=y_2d,
         )
         X_train = X_2d[idx_train]
         X_test = X_2d[idx_test]
 
-        boundary_resolution = parameters.boundary_resolution if hasattr(parameters, "boundary_resolution") else 50
+        boundary_resolution = (
+            parameters.boundary_resolution
+            if hasattr(parameters, "boundary_resolution")
+            else 50
+        )
         gamma = self._resolve_gamma(parameters, X_train)
         degree = parameters.degree
         kernel = parameters.kernel
         C = parameters.C
-        max_iter = parameters.max_iterations if hasattr(parameters, "max_iterations") else 100
+        max_iter = parameters.max_iterations
 
         mesh_points = self._make_mesh(X_2d, boundary_resolution)
 
         # ── Run custom Dual Gradient Ascent ───────────────────────────────────
         iterations, final_alpha, final_b, sv_local = self._gd_train(
-            X_train, y_train, X_2d, C, kernel, gamma, degree,
-            mesh_points, visible_class_names,
+            X_train,
+            y_train,
+            X_2d,
+            C,
+            kernel,
+            gamma,
+            degree,
+            mesh_points,
+            visible_class_names,
             idx_train=idx_train,
             boundary_resolution=boundary_resolution,
             max_iter=max_iter,
-            lr=parameters.learning_rate,
         )
 
         # Map local (train-subset) SV indices back to X_2d indices
@@ -469,20 +652,31 @@ class SVMService:
             optimal_w1, optimal_w2 = 0.0, 0.0
 
         # ── Evaluation metrics ────────────────────────────────────────────────
-        y_train_pred = self._predict_dual(X_train, final_alpha, y_train, X_train, final_b, kernel, gamma, degree)
+        y_train_pred = self._predict_dual(
+            X_train, final_alpha, y_train, X_train, final_b, kernel, gamma, degree
+        )
         train_metrics = self._compute_metrics(y_train, y_train_pred)
 
         test_metrics = None
         if len(y_test) > 0:
-            y_test_pred = self._predict_dual(X_test, final_alpha, y_train, X_train, final_b, kernel, gamma, degree)
+            y_test_pred = self._predict_dual(
+                X_test, final_alpha, y_train, X_train, final_b, kernel, gamma, degree
+            )
             test_metrics = self._compute_metrics(y_test, y_test_pred)
 
         metrics = ClassificationMetrics(train=train_metrics, test=test_metrics)
 
         # ── Final boundary ────────────────────────────────────────────────────
         decision_boundary = self._generate_decision_boundary(
-            final_alpha, y_train, X_train, final_b,
-            kernel, gamma, degree, visible_class_names, mesh_points,
+            final_alpha,
+            y_train,
+            X_train,
+            final_b,
+            kernel,
+            gamma,
+            degree,
+            visible_class_names,
+            mesh_points,
         )
 
         x_min, x_max = float(X_2d[:, 0].min()), float(X_2d[:, 0].max())
@@ -490,11 +684,14 @@ class SVMService:
         x_margin = (x_max - x_min) * 0.1 if x_max > x_min else 1.0
         y_margin = (y_max - y_min) * 0.1 if y_max > y_min else 1.0
 
-        target_name = dataset.info.target_name if dataset.info and hasattr(dataset.info, "target_name") else "target"
+        target_name = (
+            dataset.info.target_name
+            if dataset.info and hasattr(dataset.info, "target_name")
+            else "target"
+        )
         metadata = SVMMetadata(
             feature_names=dataset.get_feature_names(),
             n_features=n_features,
-            n_classes=len(np.unique(y_full)),
             n_samples=len(y_full),
             target_name=target_name,
             feature_x_index=feature_x_idx,
@@ -503,6 +700,7 @@ class SVMService:
             feature_y_name=dataset.get_feature_names()[feature_y_idx],
             class_names=visible_class_names,
             dataset_name=dataset.info.name if dataset.info else None,
+            kernel=kernel,
         )
 
         return {
@@ -540,12 +738,16 @@ class SVMService:
 
         feature_x_idx = min(parameters.feature_x, X_full.shape[1] - 1)
         feature_y_idx = min(parameters.feature_y, X_full.shape[1] - 1)
-        X_2d, y_2d, target_class_indices = self._get_2d_points(X_full, y_full, feature_x_idx, feature_y_idx)
+        X_2d, y_2d, target_class_indices = self._get_2d_points(
+            X_full, y_full, feature_x_idx, feature_y_idx
+        )
         visible_class_names = [class_names[i] for i in target_class_indices]
 
         y_mapped = np.where(y_2d == 0, -1, 1)
         N = len(y_2d)
-        margin = y_mapped * (X_2d[:, 0] * current_w1 + X_2d[:, 1] * current_w2 + current_b)
+        margin = y_mapped * (
+            X_2d[:, 0] * current_w1 + X_2d[:, 1] * current_w2 + current_b
+        )
 
         misclassified = margin < 1
 
@@ -563,7 +765,11 @@ class SVMService:
         new_b = current_b - learning_rate * grad_b
 
         loss = self._compute_hinge_loss(X_2d, y_2d, new_w1, new_w2, new_b)
-        boundary_resolution = parameters.boundary_resolution if hasattr(parameters, "boundary_resolution") else 50
+        boundary_resolution = (
+            parameters.boundary_resolution
+            if hasattr(parameters, "boundary_resolution")
+            else 50
+        )
         mesh_points = self._make_mesh(X_2d, boundary_resolution)
 
         return {
@@ -574,7 +780,12 @@ class SVMService:
             "loss": loss,
             "decision_boundary": DecisionBoundaryData(
                 mesh_points=mesh_points.tolist(),
-                predictions=[visible_class_names[1 if p[0] * new_w1 + p[1] * new_w2 + new_b > 0 else 0] for p in mesh_points],
+                predictions=[
+                    visible_class_names[
+                        1 if p[0] * new_w1 + p[1] * new_w2 + new_b > 0 else 0
+                    ]
+                    for p in mesh_points
+                ],
                 dimensions=2,
             ).model_dump(),
         }
@@ -595,7 +806,9 @@ class SVMService:
 
         feature_x_idx = min(parameters.feature_x, X_full.shape[1] - 1)
         feature_y_idx = min(parameters.feature_y, X_full.shape[1] - 1)
-        X_2d, y_2d, target_class_indices = self._get_2d_points(X_full, y_full, feature_x_idx, feature_y_idx)
+        X_2d, y_2d, target_class_indices = self._get_2d_points(
+            X_full, y_full, feature_x_idx, feature_y_idx
+        )
         visible_class_names = [class_names[i] for i in target_class_indices]
 
         y_pred = np.where(X_2d[:, 0] * w1 + X_2d[:, 1] * w2 + b > 0, 1, 0)
@@ -603,7 +816,11 @@ class SVMService:
         metrics = ClassificationMetrics(train=metrics_values, test=None)
 
         loss = self._compute_hinge_loss(X_2d, y_2d, w1, w2, b)
-        boundary_resolution = parameters.boundary_resolution if hasattr(parameters, "boundary_resolution") else 50
+        boundary_resolution = (
+            parameters.boundary_resolution
+            if hasattr(parameters, "boundary_resolution")
+            else 50
+        )
         mesh_points = self._make_mesh(X_2d, boundary_resolution)
 
         return {
@@ -612,7 +829,10 @@ class SVMService:
             "metrics": metrics.model_dump(),
             "decision_boundary": DecisionBoundaryData(
                 mesh_points=mesh_points.tolist(),
-                predictions=[visible_class_names[1 if p[0] * w1 + p[1] * w2 + b > 0 else 0] for p in mesh_points],
+                predictions=[
+                    visible_class_names[1 if p[0] * w1 + p[1] * w2 + b > 0 else 0]
+                    for p in mesh_points
+                ],
                 dimensions=2,
             ).model_dump(),
         }

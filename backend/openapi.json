@@ -4795,6 +4795,50 @@
             "type": "array",
             "title": "Support Vector Indices",
             "description": "Global indices (into the full X_2d dataset) of support vectors at this iteration"
+          },
+          "kernel_space_points": {
+            "anyOf": [
+              {
+                "items": {
+                  "items": {
+                    "type": "number"
+                  },
+                  "type": "array"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Kernel Space Points",
+            "description": "Kernel PCA projection points at this iteration. Shape: (n, 2)."
+          },
+          "kernel_space_boundary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DecisionBoundaryData"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Decision boundary in kernel space at this iteration."
+          },
+          "alphas": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alphas",
+            "description": "Dual coefficients (alpha) for each training sample at this iteration."
           }
         },
         "type": "object",
@@ -4862,6 +4906,12 @@
             },
             "type": "array",
             "title": "Class Names"
+          },
+          "kernel": {
+            "type": "string",
+            "title": "Kernel",
+            "description": "Kernel used for training",
+            "default": "linear"
           }
         },
         "type": "object",
@@ -4929,36 +4979,13 @@
             "description": "Degree of polynomial kernel function",
             "default": 3
           },
-          "test_size": {
-            "type": "number",
-            "maximum": 0.5,
-            "minimum": 0.05,
-            "title": "Test Size",
-            "description": "Proportion of data to hold out as the test set",
-            "default": 0.2
-          },
-          "random_state": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Random State",
-            "description": "Random seed for reproducibility of the train/test split",
-            "default": 42
-          },
-          "learning_rate": {
-            "type": "number",
-            "maximum": 10.0,
-            "minimum": 1e-06,
-            "title": "Learning Rate",
-            "description": "Step size for each gradient descent iteration",
-            "default": 0.01
-          },
           "max_iterations": {
             "type": "integer",
-            "maximum": 200.0,
+            "maximum": 2000.0,
             "minimum": 1.0,
             "title": "Max Iterations",
-            "description": "Max gradient descent epochs; at most 15 frames are stored for playback",
-            "default": 100
+            "description": "Max SMO epochs; at most 15 frames are stored for playback",
+            "default": 500
           }
         },
         "type": "object",
@@ -5333,24 +5360,6 @@
             "title": "Total Iterations",
             "description": "Total number of frames stored for playback",
             "default": 0
-          },
-          "kernel_space_points": {
-            "anyOf": [
-              {
-                "items": {
-                  "items": {
-                    "type": "number"
-                  },
-                  "type": "array"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kernel Space Points",
-            "description": "Kernel PCA projection of all data points into 2D kernel feature space. Null for linear kernel (not illustrative). Shape: (n, 2)."
           }
         },
         "type": "object",

@@ -112,7 +112,11 @@
             "name": "linear",
             "description": "Linear Regression",
             "start_page": 0,
-            "nodes": [{ "index": 3233669327 }, { "index": 3050687251 }, { "index": 1762156781 }],
+            "nodes": [
+                { "index": 3233669327 },
+                { "index": 3050687251 },
+                { "index": 1762156781 }
+            ],
             "edges": [
                 {
                     "start": { "local_index": 0, "story_name": null },
@@ -137,8 +141,8 @@
             "start_page": 0,
             "nodes": [
                 { "index": 3100000001 },
-                { "index": 3100000002 },
-                { "index": 3100000003 }
+                { "index": 3100000003 },
+                { "index": 3100000002 }
             ],
             "edges": [
                 {
@@ -165,7 +169,7 @@
             "page_type": "dynamic",
             "dynamic_type": "model",
             "model_name": "decision_tree",
-            "component_type": "manual",
+            "component_type": "train",
             "problem_type": "classifier",
             "parameters": {}
         },

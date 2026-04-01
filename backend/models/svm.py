@@ -28,21 +28,9 @@ class SVMParameters(BaseModel):
         3, ge=1,
         description="Degree of polynomial kernel function"
     )
-    test_size: float = Field(
-        0.2, ge=0.05, le=0.5,
-        description="Proportion of data to hold out as the test set"
-    )
-    random_state: int = Field(
-        42, ge=0,
-        description="Random seed for reproducibility of the train/test split"
-    )
-    learning_rate: float = Field(
-        0.01, ge=1e-6, le=10.0,
-        description="Step size for each gradient descent iteration"
-    )
     max_iterations: int = Field(
-        100, ge=1, le=200,
-        description="Max gradient descent epochs; at most 15 frames are stored for playback"
+        500, ge=1, le=2000,
+        description="Max SMO epochs; at most 15 frames are stored for playback"
     )
 
     def to_sklearn_params(self) -> Dict[str, Any]:
@@ -50,7 +38,6 @@ class SVMParameters(BaseModel):
         params = {
             "C": self.C,
             "kernel": self.kernel,
-            "random_state": self.random_state,
         }
         if self.kernel in ["rbf", "poly", "sigmoid"]:
             if self.gamma is not None:
@@ -74,3 +61,4 @@ class SVMMetadata(BaseModel):
     feature_y_index: int
     feature_y_name: str
     class_names: List[str]
+    kernel: str = Field("linear", description="Kernel used for training")

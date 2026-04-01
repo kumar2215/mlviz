@@ -114,6 +114,11 @@ const Visualisation: React.FC = () => {
                 yLabel: usingKernelSpace ? "Variance Axis (PC1)" : (visualizationData.metadata?.feature_y_name ?? "Feature 2"),
                 context,
                 decisionBoundary: activeBoundary,
+                w1: currentIter?.w1 ?? visualizationData.optimal_w1,
+                w2: currentIter?.w2 ?? visualizationData.optimal_w2,
+                bias: currentIter?.b ?? visualizationData.optimal_b,
+                isLinear: (visualizationData.metadata?.kernel ?? (lastVisualizationParams?.parameters?.kernel ?? (lastVisualizationParams as any)?.kernel)) === "linear",
+                isKernelSpace: usingKernelSpace,
             });
         },
         [visualizationData, iterations, decisionBoundary, showKernelSpace, totalIterations]

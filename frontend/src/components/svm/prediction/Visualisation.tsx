@@ -3,8 +3,8 @@
  * Manual exploration of the decision boundary and margins.
  */
 
-import { renderSVM } from "@/components/svm/SVMRenderer";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
+import { renderSVM } from "@/components/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useSVMContext } from "@/contexts/models/SVMContext";
@@ -67,9 +67,14 @@ const Visualisation: React.FC = () => {
                 yLabel: visualizationData.metadata?.feature_y_name ?? "Feature 2",
                 context,
                 decisionBoundary: decisionBoundary ?? undefined,
+                w1: currentW1,
+                w2: currentW2,
+                bias: currentBias,
+                isLinear: (visualizationData.metadata?.kernel ?? (lastVisualizationParams?.parameters?.kernel ?? (lastVisualizationParams as any)?.kernel)) === "linear",
+                isKernelSpace: false,
             });
         },
-        [visualizationData, decisionBoundary]
+        [visualizationData, decisionBoundary, currentW1, currentW2, currentBias]
     );
 
     if (isVisualizationLoading) {
@@ -107,24 +112,7 @@ const Visualisation: React.FC = () => {
     }
 
     return (
-        <div className="relative h-full w-full">
-            {/* Displaying Live Loss Info in absolute position */}
-            {predictionData && (
-                <div className="absolute top-6 right-6 z-20 bg-white/90 backdrop-blur-sm shadow-sm border border-slate-200 rounded-lg p-3">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Current Validation</p>
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-                        <span className="text-slate-600">Hinge Loss:</span>
-                        <span className="font-mono text-indigo-600 text-right">{predictionData.loss?.toFixed(4)}</span>
-                        <span className="text-slate-600">Accuracy:</span>
-                        <span className="font-mono text-emerald-600 text-right">
-                            {predictionData.metrics?.train?.accuracy !== undefined 
-                                ? (predictionData.metrics.train.accuracy * 100).toFixed(1) + "%" 
-                                : "--"}
-                        </span>
-                    </div>
-                </div>
-            )}
-
+    
             <BaseVisualisation
                 dataConfig={{
                     data: visualizationData,
@@ -138,7 +126,6 @@ const Visualisation: React.FC = () => {
                     controlsStyle: "overlay",
                 }}
             />
-        </div>
     );
 };
 

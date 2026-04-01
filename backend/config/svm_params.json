@@ -16,7 +16,7 @@
       },
       {
         "name": "kernel",
-        "description": "Kernel type used in the algorithm",
+        "description": "Kernel function that maps inputs to a higher-dimensional space. Linear works for linearly separable data; RBF and polynomial can fit non-linear boundaries.",
         "type": "select",
         "options": [
           "linear",
@@ -27,7 +27,7 @@
       },
       {
         "name": "C",
-        "description": "Regularization parameter. Lower values increase the margin by tolerating more training errors.",
+        "description": "Regularization parameter. Lower values widen the margin by allowing more misclassifications (soft margin); higher values enforce correct classification more strictly.",
         "type": "number",
         "min": 0.01,
         "max": 100,
@@ -35,30 +35,21 @@
         "default": 1.0
       },
       {
-        "name": "test_size",
-        "description": "Proportion of data to hold out as the test set",
-        "type": "float",
-        "min": 0.1,
-        "max": 0.5,
-        "step": 0.05,
-        "default": 0.2
-      },
-      {
-        "name": "random_state",
-        "description": "Seed for random number generator",
-        "type": "int",
-        "min": 0,
-        "max": 100,
-        "default": 42
-      },
-      {
-        "name": "learning_rate",
-        "description": "Step size for manual optimisation steps",
+        "name": "gamma",
+        "description": "Kernel coefficient for RBF and polynomial kernels. Higher values make the decision boundary more sensitive to individual training points.",
         "type": "float",
         "min": 0.001,
-        "max": 1.0,
-        "step": 0.001,
-        "default": 0.01
+        "max": 10.0,
+        "step": 0.01,
+        "default": 1.0
+      },
+      {
+        "name": "degree",
+        "description": "Degree of the polynomial kernel. Only used when kernel is set to 'poly'.",
+        "type": "int",
+        "min": 1,
+        "max": 6,
+        "default": 3
       }
     ]
   }

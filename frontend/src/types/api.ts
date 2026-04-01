@@ -2521,6 +2521,18 @@ export interface components {
              * @description Global indices (into the full X_2d dataset) of support vectors at this iteration
              */
             support_vector_indices?: number[];
+            /**
+             * Kernel Space Points
+             * @description Kernel PCA projection points at this iteration. Shape: (n, 2).
+             */
+            kernel_space_points?: number[][] | null;
+            /** @description Decision boundary in kernel space at this iteration. */
+            kernel_space_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
+            /**
+             * Alphas
+             * @description Dual coefficients (alpha) for each training sample at this iteration.
+             */
+            alphas?: number[] | null;
         };
         /**
          * SVMMetadata
@@ -2547,6 +2559,12 @@ export interface components {
             feature_y_name: string;
             /** Class Names */
             class_names: string[];
+            /**
+             * Kernel
+             * @description Kernel used for training
+             * @default linear
+             */
+            kernel: string;
         };
         /**
          * SVMParameters
@@ -2589,27 +2607,9 @@ export interface components {
              */
             degree: number;
             /**
-             * Test Size
-             * @description Proportion of data to hold out as the test set
-             * @default 0.2
-             */
-            test_size: number;
-            /**
-             * Random State
-             * @description Random seed for reproducibility of the train/test split
-             * @default 42
-             */
-            random_state: number;
-            /**
-             * Learning Rate
-             * @description Step size for each gradient descent iteration
-             * @default 0.01
-             */
-            learning_rate: number;
-            /**
              * Max Iterations
-             * @description Max gradient descent epochs; at most 15 frames are stored for playback
-             * @default 100
+             * @description Max SMO epochs; at most 15 frames are stored for playback
+             * @default 500
              */
             max_iterations: number;
         };
@@ -2822,11 +2822,6 @@ export interface components {
              * @default 0
              */
             total_iterations: number;
-            /**
-             * Kernel Space Points
-             * @description Kernel PCA projection of all data points into 2D kernel feature space. Null for linear kernel (not illustrative). Shape: (n, 2).
-             */
-            kernel_space_points?: number[][] | null;
         };
         /**
          * SVMVisualisationRequest
