@@ -48,3 +48,16 @@ class ClassificationMetadata(BaseModel):
     n_classes: int
     dataset_name: Optional[str] = None
 
+from pydantic import Field
+
+
+class DecisionBoundaryData(BaseModel):
+    """Decision boundary visualization data."""
+    mesh_points: list[list[float]] = Field(
+        description="Grid points for boundary visualization"
+    )
+    predictions: list[str] = Field(
+        description="Predicted class at each mesh point"
+    )
+    dimensions: int = Field(description="Number of dimensions (1, 2, or 3)")
+

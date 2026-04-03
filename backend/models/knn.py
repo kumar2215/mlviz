@@ -59,15 +59,8 @@ class NeighborInfo(BaseModel):
     coordinates: List[float] = Field(description="Feature values")
 
 
-class DecisionBoundaryData(BaseModel):
-    """Decision boundary visualization data."""
-    mesh_points: List[List[float]] = Field(
-        description="Grid points for boundary visualization"
-    )
-    predictions: List[str] = Field(
-        description="Predicted class at each mesh point"
-    )
-    dimensions: int = Field(description="Number of dimensions (1, 2, or 3)")
+from .base import DecisionBoundaryData
+
 
 
 class KNNPredictionRequest(BaseModel):

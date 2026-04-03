@@ -1,4 +1,4 @@
-from .base import ClassificationMetadata, ClassificationMetrics, ClassificationMetricValues, RegressionMetrics, RegressionMetricValues
+from .base import ClassificationMetadata, ClassificationMetrics, ClassificationMetricValues, DecisionBoundaryData, RegressionMetrics, RegressionMetricValues
 from .dataset import (
     ClassificationDataset,
     DatasetInfo,
@@ -7,6 +7,7 @@ from .dataset import (
     RegressionDataset,
 )
 from .linear_regression import LinearRegressionParameters, RegressionMetadata
+from .svm import SVMParameters, SVMMetadata
 from .decision_tree import (
     DecisionTreeParameters,
     LeafNode,
@@ -23,7 +24,6 @@ from .kmeans import (
     KMeansParameters,
 )
 from .knn import (
-    DecisionBoundaryData,
     KNNParameters,
     NeighborInfo,
 )
@@ -55,4 +55,6 @@ __all__ = [
     "ClusterInfo",
     "LinearRegressionParameters",
     "RegressionMetadata",
+    "SVMParameters",
+    "SVMMetadata",
 ]

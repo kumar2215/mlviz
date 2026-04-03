@@ -1,38 +1,36 @@
 /**
- * Linear Regression – Visualise (scatter only)
- * Shows scatter plot with a user-controllable line and live R².
- * No fitting — the user drags sliders to explore the relationship.
+ * SVM Classification – Prediction Visualisation
+ * Manual exploration of the decision boundary and margins.
  */
 
-import { renderLinearRegression } from "@/components/linear/regression/LinearRegressionRenderer";
-
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
+import { renderSVM } from "@/components/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import type { PredictionResult } from "@/contexts/models/BaseModelContext";
-import { useLinearRegression } from "@/contexts/models/LinearRegressionContext";
-import * as d3 from "d3";
-import { useCallback, useEffect, useState } from "react";
+import { useSVMContext } from "@/contexts/models/SVMContext";
+import { useCallback, useEffect } from "react";
 
 interface VisualisationProps {
     points?: Record<string, number> | null;
-    predictionResult?: PredictionResult<{ predicted_y: number }> | null;
 }
 
-const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult }) => {
+const Visualisation: React.FC<VisualisationProps> = ({ points }) => {
     const {
         visualizationData,
         isVisualizationLoading,
         visualizationError,
         loadVisualization,
         lastVisualizationParams,
-        currentSlope,
-        currentIntercept,
-    } = useLinearRegression();
+        currentW1,
+        currentW2,
+        currentBias,
+        decisionBoundary,
+        makePrediction,
+        predictionData,
+        predictionResult
+    } = useSVMContext();
 
-    const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
-
-    // Auto-reload on mount if params are stored
+    // Auto-reload on mount
     useEffect(() => {
         if (!visualizationData && !isVisualizationLoading) {
             loadVisualization(
@@ -44,12 +42,24 @@ const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Derive predicted point from predictionResult + input x
+    // Request new prediction metrics when weights change
+    useEffect(() => {
+        if (visualizationData) {
+            makePrediction({
+                ...lastVisualizationParams,
+                w1: currentW1,
+                w2: currentW2,
+                b: currentBias
+            });
+        }
+    }, [currentW1, currentW2, currentBias, visualizationData, lastVisualizationParams, makePrediction]);
+
+    // Derive prediction point from 'points' record
     const predictionPoint: [number, number] | null = (() => {
-        if (!predictionResult || !points || !visualizationData) return null;
-        const featureName = visualizationData.metadata?.feature_x_name ?? "x";
-        const x = points[featureName];
-        const y = predictionResult.additionalData?.predicted_y;
+        if (!points || !visualizationData?.metadata) return null;
+        const meta = visualizationData.metadata as any;
+        const x = points[meta.feature_x_name];
+        const y = points[meta.feature_y_name];
         if (x === undefined || y === undefined) return null;
         return [x, y];
     })();
@@ -61,25 +71,25 @@ const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult 
             context: VisualisationRenderContext
         ) => {
             if (!visualizationData) return;
-            const renderResult = renderLinearRegression({
+            renderSVM({
                 container,
                 points: visualizationData.points ?? [],
-                currentSlope,
-                currentIntercept,
-                xRange: visualizationData.x_range as [number, number],
-                yRange: visualizationData.y_range as [number, number],
-                xLabel: visualizationData.metadata?.feature_x_name ?? "x",
-                yLabel: visualizationData.metadata?.target_name ?? "y",
+                labels: visualizationData.labels ?? [],
+                classNames: visualizationData.metadata?.class_names ?? ["Class 0", "Class 1"],
+                x_range: visualizationData.x_range || [-5, 5],
+                y_range: visualizationData.y_range || [-5, 5],
+                xLabel: visualizationData.metadata?.feature_x_name ?? "Feature 1",
+                yLabel: visualizationData.metadata?.feature_y_name ?? "Feature 2",
                 context,
-                focusedLabels,
-                predictionPoint,
+                decisionBoundary: decisionBoundary ?? undefined,
+                w1: currentW1,
+                w2: currentW2,
+                bias: currentBias,
+                predictionPoint: predictionPoint ?? undefined,
+                predictedClassIndex: predictionResult?.predictedClassIndex,
             });
-
-            if (renderResult.legend) {
-                renderResult.legend.onFilterChange(setFocusedLabels);
-            }
         },
-        [visualizationData, currentSlope, currentIntercept, focusedLabels, predictionPoint]
+        [visualizationData, decisionBoundary, currentW1, currentW2, currentBias, predictionPoint, predictionResult]
     );
 
     if (isVisualizationLoading) {
@@ -87,7 +97,7 @@ const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult 
             <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">Loading visualisation…</p>
+                    <p className="text-muted-foreground">Loading classification space…</p>
                 </div>
             </div>
         );
@@ -109,7 +119,7 @@ const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult 
             <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8">
                     <p className="text-muted-foreground">
-                        Apply parameters in the sidebar to begin.
+                        Apply parameters in the sidebar to begin mapping the decision boundary.
                     </p>
                 </div>
             </div>
@@ -117,7 +127,7 @@ const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult 
     }
 
     return (
-        <div className="relative h-full w-full">
+    
             <BaseVisualisation
                 dataConfig={{
                     data: visualizationData,
@@ -131,7 +141,6 @@ const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult 
                     controlsStyle: "overlay",
                 }}
             />
-        </div>
     );
 };
 

@@ -5,6 +5,7 @@
 
 import {
     createScatterColorScale,
+    DEFAULT_BOUNDARY_OPACITY,
     DEFAULT_MARGIN,
     DEFAULT_POINT_OPACITY,
     DEFAULT_POINT_RADIUS,
@@ -57,6 +58,8 @@ export function renderScatter2D(
         onPointClick,
         onPointHover,
         scaleFactor = 1,
+        boundaryOpacity = DEFAULT_BOUNDARY_OPACITY,
+        onLegendFilterChange,
     } = options;
 
     const scaledPointRadius = pointRadius * scaleFactor;
@@ -136,6 +139,7 @@ export function renderScatter2D(
             xScale,
             yScale,
             config,
+            boundaryOpacity,
         );
     }
 
@@ -172,6 +176,12 @@ export function renderScatter2D(
         const legend = renderLegend(overlayGroup, config, innerWidth, innerHeight, { position: legendPosition }, scaleFactor);
         if (legend) {
             legend.onFilterChange((focusedNames) => {
+                // If a custom override exists, defer to it exclusively
+                if (onLegendFilterChange) {
+                    onLegendFilterChange(focusedNames);
+                    return;
+                }
+
                 // Update data points
                 const points = contentGroup.select(".data-points").selectAll<SVGCircleElement, PlotPoint>("circle");
                 points
@@ -229,6 +239,7 @@ export function renderScatter2D(
         contentGroup,
         axesGroup,
         gridGroup,
+        overlayGroup,
         bounds: { innerWidth, innerHeight },
     };
 }
@@ -237,12 +248,14 @@ export function renderScatter2D(
 // Helper Functions
 // ============================================================================
 
-function renderDecisionBoundary2D(
+export function renderDecisionBoundary2D(
     g: d3.Selection<SVGGElement, unknown, null, undefined>,
     boundary: DecisionBoundary,
     xScale: d3.ScaleLinear<number, number>,
     yScale: d3.ScaleLinear<number, number>,
     config: Config,
+    opacity: number = 0.3,
+    customColorScale?: (prediction: any) => string,
 ) {
     const { meshPoints, predictions } = boundary;
 
@@ -284,7 +297,9 @@ function renderDecisionBoundary2D(
     Array.from(gridData.values()).forEach((cell) => {
         let fillColor: string;
 
-        if (
+        if (customColorScale) {
+            fillColor = customColorScale(cell.prediction);
+        } else if (
             boundary.type === "classification" ||
             boundary.type === "clustering"
         ) {
@@ -324,7 +339,7 @@ function renderDecisionBoundary2D(
             .attr("width", cellWidth)
             .attr("height", cellHeight)
             .attr("fill", fillColor)
-            .attr("opacity", 0.3)
+            .attr("opacity", opacity)
             .attr("data-prediction", String(cell.prediction));
     });
 }
