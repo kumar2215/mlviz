@@ -40,6 +40,10 @@ export interface RenderSVMProps {
     predictionPoint?: [number, number];
     /** Optional predicted class index for coloring the prediction point */
     predictedClassIndex?: number;
+    /** Optional proposed SVM weights for step-by-step visualisations */
+    proposedW1?: number;
+    proposedW2?: number;
+    proposedBias?: number;
 }
 
 export interface RenderResult {
@@ -69,6 +73,9 @@ export function renderSVM({
     focusedLabels,
     predictionPoint,
     predictedClassIndex,
+    proposedW1,
+    proposedW2,
+    proposedBias,
 }: RenderSVMProps): RenderResult {
     const { width, height, margin, scaleFactor = 1 } = context.dimensions;
 
@@ -341,6 +348,28 @@ export function renderSVM({
         bias !== undefined
     ) {
         if (Math.abs(w1) > 1e-6 || Math.abs(w2) > 1e-6) {
+            // If there's a proposed line, draw it first so it sits under the main line
+            if (proposedW1 !== undefined && proposedW2 !== undefined && proposedBias !== undefined) {
+                if (Math.abs(proposedW1) > 1e-6 || Math.abs(proposedW2) > 1e-6) {
+                    drawDecisionLine(
+                        linesLayer,
+                        proposedW1,
+                        proposedW2,
+                        proposedBias,
+                        xScale,
+                        yScale,
+                        "#10b981", // Emerald 500
+                        3,
+                        "4 4",
+                        0.8,
+                        `<div style="font-weight:600;margin-bottom:4px;color:#10b981;">Proposed Update</div>
+                         <div style="color:#64748b;font-size:11px;line-height:1.5;">
+                           This is the new decision boundary after the subgradient step.
+                         </div>`
+                    );
+                }
+            }
+
             drawDecisionLine(
                 linesLayer,
                 w1,

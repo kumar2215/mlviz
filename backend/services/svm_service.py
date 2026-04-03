@@ -623,6 +623,7 @@ class SVMService:
             else 50
         )
         mesh_points = self._make_mesh(X_2d, boundary_resolution)
+        sv_indices = np.where(margin <= 1.0 + 1e-4)[0]
 
         return {
             "success": True,
@@ -630,6 +631,7 @@ class SVMService:
             "new_w2": float(new_w2),
             "new_b": float(new_b),
             "loss": loss,
+            "support_vector_indices": sv_indices.tolist(),
             "decision_boundary": DecisionBoundaryData(
                 mesh_points=mesh_points.tolist(),
                 predictions=[

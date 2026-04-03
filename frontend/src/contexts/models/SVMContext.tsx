@@ -2,10 +2,13 @@ import {
     getParameters,
     getSVMPrediction,
     trainSVM,
+    stepSVM,
     type SVMPredictRequest,
     type SVMPredictResponse,
     type SVMTrainRequest,
     type SVMTrainResponse,
+    type SVMStepRequest,
+    type SVMStepResponse,
 } from "@/api/svm";
 import type { DecisionBoundary } from "@/components/plots/types";
 
@@ -53,6 +56,12 @@ interface SVMContextType
     currentW2: number;
     currentBias: number;
     predictionData: SVMPredictResponse | null;
+    
+    // Step state
+    isStepLoading: boolean;
+    stepData: SVMStepResponse | null;
+    performStep: (request: Partial<SVMStepRequest>) => Promise<SVMStepResponse | undefined>;
+
     iterations: Array<{
         iteration: number;
         w1: number;
@@ -113,9 +122,13 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [isPredicting, setIsPredicting] = React.useState(false);
     const [predictionError, setPredictionError] = React.useState<string | null>(null);
 
+    // SVM Step state
+    const [isStepLoading, setIsStepLoading] = React.useState(false);
+    const [stepData, setStepData] = React.useState<SVMStepResponse | null>(null);
+
     // SVM specific iterative state
     const [currentW1, setCurrentW1] = React.useState<number>(0);
-    const [currentW2, setCurrentW2] = React.useState<number>(0);
+    const [currentW2, setCurrentW2] = React.useState<number>(1);
     const [currentBias, setCurrentBias] = React.useState<number>(0);
 
     const [predictionData, setPredictionData] = React.useState<SVMPredictResponse | null>(null);
@@ -222,6 +235,22 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         [setLastParams, setCurrentModelData]
     );
 
+    const performStep = useCallback(
+        async (request: Partial<SVMStepRequest>): Promise<SVMStepResponse | undefined> => {
+            try {
+                setIsStepLoading(true);
+                const result = await stepSVM(request);
+                setStepData(result);
+                return result;
+            } catch (error) {
+                console.error("Error stepping SVM:", error);
+            } finally {
+                setIsStepLoading(false);
+            }
+        },
+        []
+    );
+
     const loadVisualization = useCallback(
         async (params?: Partial<SVMTrainRequest>): Promise<SVMModelData | null> => {
             setIsVisualizing(true);
@@ -253,10 +282,11 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     const resetModelData = useCallback(() => {
         baseResetModelData();
         setCurrentW1(0);
-        setCurrentW2(0);
+        setCurrentW2(1);
         setCurrentBias(0);
         setPredictionData(null);
         setPredictionError(null);
+        setStepData(null);
         setIterations([]);
     }, [baseResetModelData]);
 
@@ -366,6 +396,9 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         getParameters,
         isVisualizationLoading: isLoading || isVisualizing,
         lastVisualizationParams: lastParams as any,
+        isStepLoading,
+        stepData,
+        performStep,
         decisionBoundary: mapDecisionBoundary(predictionData?.decision_boundary || currentModelData?.decision_boundary),
         iterations,
     };

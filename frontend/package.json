@@ -4,7 +4,7 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
-        "dev": "vite",
+        "dev": "VITE_SHOW_DEV_INFO=true vite",
         "dev:test": "VITE_CONFIG_FILE=test VITE_SHOW_DEV_INFO=true vite",
         "dev:host": "vite --host",
         "build": "tsc --noEmit && vite build",

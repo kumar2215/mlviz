@@ -148,7 +148,12 @@
                 {
                     "start": { "local_index": 0, "story_name": null },
                     "end": { "local_index": 2, "story_name": null },
-                    "condition": { "condition_type": "Bypass" }
+                    "condition": { "name": "predict", "condition_type": "Bypass" }
+                },
+                {
+                    "start": { "local_index": 0, "story_name": null },
+                    "end": { "local_index": 1, "story_name": null },
+                    "condition": { "name": "step", "condition_type": "Bypass" }
                 },
                 {
                     "start": { "local_index": 2, "story_name": null },
@@ -158,7 +163,12 @@
                 {
                     "start": { "local_index": 1, "story_name": null },
                     "end": { "local_index": 0, "story_name": null },
-                    "condition": { "condition_type": "Bypass" }
+                    "condition": { "name": "train", "condition_type": "Bypass" }
+                },
+                {
+                    "start": { "local_index": 1, "story_name": null },
+                    "end": { "local_index": 2, "story_name": null },
+                    "condition": { "name": "predict", "condition_type": "Bypass" }
                 }
             ]
         }
