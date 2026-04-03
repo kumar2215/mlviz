@@ -836,17 +836,13 @@ class SVMIterationData(BaseModel):
         default_factory=list,
         description="Global indices (into the full X_2d dataset) of support vectors at this iteration"
     )
-    kernel_space_points: Optional[List[List[float]]] = Field(
-        None,
-        description="Kernel PCA projection points at this iteration. Shape: (n, 2)."
-    )
-    kernel_space_boundary: Optional[DecisionBoundaryData] = Field(
-        None,
-        description="Decision boundary in kernel space at this iteration."
-    )
     alphas: Optional[List[float]] = Field(
         None,
         description="Dual coefficients (alpha) for each training sample at this iteration."
+    )
+    optimised_points: Optional[List[int]] = Field(
+        None,
+        description="Global indices of the two points (i, j) utilized for KKT optimization in this pass"
     )
 
 class SVMTrainRequest(BaseModel):

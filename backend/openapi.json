@@ -4796,35 +4796,6 @@
             "title": "Support Vector Indices",
             "description": "Global indices (into the full X_2d dataset) of support vectors at this iteration"
           },
-          "kernel_space_points": {
-            "anyOf": [
-              {
-                "items": {
-                  "items": {
-                    "type": "number"
-                  },
-                  "type": "array"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Kernel Space Points",
-            "description": "Kernel PCA projection points at this iteration. Shape: (n, 2)."
-          },
-          "kernel_space_boundary": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/DecisionBoundaryData"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Decision boundary in kernel space at this iteration."
-          },
           "alphas": {
             "anyOf": [
               {
@@ -4839,6 +4810,21 @@
             ],
             "title": "Alphas",
             "description": "Dual coefficients (alpha) for each training sample at this iteration."
+          },
+          "optimised_points": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "integer"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Optimised Points",
+            "description": "Global indices of the two points (i, j) utilized for KKT optimization in this pass"
           }
         },
         "type": "object",
@@ -4951,33 +4937,14 @@
             "type": "number",
             "minimum": 1e-05,
             "title": "C",
-            "description": "Regularization parameter",
+            "description": "Regularization parameter for soft margin",
             "default": 1.0
           },
-          "kernel": {
+          "margin_type": {
             "type": "string",
-            "title": "Kernel",
-            "description": "Kernel type to be used",
-            "default": "linear"
-          },
-          "gamma": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Gamma",
-            "description": "Kernel coefficient for 'rbf', 'poly'"
-          },
-          "degree": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Degree",
-            "description": "Degree of polynomial kernel function",
-            "default": 3
+            "title": "Margin Type",
+            "description": "Type of SVM margin: 'hard' or 'soft'",
+            "default": "soft"
           },
           "max_iterations": {
             "type": "integer",

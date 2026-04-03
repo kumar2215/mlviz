@@ -8,7 +8,6 @@
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import SVMLossMapHUD from "@/components/svm/SVMLossMapHUD";
 import { renderSVM } from "@/components/svm/SVMRenderer";
-import SVMVisualisationHUD from "@/components/svm/training/SVMVisualisationHUD";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useSVMContext } from "@/contexts/models/SVMContext";
@@ -30,7 +29,6 @@ const Visualisation: React.FC = () => {
         setManualWeights,
     } = useSVMContext();
 
-    const [showKernelSpace, setShowKernelSpace] = useState(false);
     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
 
     useEffect(() => {
@@ -70,36 +68,19 @@ const Visualisation: React.FC = () => {
                 }
             }
 
-            // 2. Decide coordinates and boundary based on view toggle
-            const usingKernelSpace = showKernelSpace && currentIter?.kernel_space_points != null;
-
-            const activePoints = usingKernelSpace
-                ? (currentIter?.kernel_space_points || [])
-                : (visualizationData.points ?? []);
-
-            // Original space boundary & SVs
-            let activeBoundary = usingKernelSpace 
-                ? (currentIter?.kernel_space_boundary || undefined) 
-                : (decisionBoundary ?? undefined);
+            // 2. Decide coordinates and boundary
+            const activePoints = visualizationData.points ?? [];
+            let activeBoundary = decisionBoundary ?? undefined;
             let activeSVIndices = currentIter?.support_vector_indices ?? visualizationData.support_vector_indices;
 
-            // Playback override for original space
-            if (!usingKernelSpace && currentIter?.mesh_predictions && decisionBoundary?.meshPoints) {
+            // Playback override
+            if (currentIter?.mesh_predictions && decisionBoundary?.meshPoints) {
                 activeBoundary = { ...decisionBoundary, predictions: currentIter.mesh_predictions as any };
             }
 
-            // 3. Coordinate Scaling
-            const xs = activePoints.map((p: number[]) => p[0]);
-            const ys = activePoints.map((p: number[]) => p[1]);
-            const xPad = (Math.max(...xs) - Math.min(...xs)) * 0.15 || 1;
-            const yPad = (Math.max(...ys) - Math.min(...ys)) * 0.15 || 1;
-            
-            const activeXRange = usingKernelSpace
-                ? [Math.min(...xs) - xPad, Math.max(...xs) + xPad]
-                : (visualizationData.x_range || [-5, 5]);
-            const activeYRange = usingKernelSpace
-                ? [Math.min(...ys) - yPad, Math.max(...ys) + yPad]
-                : (visualizationData.y_range || [-5, 5]);
+            // 3. Coordinate Ranges
+            const activeXRange = visualizationData.x_range || [-5, 5];
+            const activeYRange = visualizationData.y_range || [-5, 5];
 
             renderSVM({
                 container,
@@ -108,23 +89,21 @@ const Visualisation: React.FC = () => {
                 classNames: visualizationData.metadata?.class_names ?? ["Class 0", "Class 1"],
                 supportVectorIndices: activeSVIndices,
                 alphas: currentIter?.alphas,
-                scores: currentIter?.kernel_space_points?.map((p: number[]) => p[0]),
                 x_range: activeXRange,
                 y_range: activeYRange,
-                xLabel: usingKernelSpace ? "Decision Score f(x)" : (visualizationData.metadata?.feature_x_name ?? "Feature 1"),
-                yLabel: usingKernelSpace ? "Variance Axis (PC1)" : (visualizationData.metadata?.feature_y_name ?? "Feature 2"),
+                xLabel: visualizationData.metadata?.feature_x_name ?? "Feature 1",
+                yLabel: visualizationData.metadata?.feature_y_name ?? "Feature 2",
                 context,
                 decisionBoundary: activeBoundary,
                 w1: currentIter?.w1 ?? visualizationData.optimal_w1,
                 w2: currentIter?.w2 ?? visualizationData.optimal_w2,
                 bias: currentIter?.b ?? visualizationData.optimal_b,
-                isLinear: (visualizationData.metadata?.kernel ?? (lastVisualizationParams?.parameters?.kernel ?? (lastVisualizationParams as any)?.kernel)) === "linear",
-                isKernelSpace: usingKernelSpace,
                 onLegendFilterChange: setFocusedLabels,
                 focusedLabels,
+                optimisedPoints: currentIter?.optimised_points,
             });
         },
-        [visualizationData, iterations, decisionBoundary, showKernelSpace, totalIterations, focusedLabels]
+        [visualizationData, iterations, decisionBoundary, totalIterations, focusedLabels]
     );
 
     if (isVisualizationLoading) {
@@ -154,13 +133,10 @@ const Visualisation: React.FC = () => {
             <div className="flex items-center justify-center h-full">
                 <p className="text-muted-foreground text-center p-8">
                     Apply parameters in the sidebar to train the classifier.
-                </p>
+                 </p>
             </div>
         );
     }
-
-    // Show toggle only if at least one iteration has kernel data
-    const hasKernelData = iterations.some(it => it.kernel_space_points != null);
 
     return (
         <div className="relative h-full w-full">
@@ -182,15 +158,6 @@ const Visualisation: React.FC = () => {
                     controlsStyle: "overlay",
                 }}
             />
-
-            {hasKernelData && (
-                <div className="absolute top-3 right-3 z-10">
-                    <SVMVisualisationHUD 
-                        showKernelSpace={showKernelSpace}
-                        setShowKernelSpace={setShowKernelSpace}
-                    />
-                </div>
-            )}
 
             <div className="absolute bottom-6 right-6 z-20">
                 <SVMLossMapHUD />

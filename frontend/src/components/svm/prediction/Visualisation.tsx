@@ -85,8 +85,6 @@ const Visualisation: React.FC<VisualisationProps> = ({ points }) => {
                 w1: currentW1,
                 w2: currentW2,
                 bias: currentBias,
-                isLinear: (visualizationData.metadata?.kernel ?? (lastVisualizationParams?.parameters?.kernel ?? (lastVisualizationParams as any)?.kernel)) === "linear",
-                isKernelSpace: false,
                 predictionPoint: predictionPoint ?? undefined,
                 predictedClassIndex: predictionResult?.predictedClassIndex,
             });

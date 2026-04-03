@@ -59,6 +59,7 @@ export function renderScatter2D(
         onPointHover,
         scaleFactor = 1,
         boundaryOpacity = DEFAULT_BOUNDARY_OPACITY,
+        onLegendFilterChange,
     } = options;
 
     const scaledPointRadius = pointRadius * scaleFactor;
@@ -175,6 +176,12 @@ export function renderScatter2D(
         const legend = renderLegend(overlayGroup, config, innerWidth, innerHeight, { position: legendPosition }, scaleFactor);
         if (legend) {
             legend.onFilterChange((focusedNames) => {
+                // If a custom override exists, defer to it exclusively
+                if (onLegendFilterChange) {
+                    onLegendFilterChange(focusedNames);
+                    return;
+                }
+
                 // Update data points
                 const points = contentGroup.select(".data-points").selectAll<SVGCircleElement, PlotPoint>("circle");
                 points
@@ -232,6 +239,7 @@ export function renderScatter2D(
         contentGroup,
         axesGroup,
         gridGroup,
+        overlayGroup,
         bounds: { innerWidth, innerHeight },
     };
 }

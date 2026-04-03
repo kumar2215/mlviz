@@ -33,6 +33,7 @@ export interface ScatterRenderOptions {
     useNiceScales?: boolean;  // Whether to round scale domains to nice values (default: true)
     onPointClick?: (index: number, point: number[]) => void;
     onPointHover?: (index: number | null) => void;
+    onLegendFilterChange?: (focusedNames: Set<string> | null) => void;
     scaleFactor?: number;
     boundaryOpacity?: number; // Opacity for decision boundary regions (default: 0.3)
     zoomable?: boolean; // Whether to enable zoom (default: true)

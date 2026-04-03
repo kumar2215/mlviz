@@ -2522,17 +2522,15 @@ export interface components {
              */
             support_vector_indices?: number[];
             /**
-             * Kernel Space Points
-             * @description Kernel PCA projection points at this iteration. Shape: (n, 2).
-             */
-            kernel_space_points?: number[][] | null;
-            /** @description Decision boundary in kernel space at this iteration. */
-            kernel_space_boundary?: components["schemas"]["DecisionBoundaryData"] | null;
-            /**
              * Alphas
              * @description Dual coefficients (alpha) for each training sample at this iteration.
              */
             alphas?: number[] | null;
+            /**
+             * Optimised Points
+             * @description Global indices of the two points (i, j) utilized for KKT optimization in this pass
+             */
+            optimised_points?: number[] | null;
         };
         /**
          * SVMMetadata
@@ -2585,27 +2583,16 @@ export interface components {
             feature_y: number;
             /**
              * C
-             * @description Regularization parameter
+             * @description Regularization parameter for soft margin
              * @default 1
              */
             C: number;
             /**
-             * Kernel
-             * @description Kernel type to be used
-             * @default linear
+             * Margin Type
+             * @description Type of SVM margin: 'hard' or 'soft'
+             * @default soft
              */
-            kernel: string;
-            /**
-             * Gamma
-             * @description Kernel coefficient for 'rbf', 'poly'
-             */
-            gamma?: number | null;
-            /**
-             * Degree
-             * @description Degree of polynomial kernel function
-             * @default 3
-             */
-            degree: number;
+            margin_type: string;
             /**
              * Max Iterations
              * @description Max SMO epochs; at most 15 frames are stored for playback

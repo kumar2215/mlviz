@@ -14,39 +14,20 @@ class SVMParameters(BaseModel):
     )
     C: float = Field(
         1.0, ge=1e-5,
-        description="Regularization parameter"
+        description="Regularization parameter for soft margin"
     )
-    kernel: str = Field(
-        "linear",
-        description="Kernel type to be used"
-    )
-    gamma: Optional[float] = Field(
-        None,
-        description="Kernel coefficient for 'rbf', 'poly'"
-    )
-    degree: int = Field(
-        3, ge=1,
-        description="Degree of polynomial kernel function"
+    margin_type: str = Field(
+        "soft",
+        description="Type of SVM margin: 'hard' or 'soft'"
     )
     max_iterations: int = Field(
         500, ge=1, le=2000,
         description="Max SMO epochs; at most 15 frames are stored for playback"
     )
 
-    def to_sklearn_params(self) -> Dict[str, Any]:
-        """Return parameters configured for sklearn SVC."""
-        params = {
-            "C": self.C,
-            "kernel": self.kernel,
-        }
-        if self.kernel in ["rbf", "poly", "sigmoid"]:
-            if self.gamma is not None:
-                params["gamma"] = self.gamma
-            else:
-                params["gamma"] = "scale"
-        if self.kernel == "poly":
-            params["degree"] = self.degree
-        return params
+    def typeof_kernel(self) -> str:
+        return "linear"
+
 
 class SVMMetadata(BaseModel):
     """Metadata for SVM model responses."""

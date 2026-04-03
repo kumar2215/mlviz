@@ -61,12 +61,9 @@ interface SVMContextType
         loss: number;
         mesh_predictions?: string[];
         support_vector_indices?: number[];
-        kernel_space_points?: number[][];
-        kernel_space_boundary?: DecisionBoundary;
         alphas?: number[];
+        optimised_points?: number[];
     }>;
-    kernelSpacePoints: number[][] | null;
-    kernelSpaceBoundary: DecisionBoundary | null;
 
     // Visualization Aliases
     isVisualizationLoading: boolean;
@@ -111,8 +108,6 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     // Loading & error states
     const [isLoading, setIsLoading] = React.useState(false);
     const [error, setError] = React.useState<string | null>(null);
-    const [isStepLoading, setIsStepLoading] = React.useState(false);
-    const [stepError, setStepError] = React.useState<string | null>(null);
     const [isVisualizing, setIsVisualizing] = React.useState(false);
     const [visualizationError, setVisualizationError] = React.useState<string | null>(null);
     const [isPredicting, setIsPredicting] = React.useState(false);
@@ -123,7 +118,6 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [currentW2, setCurrentW2] = React.useState<number>(0);
     const [currentBias, setCurrentBias] = React.useState<number>(0);
 
-    const [stepData, setStepData] = React.useState<SVMStepResponse | null>(null);
     const [predictionData, setPredictionData] = React.useState<SVMPredictResponse | null>(null);
     const [singlePointPrediction, setSinglePointPrediction] = React.useState<{
         predictedClass: string;
@@ -140,9 +134,8 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         loss: number;
         mesh_predictions?: string[];
         support_vector_indices?: number[];
-        kernel_space_points?: number[][];
-        kernel_space_boundary?: DecisionBoundary;
         alphas?: number[];
+        optimised_points?: number[];
     }>>([]);
 
     // Initialise randomized weights if empty/NaN 
@@ -150,7 +143,6 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         setCurrentW1(Math.random() * 2 - 1);
         setCurrentW2(Math.random() * 2 - 1);
         setCurrentBias(Math.random() * 2 - 1);
-        setStepData(null);
         setPredictionData(null);
     }, []);
 
@@ -202,10 +194,7 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
                 // Extract iterations and strip them from the persisted model data
                 // to avoid exceeding the localStorage quota.
                 const { iterations: resultIterations, ...resultWithoutIterations } = result as any;
-                setIterations(resultIterations?.map((it: any) => ({
-                    ...it,
-                    kernel_space_boundary: mapDecisionBoundary(it.kernel_space_boundary)
-                })) ?? []);
+                setIterations(resultIterations ?? []);
 
                 const modelData: SVMModelData = {
                     ...resultWithoutIterations,
@@ -261,61 +250,11 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         []
     );
 
-    const performStep = useCallback(
-        async (request: Partial<SVMStepRequest>): Promise<SVMModelData | null> => {
-            try {
-                setIsStepLoading(true);
-                setStepError(null);
-
-                const {
-                    dataset,
-                    boundary_resolution,
-                    parameters: existingParameters,
-                    current_w1,
-                    current_w2,
-                    current_b,
-                    learning_rate,
-                    ...flatParams
-                } = request as any;
-
-                const datasetName = currentModelData?.metadata?.dataset_name || dataset;
-                const resolvedDataset = datasetName && datasetName !== "Unknown"
-                    ? { name: datasetName }
-                    : undefined;
-
-                const wrappedRequest: Partial<SVMStepRequest> = {
-                    current_w1,
-                    current_w2,
-                    current_b,
-                    learning_rate,
-                    parameters: Object.keys(flatParams).length > 0
-                        ? { ...(lastParams?.parameters || existingParameters), ...flatParams }
-                        : (lastParams?.parameters || existingParameters),
-                    dataset: resolvedDataset as any,
-                    boundary_resolution,
-                };
-
-                const step = await stepSVM(wrappedRequest);
-                setStepData(step);
-                setIsStepLoading(false);
-                return currentModelData;
-            } catch (error) {
-                console.error("Error predicting SVM step:", error);
-                setStepError(error instanceof Error ? error.message : "Error stepping SVM");
-                setIsStepLoading(false);
-                return null;
-            }
-        },
-        [currentModelData, lastParams]
-    );
-
     const resetModelData = useCallback(() => {
         baseResetModelData();
         setCurrentW1(0);
         setCurrentW2(0);
         setCurrentBias(0);
-        setStepData(null);
-        setStepData(null);
         setPredictionData(null);
         setPredictionError(null);
         setIterations([]);
@@ -408,10 +347,6 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         visualizationData,
         loadVisualization,
         resetModelData,
-        isStepLoading,
-        stepError,
-        stepData,
-        performStep,
         currentW1,
         currentW2,
         currentBias,
@@ -431,13 +366,9 @@ const SVMProviderInner: React.FC<{ children: ReactNode }> = ({ children }) => {
         getParameters,
         isVisualizationLoading: isLoading || isVisualizing,
         lastVisualizationParams: lastParams as any,
-        decisionBoundary: mapDecisionBoundary(stepData?.decision_boundary || predictionData?.decision_boundary || currentModelData?.decision_boundary),
+        decisionBoundary: mapDecisionBoundary(predictionData?.decision_boundary || currentModelData?.decision_boundary),
         iterations,
-        kernelSpacePoints: null, // Now iterations-based
-        kernelSpaceBoundary: null, // Now iterations-based
     };
-
-
 
     return <SVMContext.Provider value={contextValue}>{children}</SVMContext.Provider>;
 };

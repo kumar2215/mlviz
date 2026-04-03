@@ -9,7 +9,6 @@ import type {
     DecisionBoundary,
 } from "@/components/plots/types";
 import { createPlotPoints } from "@/components/plots/utils/dataTransformers";
-import { renderLegend } from "@/components/plots/utils/legendHelper";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { createColorScale } from "@/utils/colorUtils";
 import * as d3 from "d3";
@@ -20,6 +19,7 @@ export interface RenderSVMProps {
     labels: number[]; // 0/1
     classNames: string[]; // display names for each class index
     supportVectorIndices?: number[];
+    optimisedPoints?: number[];
     alphas?: number[]; // dual coefficients for each point
     scores?: number[]; // decision scores f(x) for each point
     boundaryResolution?: number; // grid side length (default 50)
@@ -32,8 +32,6 @@ export interface RenderSVMProps {
     w1?: number;
     w2?: number;
     bias?: number;
-    isLinear?: boolean;
-    isKernelSpace?: boolean;
     /** Interaction callback for legend */
     onLegendFilterChange?: (focusedNames: Set<string> | null) => void;
     /** Set of focused labels for toggling visibility */
@@ -55,6 +53,7 @@ export function renderSVM({
     labels,
     classNames,
     supportVectorIndices,
+    optimisedPoints,
     x_range,
     y_range,
     xLabel,
@@ -66,8 +65,6 @@ export function renderSVM({
     w1,
     w2,
     bias,
-    isLinear,
-    isKernelSpace,
     onLegendFilterChange,
     focusedLabels,
     predictionPoint,
@@ -111,6 +108,7 @@ export function renderSVM({
             useNiceScales: false, // SVM typically uses fixed ranges
             scaleFactor,
             boundaryOpacity: 0.15,
+            onLegendFilterChange,
             onPointHover: (index) => {
                 if (index === null) {
                     tooltip.style("visibility", "hidden");
@@ -121,20 +119,67 @@ export function renderSVM({
         },
     );
 
-    const { xScale, yScale, contentGroup, axesGroup } = renderResult;
+    const { xScale, yScale, colorScale, contentGroup, overlayGroup } = renderResult;
 
-    // ---- Legend ----
-    const legend = renderLegend(
-        axesGroup,
-        config,
-        width - margin.left - margin.right,
-        height - margin.top - margin.bottom,
-        { position: "bottom-left" },
-        scaleFactor,
-    );
+    // --- Inject Marker Info into Existing Legend ---
+    const existingLegendDiv = overlayGroup.select(".legend-overlay > div");
+    if (!existingLegendDiv.empty()) {
+        existingLegendDiv.append("xhtml:div")
+            .style("height", "1px")
+            .style("background-color", "#e2e8f0")
+            .style("margin", `${6 * scaleFactor}px 0 ${4 * scaleFactor}px 0`);
+        
+        const svRow = existingLegendDiv.append("xhtml:div")
+            .attr("class", "flex items-center")
+            .style("gap", `${8 * scaleFactor}px`)
+            .style("margin-bottom", `${2 * scaleFactor}px`)
+            .style("user-select", "none")
+            .style("padding", "1px 2px");
 
-    if (legend && onLegendFilterChange) {
-        legend.onFilterChange(onLegendFilterChange);
+        svRow.append("xhtml:div")
+            .attr("class", "rounded-full flex-shrink-0")
+            .style("width", `${10 * scaleFactor}px`)
+            .style("height", `${10 * scaleFactor}px`)
+            .style("border", "1.5px solid #27272a")
+            .style("background-color", "#cbd5e1");
+
+        svRow.append("xhtml:span")
+            .attr("class", "font-medium text-slate-700")
+            .style("font-size", `${10 * scaleFactor}px`)
+            .text("Support Vector");
+
+        const optRow = existingLegendDiv.append("xhtml:div")
+            .attr("class", "flex items-center")
+            .style("gap", `${8 * scaleFactor}px`)
+            .style("margin-bottom", `${2 * scaleFactor}px`)
+            .style("user-select", "none")
+            .style("padding", "1px 2px");
+
+        optRow.append("xhtml:div")
+            .attr("class", "rounded-full flex flex-shrink-0 items-center justify-center")
+            .style("width", `${10 * scaleFactor}px`)
+            .style("height", `${10 * scaleFactor}px`)
+            .style("border", "1.5px solid #27272a")
+            .style("background-color", "#475569")
+            .style("font-size", `${7 * scaleFactor}px`)
+            .style("font-weight", "900")
+            .style("color", "white")
+            .text("ϟ");
+
+        optRow.append("xhtml:span")
+            .attr("class", "font-medium text-slate-700")
+            .style("font-size", `${10 * scaleFactor}px`)
+            .text("Optimised (KKT)");
+        
+        const fo = overlayGroup.select(".legend-overlay");
+        if (fo.node()) {
+            const currentHeight = parseFloat(fo.attr("height") || "0");
+            const extraHeight = 44 * scaleFactor;
+            fo.attr("height", currentHeight + extraHeight);
+            
+            const currentY = parseFloat(fo.attr("y") || "0");
+            fo.attr("y", currentY - extraHeight);
+        }
     }
 
     // ---- Custom SV Tooltip & Styling ----
@@ -164,12 +209,18 @@ export function renderSVM({
         const isSV =
             (supportVectorIndices && supportVectorIndices.includes(i)) ||
             alphaVal > 1e-7;
+        const isOptimised = optimisedPoints && optimisedPoints.includes(i);
+        const optBadge = isOptimised
+            ? `<div style="display: inline-block; background: #eab308; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Optimised</div>`
+            : "";
         const statusBadge = isSV
             ? `<div style="display: inline-block; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Support Vector</div>`
             : "";
 
         let reason = "";
-        if (isSV) {
+        if (isOptimised) {
+            reason = "Utilised for KKT optimization at this iteration.";
+        } else if (isSV) {
             const score = scores ? scores[i] : null;
             const absScore = score !== null ? Math.abs(score) : null;
 
@@ -190,7 +241,7 @@ export function renderSVM({
             }
         }
 
-        const explanation = isSV
+        const explanation = (isSV || isOptimised)
             ? `<div style="margin-top: 6px; font-style: italic; color: #64748b; font-size: 10.5px; line-height: 1.3;">${reason}</div>`
             : "";
 
@@ -205,7 +256,7 @@ export function renderSVM({
                 : "";
 
         tooltip.style("visibility", "visible").html(`
-            ${statusBadge}
+            ${statusBadge}${optBadge}
             <div style="font-weight: 600; margin-bottom: 2px;">${classNames[labels[i]] ?? labels[i]}</div>
             <div style="color: #64748b; font-size: 11px;">
                 ${xLabel}: ${points[i][0].toFixed(2)}<br/>
@@ -224,20 +275,29 @@ export function renderSVM({
     // Update point styling and filtering
     contentGroup
         .selectAll("circle")
+        .attr("fill", (_, i) => {
+            const pt = plotPoints[i as number];
+            const baseColor = colorScale(pt);
+            if (optimisedPoints && optimisedPoints.includes(i as number)) {
+                // Return a visibly darker version of the base class color
+                return d3.color(baseColor)?.darker(1.5).toString() || baseColor;
+            }
+            return baseColor;
+        })
         .attr("stroke", (_, i) => {
-            const isSV =
-                supportVectorIndices && supportVectorIndices.includes(i);
+            const isSV = supportVectorIndices && supportVectorIndices.includes(i as number);
             return isSV ? "#27272a" : "white";
         })
         .attr("stroke-width", (_, i) => {
-            const isSV =
-                supportVectorIndices && supportVectorIndices.includes(i);
+            const isSV = supportVectorIndices && supportVectorIndices.includes(i as number);
             return (isSV ? 2 : 0.5) * scaleFactor;
         })
         .attr("fill-opacity", (_, i) => {
-            if (!focusedLabels) return 0.7;
+            const isSV = supportVectorIndices && supportVectorIndices.includes(i as number);
+            if (!focusedLabels) return isSV ? 1.0 : 0.7;
             const name = classNames[labels[i]] ?? String(labels[i]);
-            return focusedLabels.has(name) ? 0.7 : 0.1;
+            const isFocused = focusedLabels.has(name);
+            return isFocused ? (isSV ? 1.0 : 0.7) : 0.1;
         });
 
     // Handle decision boundary filtering
@@ -252,43 +312,37 @@ export function renderSVM({
     }
 
     // ---- Geometric Decision Line ----
-    if (isKernelSpace) {
-        // In kernel space (f(x) vs PC1), the boundary is always at f(x) = 0
-        drawDecisionLine(contentGroup, 1, 0, 0, xScale, yScale, "#1e293b", 2.5);
-        // Margins at f(x) = 1 and f(x) = -1
-        drawDecisionLine(
-            contentGroup,
-            1,
-            0,
-            -1,
-            xScale,
-            yScale,
-            "#94a3b8",
-            1,
-            "4 4",
-            0.4,
-        );
-        drawDecisionLine(
-            contentGroup,
-            1,
-            0,
-            1,
-            xScale,
-            yScale,
-            "#94a3b8",
-            1,
-            "4 4",
-            0.4,
-        );
-    } else if (
-        isLinear &&
+    const linesLayer = contentGroup.insert("g", ":first-child").attr("class", "svm-lines-layer");
+
+    // Add inner markers for optimized points
+    if (optimisedPoints && optimisedPoints.length > 0) {
+        const optG = contentGroup.append("g").attr("class", "kkt-markers");
+        for (const idx of optimisedPoints) {
+            const pt = points[idx];
+            if (pt) {
+                // Ensure text is centered properly
+                optG.append("text")
+                    .attr("x", xScale(pt[0]))
+                    .attr("y", yScale(pt[1]) + 0.5)
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "central")
+                    .attr("fill", "white")
+                    .style("font-size", `${7 * scaleFactor}px`)
+                    .style("font-weight", "900")
+                    .style("pointer-events", "none")
+                    .text("ϟ");
+            }
+        }
+    }
+
+    if (
         w1 !== undefined &&
         w2 !== undefined &&
         bias !== undefined
     ) {
         if (Math.abs(w1) > 1e-6 || Math.abs(w2) > 1e-6) {
             drawDecisionLine(
-                contentGroup,
+                linesLayer,
                 w1,
                 w2,
                 bias,
@@ -297,9 +351,9 @@ export function renderSVM({
                 "#1e293b",
                 2.5,
             );
-            drawMarginBand(contentGroup, w1, w2, bias, xScale, yScale);
+            drawMarginBand(linesLayer, w1, w2, bias, xScale, yScale);
             drawDecisionLine(
-                contentGroup,
+                linesLayer,
                 w1,
                 w2,
                 bias - 1,
@@ -318,7 +372,7 @@ export function renderSVM({
                  </div>`,
             );
             drawDecisionLine(
-                contentGroup,
+                linesLayer,
                 w1,
                 w2,
                 bias + 1,
@@ -340,7 +394,7 @@ export function renderSVM({
     }
 
     // ---- Predicted Point (Special Marker for Manual Input) ----
-    if (predictionPoint && !isKernelSpace) {
+    if (predictionPoint) {
         const [px, py] = predictionPoint;
         const pxScaled = xScale(px);
         const pyScaled = yScale(py);
