@@ -411,23 +411,6 @@ class SVMService:
             0
         ]
         return iterations, alpha, b, sv_indices
-
-    # -------------------------------------------------------------------------
-    # SV Contributions (for heatmap overlay)
-    # -------------------------------------------------------------------------
-
-    def _compute_sv_contributions(
-        self,
-        alpha: np.ndarray,
-        y_01: np.ndarray,
-        X_train: np.ndarray,
-        sv_indices_local: np.ndarray,  # indices into X_train
-        sv_indices_global: np.ndarray,  # indices into X_2d
-        mesh_points: np.ndarray,
-        kernel: str,
-        gamma: float,
-        degree: int,
-    ) -> List[Dict[str, Any]]:
         """Compute per-SV signed contribution across the mesh."""
         y = np.where(y_01 == 0, -1.0, 1.0)
         svs = X_train[sv_indices_local]
