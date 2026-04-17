@@ -6,6 +6,7 @@
     "scripts": {
         "dev": "VITE_SHOW_DEV_INFO=true vite",
         "dev:test": "VITE_CONFIG_FILE=test VITE_SHOW_DEV_INFO=true vite",
+        "dev:fyp": "VITE_SHOW_DEV_INFO=true VITE_CONFIG_FILE=fyp vite",
         "dev:host": "vite --host",
         "build": "tsc --noEmit && vite build",
         "lint": "eslint .",

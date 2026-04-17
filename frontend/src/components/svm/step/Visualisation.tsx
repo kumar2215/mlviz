@@ -5,13 +5,13 @@
  */
 
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
+import SVMLossMapHUD from "@/components/svm/SVMLossMapHUD";
 import { renderSVM } from "@/components/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useSVMContext } from "@/contexts/models/SVMContext";
 import { useCallback, useEffect, useState } from "react";
 import SVMStepHUD, { type SVMStepMode } from "./SVMStepHUD";
-import SVMLossMapHUD from "@/components/svm/SVMLossMapHUD";
 
 const Visualisation: React.FC = () => {
     const {
@@ -36,7 +36,7 @@ const Visualisation: React.FC = () => {
             loadVisualization(
                 Object.keys(lastVisualizationParams).length > 0
                     ? lastVisualizationParams
-                    : {}
+                    : {},
             );
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,17 +46,18 @@ const Visualisation: React.FC = () => {
         (
             container: d3.Selection<SVGGElement, unknown, null, undefined>,
             _data: unknown,
-            context: VisualisationRenderContext
+            context: VisualisationRenderContext,
         ) => {
             if (!visualizationData) return;
 
             const showProposed = mode === "preview" && !!stepData;
-            
+
             // Only show support vectors when we have run a step
-            const currentSupportVectors = showProposed && stepData 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ? (stepData as any).support_vector_indices 
-                : undefined;
+            const currentSupportVectors =
+                showProposed && stepData
+                    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      (stepData as any).support_vector_indices
+                    : undefined;
 
             const points = visualizationData.points ?? [];
             const labels = visualizationData.labels ?? [];
@@ -64,16 +65,24 @@ const Visualisation: React.FC = () => {
             // Compute dynamic decision boundary regions for the current weights
             let dynamicBoundary = undefined;
             if (decisionBoundary?.meshPoints) {
-                const classNames = visualizationData.metadata?.class_names ?? ["Class 0", "Class 1"];
-                const dynamicPredictions = decisionBoundary.meshPoints.map((point: number[] | [number, number]) => {
-                    const score = currentW1 * point[0] + currentW2 * point[1] + currentBias;
-                    return classNames[score > 0 ? 1 : 0];
-                });
+                const classNames = visualizationData.metadata?.class_names ?? [
+                    "Class 0",
+                    "Class 1",
+                ];
+                const dynamicPredictions = decisionBoundary.meshPoints.map(
+                    (point: number[] | [number, number]) => {
+                        const score =
+                            currentW1 * point[0] +
+                            currentW2 * point[1] +
+                            currentBias;
+                        return classNames[score > 0 ? 1 : 0];
+                    },
+                );
                 dynamicBoundary = {
                     type: "classification" as "classification",
                     meshPoints: decisionBoundary.meshPoints,
                     predictions: dynamicPredictions,
-                    dimensions: decisionBoundary.dimensions
+                    dimensions: decisionBoundary.dimensions,
                 };
             }
 
@@ -82,11 +91,16 @@ const Visualisation: React.FC = () => {
                 container,
                 points,
                 labels,
-                classNames: visualizationData.metadata?.class_names ?? ["Class 0", "Class 1"],
+                classNames: visualizationData.metadata?.class_names ?? [
+                    "Class 0",
+                    "Class 1",
+                ],
                 x_range: visualizationData.x_range || [-5, 5],
                 y_range: visualizationData.y_range || [-5, 5],
-                xLabel: visualizationData.metadata?.feature_x_name ?? "Feature 1",
-                yLabel: visualizationData.metadata?.feature_y_name ?? "Feature 2",
+                xLabel:
+                    visualizationData.metadata?.feature_x_name ?? "Feature 1",
+                yLabel:
+                    visualizationData.metadata?.feature_y_name ?? "Feature 2",
                 context,
                 decisionBoundary: dynamicBoundary,
                 w1: currentW1,
@@ -98,7 +112,15 @@ const Visualisation: React.FC = () => {
                 proposedBias: showProposed ? stepData!.new_b : undefined,
             });
         },
-        [visualizationData, decisionBoundary, currentW1, currentW2, currentBias, mode, stepData]
+        [
+            visualizationData,
+            decisionBoundary,
+            currentW1,
+            currentW2,
+            currentBias,
+            mode,
+            stepData,
+        ],
     );
 
     if (isVisualizationLoading) {
@@ -106,7 +128,9 @@ const Visualisation: React.FC = () => {
             <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
-                    <p className="text-muted-foreground">Loading classification space…</p>
+                    <p className="text-muted-foreground">
+                        Loading classification space…
+                    </p>
                 </div>
             </div>
         );
@@ -116,8 +140,12 @@ const Visualisation: React.FC = () => {
         return (
             <div className="flex items-center justify-center h-full">
                 <div className="text-center p-8">
-                    <p className="text-destructive mb-2">Error loading visualisation</p>
-                    <p className="text-sm text-muted-foreground">{visualizationError}</p>
+                    <p className="text-destructive mb-2">
+                        Error loading visualisation
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                        {visualizationError}
+                    </p>
                 </div>
             </div>
         );
@@ -138,15 +166,15 @@ const Visualisation: React.FC = () => {
     return (
         <div className="relative h-full w-full">
             {/* SVM step control — right side */}
-            <div className="absolute top-6 left-6 z-20">
-                <SVMStepHUD 
-                    mode={mode} 
-                    setMode={setMode} 
-                    learningRate={learningRate} 
-                    onLearningRateChange={setLearningRate} 
+            <div className="absolute top-18 left-6 z-20">
+                <SVMStepHUD
+                    mode={mode}
+                    setMode={setMode}
+                    learningRate={learningRate}
+                    onLearningRateChange={setLearningRate}
                 />
             </div>
-            
+
             {/* Loss map — bottom right */}
             <div className="absolute bottom-6 right-6 z-20">
                 <SVMLossMapHUD />

@@ -155,33 +155,35 @@ export function renderSVM({
             .style("font-size", `${10 * scaleFactor}px`)
             .text("Support Vector");
 
-        const optRow = existingLegendDiv.append("xhtml:div")
-            .attr("class", "flex items-center")
-            .style("gap", `${8 * scaleFactor}px`)
-            .style("margin-bottom", `${2 * scaleFactor}px`)
-            .style("user-select", "none")
-            .style("padding", "1px 2px");
+        if (optimisedPoints !== undefined) {
+            const optRow = existingLegendDiv.append("xhtml:div")
+                .attr("class", "flex items-center")
+                .style("gap", `${8 * scaleFactor}px`)
+                .style("margin-bottom", `${2 * scaleFactor}px`)
+                .style("user-select", "none")
+                .style("padding", "1px 2px");
 
-        optRow.append("xhtml:div")
-            .attr("class", "rounded-full flex flex-shrink-0 items-center justify-center")
-            .style("width", `${10 * scaleFactor}px`)
-            .style("height", `${10 * scaleFactor}px`)
-            .style("border", "1.5px solid #27272a")
-            .style("background-color", "#475569")
-            .style("font-size", `${7 * scaleFactor}px`)
-            .style("font-weight", "900")
-            .style("color", "white")
-            .text("ϟ");
+            optRow.append("xhtml:div")
+                .attr("class", "rounded-full flex flex-shrink-0 items-center justify-center")
+                .style("width", `${10 * scaleFactor}px`)
+                .style("height", `${10 * scaleFactor}px`)
+                .style("border", "1.5px solid #27272a")
+                .style("background-color", "#475569")
+                .style("font-size", `${7 * scaleFactor}px`)
+                .style("font-weight", "900")
+                .style("color", "white")
+                .text("ϟ");
 
-        optRow.append("xhtml:span")
-            .attr("class", "font-medium text-slate-700")
-            .style("font-size", `${10 * scaleFactor}px`)
-            .text("Optimised (KKT)");
+            optRow.append("xhtml:span")
+                .attr("class", "font-medium text-slate-700")
+                .style("font-size", `${10 * scaleFactor}px`)
+                .text("Optimised (KKT)");
+        }
         
         const fo = overlayGroup.select(".legend-overlay");
         if (fo.node()) {
             const currentHeight = parseFloat(fo.attr("height") || "0");
-            const extraHeight = 44 * scaleFactor;
+            const extraHeight = (optimisedPoints !== undefined ? 44 : 22) * scaleFactor;
             fo.attr("height", currentHeight + extraHeight);
             
             const currentY = parseFloat(fo.attr("y") || "0");
