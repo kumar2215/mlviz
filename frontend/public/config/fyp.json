@@ -45,10 +45,10 @@
                         "condition_type": "Metric",
                         "name": "Reach the desired accuracy!",
                         "description": "Make it so your accuracy is at least 0.9!",
-                        "metric": "test.accuracy",
+                        "metric": "train.accuracy",
                         "comparator": ">=",
                         "value": 0.9,
-                        "evaluation_mode": "any"
+                        "evaluation_mode": "latest"
                     }
                 }
             ]
