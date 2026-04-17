@@ -45,7 +45,7 @@
                         "condition_type": "Metric",
                         "name": "Reach the desired accuracy!",
                         "description": "Make it so your accuracy is at least 0.9!",
-                        "metric": "accuracy",
+                        "metric": "test.accuracy",
                         "comparator": ">=",
                         "value": 0.9,
                         "evaluation_mode": "any"
