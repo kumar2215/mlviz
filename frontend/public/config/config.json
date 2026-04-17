@@ -336,37 +336,33 @@
                         "name": "Back to the visualisation",
                         "description": "See how the dataset is split within KNN"
                     }
+                }
+            ]
+        },
+        "kmeans": {
+            "name": "kmeans",
+            "description": "Kmeans clustering",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "1094533493"
+                }
+            ],
+            "edges": []
+        },
+        "linear": {
+            "name": "linear",
+            "description": "Linear Regression",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "3915783174"
                 },
                 {
-                    "start": {
-                        "local_index": 14,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Back to story",
-                        "description": "Return to the main story"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 15,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Back to story",
-                        "description": "Return to the main story"
-                    }
-                },
+                    "index": "3050687251"
+                }
+            ],
+            "edges": [
                 {
                     "start": {
                         "local_index": 16,
@@ -410,6 +406,58 @@
                         "condition_type": "Bypass",
                         "name": "Back to story",
                         "description": "Return to the main story"
+                    }
+                }
+            ]
+        },
+        "decision_tree_sample": {
+            "name": "decision_tree_sample",
+            "description": "",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "1494697096"
+                },
+                {
+                    "index": "3840011629"
+                },
+                {
+                    "index": "4197165244"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Build a tree!",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Metric",
+                        "name": "Reach the desired accuracy!",
+                        "description": "Make it so your accuracy is at least 0.9!",
+                        "metric": "accuracy",
+                        "comparator": ">=",
+                        "value": 0.9,
+                        "evaluation_mode": "any"
                     }
                 }
             ]
@@ -587,7 +635,7 @@
             "problem_type": "classifier",
             "dataset": null
         },
-        "1094533493": {
+        "3176057943": {
             "name": "",
             "page_type": "dynamic",
             "note": "Use the top-right HUD to simulate the algorithm! Feel free to intervene and choose your centroids at any time.",
@@ -617,7 +665,7 @@
                 "max_iterations": 100
             }
         },
-        "3915783174": {
+        "842744718": {
             "name": "Train: Optimal Line",
             "page_type": "dynamic",
             "note": "Use the HUD to change your line (This page is a WIP - we will add a Loss Map soon)",
@@ -639,7 +687,7 @@
                 "learning_rate": 0.01
             }
         },
-        "3050687251": {
+        "2222401443": {
             "name": "Step: Gradient Descent",
             "page_type": "dynamic",
             "note": "Use the HUD to change your line, or continue running the gradient descent! (This page is a WIP - we will add a Loss Map soon)",
@@ -654,6 +702,24 @@
                 "test_size": 0.2,
                 "random_state": 42,
                 "learning_rate": 0.01
+            }
+        },
+        "1494697096": {
+            "name": "fyp_decision_tree",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "",
+                "link": "md/fyp/dtree.md"
+            }
+        },
+        "4197165244": {
+            "name": "fyp_end",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# Nicely done!",
+                "link": ""
             }
         }
     }

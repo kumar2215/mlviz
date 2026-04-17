@@ -5,15 +5,21 @@
  */
 
 import { renderLinearRegression } from "@/components/linear/regression/LinearRegressionRenderer";
-import LineControlHUD from "@/components/linear/regression/LineControlHUD";
+
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
+import type { PredictionResult } from "@/contexts/models/BaseModelContext";
 import { useLinearRegression } from "@/contexts/models/LinearRegressionContext";
 import * as d3 from "d3";
 import { useCallback, useEffect, useState } from "react";
 
-const Visualisation: React.FC = () => {
+interface VisualisationProps {
+    points?: Record<string, number> | null;
+    predictionResult?: PredictionResult<{ predicted_y: number }> | null;
+}
+
+const Visualisation: React.FC<VisualisationProps> = ({ points, predictionResult }) => {
     const {
         visualizationData,
         isVisualizationLoading,
@@ -38,6 +44,16 @@ const Visualisation: React.FC = () => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // Derive predicted point from predictionResult + input x
+    const predictionPoint: [number, number] | null = (() => {
+        if (!predictionResult || !points || !visualizationData) return null;
+        const featureName = visualizationData.metadata?.feature_x_name ?? "x";
+        const x = points[featureName];
+        const y = predictionResult.additionalData?.predicted_y;
+        if (x === undefined || y === undefined) return null;
+        return [x, y];
+    })();
+
     const renderCallback = useCallback(
         (
             container: d3.Selection<SVGGElement, unknown, null, undefined>,
@@ -56,13 +72,14 @@ const Visualisation: React.FC = () => {
                 yLabel: visualizationData.metadata?.target_name ?? "y",
                 context,
                 focusedLabels,
+                predictionPoint,
             });
 
             if (renderResult.legend) {
                 renderResult.legend.onFilterChange(setFocusedLabels);
             }
         },
-        [visualizationData, currentSlope, currentIntercept, focusedLabels]
+        [visualizationData, currentSlope, currentIntercept, focusedLabels, predictionPoint]
     );
 
     if (isVisualizationLoading) {
@@ -101,10 +118,6 @@ const Visualisation: React.FC = () => {
 
     return (
         <div className="relative h-full w-full">
-            <div className="absolute top-6 right-6 z-20">
-                <LineControlHUD />
-            </div>
-
             <BaseVisualisation
                 dataConfig={{
                     data: visualizationData,

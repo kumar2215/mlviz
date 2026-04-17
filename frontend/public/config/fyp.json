@@ -1,0 +1,559 @@
+{
+    "datasets": {},
+    "stories": {
+        "decision_tree_sample": {
+            "name": "decision_tree_iris",
+            "description": "Sample for decision tree with iris",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "1494697096"
+                },
+                {
+                    "index": "3840011629"
+                },
+                {
+                    "index": "4197165244"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Build a tree!",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Metric",
+                        "name": "Reach the desired accuracy!",
+                        "description": "Make it so your accuracy is at least 0.9!",
+                        "metric": "accuracy",
+                        "comparator": ">=",
+                        "value": 0.9,
+                        "evaluation_mode": "any"
+                    }
+                }
+            ]
+        },
+        "knn": {
+            "name": "knn",
+            "description": "KNN Classifier",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "705804919"
+                },
+                {
+                    "index": "3929557980"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Prediction visualisation",
+                        "description": "See how your points are predicted with KNN!"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Back to the visualisation",
+                        "description": "See how the dataset is split within KNN"
+                    }
+                }
+            ]
+        },
+        "kmeans": {
+            "name": "kmeans",
+            "description": "Kmeans clustering",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "3176057943"
+                }
+            ],
+            "edges": []
+        },
+        "linear": {
+            "name": "linear",
+            "description": "Linear Regression",
+            "start_page": 1,
+            "nodes": [
+                {
+                    "index": "842744718"
+                },
+                {
+                    "index": "2222401443"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Gradient descent visualisation",
+                        "description": "Step through gradient descent with this visualisation!"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Train visualisation with OLS",
+                        "description": "Train the visualisation using OLS."
+                    }
+                }
+            ]
+        },
+        "svm": {
+            "name": "svm",
+            "description": "Support Vector Machine",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "3427042873"
+                },
+                {
+                    "index": "1058845322"
+                },
+                {
+                    "index": "2860870868"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "predict",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "step",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "train",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "predict",
+                        "description": null
+                    }
+                }
+            ]
+        }
+    },
+    "pages": {
+        "1014905555": {
+            "name": "decision_tree/01",
+            "page_type": "static",
+            "note": "The bar above this is your navigation bar. To proceed on to the next slide, you might have to fulfill a set of conditions, as stated on the Navigation Buttons. Once these conditions are cleared, the button will turn green!",
+            "parameters": {
+                "text": "# What is a decision tree?\n\nImagine playing **20 Questions**. One person thinks of something, and your job is to figure out what it is by asking only yes/no questions. If you ask random questions, you'll waste turns quickly. But if you ask smart questions that split the possibilities\u2014like \"Is it alive?\" or \"Is it bigger than a car?\"\u2014you narrow down the options much faster. Each answer pushes you down a different path of reasoning until eventually you're confident enough to guess the object.\n\nA **decision tree** in machine learning works in almost exactly the same way. The model learns a sequence of yes/no questions that progressively narrow down the possibilities. Each question splits the data into groups, just like how your questions in 20 Questions split the set of possible objects. As you move down the tree, the possibilities get more specific until you reach a final answer or prediction. In other words, a decision tree is basically the computer learning how to play a really efficient game of 20 Questions.",
+                "link": null
+            }
+        },
+        "2842271352": {
+            "name": "decision_tree/02",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# How can a decision tree be used?\n\nThis idea becomes useful when we apply it to real data. Instead of guessing objects, the questions are about features in the data. For example, imagine a bank trying to decide whether to approve a loan. The model might start with a question like *\"Is the applicant's income above $50,000?\"* If yes, it follows one branch; if no, another. The next question might be *\"Does the applicant have existing debt?\"* or *\"Is their credit score above 700?\"* Each step narrows down the possibilities until the tree reaches a final decision, such as approving or rejecting the loan.\n\nBecause of this structure, decision trees can be used for many practical tasks. They are commonly used for **classification**, like identifying whether an email is spam or not, diagnosing diseases from symptoms, or recognizing objects in data. They can also be used for **prediction**, such as estimating house prices or customer churn. In each case, the model is essentially learning the most informative sequence of questions to ask about the data so that it can arrive at the most accurate answer.",
+                "link": null
+            }
+        },
+        "2094981965": {
+            "name": "decision_tree/03",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# Terminologies\n\nThe connections between nodes are called **branches**, which represent the possible answers to each question, such as yes or no. For example, in a game like _Guess Who?_, asking \"Do they wear glasses?\" would create two branches: **yes** and **no**. These branches lead to the next set of questions, which can be called **split nodes**, where you continue narrowing down the possibilities with new questions like \"Do they have blonde hair?\" or \"Are they wearing a hat?\" Eventually, you reach **leaf nodes**, which represent the final outcome\u2014when you've narrowed it down to a single character and can confidently make your guess.\n\n![dtree_diagram](images/dtree_diagram.svg)",
+                "link": null
+            }
+        },
+        "3333589591": {
+            "name": "decision_tree/04",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# The Iris Dataset\n\nTo see decision trees in action, we can use the **Iris dataset**, one of the most well-known datasets in machine learning. It contains measurements of iris flowers and the goal is to classify each flower into one of three species: **setosa**, **versicolor**, or **virginica**. <video src=\"https://www.youtube.com/watch?v=t-I9Zgafz4A\" />\n\nEach flower in the dataset is described using four features: **sepal length**, **sepal width**, **petal length**, and **petal width**. A decision tree can learn a sequence of questions about these measurements\u2014such as \"Is the petal length less than 2.5 cm?\"\u2014to progressively narrow down which species the flower belongs to. By following these splits, the tree can classify a new flower based on its measurements.\n\nLet's look at a sample decision tree for this dataset and how you can predict off it!",
+                "link": null
+            }
+        },
+        "3938218143": {
+            "name": "decision_tree/05",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# What just happened?\n\nWhat just happened is that the algorithm **learned a sequence of questions** from the data that helps it distinguish between the three iris species. Using the training dataset, the decision tree examined the four features\u2014sepal length, sepal width, petal length, and petal width\u2014and searched for splits that best separated the different classes.\n\nStarting from the root node, the algorithm chose a feature and threshold that divided the data into groups that were more \"pure\" (meaning they contained mostly one species). It then repeated this process for each resulting subset, creating more nodes and branches. This continued until the stopping conditions in the default scikit-learn settings were met.\n\nThe final result is a **tree of decision rules**. When you pass a new flower to the model, it simply follows the learned path of questions (for example, checking petal length, then petal width) until it reaches a leaf node, which gives the predicted species. In essence, the model has automatically learned how to play a structured version of 20 Questions for identifying iris flowers.\n\nNow, let's see what hyperparams we can change!",
+                "link": null
+            }
+        },
+        "2745435572": {
+            "name": "decision_tree/06",
+            "page_type": "static",
+            "note": "To learn more about the hyperparameters, you can read the [sklearn documentation](https://scikit-learn.org/stable/modules/generated/sklearn.tree.DecisionTreeClassifier.html).",
+            "parameters": {
+                "text": "# Hyperparameters?\n\nNow the difference is that you were able to control **how the tree learns** by adjusting its hyperparameters. Instead of letting the algorithm grow the tree freely, you placed limits on its structure\u2014for example by setting a **maximum depth**.\n\nThis affects how complex the tree can become. If the tree is allowed to grow very deep, it may keep splitting the data until it almost perfectly memorizes the training set. While this can give very high **training accuracy**, the model may start capturing noise or very specific patterns that don't generalize well to new data. This is known as **overfitting**.\n\nBy limiting the depth (for example, max_depth = 3), the tree is forced to learn **simpler decision rules**. It may not perfectly classify every training example, but the rules it learns tend to generalize better. This is why you might observe something interesting: the model with a limited depth can sometimes produce **better accuracy on the test set**, even though it performs slightly worse on the training set. In other words, restricting the model's complexity can help it make better predictions on unseen data. \n\nNow, create your own set of training questions! No worries, the relevant information will be provided to you.",
+                "link": null
+            }
+        },
+        "478951883": {
+            "name": "decision_tree/07",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# Congratulations!\n\nIn this step, instead of letting the algorithm decide the splits, **you chose the questions yourself** and manually built the tree. In other words, you played the role of the decision tree algorithm.\n\nStarting from the root, you selected a feature and a threshold to split the data\u2014for example, a question like \"Is petal length less than 2.5 cm?\". Each time you added a question, you divided the dataset into smaller groups and continued asking new questions to further separate the species. Eventually, each path ended with a final prediction.\n\nThis activity highlights what the algorithm normally does automatically: it searches through many possible questions and selects the ones that best separate the data. By building the tree manually, you can see how each question affects the dataset and how good questions quickly narrow down the possibilities\u2014very similar to choosing effective questions in games like _20 Questions_ or _Guess Who?_.",
+                "link": null
+            }
+        },
+        "52300805": {
+            "name": "decision_tree/predict_explanation",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# What just happened?\n\nWhen you made a prediction, the decision tree followed a path through its learned questions based on the flower measurements you provided.\n\nStarting at the **root node**, the tree checked the first condition\u2014for example, \"Is the petal length less than 2.5 cm?\"\u2014and took the branch corresponding to your input. It then evaluated the next condition along that branch, and so on, until it reached a **leaf node**. The species label at that leaf is the prediction you saw.\n\nThe key insight is that the tree already knows all its questions\u2014it learned them from training data. When predicting, it doesn't re-learn anything; it simply **routes your input** through the fixed set of rules until it arrives at an answer. The highlighted path you saw in the visualisation is exactly the sequence of questions the tree asked about your specific flower.",
+                "link": null
+            }
+        },
+        "3858303656": {
+            "name": "decision_tree_predict",
+            "page_type": "dynamic",
+            "note": "",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {}
+        },
+        "3548984691": {
+            "name": "decision_tree_train_wparams",
+            "page_type": "dynamic",
+            "note": "",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "whitelist": ["max_depth"]
+            }
+        },
+        "3719022735": {
+            "name": "decision_tree_train_noparams",
+            "page_type": "dynamic",
+            "note": "The `max-depth` parameter refers to the depth of the tree: effectively, how many questions can you ask?",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "whitelist": []
+            }
+        },
+        "3840011629": {
+            "name": "decision_tree_manual",
+            "page_type": "dynamic",
+            "note": "Click on the node to get started! You'll see a popup on your right where you can then look at the information that the algorithm decides, like information gain.",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "manual",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {}
+        },
+        "34680342": {
+            "name": "decision_tree_08",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# Congratulations!\n\nYou've learnt about what a decision tree does!",
+                "link": null
+            }
+        },
+        "1627985803": {
+            "name": "",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "manual",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {}
+        },
+        "986251654": {
+            "name": "",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {}
+        },
+        "705804919": {
+            "name": "",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null
+        },
+        "3929557980": {
+            "name": "",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null
+        },
+        "3176057943": {
+            "name": "",
+            "page_type": "dynamic",
+            "note": "Use the top-right HUD to simulate the algorithm! Feel free to intervene and choose your centroids at any time.",
+            "dynamic_type": "model",
+            "model_name": "kmeans",
+            "component_type": "step",
+            "problem_type": "clustering",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "include_boundary": true,
+                "max_iterations": 100
+            }
+        },
+        "46745708": {
+            "name": "",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "kmeans",
+            "component_type": "train",
+            "problem_type": "clustering",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "include_boundary": true,
+                "max_iterations": 100
+            }
+        },
+        "842744718": {
+            "name": "Train: Optimal Line",
+            "page_type": "dynamic",
+            "note": "Use the HUD to change your line (This page is a WIP - we will add a Loss Map soon)",
+            "dynamic_type": "model",
+            "model_name": "linear",
+            "component_type": "train",
+            "problem_type": "regression",
+            "dataset": {
+                "type": "predefined_regression",
+                "name": "simple",
+                "test_size": 0.25,
+                "random_state": 2025
+            },
+            "parameters": {
+                "feature_x": 0,
+                "fit_intercept": true,
+                "test_size": 0.2,
+                "random_state": 42,
+                "learning_rate": 0.01
+            }
+        },
+        "2222401443": {
+            "name": "Step: Gradient Descent",
+            "page_type": "dynamic",
+            "note": "Use the HUD to change your line, or continue running the gradient descent! (This page is a WIP - we will add a Loss Map soon)",
+            "dynamic_type": "model",
+            "model_name": "linear",
+            "component_type": "step",
+            "problem_type": "regression",
+            "dataset": null,
+            "parameters": {
+                "feature_x": 0,
+                "fit_intercept": true,
+                "test_size": 0.2,
+                "random_state": 42,
+                "learning_rate": 0.01
+            }
+        },
+        "1494697096": {
+            "name": "fyp_decision_tree",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "",
+                "link": "md/fyp/dtree.md"
+            }
+        },
+        "4197165244": {
+            "name": "fyp_end",
+            "page_type": "static",
+            "note": "",
+            "parameters": {
+                "text": "# Nicely done!",
+                "link": ""
+            }
+        },
+        "3427042873": {
+            "name": "SVM Train",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        "2860870868": {
+            "name": "SVM Predict",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        "1058845322": {
+            "name": "SVM Step",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "step",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        }
+    }
+}

@@ -1,15 +1,24 @@
 from typing import Dict
 
 import numpy as np
-
 from models.dataset import (
     ClassificationDataset,
     DatasetInfo,
     PredefinedClassificationDataset,
     PredefinedRegressionDataset,
     RegressionDataset,
+    SynthClassificationParams,
+    SynthRegressionParams,
 )
-from sklearn.datasets import load_breast_cancer, load_digits, load_iris, load_wine
+from sklearn.datasets import (
+    load_breast_cancer,
+    load_digits,
+    load_iris,
+    load_wine,
+    make_circles,
+    make_classification,
+    make_moons,
+)
 from sklearn.model_selection import train_test_split
 
 
@@ -22,6 +31,9 @@ class DatasetService:
             "wine": self._load_wine,
             "breast_cancer": self._load_breast_cancer,
             "digits": self._load_digits,
+            "simple_binary": self._load_simple_binary,
+            "moons": self._load_moons,
+            "circles": self._load_circles,
         }
         self._predefined_regression_loaders = {
             "simple": self._load_simple_regression,
@@ -101,7 +113,82 @@ class DatasetService:
             ),
         )
 
-    async def load_predefined_dataset(self, dataset_ref: PredefinedClassificationDataset) -> ClassificationDataset:
+    def _load_simple_binary(self) -> ClassificationDataset:
+        """Create a simple synthetic binary classification dataset."""
+        params = SynthClassificationParams(
+            n_samples=100,
+            n_features=2,
+            n_informative=2,
+            n_redundant=0,
+            n_clusters_per_class=1,
+            random_state=2026,
+            n_classes=2
+        )
+        X, y = make_classification(
+            n_samples=params.n_samples,
+            n_features=params.n_features,
+            n_informative=params.n_informative,
+            n_redundant=params.n_redundant,
+            n_clusters_per_class=params.n_clusters_per_class,
+            n_classes=params.n_classes,
+            random_state=params.random_state,
+        )
+        return ClassificationDataset(
+            X=X.tolist(),
+            y=y.tolist(),
+            feature_names=[f"{i + 1}" for i in range(params.n_features)],
+            target_names=["A", "B"],
+            info=DatasetInfo(
+                name="Simple Binary",
+                description="Synthetic binary classification dataset (Linearly Separable)",
+                n_samples=params.n_samples,
+                n_features=params.n_features,
+                n_classes=params.n_classes,
+                target_type="classification",
+            ),
+        )
+
+    def _load_moons(self) -> ClassificationDataset:
+        """Create a moons synthetic dataset (non-linear)."""
+        params = SynthClassificationParams(n_samples=50, noise=0.1, random_state=42)
+        X, y = make_moons(n_samples=params.n_samples, noise=params.noise, random_state=params.random_state)
+        return ClassificationDataset(
+            X=X.tolist(),
+            y=y.tolist(),
+            feature_names=["0", "1"],
+            target_names=["A", "B"],
+            info=DatasetInfo(
+                name="Moons",
+                description="Synthetic non-linear dataset (Moons shape)",
+                n_samples=params.n_samples,
+                n_features=params.n_features,
+                n_classes=params.n_classes,
+                target_type="classification",
+            ),
+        )
+
+    def _load_circles(self) -> ClassificationDataset:
+        """Create a circles synthetic dataset (non-linear)."""
+        params = SynthClassificationParams(n_samples=50, noise=0.1, factor=0.5, random_state=42)
+        X, y = make_circles(n_samples=params.n_samples, noise=params.noise, factor=params.factor, random_state=params.random_state)
+        return ClassificationDataset(
+            X=X.tolist(),
+            y=y.tolist(),
+            feature_names=["0", "1"],
+            target_names=["A", "B"],
+            info=DatasetInfo(
+                name="Circles",
+                description="Synthetic non-linear dataset (Circles shape)",
+                n_samples=params.n_samples,
+                n_features=params.n_features,
+                n_classes=params.n_classes,
+                target_type="classification",
+            ),
+        )
+
+    async def load_predefined_dataset(
+        self, dataset_ref: PredefinedClassificationDataset
+    ) -> ClassificationDataset:
         """Load a predefined dataset."""
         if dataset_ref.name not in self._predefined_loaders:
             raise ValueError(f"Unknown dataset: {dataset_ref.name}")
@@ -114,7 +201,9 @@ class DatasetService:
 
         return dataset
 
-    async def prepare_dataset_for_training(self, dataset: ClassificationDataset) -> Dict[str, any]:
+    async def prepare_dataset_for_training(
+        self, dataset: ClassificationDataset
+    ) -> Dict[str, any]:
         """Prepare dataset for ML training with train/test split."""
         X, y = dataset.to_numpy()
 
@@ -148,7 +237,9 @@ class DatasetService:
 
         return datasets_info
 
-    async def validate_custom_dataset(self, dataset_data: Dict) -> ClassificationDataset:
+    async def validate_custom_dataset(
+        self, dataset_data: Dict
+    ) -> ClassificationDataset:
         """Validate and create a ClassificationDataset from uploaded data."""
         # This will automatically validate using Pydantic
         return ClassificationDataset(**dataset_data)
@@ -158,10 +249,17 @@ class DatasetService:
     # ------------------------------------------------------------------
 
     def _load_simple_regression(self) -> RegressionDataset:
-        rng = np.random.default_rng(42)
-        n = 100
-        x = rng.uniform(-3, 3, size=n)
-        y = 2.5 * x + 1.0 + rng.normal(0, 1.0, size=n)
+        params = SynthRegressionParams(
+            n_samples=100,
+            random_state=42,
+            slope=2.5,
+            intercept=1.0,
+            noise=1.0,
+            x_range=(-3.0, 3.0)
+        )
+        rng = np.random.default_rng(params.random_state)
+        x = rng.uniform(params.x_range[0], params.x_range[1], size=params.n_samples)
+        y = params.slope * x + params.intercept + rng.normal(0, params.noise, size=params.n_samples)
         return RegressionDataset(
             X=[[float(xi)] for xi in x],
             y=[float(yi) for yi in y],
@@ -171,6 +269,7 @@ class DatasetService:
 
     def _load_diabetes(self) -> RegressionDataset:
         from sklearn.datasets import load_diabetes
+
         data = load_diabetes()
         return RegressionDataset(
             X=data.data.tolist(),
@@ -181,6 +280,7 @@ class DatasetService:
 
     def _load_california_housing(self) -> RegressionDataset:
         from sklearn.datasets import fetch_california_housing
+
         data = fetch_california_housing()
         return RegressionDataset(
             X=data.data.tolist(),
@@ -189,10 +289,14 @@ class DatasetService:
             target_name="median house value",
         )
 
-    async def load_predefined_regression_dataset(self, dataset_ref: PredefinedRegressionDataset) -> RegressionDataset:
+    async def load_predefined_regression_dataset(
+        self, dataset_ref: PredefinedRegressionDataset
+    ) -> RegressionDataset:
         """Load a predefined regression dataset and apply split config from the reference."""
         if dataset_ref.name not in self._predefined_regression_loaders:
-            raise ValueError(f"Unknown predefined regression dataset: {dataset_ref.name}")
+            raise ValueError(
+                f"Unknown predefined regression dataset: {dataset_ref.name}"
+            )
 
         dataset = self._predefined_regression_loaders[dataset_ref.name]()
         dataset.test_size = dataset_ref.test_size
@@ -209,7 +313,9 @@ class DatasetService:
         or None (defaults to diabetes).
         """
         if dataset_param is None:
-            return await self.load_predefined_regression_dataset(PredefinedRegressionDataset())
+            return await self.load_predefined_regression_dataset(
+                PredefinedRegressionDataset()
+            )
 
         if isinstance(dataset_param, PredefinedRegressionDataset):
             return await self.load_predefined_regression_dataset(dataset_param)
@@ -224,7 +330,9 @@ class DatasetService:
                 )
             return RegressionDataset(**dataset_param)
 
-        raise ValueError(f"Cannot resolve regression dataset from type {type(dataset_param)}")
+        raise ValueError(
+            f"Cannot resolve regression dataset from type {type(dataset_param)}"
+        )
 
 
 # Global dataset service instance

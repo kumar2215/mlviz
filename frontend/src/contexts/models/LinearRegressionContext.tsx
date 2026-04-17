@@ -28,6 +28,8 @@ import React, {
 import {
     createBaseModelContext,
     type BaseModelData,
+    type PredictableModelContext,
+    type PredictionResult,
     type StepableModelContext,
     type TrainableModelContext,
     type VisualizableModelContext,
@@ -60,7 +62,8 @@ interface LinearRegressionContextType
             LinearRegressionModelData,
             LinearRegressionStepResponse,
             LinearRegressionStepRequest
-        > {
+        >,
+        PredictableModelContext<LinearRegressionModelData, { predicted_y: number }> {
     isVisualizationLoading: boolean;
     visualizationError: string | null;
     visualizationData: LinearRegressionModelData | null;
@@ -92,6 +95,8 @@ interface LinearRegressionContextType
 
     /** Compute R² live on the frontend from the scatter points */
     computeR2: (slope: number, intercept: number) => number;
+    /** Compute MSE live on the frontend from the scatter points */
+    computeMSE: (slope: number, intercept: number) => number;
     /** Randomize the current line based on data range */
     randomizeLine: () => void;
 }
@@ -163,6 +168,37 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
         setCurrentInterceptState(intercept);
     }, []);
 
+    // Prediction
+    const [isPredicting, setIsPredicting] = useState(false);
+    const [predictionResult, setPredictionResult] = useState<PredictionResult<{ predicted_y: number }> | null>(null);
+
+    const getFeatureNames = useCallback((): string[] | null => {
+        const name = currentModelData?.metadata?.feature_x_name;
+        return name ? [name] : null;
+    }, [currentModelData?.metadata?.feature_x_name]);
+
+    const getClassNames = useCallback((): string[] | null => {
+        const name = currentModelData?.metadata?.target_name;
+        return name ? [name] : null;
+    }, [currentModelData?.metadata?.target_name]);
+
+    const predict = useCallback(async (points: Record<string, number>) => {
+        setIsPredicting(true);
+        const featureName = currentModelData?.metadata?.feature_x_name ?? "x";
+        const x = points[featureName] ?? 0;
+        const y = currentSlope * x + currentIntercept;
+        setPredictionResult({
+            predictedClass: String(y.toFixed(4)),
+            predictedClassIndex: 0,
+            additionalData: { predicted_y: y },
+        });
+        setIsPredicting(false);
+    }, [currentModelData?.metadata?.feature_x_name, currentSlope, currentIntercept]);
+
+    const clearPrediction = useCallback(() => {
+        setPredictionResult(null);
+    }, []);
+
     const randomizeLine = useCallback(() => {
         if (!currentModelData) {
             setCurrentSlopeState(Math.random() * 2 - 1);
@@ -187,7 +223,6 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
     // ========================================================================
     // Frontend R² computation (no API round-trip)
     // ========================================================================
-
     const computeR2 = useCallback(
         (slope: number, intercept: number): number => {
             const points = currentModelData?.points;
@@ -200,6 +235,18 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
                 0
             );
             return 1 - ssRes / ssTot;
+        },
+        [currentModelData?.points]
+    );
+
+    const computeMSE = useCallback(
+        (slope: number, intercept: number): number => {
+            const points = currentModelData?.points;
+            if (!points || points.length === 0) return 0;
+            return points.reduce(
+                (s, p) => s + (p[1] - (slope * p[0] + intercept)) ** 2,
+                0
+            ) / points.length;
         },
         [currentModelData?.points]
     );
@@ -441,10 +488,19 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
             currentIntercept,
             setCurrentLine,
             computeR2,
+            computeMSE,
 
             isEvaluating,
             evaluateLine,
             randomizeLine,
+
+            getFeatureNames,
+            getClassNames,
+            isPredicting,
+            predictionError: null,
+            predictionResult,
+            predict,
+            clearPrediction,
         }),
         [
             currentModelData, lastParams, setCurrentModelData, setLastParams,
@@ -452,8 +508,9 @@ const LinearRegressionProviderInner: React.FC<{ children: ReactNode }> = ({
             isVisualizationLoading, visualizationError, trainModel,
             visualizationData, loadVisualization,
             isStepLoading, stepError, stepData, performStep,
-            currentSlope, currentIntercept, setCurrentLine, computeR2,
+            currentSlope, currentIntercept, setCurrentLine, computeR2, computeMSE,
             isEvaluating, evaluateLine, randomizeLine,
+            getFeatureNames, getClassNames, isPredicting, predictionResult, predict, clearPrediction,
         ]
     );
 

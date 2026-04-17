@@ -2,6 +2,7 @@ import DecisionTreePredictVisualization from "@/components/decision_tree/classif
 import KMeansPredictVisualisation from "@/components/kmeans/clustering/prediction/Visualisation";
 import KNNPredictVisualization from "@/components/knn/classifier/prediction/Visualisation";
 import LinearRegressionVizVisualisation from "@/components/linear/regression/prediction/Visualisation";
+import SVMPredictVisualization from "@/components/svm/prediction/Visualisation";
 import type { PredictionResult } from "@/contexts/models/BaseModelContext";
 import React from "react";
 
@@ -18,6 +19,7 @@ const componentMap: Record<string, React.ComponentType<any>> = {
     knn: KNNPredictVisualization,
     kmeans: KMeansPredictVisualisation,
     linear: LinearRegressionVizVisualisation,
+    svm: SVMPredictVisualization,
 } as const;
 
 export const PredictComponent: React.FC<ComponentRegistryProps> = ({

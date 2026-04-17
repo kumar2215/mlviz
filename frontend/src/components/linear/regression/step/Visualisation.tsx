@@ -7,6 +7,7 @@
 
 import { renderLinearRegression } from "@/components/linear/regression/LinearRegressionRenderer";
 import LineControlHUD from "@/components/linear/regression/LineControlHUD";
+import LossMapHUD from "@/components/linear/regression/LossMapHUD";
 import GDStepHUD, {
     type GDStepMode,
 } from "@/components/linear/regression/step/GDStepHUD";
@@ -136,6 +137,11 @@ const Visualisation: React.FC = () => {
         <div className="relative h-full w-full">
             <div className="absolute top-18 left-4 z-20">
                 <LineControlHUD />
+            </div>
+
+            {/* Loss map — bottom right */}
+            <div className="absolute bottom-6 right-6 z-20">
+                <LossMapHUD />
             </div>
 
             {/* GD step control — right side */}

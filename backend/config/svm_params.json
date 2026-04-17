@@ -1,0 +1,37 @@
+{
+    "parameters": [
+      {
+        "name": "feature_x",
+        "description": "Index of the first feature to use (X axis)",
+        "type": "select",
+        "options": "dynamic:features",
+        "default": 0
+      },
+      {
+        "name": "feature_y",
+        "description": "Index of the second feature to use (Y axis)",
+        "type": "select",
+        "options": "dynamic:features",
+        "default": 1
+      },
+      {
+        "name": "margin_type",
+        "description": "Type of SVM: Hard Margin enforces zero misclassifications (requires separable data), Soft Margin allows some 'slack' via the C parameter.",
+        "type": "select",
+        "options": [
+          "soft",
+          "hard"
+        ],
+        "default": "soft"
+      },
+      {
+        "name": "C",
+        "description": "Regularization parameter (only used for Soft Margin). Lower values widen the margin; higher values enforce correct classification more strictly.",
+        "type": "number",
+        "min": 0.01,
+        "max": 100,
+        "step": 0.1,
+        "default": 1.0
+      }
+    ]
+  }
