@@ -13,10 +13,10 @@ class DatasetReference(BaseModel):
 
 
 class PredefinedDataset(BaseModel):
-    """A predefined sklearn dataset."""
+    """A predefined sklearn classification dataset."""
 
     type: Literal["predefined"] = "predefined"
-    name: Literal["wine", "iris", "breast_cancer", "digits"] = Field(
+    name: Literal["wine", "iris", "breast_cancer", "digits", "simple_binary", "moons", "circles"] = Field(
         ..., description="Name of the predefined dataset"
     )
     test_size: float = Field(0.25, ge=0, le=0.9, description="Test split ratio")
@@ -24,11 +24,11 @@ class PredefinedDataset(BaseModel):
 
 
 class CustomDataset(BaseModel):
-    """A custom dataset with inline data."""
+    """A custom classification dataset with inline data."""
 
     type: Literal["custom"] = "custom"
     X: List[List[float]] = Field(..., description="Feature matrix")
-    y: List[int] = Field(..., description="Target vector")
+    y: List[int] = Field(..., description="Integer class labels")
     feature_names: Optional[List[str]] = Field(
         None, description="Names for each feature"
     )
@@ -36,6 +36,22 @@ class CustomDataset(BaseModel):
         None, description="Names for each target class"
     )
     test_size: float = Field(0, ge=0, le=0.9, description="Test split ratio")
+    random_state: int = Field(2025, ge=0, description="Random state for reproducibility")
+
+
+class CustomRegressionDataset(BaseModel):
+    """A custom regression dataset with inline data."""
+
+    type: Literal["custom_regression"] = "custom_regression"
+    X: List[List[float]] = Field(..., description="Feature matrix")
+    y: List[float] = Field(..., description="Continuous target vector")
+    feature_names: Optional[List[str]] = Field(
+        None, description="Names for each feature"
+    )
+    target_name: Optional[str] = Field(
+        "target", description="Name of the target variable"
+    )
+    test_size: float = Field(0.25, ge=0, le=0.9, description="Test split ratio")
     random_state: int = Field(2025, ge=0, description="Random state for reproducibility")
 
 
@@ -50,11 +66,14 @@ class PredefinedRegressionDataset(BaseModel):
     random_state: int = Field(2025, ge=0, description="Random state for reproducibility")
 
 
-# A dataset entry in the top-level datasets dict (custom only)
-DatasetEntry = CustomDataset
+# A dataset entry in the top-level datasets dict (custom classification or regression)
+DatasetEntry = Annotated[
+    Union[CustomDataset, CustomRegressionDataset],
+    Field(discriminator="type"),
+]
 
 # A dataset on a page (reference to top-level, or inline predefined)
 PageDataset = Annotated[
-    Union[DatasetReference, PredefinedDataset, PredefinedRegressionDataset],
+    Union[DatasetReference, PredefinedDataset, CustomDataset, CustomRegressionDataset, PredefinedRegressionDataset],
     Field(discriminator="type"),
 ]

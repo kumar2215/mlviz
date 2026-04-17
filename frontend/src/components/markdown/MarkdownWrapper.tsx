@@ -1,3 +1,4 @@
+import { Blockquote } from "@/components/markdown/Blockquote";
 import Markdown, { type Components, type ExtraProps } from "react-markdown";
 import rehypeMathjax from "rehype-mathjax";
 import rehypeRaw from "rehype-raw";
@@ -119,6 +120,20 @@ const ListItem: React.FC<ListItemProps> = ({ children, node, ...props }) => {
         >
             {children}
         </li>
+    );
+};
+
+type InputProps = React.ComponentProps<"input"> & ExtraProps;
+
+const TaskCheckbox: React.FC<InputProps> = ({ node, checked, ...props }) => {
+    return (
+        <input
+            type="checkbox"
+            checked={checked}
+            readOnly
+            className="appearance-none w-[1em] h-[1em] border border-gray-500 rounded-sm inline-block align-middle mr-2 relative top-[-0.05em] checked:bg-gray-500"
+            {...props}
+        />
     );
 };
 
@@ -294,6 +309,7 @@ const Link: React.FC<LinkProps> = ({ children, node, ...props }) => {
 };
 
 const DefaultComponentMap: Components = {
+    blockquote: Blockquote,
     strong: Strong,
     p: Paragraph,
     h1: Heading1,
@@ -303,6 +319,7 @@ const DefaultComponentMap: Components = {
     ul: UnorderedList,
     ol: OrderedList,
     li: ListItem,
+    input: TaskCheckbox,
     a: Link,
     img: Image,
     video: Video,

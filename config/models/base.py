@@ -6,7 +6,7 @@ from .dataset import PageDataset
 
 # Type definitions
 Index = str
-ModelNames = Literal["decision_tree", "knn", "kmeans", "linear"]
+ModelNames = Literal["decision_tree", "knn", "kmeans", "linear", "svm"]
 ModelComponentType = Literal["manual", "train", "predict", "viz_only", "step"]
 ProblemType = Literal["classifier", "clustering", "regression"]
 

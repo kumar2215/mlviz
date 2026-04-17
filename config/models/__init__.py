@@ -18,10 +18,12 @@ from .base import (
 # Dataset
 from .dataset import (
     CustomDataset,
+    CustomRegressionDataset,
     DatasetEntry,
     DatasetReference,
     PageDataset,
     PredefinedDataset,
+    PredefinedRegressionDataset,
 )
 
 # Conditions
@@ -78,6 +80,18 @@ from .linear_regression_page import (
     LinearRegressionVizParameters,
 )
 
+# SVM Pages
+from .svm_page import (
+    SVMPage,
+    SVMPageUnion,
+    SVMPredictPage,
+    SVMPredictParameters,
+    SVMStepPage,
+    SVMStepParameters,
+    SVMTrainPage,
+    SVMTrainParameters,
+)
+
 # KNN Pages
 from .knn_page import (
     KNNPage,
@@ -116,6 +130,9 @@ model_pages = {
     "Linear Regression: Visualise": LinearRegressionVizPage,
     "Linear Regression: Train": LinearRegressionTrainPage,
     "Linear Regression: Step": LinearRegressionStepPage,
+    "SVM: Step": SVMStepPage,
+    "SVM: Train": SVMTrainPage,
+    "SVM: Predict": SVMPredictPage,
 }
 
 __all__ = [
@@ -131,10 +148,12 @@ __all__ = [
     "ProblemType",
     # Dataset
     "CustomDataset",
+    "CustomRegressionDataset",
     "DatasetEntry",
     "DatasetReference",
     "PageDataset",
     "PredefinedDataset",
+    "PredefinedRegressionDataset",
     # Conditions
     "BaseCondition",
     "BypassCheck",
@@ -170,6 +189,15 @@ __all__ = [
     "KMeansTrainPage",
     "KMeansPredictPage",
     "KMeansPageUnion",
+    # SVM
+    "SVMStepParameters",
+    "SVMTrainParameters",
+    "SVMPredictParameters",
+    "SVMPage",
+    "SVMStepPage",
+    "SVMTrainPage",
+    "SVMPredictPage",
+    "SVMPageUnion",
     # Linear Regression
     "LinearRegressionVizParameters",
     "LinearRegressionTrainParameters",
