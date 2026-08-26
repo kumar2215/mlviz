@@ -13,7 +13,7 @@ import {
     predictWithInstructions,
     type DecisionTreeResponse,
 } from "@/api/dt";
-import { useDataset } from "@/contexts/DatasetContext";
+import { useDataset } from "@/store/useAppStore";
 import type { components } from "@/types/api";
 import type { ClassificationMetrics, TreeNode } from "@/types/model";
 import type { Parameters } from "@/types/story";

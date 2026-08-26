@@ -1,5 +1,4 @@
-import { useConfig } from "@/contexts/ConfigContext";
-import { useDataset } from "@/contexts/DatasetContext";
+import { useConfig, useDataset } from "@/store/useAppStore";
 import { ModelNameProvider, ModelProvider } from "@/contexts/ModelContext";
 import ModelPage from "@/pages/model/ModelPage";
 import type { DynamicPageUnion } from "@/types/story";

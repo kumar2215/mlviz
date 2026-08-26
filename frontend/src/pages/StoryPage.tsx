@@ -1,7 +1,7 @@
 import NavigationBar from "@/components/navigation/NavigationBar";
 import { Sidenote } from "@/components/Sidenote";
 import { Button } from "@/components/ui/button";
-import { useCurrentStory } from "@/contexts/StoryContext";
+import { useCurrentStory } from "@/store/useAppStore";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import DynamicPage from "@/pages/DynamicPage";
 import StaticPage from "@/pages/StaticPage";

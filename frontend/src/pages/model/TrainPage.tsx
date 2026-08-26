@@ -3,12 +3,12 @@ import { Results } from "@/components/results/Results";
 import { TrainComponent } from "@/components/TrainComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
-import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useCurrentStory } from "@/store/useAppStore";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type TrainPageProps = Pick<
     ModelPageProps,
@@ -49,9 +49,7 @@ const TrainPage: React.FC<TrainPageProps> = ({
     }, [(model as any).getFeatureNames, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const context = useContext(CurrentStoryContext);
-    if (!context) throw new Error("No context found.");
-    const { updateParams } = context;
+    const { updateParams } = useCurrentStory();
     const { recordTrain } = useHistoryRecorder();
 
     useEffect(() => {

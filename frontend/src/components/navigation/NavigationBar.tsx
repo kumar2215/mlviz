@@ -1,11 +1,11 @@
 import NavigationButton from "@/components/navigation/NavigationButton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useCurrentStory } from "@/store/useAppStore";
 import type { Edge, Parameters } from "@/types/story";
-import { displayCondition, isConditionMet } from "@/utils/conditions";
 import { ArrowLeft, Route } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { isConditionMet, displayCondition } from "@/utils/conditions";
 
 interface NavigationBarProps {
     edges: Edge[];
@@ -20,9 +20,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     onBack,
     canGoBack,
 }) => {
-    const context = useContext(CurrentStoryContext);
-    if (!context) throw new Error("Must be within CurrentStoryProvider");
-    const { storyState } = context;
+    const { storyState } = useCurrentStory();
 
     // Timer state for "Wait" conditions
     const [now, setNow] = useState(Date.now());

@@ -1,18 +1,34 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/contexts/ConfigContext";
-import { CurrentStoryProvider, StoryContext } from "@/contexts/StoryContext";
 import { StoryPage } from "@/pages/StoryPage";
+import { useCurrentStoryActions, useAppStore } from "@/store/useAppStore";
+import { useShallow } from "zustand/react/shallow";
 import type { PageUnion, Story } from "@/types/story";
-import { useContext } from "react";
+import { useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 
 const StoryPageWrapper: React.FC = () => {
-    const { config: storyConfig, loading, error } = useConfig();
     const { storyName } = useParams<{ storyName: string }>();
     const location = useLocation();
-    const context = useContext(StoryContext);
+    const setCurrentStoryId = useCurrentStoryActions().setCurrentStoryId;
+
+    useEffect(() => {
+        if (storyName) {
+            setCurrentStoryId(storyName);
+        }
+        // On unmount, clear the current story
+        return () => {
+            setCurrentStoryId("");
+        };
+    }, [storyName, setCurrentStoryId]);
 
     if (!storyName) throw new Error("No story name");
+
+    // Use useConfig to get config and loading state
+    const { config, loading, error } = useAppStore(useShallow((state) => ({
+        config: state.config,
+        loading: state.loading,
+        error: state.error,
+    })));
 
     if (loading) {
         return (
@@ -24,7 +40,7 @@ const StoryPageWrapper: React.FC = () => {
         );
     }
 
-    if (error || !storyConfig) {
+    if (error || !config) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
                 <div className="text-2xl font-mono text-red-600 mb-4">
@@ -45,10 +61,8 @@ const StoryPageWrapper: React.FC = () => {
         );
     }
 
-    const stories: Record<string, Story> = storyConfig.stories;
-    const pages: Record<string, PageUnion> = storyConfig.pages;
-
-    if (!context) throw new Error("Must be within StoryProvider");
+    const stories: Record<string, Story> = config.stories;
+    const pages: Record<string, PageUnion> = config.pages;
 
     const story: Story | undefined = storyName ? stories[storyName] : undefined;
 
@@ -57,20 +71,17 @@ const StoryPageWrapper: React.FC = () => {
     }
 
     const initialPageId = location.state?.local_index ?? story.start_page;
-
+    
+    // The key is important to force a remount when the story or page changes
     const pageKey = `${storyName}-${initialPageId}`;
 
     return (
-        <CurrentStoryProvider
-            storyId={storyName}
+        <StoryPage
             key={pageKey}
-        >
-            <StoryPage
-                story={story}
-                pages={pages}
-                initialPageId={initialPageId}
-            />
-        </CurrentStoryProvider>
+            story={story}
+            pages={pages}
+            initialPageId={initialPageId}
+        />
     );
 };
 

@@ -52,6 +52,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         : undefined;
 
     const lastRendererRef = useRef<any>(null);
+    const contentGroupRef = useRef<d3.Selection<SVGGElement, unknown, null, undefined> | null>(null);
     const normalizationRef = useRef<{ x: number; y: number } | null>(null);
 
     React.useLayoutEffect(() => {
@@ -66,6 +67,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 .attr("class", "content-container")
                 .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`);
         }
+        contentGroupRef.current = contentGroup;
 
         let currentZoomTransform =
             capabilities.zoomable && zoomControls
@@ -208,7 +210,23 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         theme,
         playControls?.currentStep,
         playControls?.isPlaying,
+        zoomControls,
     ]);
+
+    // Cleanup effect for HMR and unmount
+    React.useLayoutEffect(() => {
+        return () => {
+            const group = contentGroupRef.current;
+            if (group) {
+                group.selectAll("*").remove();
+            }
+            
+            // Clean up D3 zoom behavior for HMR
+            if (zoomControls?.destroy) {
+                zoomControls.destroy();
+            }
+        };
+    }, [zoomControls]);
 
     return (
         <div

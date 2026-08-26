@@ -2,18 +2,17 @@
  * useHistoryRecorder
  *
  * Provides typed action-recording helpers that write into the active story's
- * history log via StoryContext.recordAction.
+ * history log via the Zustand story store.
  *
  * Safe to use outside of a story (e.g. standalone model pages) — all helpers
- * become no-ops when there is no CurrentStoryContext in scope.
+ * become no-ops when there is no active story.
  */
 
-import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useCurrentStory } from "@/store/useAppStore";
 import type { ActionType, HistoryEntry, Parameters } from "@/types/story";
-import { useContext } from "react";
 
 export function useHistoryRecorder() {
-    const context = useContext(CurrentStoryContext);
+    const context = useCurrentStory();
     // Return a no-op recorder when not inside a story
     const recordAction = context?.recordAction ?? (() => {});
 

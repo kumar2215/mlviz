@@ -56,6 +56,7 @@ export interface PlayControlState {
 }
 
 export interface ZoomControlState {
+    destroy: () => void;
     zoomBehavior: d3.ZoomBehavior<SVGSVGElement, unknown> | null;
     svgSelection: d3.Selection<SVGSVGElement, unknown, null, undefined> | null;
     resetZoom: () => void;

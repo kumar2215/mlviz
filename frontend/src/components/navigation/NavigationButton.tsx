@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useCurrentStory } from "@/store/useAppStore";
 import type { Edge, Parameters } from "@/types/story";
 import {
     displayCondition,
@@ -8,7 +8,6 @@ import {
     isConditionMet,
 } from "@/utils/conditions";
 import { CheckCircle, XCircle } from "lucide-react";
-import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface NavigationButtonProps {
@@ -22,9 +21,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
     handler,
     conditionState,
 }) => {
-    const context = useContext(CurrentStoryContext);
-    if (!context) throw new Error("Must be within CurrentStoryProvider");
-    const { storyState, addEdge } = context;
+    const { storyState, addEdge } = useCurrentStory();
 
     const navigate = useNavigate();
 

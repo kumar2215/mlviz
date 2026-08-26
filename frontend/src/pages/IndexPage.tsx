@@ -1,9 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/contexts/ConfigContext";
+import { useConfig } from "@/store/useAppStore";
 import { Link } from "react-router-dom";
 
 const IndexPage = () => {
-    const { config: storyConfig, loading, error } = useConfig();
+    const { config, loading, error } = useConfig();
 
     if (loading) {
         return (
@@ -15,7 +15,7 @@ const IndexPage = () => {
         );
     }
 
-    if (error || !storyConfig) {
+    if (error || !config) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
                 <div className="text-4xl font-bold font-mono text-red-600 mb-4">
@@ -48,7 +48,7 @@ const IndexPage = () => {
             </div>
 
             <div className="flex-1 mx-4 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 overflow-y-auto content-start">
-                {Object.entries(storyConfig.stories).map(([name, s]) => (
+                {Object.entries(config.stories).map(([name, s]) => (
                     <Link
                         key={s.name}
                         to={`/story/${name}`}

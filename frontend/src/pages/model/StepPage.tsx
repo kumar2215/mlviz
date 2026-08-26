@@ -1,12 +1,12 @@
 import ModelOptionsForm from "@/components/input/ModelOptionsForm";
 import { StepComponent } from "@/components/StepComponent";
 import { useModel } from "@/contexts/ModelContext";
-import { CurrentStoryContext } from "@/contexts/StoryContext";
+import { useCurrentStory } from "@/store/useAppStore";
 import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
 import { filterParameters } from "@/utils/conditions";
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type StepPageProps = Pick<
     ModelPageProps,
@@ -43,9 +43,7 @@ const StepPage: React.FC<StepPageProps> = ({
     }, [model, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const context = useContext(CurrentStoryContext);
-    if (!context) throw new Error("No context found.");
-    const { updateParams } = context;
+    const { updateParams } = useCurrentStory();
     const { recordStep } = useHistoryRecorder();
 
     const [stepParams, setStepParams] = useState<Parameters>(
