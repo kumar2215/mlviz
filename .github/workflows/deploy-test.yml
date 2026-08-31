@@ -100,7 +100,7 @@ jobs:
               env:
                   VITE_FAVICON: /mlviz_orange.png
                   VITE_TITLE: mlviz (test)
-                  VITE_CONFIG_FILE: test
+                  VITE_CONFIG_FILE: config
                   VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.backend-url }}
               run: |
                   echo "Building with backend URL: $VITE_API_BASE_URL"
