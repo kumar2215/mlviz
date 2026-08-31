@@ -259,7 +259,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                     boundary_resolution,
                     max_iterations,
                     // Use dataset from params if provided, otherwise use activeDataset from context
-                    dataset: params?.dataset || activeDataset || undefined,
+                    dataset: params?.dataset || (activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined),
                 };
 
                 const data = await trainAPI(requestParams);
@@ -381,7 +381,7 @@ const KMeansProviderInner: React.FC<{ children: ReactNode }> = ({
                     include_boundary,
                     boundary_resolution,
                     // Use dataset from request if provided, otherwise use activeDataset from context
-                    dataset: request?.dataset || activeDataset || undefined,
+                    dataset: request?.dataset || (activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined),
                 };
 
                 const data = await stepAPI(requestParams);

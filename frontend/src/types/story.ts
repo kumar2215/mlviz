@@ -128,14 +128,21 @@ export type Parameters = Record<string, any>;
 
 export type DatasetReference = { type: "reference"; name: string };
 
+export type Dataset =
+    | components["schemas"]["ClassificationDataset"]
+    | components["schemas"]["RegressionDataset"];
+
+export type PredefinedDataset =
+    | components["schemas"]["PredefinedClassificationDataset"]
+    | components["schemas"]["PredefinedRegressionDataset"];
+
+export type StoryDataset = Dataset | PredefinedDataset;
+
 interface BasePage {
     page_type: "static" | "dynamic";
     name?: string;
     parameters?: Parameters;
-    dataset?: 
-        | components["schemas"]["PredefinedDataset"] 
-        | components["schemas"]["DatasetResponse"]
-        | DatasetReference;
+    dataset?: StoryDataset | DatasetReference | null;
     note?: string;
 }
 
@@ -184,7 +191,7 @@ export interface Story {
 export interface Config {
     stories: Record<string, Story>;
     pages: Record<Index, PageUnion>;
-    datasets?: Record<string, components["schemas"]["PredefinedDataset"] | components["schemas"]["DatasetResponse"]>;
+    datasets?: Record<string, StoryDataset>;
 }
 
 export type TrainingParameters = Record<string, any>;

@@ -42,7 +42,7 @@ const PredictPage: React.FC<PredictPageProps> = ({
                 const newPoints: Record<string, number> = {};
                 let hasContentChanged = false;
 
-                currentFeatures.forEach((feature) => {
+                currentFeatures.forEach((feature: string) => {
                     const value = prevPoints[feature];
                     if (value !== undefined) {
                         newPoints[feature] = value;
