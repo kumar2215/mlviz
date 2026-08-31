@@ -1,418 +1,9 @@
 {
     "datasets": {},
     "stories": {
-        "survey_story": {
-            "name": "survey_story",
-            "description": "Learn how a decision tree works with the Iris dataset!",
-            "start_page": 0,
-            "nodes": [
-                {
-                    "index": "1014905555"
-                },
-                {
-                    "index": "2842271352"
-                },
-                {
-                    "index": "2094981965"
-                },
-                {
-                    "index": "3333589591"
-                },
-                {
-                    "index": "3858303656"
-                },
-                {
-                    "index": "52300805"
-                },
-                {
-                    "index": "3719022735"
-                },
-                {
-                    "index": "3938218143"
-                },
-                {
-                    "index": "3548984691"
-                },
-                {
-                    "index": "2745435572"
-                },
-                {
-                    "index": "3840011629"
-                },
-                {
-                    "index": "478951883"
-                },
-                {
-                    "index": "34680342"
-                },
-                {
-                    "index": "705804919"
-                },
-                {
-                    "index": "3929557980"
-                },
-                {
-                    "index": "1094533493"
-                },
-                {
-                    "index": "3915783174"
-                },
-                {
-                    "index": "3050687251"
-                }
-            ],
-            "edges": [
-                {
-                    "start": {
-                        "local_index": 0,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 1,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Using decision trees?",
-                        "description": "Learn how decision trees can be used",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 1,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 2,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Terminologies",
-                        "description": "Learn about terminologies within decision tree",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 2,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 3,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "What is Iris?",
-                        "description": "Learn about the dataset we'll be playing with",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 3,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 4,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Sample prediction",
-                        "description": "Try out how a \"set of questions\" works as a decision tree!",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 4,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 5,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "ActionCount",
-                        "name": "Predict any value",
-                        "description": "Play around with the model by trying out prediction!",
-                        "action": "predict",
-                        "min": 1
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 5,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 6,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Start training your models!",
-                        "description": "See how a model can be built, step by step.",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 6,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 7,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "ActionCount",
-                        "name": "Train the model",
-                        "description": "Train the model and press play to see how it works!",
-                        "action": "train",
-                        "min": 1
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 7,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 8,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Training with hyperparameters",
-                        "description": "Play around with hyperparameters!",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 8,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 9,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Parameter",
-                        "name": "Train with depth=3",
-                        "description": "Train the model with max_depth = 3!",
-                        "category": "trainParams",
-                        "parameter": "max_depth",
-                        "comparator": "=",
-                        "value": "3"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 9,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 10,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Build your own tree!",
-                        "description": "Try to build your own tree, using the same information the algorithms do!",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 10,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 11,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Metric",
-                        "name": "Get an accuracy > 0.9",
-                        "description": "Get your accuracy >= 0.9!",
-                        "metric": "test.accuracy",
-                        "comparator": ">=",
-                        "value": 0.9,
-                        "evaluation_mode": "latest"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 11,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Wait",
-                        "name": "Wrap up!",
-                        "description": "Congrats!",
-                        "wait": 2
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 13,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Check out the KNN visualisations",
-                        "description": "Optional exploration of our K-Nearest Neighbours visualisation"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 15,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Check out the KMeans visualisations",
-                        "description": "Optional exploration of our K-Means visualisation"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 16,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Check out the Linear Regression visualisations",
-                        "description": "Optional exploration of our Linear Regression visualisation"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 13,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 14,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Prediction visualisation",
-                        "description": "See how your points are predicted with KNN!"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 14,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 13,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Back to the visualisation",
-                        "description": "See how the dataset is split within KNN"
-                    }
-                }
-            ]
-        },
-        "kmeans": {
-            "name": "kmeans",
-            "description": "Kmeans clustering",
-            "start_page": 0,
-            "nodes": [
-                {
-                    "index": "1094533493"
-                }
-            ],
-            "edges": []
-        },
-        "linear": {
-            "name": "linear",
-            "description": "Linear Regression",
-            "start_page": 0,
-            "nodes": [
-                {
-                    "index": "3915783174"
-                },
-                {
-                    "index": "3050687251"
-                }
-            ],
-            "edges": [
-                {
-                    "start": {
-                        "local_index": 16,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 17,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Gradient descent visualisation",
-                        "description": "Step through gradient descent with this visualisation!"
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 17,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 16,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Train visualisation with OLS",
-                        "description": "Train the visualisation using OLS."
-                    }
-                },
-                {
-                    "start": {
-                        "local_index": 17,
-                        "story_name": null
-                    },
-                    "end": {
-                        "local_index": 12,
-                        "story_name": null
-                    },
-                    "condition": {
-                        "condition_type": "Bypass",
-                        "name": "Back to story",
-                        "description": "Return to the main story"
-                    }
-                }
-            ]
-        },
         "decision_tree_sample": {
-            "name": "decision_tree_sample",
-            "description": "",
+            "name": "decision_tree_iris",
+            "description": "Sample for decision tree with iris",
             "start_page": 0,
             "nodes": [
                 {
@@ -454,10 +45,204 @@
                         "condition_type": "Metric",
                         "name": "Reach the desired accuracy!",
                         "description": "Make it so your accuracy is at least 0.9!",
-                        "metric": "accuracy",
+                        "metric": "train.accuracy",
                         "comparator": ">=",
                         "value": 0.9,
-                        "evaluation_mode": "any"
+                        "evaluation_mode": "latest"
+                    }
+                }
+            ]
+        },
+        "knn": {
+            "name": "knn",
+            "description": "KNN Classifier",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "705804919"
+                },
+                {
+                    "index": "3929557980"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Prediction visualisation",
+                        "description": "See how your points are predicted with KNN!"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Back to the visualisation",
+                        "description": "See how the dataset is split within KNN"
+                    }
+                }
+            ]
+        },
+        "kmeans": {
+            "name": "kmeans",
+            "description": "Kmeans clustering",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "3176057943"
+                }
+            ],
+            "edges": []
+        },
+        "linear": {
+            "name": "linear",
+            "description": "Linear Regression",
+            "start_page": 1,
+            "nodes": [
+                {
+                    "index": "842744718"
+                },
+                {
+                    "index": "2222401443"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Gradient descent visualisation",
+                        "description": "Step through gradient descent with this visualisation!"
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "Train visualisation with OLS",
+                        "description": "Train the visualisation using OLS."
+                    }
+                }
+            ]
+        },
+        "svm": {
+            "name": "svm",
+            "description": "Support Vector Machine",
+            "start_page": 0,
+            "nodes": [
+                {
+                    "index": "3427042873"
+                },
+                {
+                    "index": "1058845322"
+                },
+                {
+                    "index": "2860870868"
+                }
+            ],
+            "edges": [
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "predict",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "step",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": null,
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 0,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "train",
+                        "description": null
+                    }
+                },
+                {
+                    "start": {
+                        "local_index": 1,
+                        "story_name": null
+                    },
+                    "end": {
+                        "local_index": 2,
+                        "story_name": null
+                    },
+                    "condition": {
+                        "condition_type": "Bypass",
+                        "name": "predict",
+                        "description": null
                     }
                 }
             ]
@@ -550,7 +335,7 @@
         "3548984691": {
             "name": "decision_tree_train_wparams",
             "page_type": "dynamic",
-            "note": "The `max-depth` parameter refers to the depth of the tree: effectively, how many questions can you ask?",
+            "note": "",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "train",
@@ -563,7 +348,7 @@
         "3719022735": {
             "name": "decision_tree_train_noparams",
             "page_type": "dynamic",
-            "note": "",
+            "note": "The `max-depth` parameter refers to the depth of the tree: effectively, how many questions can you ask?",
             "dynamic_type": "model",
             "model_name": "decision_tree",
             "component_type": "train",
@@ -589,7 +374,7 @@
             "page_type": "static",
             "note": "",
             "parameters": {
-                "text": "# Congratulations!\n\nYou've learnt about what a decision tree does!\n\nOptionally, you can check out our current work on the remaining visualisations!",
+                "text": "# Congratulations!\n\nYou've learnt about what a decision tree does!",
                 "link": null
             }
         },
@@ -720,6 +505,54 @@
             "parameters": {
                 "text": "# Nicely done!",
                 "link": ""
+            }
+        },
+        "3427042873": {
+            "name": "SVM Train",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        "2860870868": {
+            "name": "SVM Predict",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        "1058845322": {
+            "name": "SVM Step",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "step",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
             }
         }
     }
