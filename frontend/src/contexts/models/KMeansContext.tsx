@@ -16,7 +16,7 @@ import {
     type KMeansTrainRequest,
     type KMeansTrainResponse,
 } from "@/api/kmeans";
-import { useDataset } from "@/contexts/DatasetContext";
+import { useDataset } from "@/store/useAppStore";
 import React, {
     createContext,
     useCallback,

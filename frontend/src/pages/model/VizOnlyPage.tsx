@@ -1,8 +1,7 @@
 import { TrainComponent } from "@/components/TrainComponent";
 import { useModel } from "@/contexts/ModelContext";
-import { CurrentStoryContext } from "@/contexts/StoryContext";
-import type { ModelPage as ModelPageProps } from "@/types/story";
-import { useContext, useEffect } from "react";
+import { useCurrentStory } from "@/store/useAppStore";
+import { useEffect } from "react";
 
 type VizOnlyPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
 
@@ -17,8 +16,9 @@ const VizOnlyPage: React.FC<VizOnlyPageProps> = ({
     const visualizationData = (model as any).visualizationData || (model as any).data;
     const loadVisualization = (model as any).loadVisualization || (model as any).train;
 
-    const context = useContext(CurrentStoryContext);
-    if (!context) throw new Error("No context found.");
+    // We still call useCurrentStory to ensure this page is used within a story context,
+    // even if we don't use its return values directly in this component.
+    useCurrentStory();
 
     useEffect(() => {
         if (loadVisualization) {

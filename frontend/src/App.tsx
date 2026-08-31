@@ -1,9 +1,7 @@
 // src/App.tsx
-import { ConfigProvider } from "@/contexts/ConfigContext";
-import { DatasetProvider } from "@/contexts/DatasetContext";
-import { StoryProvider } from "@/contexts/StoryContext";
+import { useConfigActions } from "@/store/useAppStore";
 import StoryPageWrapper from "@/pages/StoryPageWrapper";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import IndexPage from "./pages/IndexPage";
 
@@ -37,14 +35,12 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
 }
 
 function App() {
-    const [blockReason, setBlockReason] = useState<BlockReason>(getBlockReason);
+    const { fetchConfig } = useConfigActions();
+    const blockReason = getBlockReason();
 
     useEffect(() => {
-        if (isMobileBrowser) return;
-        const handler = () => setBlockReason(getBlockReason());
-        window.addEventListener("resize", handler);
-        return () => window.removeEventListener("resize", handler);
-    }, []);
+        fetchConfig();
+    }, [fetchConfig]);
 
     if (blockReason) {
         return <MobileBlockScreen reason={blockReason} />;
@@ -52,22 +48,16 @@ function App() {
 
     return (
         <div className="w-screen h-screen overflow-hidden">
-            <ConfigProvider>
-                <DatasetProvider>
-                    <StoryProvider>
-                        <Routes>
-                            <Route
-                                path="/"
-                                element={<IndexPage />}
-                            />
-                            <Route
-                                path="/story/:storyName"
-                                element={<StoryPageWrapper />}
-                            />
-                        </Routes>
-                    </StoryProvider>
-                </DatasetProvider>
-            </ConfigProvider>
+            <Routes>
+                <Route
+                    path="/"
+                    element={<IndexPage />}
+                />
+                <Route
+                    path="/story/:storyName"
+                    element={<StoryPageWrapper />}
+                />
+            </Routes>
         </div>
     );
 }

@@ -15,7 +15,7 @@ import {
     type LinearRegressionTrainRequest,
     type LinearRegressionTrainResponse
 } from "@/api/linear_regression";
-import { useDataset } from "@/contexts/DatasetContext";
+import { useDataset } from "@/store/useAppStore";
 import React, {
     createContext,
     useCallback,
