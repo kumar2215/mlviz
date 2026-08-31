@@ -473,7 +473,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
                 parent_samples_mask: node.samples_mask || null, // Use node's sample indices
                 criterion: 'gini',
                 max_thresholds: 100,
-                dataset: activeDataset || undefined,
+                dataset: activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined,
             });
             
             setCurrentModelData({
@@ -512,7 +512,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
                 threshold: selectedThreshold,
                 parent_samples_mask: node.samples_mask || null, // Use node's sample indices
                 criterion: 'gini',
-                dataset: activeDataset || undefined,
+                dataset: activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined,
             });
             
             console.log('[ManualTree] Node stats received:', nodeStats);
@@ -576,7 +576,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
             try {
                 const result = await evaluateManualTreeAPI({
                     tree: newTree,
-                    dataset: activeDataset || undefined,
+                    dataset: activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined,
                 });
                 
                 // Update with metrics
@@ -645,7 +645,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
             // Clean tree to remove frontend-only fields like 'terminal'
             const result = await evaluateManualTreeAPI({
                 tree: updatedTree,
-                dataset: activeDataset || undefined,
+                dataset: activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined,
             });
             
             // Update with metrics
@@ -675,7 +675,7 @@ const DecisionTreeProviderInner: React.FC<{ children: ReactNode }> = ({ children
             console.log('[ManualTree] Evaluating tree...');
             const result = await evaluateManualTreeAPI({
                 tree: currentModelData.tree,
-                dataset: activeDataset || undefined,
+                dataset: activeDataset?.type === "custom" || activeDataset?.type === "predefined" ? activeDataset : undefined,
             });
             
             console.log('[ManualTree] Evaluation result:', result);

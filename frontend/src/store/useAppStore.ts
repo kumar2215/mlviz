@@ -6,8 +6,12 @@ import type { Config, EdgeNode, HistoryEntry, Parameters, StoryHistory } from "@
 import type { components } from "@/types/api";
 
 // DATASET TYPES
-export type Dataset = components["schemas"]["Dataset"];
-export type PredefinedDataset = components["schemas"]["PredefinedDataset"];
+export type Dataset =
+    | components["schemas"]["ClassificationDataset"]
+    | components["schemas"]["RegressionDataset"];
+export type PredefinedDataset =
+    | components["schemas"]["PredefinedClassificationDataset"]
+    | components["schemas"]["PredefinedRegressionDataset"];
 export type ActiveDataset = PredefinedDataset | Dataset;
 
 // STORY TYPES

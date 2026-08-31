@@ -26,7 +26,6 @@ const Visualisation: React.FC<VisualisationProps> = ({ points }) => {
         currentBias,
         decisionBoundary,
         makePrediction,
-        predictionData,
         predictionResult
     } = useSVMContext();
 

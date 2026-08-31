@@ -21,7 +21,6 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
         currentSlope,
         currentIntercept,
         setCurrentLine,
-        computeR2,
         visualizationData,
         evaluateLine,
     } = useLinearRegression();
@@ -50,17 +49,6 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
         (yRange ? ySpan * 1.5 : 500);
     const iStep = (iMax - iMin) / 1000;
 
-    const r2 = computeR2(currentSlope, currentIntercept);
-
-    const r2Color =
-        r2 >= 0.9
-            ? "text-emerald-600"
-            : r2 >= 0.7
-              ? "text-blue-600"
-              : r2 >= 0.5
-                ? "text-amber-600"
-                : "text-red-500";
-
     const fs = (n: number) => `${n * scaleFactor}px`;
 
     return (
@@ -74,19 +62,6 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
             title="Line Controls"
             style={{ width: fs(272) }}
         >
-            {/* R² live readout
-            <div
-                className="rounded-xl border border-slate-100 bg-slate-50 flex flex-col items-center mb-4"
-                style={{ padding: fs(10), gap: fs(2) }}
-            >
-                <span className="uppercase tracking-widest text-slate-400 font-semibold" style={{ fontSize: fs(9) }}>
-                    Live R²
-                </span>
-                <span className={`font-mono font-bold ${r2Color}`} style={{ fontSize: fs(26) }}>
-                    {r2.toFixed(4)}
-                </span>
-            </div> */}
-
             {/* Intercept — standard range slider */}
             <div
                 className="flex flex-col"

@@ -236,7 +236,7 @@ function splitLines(text: string): {
 
 // ── Main export ───────────────────────────────────────────────────────────────
 
-export const Blockquote: React.FC<BlockquoteProps> = ({ children, node }) => {
+export const Blockquote: React.FC<BlockquoteProps> = ({ node }) => {
     const firstPara = node?.children?.find(
         (c: any) => c.type === "element" && c.tagName === "p",
     );

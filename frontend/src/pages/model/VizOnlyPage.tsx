@@ -1,6 +1,7 @@
 import { TrainComponent } from "@/components/TrainComponent";
 import { useModel } from "@/contexts/ModelContext";
 import { useCurrentStory } from "@/store/useAppStore";
+import type { ModelPage as ModelPageProps } from "@/types/story";
 import { useEffect } from "react";
 
 type VizOnlyPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
