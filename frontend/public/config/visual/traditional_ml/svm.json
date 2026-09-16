@@ -1,0 +1,97 @@
+{
+    "name": "Support Vector Machine",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        {
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "step",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        {
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "svm",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "step",
+                "description": null
+            }
+        },
+        {
+            "from": 1,
+            "to": 2,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "predict",
+                "description": null
+            }
+        },
+        {
+            "from": 0,
+            "to": 2,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "predict",
+                "description": null
+            }
+        },
+        {
+            "from": 2,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": null,
+                "description": null
+            }
+        },
+        {
+            "from": 1,
+            "to": 0,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "train",
+                "description": null
+            }
+        }
+    ]
+}

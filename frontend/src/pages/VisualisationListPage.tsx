@@ -1,37 +1,45 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/store/useConfig";
-import { Link } from "react-router-dom";
+import { useVisualisation, setCurrentVisualisation } from "@/store/useVisualisation";
+import { Link, useParams } from "react-router-dom";
+import { useEffect } from "react";
 
-const IndexPage = () => {
-    const { config, loading, error } = useConfig();
+export default function VisualisationListPage() {
+    const { categoryName: category} = useParams<{ categoryName: string }>();
+    const { visualisations, fetchVisualisations, loading, error } = useVisualisation();
 
-    if (loading) {
+    if (!category) {
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
-                    Loading configurations...
+                <div className="text-2xl font-mono text-fuchsia-600">
+                    No category selected
                 </div>
             </div>
         );
     }
 
-    if (error || !config) {
+    useEffect(() => {
+        fetchVisualisations(category);
+    }, [fetchVisualisations]);
+
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+                <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
+                    Loading list of visualisations...
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !visualisations) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
                 <div className="text-4xl font-bold font-mono text-red-600 mb-4">
-                    Error loading config
+                    Error loading visualisations
                 </div>
                 <div className="text-sm font-mono text-gray-600 mb-8">
-                    {error || "Config not found"}
+                    {error || "Visualisations not found"}
                 </div>
-                <Button
-                    onClick={() => {
-                        window.location.href = window.location.pathname;
-                    }}
-                    className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-200 rounded-full px-6"
-                >
-                    Reset to Default Config
-                </Button>
             </div>
         );
     }
@@ -48,19 +56,17 @@ const IndexPage = () => {
             </div>
 
             <div className="flex-1 mx-4 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 overflow-y-auto content-start">
-                {config.categories.map((c) => (
+                {visualisations && Object.values(visualisations).filter((v) => v.category === category).map((v) => (
                     <Link
-                        key={c.name}
-                        to={`/category/${c.config_path}`}
+                        key={`${v.category}-${v.name}`}
+                        to={`/viz/${v.path}`}
                     >   
-                        <Button className="group w-full flex flex-row justify-start items-center gap-5 text-wrap bg-gradient-to-r from-gray-50 to-white text-gray-800 hover:from-red-500 hover:to-fuchsia-600 hover:text-white transition-all duration-100 hover:shadow-lg font-light hover:font-medium rounded-3xl py-16 px-8 scroll-auto">
-                            {/* <img src={"mlviz.png"} alt={c.name} className="w-12 h-12" /> */}
+                        <Button 
+                            onClick={() => setCurrentVisualisation(v)}
+                            className="group w-full flex flex-col items-start justify-center text-wrap bg-gradient-to-r from-gray-50 to-white text-gray-800 hover:from-red-500 hover:to-fuchsia-600 hover:text-white transition-all duration-100 hover:shadow-lg font-light hover:font-medium rounded-3xl py-16 px-8 scroll-auto">
                             <span className="font-mono text-left tracking-tighter text-2xl text-wrap bg-gradient-to-r from-fuchsia-500 to-blue-600 bg-clip-text text-transparent group-hover:from-fuchsia-50 group-hover:to-blue-50 group-hover:font-bold">
-                                {c.name}
+                                {v.name}
                             </span>
-                            {/* <span className="text-sm tracking-tight text-left text-wrap mt-2">
-                                {s.description}
-                            </span> */}
                         </Button>
                     </Link>
                 ))}
@@ -83,5 +89,3 @@ const IndexPage = () => {
         </div>
     );
 };
-
-export default IndexPage;

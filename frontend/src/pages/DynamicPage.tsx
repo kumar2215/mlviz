@@ -1,7 +1,8 @@
-import { useConfig, useDataset } from "@/store/useAppStore";
+import { useConfig } from "@/store/useConfig";
+import { useDataset } from "@/store/useDataset";
 import { ModelNameProvider, ModelProvider } from "@/contexts/ModelContext";
 import ModelPage from "@/pages/model/ModelPage";
-import type { DynamicPageUnion } from "@/types/story";
+import type { DynamicPageUnion } from "@/types/page";
 import React, { useEffect } from "react";
 
 interface DynamicPageProps {

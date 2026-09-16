@@ -1,10 +1,10 @@
 import ModelOptionsForm from "@/components/input/ModelOptionsForm";
 import { StepComponent } from "@/components/StepComponent";
 import { useModel } from "@/contexts/ModelContext";
-import { useCurrentStory } from "@/store/useAppStore";
-import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
+import { useVisualisation } from "@/store/useVisualisation";
+import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
-import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
+import type { ModelPage as ModelPageProps, Parameters } from "@/types/page";
 import { filterParameters } from "@/utils/conditions";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
@@ -43,8 +43,8 @@ const StepPage: React.FC<StepPageProps> = ({
     }, [model, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const { updateParams } = useCurrentStory();
-    const { recordStep } = useHistoryRecorder();
+    const { updateParams } = useVisualisation();
+    const { recordStep } = useVisualisationHistoryRecorder();
 
     const [stepParams, setStepParams] = useState<Parameters>(
         parameters == null ? lastParams : parameters

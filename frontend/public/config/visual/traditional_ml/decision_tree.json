@@ -1,0 +1,51 @@
+{
+    "name": "Decision Tree",
+    "pages": [
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/fyp/dtree.md"
+        },
+        {
+            "page_type": "dynamic",
+            "note": "Click on the node to get started! You'll see a popup on your right where you can then look at the information that the algorithm decides, like information gain.",
+            "dynamic_type": "model",
+            "model_name": "decision_tree",
+            "component_type": "manual",
+            "problem_type": "classifier",
+            "dataset": null,
+            "parameters": {}
+        },
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "# Nicely done!",
+            "path": ""
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Build a tree!",
+                "description": null
+            }
+        },
+        {
+            "from": 1,
+            "to": 2,
+            "condition": {
+                "condition_type": "Metric",
+                "name": "Reach the desired accuracy!",
+                "description": "Make it so your accuracy is at least 0.9!",
+                "metric": "train.accuracy",
+                "comparator": ">=",
+                "value": 0.9,
+                "evaluation_mode": "latest"
+            }
+        }
+    ]
+}

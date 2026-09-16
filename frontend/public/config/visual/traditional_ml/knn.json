@@ -1,0 +1,44 @@
+{
+    "name": "KNN",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "train",
+            "problem_type": "classifier",
+            "dataset": null
+        },
+        {
+            "name": "",
+            "page_type": "dynamic",
+            "note": null,
+            "dynamic_type": "model",
+            "model_name": "knn",
+            "component_type": "predict",
+            "problem_type": "classifier",
+            "dataset": null
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Prediction visualisation",
+                "description": "See how your points are predicted with KNN!"
+            }
+        },
+        {
+            "from": 1,
+            "to": 0,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Back to the visualisation",
+                "description": "See how the dataset is split within KNN"
+            }
+        }
+    ]
+}

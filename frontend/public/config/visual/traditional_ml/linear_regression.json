@@ -1,0 +1,62 @@
+{
+    "name": "Linear Regression",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "note": "Use the HUD to change your line, or continue running the gradient descent! (This page is a WIP - we will add a Loss Map soon)",
+            "dynamic_type": "model",
+            "model_name": "linear",
+            "component_type": "step",
+            "problem_type": "regression",
+            "dataset": null,
+            "parameters": {
+                "feature_x": 0,
+                "fit_intercept": true,
+                "test_size": 0.2,
+                "random_state": 42,
+                "learning_rate": 0.01
+            }
+        },
+        {
+            "page_type": "dynamic",
+            "note": "Use the HUD to change your line (This page is a WIP - we will add a Loss Map soon)",
+            "dynamic_type": "model",
+            "model_name": "linear",
+            "component_type": "train",
+            "problem_type": "regression",
+            "dataset": {
+                "type": "predefined_regression",
+                "name": "simple",
+                "test_size": 0.25,
+                "random_state": 2025
+            },
+            "parameters": {
+                "feature_x": 0,
+                "fit_intercept": true,
+                "test_size": 0.2,
+                "random_state": 42,
+                "learning_rate": 0.01
+            }
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Train visualisation with OLS",
+                "description": "Train the visualisation using OLS."
+            }
+        },
+        {
+            "from": 1,
+            "to": 0,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Gradient descent visualisation",
+                "description": "Step through gradient descent with this visualisation!"
+            }
+        }
+    ]
+}

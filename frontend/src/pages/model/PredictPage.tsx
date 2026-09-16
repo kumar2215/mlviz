@@ -2,9 +2,9 @@ import PredictionInputForm from "@/components/input/PredictionInputForm";
 import { PredictComponent } from "@/components/PredictComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
-import { useCurrentStory } from "@/store/useAppStore";
-import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
-import type { ModelPage as ModelPageProps } from "@/types/story";
+import { useVisualisation } from "@/store/useVisualisation";
+import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import type { ModelPage as ModelPageProps } from "@/types/page";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
 type PredictPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
@@ -14,8 +14,8 @@ const PredictPage: React.FC<PredictPageProps> = ({
     parameters,
     dataset,
 }) => {
-    const { updateParams } = useCurrentStory();
-    const { recordPredict } = useHistoryRecorder();
+    const { updateParams } = useVisualisation();
+    const { recordPredict } = useVisualisationHistoryRecorder();
 
     const {
         currentModelData,

@@ -1,7 +1,7 @@
 import { TrainComponent } from "@/components/TrainComponent";
 import { useModel } from "@/contexts/ModelContext";
-import { useCurrentStory } from "@/store/useAppStore";
-import type { ModelPage as ModelPageProps } from "@/types/story";
+import { useVisualisation } from "@/store/useVisualisation";
+import type { ModelPage as ModelPageProps } from "@/types/page";
 import { useEffect } from "react";
 
 type VizOnlyPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
@@ -19,7 +19,7 @@ const VizOnlyPage: React.FC<VizOnlyPageProps> = ({
 
     // We still call useCurrentStory to ensure this page is used within a story context,
     // even if we don't use its return values directly in this component.
-    useCurrentStory();
+    useVisualisation();
 
     useEffect(() => {
         if (loadVisualization) {

@@ -14,7 +14,7 @@ import {
     type KNNVisualisationRequest,
     type KNNVisualisationResponse
 } from "@/api/knn";
-import { useDataset } from "@/store/useAppStore";
+import { useDataset } from "@/store/useDataset";
 import React, {
     createContext,
     useCallback,

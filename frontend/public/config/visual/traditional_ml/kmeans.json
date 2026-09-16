@@ -1,0 +1,20 @@
+{
+    "name": "KMeans",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "note": "Use the top-right HUD to simulate the algorithm! Feel free to intervene and choose your centroids at any time.",
+            "dynamic_type": "model",
+            "model_name": "kmeans",
+            "component_type": "step",
+            "problem_type": "clustering",
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "include_boundary": true,
+                "max_iterations": 100
+            }
+        }
+    ],
+    "transitions": []
+}

@@ -1,26 +1,15 @@
-/**
- * useHistoryRecorder
- *
- * Provides typed action-recording helpers that write into the active story's
- * history log via the Zustand story store.
- *
- * Safe to use outside of a story (e.g. standalone model pages) — all helpers
- * become no-ops when there is no active story.
- */
+import type { ActionType, HistoryEntry } from "@/types/history";
+import type { Parameters } from "@/types/page";
+import { useVisualisation } from "@/store/useVisualisation";
 
-import { useCurrentStory } from "@/store/useAppStore";
-import type { ActionType, HistoryEntry, Parameters } from "@/types/story";
-
-export function useHistoryRecorder() {
-    const context = useCurrentStory();
-    // Return a no-op recorder when not inside a story
-    const recordAction = context?.recordAction ?? (() => {});
+export function useVisualisationHistoryRecorder() {
+    const { recordAction } = useVisualisation();
 
     const record = (
         type: ActionType,
-        extra?: Omit<HistoryEntry, "type" | "timestamp">
+        extra?: Omit<HistoryEntry, "actionType" | "timestamp">
     ) => {
-        recordAction({ type, timestamp: Date.now(), ...extra });
+        recordAction({ actionType: type, timestamp: Date.now(), ...extra });
     };
 
     return {

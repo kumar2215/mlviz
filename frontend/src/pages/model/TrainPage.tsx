@@ -3,10 +3,10 @@ import { Results } from "@/components/results/Results";
 import { TrainComponent } from "@/components/TrainComponent";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useModel } from "@/contexts/ModelContext";
-import { useCurrentStory } from "@/store/useAppStore";
-import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
+import { useVisualisation } from "@/store/useVisualisation";
+import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
-import type { ModelPage as ModelPageProps, Parameters } from "@/types/story";
+import type { ModelPage as ModelPageProps, Parameters } from "@/types/page";
 import { filterParameters } from "@/utils/conditions";
 import { useEffect, useMemo, useRef, useState } from "react";
 
@@ -49,8 +49,8 @@ const TrainPage: React.FC<TrainPageProps> = ({
     }, [(model as any).getFeatureNames, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const { updateParams } = useCurrentStory();
-    const { recordTrain } = useHistoryRecorder();
+    const { updateParams } = useVisualisation();
+    const { recordTrain } = useVisualisationHistoryRecorder();
 
     useEffect(() => {
         const fetchParameters = async () => {

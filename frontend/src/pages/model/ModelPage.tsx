@@ -3,7 +3,7 @@ import PredictPage from "@/pages/model/PredictPage";
 import StepPage from "@/pages/model/StepPage";
 import TrainPage from "@/pages/model/TrainPage";
 import VizOnlyPage from "@/pages/model/VizOnlyPage";
-import type { ModelPage as ModelPageType } from "@/types/story";
+import type { ModelPage as ModelPageType } from "@/types/page";
 
 type ModelPageProps = Omit<
     ModelPageType,

@@ -13,10 +13,10 @@ import {
     predictWithInstructions,
     type DecisionTreeResponse,
 } from "@/api/dt";
-import { useDataset } from "@/store/useAppStore";
+import { useDataset } from "@/store/useDataset";
 import type { components } from "@/types/api";
 import type { ClassificationMetrics, TreeNode } from "@/types/model";
-import type { Parameters } from "@/types/story";
+import type { Parameters } from "@/types/page";
 import React, {
     createContext,
     useCallback,

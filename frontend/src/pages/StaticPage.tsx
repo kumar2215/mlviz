@@ -1,8 +1,8 @@
 import MarkdownWrapper from "@/components/markdown/MarkdownWrapper";
-import type { StaticPageParameters } from "@/types/story";
+import type { StaticPageParameters } from "@/types/page";
 import React, { useEffect, useState } from "react";
 
-const StaticPage: React.FC<StaticPageParameters> = ({ text, link }) => {
+const StaticPage: React.FC<StaticPageParameters> = ({ text, path }) => {
     const [content, setContent] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -14,12 +14,12 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, link }) => {
             return;
         }
 
-        // If link is provided, fetch the markdown file
-        if (link) {
+        // If path is provided, fetch the markdown file
+        if (path) {
             setLoading(true);
             setError(null);
 
-            fetch(link)
+            fetch(path)
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error(
@@ -37,7 +37,7 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, link }) => {
                     setLoading(false);
                 });
         }
-    }, [text, link]);
+    }, [text, path]);
 
     return (
         <div className="flex justify-center h-full w-full overflow-y-auto bg-gradient-to-br from-blue-50 to-purple-50">

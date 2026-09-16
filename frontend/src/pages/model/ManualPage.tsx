@@ -1,8 +1,8 @@
 import { ManualComponent } from "@/components/ManualComponent";
 import { Results } from "@/components/results/Results";
 import { useModel } from "@/contexts/ModelContext";
-import { useHistoryRecorder } from "@/hooks/useHistoryRecorder";
-import type { ModelPage as ModelPageProps } from "@/types/story";
+import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import type { ModelPage as ModelPageProps } from "@/types/page";
 import React, { useEffect, useRef } from "react";
 
 type ManualPageProps = Pick<
@@ -18,7 +18,7 @@ const ManualPage: React.FC<ManualPageProps> = ({
 
     const { currentModelData, resetModelData } = useModel();
 
-    const { recordManualEvaluate } = useHistoryRecorder();
+    const { recordManualEvaluate } = useVisualisationHistoryRecorder();
 
     // Track whether the initial model data has been set so we don't fire on mount
     const hasInitialData = useRef(false);
