@@ -1,5 +1,6 @@
 // src/App.tsx
 import { useConfig } from "@/store/useConfig";
+import StoryListPage from "@/pages/StoryListPage";
 import StoryPageWrapper from "@/pages/StoryPageWrapper";
 import VisualisationPage from "@/pages/VisualisationPage";
 import VisualisationListPage from "@/pages/VisualisationListPage";
@@ -60,11 +61,15 @@ function App() {
                     element={<VisualisationListPage />}
                 />
                 <Route
+                    path="/stories"
+                    element={<StoryListPage />}
+                />
+                <Route
                     path="/story/:storyName"
                     element={<StoryPageWrapper />}
                 />
                 <Route
-                    path="/viz/:visualisation"
+                    path="/viz/:visualisationName"
                     element={<VisualisationPage />}
                 />
             </Routes>

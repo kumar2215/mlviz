@@ -238,7 +238,7 @@ function retrieveBlacklistParameters(
 
 export function filterParameters(
     response: ModelOption[],
-    parameters?: Record<string, string[]>
+    parameters?: Record<string, any>
 ) {
     if (!parameters) return response;
     return retrieveBlacklistParameters(

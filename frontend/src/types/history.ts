@@ -17,9 +17,16 @@ export interface HistoryEntry {
     metrics?: Record<string, any>; // for train / step results
 }
 
-export interface VisualisationHistoryState {
-    visualisation_id: string;
+export interface HistoryState {
     params: Record<string, Parameters>;
     entries: HistoryEntry[];
     path: number[];
+}
+
+export interface VisualisationHistoryState extends HistoryState {
+    visualisation_id: string;
+}
+
+export interface StoryHistoryState extends HistoryState {
+    story_id: string;
 }

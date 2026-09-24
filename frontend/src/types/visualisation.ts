@@ -10,7 +10,7 @@ export interface Transition {
 export default interface Visualisation {
     category: string;
     name: string;
-    path: string;
+    display_name: string;
     pages: PageUnion[];
     transitions: Transition[];
 }

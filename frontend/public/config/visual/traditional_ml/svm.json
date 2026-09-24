@@ -1,13 +1,10 @@
 {
-    "name": "Support Vector Machine",
+    "display_name": "Support Vector Machine",
     "pages": [
         {
+            "name": "SVMTrain",
             "page_type": "dynamic",
             "note": null,
-            "dynamic_type": "model",
-            "model_name": "svm",
-            "component_type": "train",
-            "problem_type": "classifier",
             "dataset": null,
             "parameters": {
                 "visualisation_features": [0, 1],
@@ -17,12 +14,9 @@
             }
         },
         {
+            "name": "SVMStep",
             "page_type": "dynamic",
             "note": null,
-            "dynamic_type": "model",
-            "model_name": "svm",
-            "component_type": "step",
-            "problem_type": "classifier",
             "dataset": null,
             "parameters": {
                 "visualisation_features": [0, 1],
@@ -32,12 +26,9 @@
             }
         },
         {
+            "name": "SVMPredict",
             "page_type": "dynamic",
             "note": null,
-            "dynamic_type": "model",
-            "model_name": "svm",
-            "component_type": "predict",
-            "problem_type": "classifier",
             "dataset": null,
             "parameters": {
                 "visualisation_features": [0, 1],

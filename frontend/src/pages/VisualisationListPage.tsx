@@ -1,11 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { useVisualisation, setCurrentVisualisation } from "@/store/useVisualisation";
+import { useVisualisation } from "@/store/useVisualisation";
 import { Link, useParams } from "react-router-dom";
-import { useEffect } from "react";
 
 export default function VisualisationListPage() {
     const { categoryName: category} = useParams<{ categoryName: string }>();
-    const { visualisations, fetchVisualisations, loading, error } = useVisualisation();
+    const { visualisations, loading, error } = useVisualisation();
 
     if (!category) {
         return (
@@ -16,10 +15,6 @@ export default function VisualisationListPage() {
             </div>
         );
     }
-
-    useEffect(() => {
-        fetchVisualisations(category);
-    }, [fetchVisualisations]);
 
     if (loading) {
         return (
@@ -59,13 +54,12 @@ export default function VisualisationListPage() {
                 {visualisations && Object.values(visualisations).filter((v) => v.category === category).map((v) => (
                     <Link
                         key={`${v.category}-${v.name}`}
-                        to={`/viz/${v.path}`}
+                        to={`/viz/${v.name}`}
                     >   
-                        <Button 
-                            onClick={() => setCurrentVisualisation(v)}
+                        <Button
                             className="group w-full flex flex-col items-start justify-center text-wrap bg-gradient-to-r from-gray-50 to-white text-gray-800 hover:from-red-500 hover:to-fuchsia-600 hover:text-white transition-all duration-100 hover:shadow-lg font-light hover:font-medium rounded-3xl py-16 px-8 scroll-auto">
                             <span className="font-mono text-left tracking-tighter text-2xl text-wrap bg-gradient-to-r from-fuchsia-500 to-blue-600 bg-clip-text text-transparent group-hover:from-fuchsia-50 group-hover:to-blue-50 group-hover:font-bold">
-                                {v.name}
+                                {v.display_name}
                             </span>
                         </Button>
                     </Link>

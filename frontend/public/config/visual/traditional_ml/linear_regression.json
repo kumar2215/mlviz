@@ -1,13 +1,10 @@
 {
-    "name": "Linear Regression",
+    "display_name": "Linear Regression",
     "pages": [
         {
+            "name": "LinearRegressionStep",
             "page_type": "dynamic",
             "note": "Use the HUD to change your line, or continue running the gradient descent! (This page is a WIP - we will add a Loss Map soon)",
-            "dynamic_type": "model",
-            "model_name": "linear",
-            "component_type": "step",
-            "problem_type": "regression",
             "dataset": null,
             "parameters": {
                 "feature_x": 0,
@@ -18,12 +15,9 @@
             }
         },
         {
+            "name": "LinearRegressionTrain",
             "page_type": "dynamic",
             "note": "Use the HUD to change your line (This page is a WIP - we will add a Loss Map soon)",
-            "dynamic_type": "model",
-            "model_name": "linear",
-            "component_type": "train",
-            "problem_type": "regression",
             "dataset": {
                 "type": "predefined_regression",
                 "name": "simple",

@@ -1,24 +1,19 @@
 {
-    "name": "KNN",
+    "display_name": "KNN",
     "pages": [
         {
+            "name": "KNNTrain",
             "page_type": "dynamic",
             "note": null,
-            "dynamic_type": "model",
-            "model_name": "knn",
-            "component_type": "train",
-            "problem_type": "classifier",
-            "dataset": null
+            "dataset": null,
+            "parameters": {}
         },
         {
-            "name": "",
+            "name": "KNNPredict",
             "page_type": "dynamic",
             "note": null,
-            "dynamic_type": "model",
-            "model_name": "knn",
-            "component_type": "predict",
-            "problem_type": "classifier",
-            "dataset": null
+            "dataset": null,
+            "parameters": {}
         }
     ],
     "transitions": [

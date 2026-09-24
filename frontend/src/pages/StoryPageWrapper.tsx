@@ -1,34 +1,126 @@
 import { Button } from "@/components/ui/button";
-import { StoryPage } from "@/pages/StoryPage";
-import { useCurrentStoryActions, useAppStore } from "@/store/useAppStore";
-import { useShallow } from "zustand/react/shallow";
-import type { PageUnion, Story } from "@/types/story";
-import { useEffect } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import VisualisationPage from "./VisualisationPage";
+import { useStory, setCurrentStory } from "@/store/useStory";
+import { useVisualisation } from "@/store/useVisualisation";
+import type { Transition } from "@/types/visualisation";
+import type { PageUnion } from "@/types/page";
+import type { Story } from "@/types/story";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 
-const StoryPageWrapper: React.FC = () => {
+export default function StoryPageWrapper() {
     const { storyName } = useParams<{ storyName: string }>();
-    const location = useLocation();
-    const setCurrentStoryId = useCurrentStoryActions().setCurrentStoryId;
+    const { loading, error, stories } = useStory();
+    const [story, setStory] = useState<Story | null>(null);
 
-    useEffect(() => {
-        if (storyName) {
-            setCurrentStoryId(storyName);
+    function unrollStory(story: Story): Story {
+        if (story.pages.filter((page) => page.page_type === "reference").length === 0) {
+            return story; // No references, return as is
         }
-        // On unmount, clear the current story
-        return () => {
-            setCurrentStoryId("");
-        };
-    }, [storyName, setCurrentStoryId]);
+        let pages: PageUnion[] = [];
+        let transitions: Transition[] = story.transitions;
+
+        for (const page of story.pages) {
+            if (page.page_type !== "reference") {
+                pages.push(page);
+            } else {
+                const referenceType = page.reference_type;
+                if (referenceType === "story") {
+                    const referencedStoryName = page.path;
+                    const referencedStory = stories[referencedStoryName];
+                    if (!referencedStory) {
+                        throw new Error(`Referenced story not found: ${referencedStoryName}`);
+                    }
+                    const unrolledReferencedStory = unrollStory(referencedStory);
+                    const referencePages = page.pages;
+
+                    for (const index of referencePages) {
+                        const referencePage = unrolledReferencedStory.pages[index];
+                        pages.push(referencePage);
+                    }
+
+                    const pageOffset = pages.length - referencePages.length;
+                    for (let i1 = 0; i1 < referencePages.length; i1++) {
+                        for (let i2 = 0; i2 < referencePages.length; i2++) {
+                            if (i1 !== i2) {
+                                const local_idx1 = referencePages[i1];
+                                const local_idx2 = referencePages[i2];
+                                const t1 = unrolledReferencedStory.transitions.find(
+                                    (t) => t.from === local_idx1 && t.to === local_idx2,
+                                );
+                                const t2 = unrolledReferencedStory.transitions.find(
+                                    (t) => t.from === local_idx2 && t.to === local_idx1,
+                                );
+                                if (t1) transitions.push({ ...t1, from: pageOffset + i1, to: pageOffset + i2 });
+                                if (t2) transitions.push({ ...t2, from: pageOffset + i2, to: pageOffset + i1 });
+                            }
+                        }
+                    }
+                } else if (referenceType === "visualisation") {
+                    const visualisationCategory = page.path.split("/")[0];
+                    const visualisationName = page.path.split("/")[1].replace(".json", "");
+                    const referenceVisualisation = Object.values(useVisualisation.getState().visualisations).find(
+                        (v) => v.category === visualisationCategory && v.name === visualisationName,
+                    );
+                    if (!referenceVisualisation) {
+                        throw new Error(`Referenced visualisation not found: ${visualisationName}`);
+                    }
+                    const unrolledReferenceVisualisation = unrollStory(referenceVisualisation);
+                    const referencePages = page.pages;
+
+                    for (const index of referencePages) {
+                        const referencePage = { ...unrolledReferenceVisualisation.pages[index] };
+                        if (referencePage.page_type === "dynamic") {
+                            referencePage.category = visualisationCategory;
+                            referencePage.path = visualisationName;
+                        }
+                        pages.push(referencePage);
+                    }
+
+                    const pageOffset = pages.length - referencePages.length;
+                    for (let i1 = 0; i1 < referencePages.length; i1++) {
+                        for (let i2 = 0; i2 < referencePages.length; i2++) {
+                            if (i1 !== i2) {
+                                const local_idx1 = referencePages[i1];
+                                const local_idx2 = referencePages[i2];
+                                const t1 = unrolledReferenceVisualisation.transitions.find(
+                                    (t) => t.from === local_idx1 && t.to === local_idx2,
+                                );
+                                const t2 = unrolledReferenceVisualisation.transitions.find(
+                                    (t) => t.from === local_idx2 && t.to === local_idx1,
+                                );
+                                if (t1) transitions.push({ ...t1, from: pageOffset + i1, to: pageOffset + i2 });
+                                if (t2) transitions.push({ ...t2, from: pageOffset + i2, to: pageOffset + i1 });
+                            }
+                        }
+                    }
+                } else {
+                    throw new Error(`Unknown reference type: ${referenceType}`);
+                }
+            }
+        }
+        return { ...story, pages, transitions };
+    }
 
     if (!storyName) throw new Error("No story name");
 
-    // Use useConfig to get config and loading state
-    const { config, loading, error } = useAppStore(useShallow((state) => ({
-        config: state.config,
-        loading: state.loading,
-        error: state.error,
-    })));
+    useEffect(() => {
+        let story = stories[storyName];
+        if (!story) return;
+        story = unrollStory(story);
+        setStory(story);
+        setCurrentStory(story);
+    }, [storyName]);
+
+    if (!story) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+                <div className="text-2xl font-mono text-fuchsia-600">
+                    No story found for "{storyName}". Please check the story name and try again.
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
@@ -40,11 +132,11 @@ const StoryPageWrapper: React.FC = () => {
         );
     }
 
-    if (error || !config) {
+    if (error || !story || !storyName) {
         return (
             <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
                 <div className="text-2xl font-mono text-red-600 mb-4">
-                    Error loading config
+                    Error loading story
                 </div>
                 <div className="text-sm font-mono text-gray-600 mb-8">
                     {error || "Config not found"}
@@ -60,29 +152,7 @@ const StoryPageWrapper: React.FC = () => {
             </div>
         );
     }
+;
 
-    const stories: Record<string, Story> = config.stories;
-    const pages: Record<string, PageUnion> = config.pages;
-
-    const story: Story | undefined = storyName ? stories[storyName] : undefined;
-
-    if (!story) {
-        return <div>Story not found</div>;
-    }
-
-    const initialPageId = location.state?.local_index ?? story.start_page;
-    
-    // The key is important to force a remount when the story or page changes
-    const pageKey = `${storyName}-${initialPageId}`;
-
-    return (
-        <StoryPage
-            key={pageKey}
-            story={story}
-            pages={pages}
-            initialPageId={initialPageId}
-        />
-    );
+    return <VisualisationPage />;
 };
-
-export default StoryPageWrapper;

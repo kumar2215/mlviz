@@ -1,120 +1,18 @@
 import PredictionInputForm from "@/components/input/PredictionInputForm";
-import { PredictComponent } from "@/components/PredictComponent";
+import usePredict from "@/hooks/usePredict";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
-import { useModel } from "@/contexts/ModelContext";
-import { useVisualisation } from "@/store/useVisualisation";
-import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
-import type { ModelPage as ModelPageProps } from "@/types/page";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
+import type { Parameters } from "@/types/page";
 
-type PredictPageProps = Pick<ModelPageProps, "model_name" | "parameters" | "dataset">;
+type PredictPageProps = {
+    useModel: () => any;
+    parameters: Parameters;
+    PredictVisualizationComponent: React.FC<{ points?: Record<string, number> | null }>;
+}
 
-const PredictPage: React.FC<PredictPageProps> = ({
-    model_name,
-    parameters,
-    dataset,
-}) => {
-    const { updateParams } = useVisualisation();
-    const { recordPredict } = useVisualisationHistoryRecorder();
-
-    const {
-        currentModelData,
-        getFeatureNames,
-        getPredictiveFeatureNames,
-        predict,
-        predictionResult,
-        isPredicting,
-    } = useModel();
-
-    const [predictionInputPoints, setPredictionInputPoints] = useState<
-        Record<string, number>
-    >(parameters?.presetPoints || {});
-
-    const rawFeatures = (typeof getPredictiveFeatureNames === 'function'
-        ? getPredictiveFeatureNames()
-        : getFeatureNames()) || [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const currentFeatures = useMemo(() => rawFeatures, [JSON.stringify(rawFeatures)]);
-
-    useEffect(() => {
-        if (currentFeatures.length > 0) {
-            setPredictionInputPoints((prevPoints) => {
-                const newPoints: Record<string, number> = {};
-                let hasContentChanged = false;
-
-                currentFeatures.forEach((feature: string) => {
-                    const value = prevPoints[feature];
-                    if (value !== undefined) {
-                        newPoints[feature] = value;
-                    }
-                    if (value !== prevPoints[feature]) {
-                        hasContentChanged = true;
-                    }
-                });
-
-                const prevFeatures = Object.keys(prevPoints);
-                const hasRemovedFeatures = prevFeatures.some(
-                    (feature) => !currentFeatures.includes(feature),
-                );
-
-                if (
-                    hasContentChanged ||
-                    hasRemovedFeatures ||
-                    Object.keys(newPoints).length !== prevFeatures.length
-                ) {
-                    updateParams({ predictParams: newPoints });
-                    return newPoints;
-                } else {
-                    updateParams({ predictParams: prevPoints });
-                    return prevPoints;
-                }
-            });
-        } else {
-            setPredictionInputPoints((prevPoints) => {
-                if (Object.keys(prevPoints).length > 0) {
-                    return {};
-                }
-                return prevPoints;
-            });
-        }
-    }, [currentFeatures]);
-
-    const lastPredictedPointsRef = useRef<string>("");
-
+export default function PredictPage({ useModel, parameters, PredictVisualizationComponent } : PredictPageProps) {
     const [showAlert, setShowAlert] = useState(false);
-
-    const handlePredict = (newPoints: Record<string, number>) => {
-        setPredictionInputPoints(newPoints);
-        updateParams({ predictParams: newPoints });
-        recordPredict(newPoints);
-        // Trigger prediction immediately on user action
-        predict(newPoints);
-        lastPredictedPointsRef.current = JSON.stringify(newPoints) + currentFeatures.join(",");
-        setShowAlert(true);
-        setTimeout(() => setShowAlert(false), 2000);
-    };
-
-    // Auto-predict on mount, when features change, or when inputs change
-    useEffect(() => {
-        const pointsStr = JSON.stringify(predictionInputPoints) + currentFeatures.join(",");
-        const hasValidPoints =
-            currentFeatures.length > 0 &&
-            Object.keys(predictionInputPoints).length > 0 &&
-            Object.values(predictionInputPoints).every((v) => v !== undefined);
-
-        if (hasValidPoints && currentModelData && !isPredicting && pointsStr !== lastPredictedPointsRef.current) {
-            predict(predictionInputPoints);
-            lastPredictedPointsRef.current = pointsStr;
-        }
-    }, [predictionInputPoints, predict, currentModelData, isPredicting, currentFeatures, dataset]);
-
-    if (!currentModelData) {
-        return (
-            <div>
-                <p>No data available to display.</p>
-            </div>
-        );
-    }
+    const { currentFeatures, predictionInputPoints, handlePredict } = usePredict(useModel, setShowAlert, parameters);
 
     return (
         <div className="grid grid-cols-10 w-full h-full relative">
@@ -129,16 +27,8 @@ const PredictPage: React.FC<PredictPageProps> = ({
                 />
             </div>
             <div className="col-span-8 shadow-lg overflow-hidden min-h-0">
-                <PredictComponent
-                    componentName={model_name}
-                    data={currentModelData}
-                    points={predictionInputPoints}
-                    predictionResult={predictionResult}
-                    isPredicting={isPredicting}
-                />
+                <PredictVisualizationComponent points={predictionInputPoints} />
             </div>
         </div>
     );
 };
-
-export default PredictPage;

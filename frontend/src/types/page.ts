@@ -3,9 +3,7 @@ import type { ActiveDataset, DatasetReference } from "@/types/dataset";
 export type Parameters = Record<string, any>;
 
 interface BasePage {
-    page_type: "static" | "dynamic";
-    name?: string;
-    parameters?: Parameters;
+    page_type: "static" | "dynamic" | "reference";
     dataset?: ActiveDataset | DatasetReference | null;
     note?: string;
 }
@@ -19,22 +17,30 @@ export interface StaticPage extends BasePage, StaticPageParameters {
     page_type: "static";
 }
 
-export interface DynamicPageParameters extends BasePage {
+export interface DynamicPage extends BasePage {
+    name: string;
     page_type: "dynamic";
-    dynamic_type: "model" | "none";
+    parameters: Parameters;
+    category?: string;
+    path?: string;
 }
 
-export interface DynamicPage extends DynamicPageParameters {
-    dynamic_type: "none";
+export interface ReferencePage extends BasePage {
+    page_type: "reference";
+    reference_type: "visualisation" | "story";
+    path: string;
+    pages: number[];
 }
 
-export interface ModelPage extends DynamicPageParameters {
-    dynamic_type: "model";
-    model_name: string;
-    component_type: "train" | "predict" | "manual" | "viz_only" | "step";
-    problem_type: "classifier" | "clustering" | "regression";
+export type PageUnion = StaticPage | DynamicPage | ReferencePage;
+
+export interface DynamicPageProps {
+    page: DynamicPage;
+    category: string;
+    visualisation: string;
 }
 
-export type DynamicPageUnion = DynamicPage | ModelPage;
-
-export type PageUnion = StaticPage | DynamicPageUnion;
+export interface IndexPageProps {
+    name: string;
+    parameters: Parameters;
+}

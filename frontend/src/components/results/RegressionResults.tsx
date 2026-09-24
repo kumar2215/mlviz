@@ -1,4 +1,4 @@
-import { useLinearRegression } from "@/contexts/models/LinearRegressionContext";
+import { useLinearRegression } from "@/pages/traditional_ml/linear_regression/LinearRegressionContext";
 import type { RegressionResultData } from "@/types/model";
 import { ChartColumnIncreasing } from "lucide-react";
 import MetricSection from "./MetricSection";
