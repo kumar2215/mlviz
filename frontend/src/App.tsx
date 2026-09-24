@@ -1,12 +1,13 @@
-// src/App.tsx
+import { useStory, setCurrentStory } from "@/store/useStory";
 import { useConfig } from "@/store/useConfig";
-import StoryListPage from "@/pages/StoryListPage";
+import { useVisualisation, setCurrentVisualisation } from "@/store/useVisualisation";
+import ListPage, { type ListItem } from "./pages/ListPage";
 import StoryPageWrapper from "@/pages/StoryPageWrapper";
 import VisualisationPage from "@/pages/VisualisationPage";
-import VisualisationListPage from "@/pages/VisualisationListPage";
-import { useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
-import IndexPage from "./pages/IndexPage";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import type { Story } from "@/types/story";
+import type Visualisation from "@/types/visualisation";
 
 type BlockReason = "mobile" | "narrow" | null;
 
@@ -37,44 +38,81 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
     );
 }
 
-function App() {
-    const { fetchConfig } = useConfig();
+export default function App() {
+    const { loading, error, config, fetchConfig } = useConfig();
+    const { visualisations } = useVisualisation();
+    const { stories } = useStory();
     const blockReason = getBlockReason();
 
-    useEffect(() => {
-        fetchConfig();
-    }, [fetchConfig]);
+    const [item, setItem] = useState<ListItem[] | Story | Visualisation | null>(null);
+    const [itemName, setItemName] = useState<string>("");
+    const location = useLocation();
+    const pathname = location.pathname;
+    const category = pathname.startsWith("/category/") ? pathname.slice("/category/".length).replace("/", "") : undefined;
+    const storyName = pathname.startsWith("/story/") ? pathname.slice("/story/".length).replace("/", "") : undefined;
+    const visualisationName = pathname.startsWith("/viz/") ? pathname.slice("/viz/".length).replace("/", "") : undefined;
 
     if (blockReason) {
         return <MobileBlockScreen reason={blockReason} />;
     }
 
-    return (
-        <div className="w-screen h-screen overflow-hidden">
-            <Routes>
-                <Route
-                    path="/"
-                    element={<IndexPage />}
-                />
-                <Route
-                    path="/category/:categoryName"
-                    element={<VisualisationListPage />}
-                />
-                <Route
-                    path="/stories"
-                    element={<StoryListPage />}
-                />
-                <Route
-                    path="/story/:storyName"
-                    element={<StoryPageWrapper />}
-                />
-                <Route
-                    path="/viz/:visualisationName"
-                    element={<VisualisationPage />}
-                />
-            </Routes>
-        </div>
-    );
-}
+    useEffect(() => {
+        fetchConfig();
+    }, [fetchConfig]);
 
-export default App;
+    useEffect(() => {
+        if (pathname === "/") {
+            setItem(config?.categories.map((c) => ({ display_name: c.name, path: `/category/${c.config_path}`, icon: c.icon})) || null);
+            setItemName("config");
+        } else if (pathname.startsWith("/category/")) {
+            setItem(Object.values(visualisations).filter((v) => v.category === category).map((v) => ({ display_name: v.display_name, path: `/viz/${v.name}` })) || null);
+            setItemName("visualisations");
+        } else if (pathname.startsWith("/stories")) {
+            setItem(Object.values(stories).map((s) => ({ display_name: s.display_name, path: `/story/${s.name}` })) || null);
+            setItemName("stories");
+        } else if (pathname.startsWith("/story/")) {
+            const story = stories[storyName!];
+            setItem(story);
+            setItemName("story");
+            setCurrentStory(story);
+            setCurrentVisualisation(null);
+        } else if (pathname.startsWith("/viz/")) {
+            const visualisation = visualisations[visualisationName!];
+            setItem(visualisation);
+            setItemName("visualisation");
+            setCurrentVisualisation(visualisation);
+            setCurrentStory(null);
+        }
+    }, [pathname, category, storyName, visualisationName, config, visualisations, stories]);
+
+    if (loading) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+                <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
+                    {`Loading ${itemName}...`}
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !item) {
+        return (
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+                <div className="text-4xl font-bold font-mono text-red-600 mb-4">
+                    {`Error loading ${itemName}`}
+                </div>
+                <div className="text-sm font-mono text-gray-600 mb-8">
+                    {error || `${itemName.charAt(0).toUpperCase() + itemName.slice(1)} not found`}
+                </div>
+            </div>
+        );
+    }
+
+    if (Array.isArray(item)) {
+        return <ListPage listItems={item} />;
+    } else if (itemName === "story") {
+        return <StoryPageWrapper story={item} />;
+    } else if (itemName === "visualisation") {
+        return <VisualisationPage userMode="visualisation" />;
+    }
+};

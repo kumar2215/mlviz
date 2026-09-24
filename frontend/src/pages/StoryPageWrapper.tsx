@@ -1,17 +1,13 @@
-import { Button } from "@/components/ui/button";
 import VisualisationPage from "./VisualisationPage";
 import { useStory, setCurrentStory } from "@/store/useStory";
 import { useVisualisation } from "@/store/useVisualisation";
+import { useEffect } from "react";
 import type { Transition } from "@/types/visualisation";
 import type { PageUnion } from "@/types/page";
 import type { Story } from "@/types/story";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 
-export default function StoryPageWrapper() {
-    const { storyName } = useParams<{ storyName: string }>();
-    const { loading, error, stories } = useStory();
-    const [story, setStory] = useState<Story | null>(null);
+export default function StoryPageWrapper({ story }: { story: Story }) {
+    const { stories } = useStory();
 
     function unrollStory(story: Story): Story {
         if (story.pages.filter((page) => page.page_type === "reference").length === 0) {
@@ -102,57 +98,10 @@ export default function StoryPageWrapper() {
         return { ...story, pages, transitions };
     }
 
-    if (!storyName) throw new Error("No story name");
-
     useEffect(() => {
-        let story = stories[storyName];
-        if (!story) return;
-        story = unrollStory(story);
-        setStory(story);
-        setCurrentStory(story);
-    }, [storyName]);
+        const unrolledStory = unrollStory(story);
+        setCurrentStory(unrolledStory);
+    }, [story]);
 
-    if (!story) {
-        return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="text-2xl font-mono text-fuchsia-600">
-                    No story found for "{storyName}". Please check the story name and try again.
-                </div>
-            </div>
-        );
-    }
-
-    if (loading) {
-        return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
-                    Loading story...
-                </div>
-            </div>
-        );
-    }
-
-    if (error || !story || !storyName) {
-        return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="text-2xl font-mono text-red-600 mb-4">
-                    Error loading story
-                </div>
-                <div className="text-sm font-mono text-gray-600 mb-8">
-                    {error || "Config not found"}
-                </div>
-                <Button
-                    onClick={() => {
-                        window.location.href = "/";
-                    }}
-                    className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-200 rounded-full px-6"
-                >
-                    Return to Home (Default Config)
-                </Button>
-            </div>
-        );
-    }
-;
-
-    return <VisualisationPage />;
+    return <VisualisationPage userMode="story" />;
 };

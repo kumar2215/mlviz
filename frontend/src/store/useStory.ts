@@ -96,11 +96,11 @@ export function getCurrentStory(): Story | null {
     return useStory.getState().currentStory;
 }
 
-export function setCurrentStory(story: Story) {
+export function setCurrentStory(story: Story | null): void {
     useStory.setState((state) => {
         state.currentStory = story;
         state.currentStoryHistory = {
-            story_id: story.name || "",
+            story_id: story?.name || "",
             params: {},
             entries: [],
             path: [],

@@ -116,11 +116,11 @@ export function getCurrentVisualisation(): Visualisation | null {
     return useVisualisation.getState().currentVisualisation;
 }
 
-export function setCurrentVisualisation(visualisation: Visualisation) {
+export function setCurrentVisualisation(visualisation: Visualisation | null): void {
     useVisualisation.setState((state) => {
         state.currentVisualisation = visualisation;
         state.currentVisualisationHistory = {
-            visualisation_id: visualisation.name || "",
+            visualisation_id: visualisation?.name || "",
             params: {},
             entries: [],
             path: [],
