@@ -58,7 +58,7 @@ export default function VisualisationPage() {
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
                 <div className="text-2xl font-mono text-fuchsia-600">
-                    {`${userMode === "story" ? "Story" : "Visualisation"}$ "${name}" is under construction.`}
+                    {`${userMode === "story" ? "Story" : "Visualisation"} '${name}' is under construction.`}
                 </div>
             </div>
         );
