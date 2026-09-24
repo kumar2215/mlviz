@@ -1,11 +1,11 @@
 import TrainPage from "@/pages/model/TrainPage";
 import ClassifierResults from "@/components/results/ClassifierResults";
 import SVMTrainVisualisation from "@/pages/traditional_ml/svm/train/SVMTrainVisualisation";
-import { useSVMContext } from "../SVMContext";
+import { useSVM } from "@/store/traditional_ml/useSVM";
 import type { Parameters } from "@/types/page";
 
 export default function SVMTrainPage({ parameters } : { parameters: Parameters }) {
-    const { data } = useSVMContext();
+    const { data } = useSVM();
     
     const resultsComponent = () => (
         <ClassifierResults
@@ -16,7 +16,7 @@ export default function SVMTrainPage({ parameters } : { parameters: Parameters }
 
     return (
         <TrainPage
-            useModel={useSVMContext}
+            useModel={useSVM}
             parameters={parameters}
             TrainVisualizationComponent={SVMTrainVisualisation}
             ResultsComponent={resultsComponent}

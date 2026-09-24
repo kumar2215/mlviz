@@ -1,6 +1,6 @@
-import { create } from 'zustand';
-import { immer } from 'zustand/middleware/immer';
-import type { Story, Stories } from '@/types/story';
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
+import type { Story, Stories } from "@/types/story";
 import type { HistoryEntry, StoryHistoryState } from "@/types/history";
 
 interface StoryStore {
@@ -23,16 +23,21 @@ export const useStory = create<StoryStore>()(
             story_id: "",
             params: {},
             entries: [],
-            path: []
+            path: [],
         },
         stories: {},
         loading: false,
         error: null,
         fetchStories: async () => {
             if (Object.keys(get().stories).length > 0) return; // Already loaded
-            set(state => { state.loading = true; state.error = null; });
+            set((state) => {
+                state.loading = true;
+                state.error = null;
+            });
             try {
-                const response = await fetch(`${import.meta.env.BASE_URL}config/story/stories.json`);
+                const response = await fetch(
+                    `${import.meta.env.BASE_URL}config/story/stories.json`,
+                );
                 if (!response.ok) {
                     throw new Error(`Failed to fetch story file, status: ${response.statusText}`);
                 }
@@ -41,14 +46,14 @@ export const useStory = create<StoryStore>()(
                     acc[key] = { ...data[key], name: key };
                     return acc;
                 }, {}) as Stories;
-                set(state => {
+                set((state) => {
                     state.stories = stories;
                     state.loading = false;
                 });
             } catch (err) {
                 const message = err instanceof Error ? err.message : "Unknown error";
                 console.error("Error loading story:", err);
-                set(state => {
+                set((state) => {
                     state.error = message;
                     state.loading = false;
                 });
@@ -56,7 +61,11 @@ export const useStory = create<StoryStore>()(
         },
         addPageVisit: (pageId: number) => {
             set((state) => {
-                state.recordAction({ actionType: "page_visit", timestamp: Date.now(), page_id: pageId });
+                state.recordAction({
+                    actionType: "page_visit",
+                    timestamp: Date.now(),
+                    page_id: pageId,
+                });
                 state.currentStoryHistory.path.push(pageId);
             });
         },
@@ -79,8 +88,8 @@ export const useStory = create<StoryStore>()(
                 const currentParams = state.currentStoryHistory.params;
                 state.currentStoryHistory.params = { ...currentParams, ...paramUpdates };
             });
-        }
-    }))
+        },
+    })),
 );
 
 export function getCurrentStory(): Story | null {
@@ -88,13 +97,13 @@ export function getCurrentStory(): Story | null {
 }
 
 export function setCurrentStory(story: Story) {
-    useStory.setState(state => {
+    useStory.setState((state) => {
         state.currentStory = story;
         state.currentStoryHistory = {
             story_id: story.name || "",
             params: {},
             entries: [],
-            path: []
+            path: [],
         };
     });
 }

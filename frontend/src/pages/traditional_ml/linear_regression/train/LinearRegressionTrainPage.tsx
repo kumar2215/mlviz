@@ -1,7 +1,7 @@
 import TrainPage from "@/pages/model/TrainPage";
 import RegressionResults from "@/components/results/RegressionResults";
 import LinearRegressionTrain from "./LinearRegressionTrainVisualisation";
-import { useLinearRegression } from "../LinearRegressionContext";
+import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression";
 import type { Parameters } from "@/types/page";
 import type { RegressionMetadata } from "@/types/model";
 

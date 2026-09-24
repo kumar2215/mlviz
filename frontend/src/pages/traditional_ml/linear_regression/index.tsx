@@ -1,6 +1,5 @@
 import LinearRegressionStep from "./step/LinearRegressionStepPage";
 import LinearRegressionTrain from "./train/LinearRegressionTrainPage";
-import { LinearRegressionProvider } from "./LinearRegressionContext";
 import type { IndexPageProps } from "@/types/page";
 
 export default function IndexPage({ name, parameters }: IndexPageProps) {
@@ -25,9 +24,5 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
         );
     }
 
-    return (
-        <LinearRegressionProvider>
-            {page}
-        </LinearRegressionProvider>
-    );
+    return page;
 };

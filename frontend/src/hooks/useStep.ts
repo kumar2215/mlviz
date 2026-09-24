@@ -66,8 +66,7 @@ export default function useStep(useModel: () => any, parameters: Parameters) {
     const handleApplyParams = async () => {
         // Applying parameters in Step mode resets the model and starts fresh
         resetModelData();
-        // We wait a tick to ensure context state updates have propagated if needed, 
-        // though our context now handles it via manual ref clearing.
+        // Zustand resets synchronously, so training reads the cleared state.
         const trainParams = {
             ...stepParams,
             dataset: (stepParams as any)?.dataset

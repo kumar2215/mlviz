@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
-import { useKMeans } from "@/pages/traditional_ml/kmeans/KMeansContext";
+import { useKMeans } from "@/store/traditional_ml/useKMeans";
 import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { Check, Move, Play, Plus, RotateCcw, Target } from "lucide-react";

@@ -1,4 +1,5 @@
 import { useVisualisation } from "@/store/useVisualisation";
+import { useDataset } from "@/store/useDataset";
 import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { Parameters } from "@/types/page";
@@ -7,10 +8,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function useTrain(useModel: () => any, setShowAlert: (show: boolean) => void, parameters: Parameters) {
     const model = useModel();
+    const activeDataset = useDataset(state => state.activeDataset);
     const { isLoading, data, train, getParameters, resetModelData } = model;
     const hasInitialized = useRef(false);
 
-    // Try to get lastParams from context (different models use different names)
+    // Try to get lastParams from the store (different models use different names)
     // Use useMemo to maintain stable reference
     const lastParams = useMemo(
         () =>
@@ -18,14 +20,14 @@ export default function useTrain(useModel: () => any, setShowAlert: (show: boole
         [(model as any).lastParams, (model as any).lastTrainedParams],
     );
 
-    // Get feature names from model context (for KNN dynamic feature dropdowns)
+    // Get feature names from the model store (for KNN dynamic feature dropdowns)
     const featureNames = useMemo(() => {
         if (typeof (model as any).getFeatureNames === "function") {
             return (model as any).getFeatureNames();
         }
         // Fallback to metadata if available
         return data?.metadata?.feature_names || null;
-    }, [(model as any).getFeatureNames, data?.metadata?.feature_names]);
+    }, [model, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
     const { updateParams } = useVisualisation();
@@ -64,7 +66,7 @@ export default function useTrain(useModel: () => any, setShowAlert: (show: boole
         // For a TrainPage, we always want to perform actual training if parameters are provided.
         // loadVisualization is more appropriate for VizOnlyPage or preview states where metrics are not needed.
         train(trainParams);
-    }, [parameters, train, resetModelData, (model as any).loadVisualization]);
+    }, [parameters, train, resetModelData, (model as any).loadVisualization, activeDataset]);
 
 
     const handleTrainModel = async () => {

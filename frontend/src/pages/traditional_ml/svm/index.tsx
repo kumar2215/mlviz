@@ -1,7 +1,7 @@
 import SVMPredict from "./predict/SVMPredictPage";
 import SVMStep from "./step/SVMStepPage";
 import SVMTrain from "./train/SVMTrainPage";
-import { SVMProvider } from "./SVMContext";
+
 import type { IndexPageProps } from "@/types/page";
 
 export default function IndexPage({ name, parameters }: IndexPageProps) {
@@ -29,9 +29,5 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
         );
     }
 
-    return (
-        <SVMProvider>
-            {page}
-        </SVMProvider>
-    );
+    return page;
 };

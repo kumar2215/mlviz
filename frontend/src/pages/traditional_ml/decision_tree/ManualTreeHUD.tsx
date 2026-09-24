@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
-import { useDecisionTree } from "@/pages/traditional_ml/decision_tree/DecisionTreeContext";
+import { useDecisionTree } from "@/store/traditional_ml/useDecisionTree";
 import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import { GitBranch, Leaf, Split } from "lucide-react";
@@ -21,7 +21,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { renderInformationGainGraph } from "./rendererUtils";
 
 const ManualTreeHUD: React.FC = () => {
-    const { manualTree, getFeatureNames, getClassNames } = useDecisionTree();
+    const { manualTree, currentModelData, getFeatureNames, getClassNames } = useDecisionTree();
 
     const {
         selectedNodePath,
@@ -39,9 +39,9 @@ const ManualTreeHUD: React.FC = () => {
 
     const featureNames = useMemo(
         () => getFeatureNames() || [],
-        [getFeatureNames],
+        [getFeatureNames, currentModelData],
     );
-    const classNames = useMemo(() => getClassNames() || [], [getClassNames]);
+    const classNames = useMemo(() => getClassNames() || [], [getClassNames, currentModelData]);
 
     // Clear exploration cache when the selected node changes
     useEffect(() => {

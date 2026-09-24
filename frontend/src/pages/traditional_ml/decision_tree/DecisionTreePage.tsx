@@ -1,5 +1,5 @@
-import { useDecisionTree } from "./DecisionTreeContext";
-import DecisionTreeManual from "@/pages/traditional_ml/decision_tree/Visualisation";
+import { useDecisionTree } from "@/store/traditional_ml/useDecisionTree";
+import DecisionTree from "@/pages/traditional_ml/decision_tree/DecisionTreeVisualization";
 import ClassifierResults from "@/components/results/ClassifierResults";
 import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
 import { useEffect, useRef } from "react";
@@ -30,7 +30,7 @@ export default function DecisionTreePage() {
     return (
         <div className="grid grid-cols-10 mx-auto w-full h-full">
             <div className="col-span-8 shadow-lg overflow-hidden min-h-0">
-                <DecisionTreeManual />
+                <DecisionTree />
             </div>
 
             <div className="col-span-2 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 min-h-0">

@@ -3,7 +3,7 @@
  * Wraps the generic BaseLossMapHUD to provide MSE loss landscape for Slope vs Intercept.
  */
 import BaseLossMapHUD, { type LossMapMode } from "@/components/visualisation/BaseLossMapHUD";
-import { useLinearRegression } from "@/pages/traditional_ml/linear_regression/LinearRegressionContext";
+import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression";
 import React, { useMemo } from "react";
 
 interface LossMapHUDProps {

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import RadialSlopeSlider from "@/components/input/RadialSlopeSlider";
 import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
-import { useSVMContext } from "@/pages/traditional_ml/svm/SVMContext";
+import { useSVM } from "@/store/traditional_ml/useSVM";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { ArrowRight, Check, Play, RefreshCw, X } from "lucide-react";
 import React, { useId } from "react";
@@ -34,7 +34,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
         computeHingeLoss,
         lastVisualizationParams,
         makePrediction
-    } = useSVMContext();
+    } = useSVM();
 
     const interceptId = useId();
     const widthId = useId();

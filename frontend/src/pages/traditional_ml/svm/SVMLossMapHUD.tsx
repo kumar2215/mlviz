@@ -4,7 +4,7 @@
  * computing Hinge Loss with a fixed currentBias.
  */
 import BaseLossMapHUD, { type LossMapMode } from "@/components/visualisation/BaseLossMapHUD";
-import { useSVMContext } from "@/pages/traditional_ml/svm/SVMContext";
+import { useSVM } from "@/store/traditional_ml/useSVM";
 import React, { useMemo } from "react";
 
 interface SVMLossMapHUDProps {
@@ -17,8 +17,9 @@ const SVMLossMapHUD: React.FC<SVMLossMapHUDProps> = ({ mode }) => {
         currentW2,
         currentBias,
         computeHingeLoss,
+        currentModelData,
         stepData,
-    } = useSVMContext();
+    } = useSVM();
 
     // Compute generic parameter bounds (could be dynamic or fixed for visualization)
     const bounds = useMemo(() => {
@@ -35,10 +36,10 @@ const SVMLossMapHUD: React.FC<SVMLossMapHUDProps> = ({ mode }) => {
     }, []);
 
     // Create a stable compute function fixing the bias
-    const computeFixedLoss = React.useCallback(
-        (w1: number, w2: number) => computeHingeLoss(w1, w2, currentBias),
-        [computeHingeLoss, currentBias]
-    );
+    const computeFixedLoss = React.useMemo(() => {
+        if (!currentModelData?.points?.length) return () => 0;
+        return (w1: number, w2: number) => computeHingeLoss(w1, w2, currentBias);
+    }, [computeHingeLoss, currentBias, currentModelData]);
 
     return (
         <BaseLossMapHUD

@@ -9,7 +9,7 @@ import SVMLossMapHUD from "@/pages/traditional_ml/svm/SVMLossMapHUD";
 import { renderSVM } from "@/pages/traditional_ml/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import { useSVMContext } from "@/pages/traditional_ml/svm/SVMContext";
+import { useSVM } from "@/store/traditional_ml/useSVM";
 import { useCallback, useEffect, useState } from "react";
 import SVMStepHUD, { type SVMStepMode } from "./SVMStepHUD";
 
@@ -25,7 +25,7 @@ export default function SVMStepVisualisation() {
         currentBias,
         stepData,
         decisionBoundary,
-    } = useSVMContext();
+    } = useSVM();
 
     const [mode, setMode] = useState<SVMStepMode>("idle");
     const [learningRate, setLearningRate] = useState(0.01);

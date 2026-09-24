@@ -5,7 +5,7 @@
  */
 import RadialSlopeSlider from "@/components/input/RadialSlopeSlider";
 import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
-import { useLinearRegression } from "@/pages/traditional_ml/linear_regression/LinearRegressionContext";
+import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { TrendingUp } from "lucide-react";
 import React, { useId } from "react";

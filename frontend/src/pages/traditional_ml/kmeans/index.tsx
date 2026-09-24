@@ -1,5 +1,4 @@
 import KMeansStep from "./KMeansStepPage";
-import { KMeansProvider } from "./KMeansContext";
 import type { IndexPageProps } from "@/types/page";
 
 export default function IndexPage({ name, parameters }: IndexPageProps) {
@@ -21,9 +20,5 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
         );
     }
 
-    return (
-        <KMeansProvider>
-            {page}
-        </KMeansProvider>
-    );
+    return page;
 };

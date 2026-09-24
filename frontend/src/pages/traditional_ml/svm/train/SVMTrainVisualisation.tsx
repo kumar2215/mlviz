@@ -10,7 +10,7 @@ import SVMLossMapHUD from "@/pages/traditional_ml/svm/SVMLossMapHUD";
 import { renderSVM } from "@/pages/traditional_ml/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import { useSVMContext } from "@/pages/traditional_ml/svm/SVMContext";
+import { useSVM } from "@/store/traditional_ml/useSVM";
 import * as d3 from "d3";
 import { useCallback, useEffect, useState } from "react";
 
@@ -27,7 +27,7 @@ export default function SVMTrainVisualisation() {
         currentW2,
         currentBias,
         setManualWeights,
-    } = useSVMContext();
+    } = useSVM();
 
     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
 

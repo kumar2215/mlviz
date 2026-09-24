@@ -1,7 +1,7 @@
 import TrainPage from "@/pages/model/TrainPage";
 import ClassifierResults from "@/components/results/ClassifierResults";
 import KNNTrainVisualisation from "./KNNTrainVisualisation";
-import { useKNN } from "../KNNContext";
+import { useKNN } from "@/store/traditional_ml/useKNN";
 import type { Parameters } from "@/types/page";
 
 export default function KNNTrainPage({ parameters } : { parameters: Parameters }) {

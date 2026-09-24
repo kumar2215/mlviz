@@ -1,6 +1,5 @@
 import KNNPredict from "./predict/KNNPredictPage";
 import KNNTrain from "./train/KNNTrainPage";
-import { KNNProvider } from "./KNNContext";
 import type { IndexPageProps } from "@/types/page";
 
 export default function IndexPage({ name, parameters }: IndexPageProps) {
@@ -25,9 +24,5 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
         );
     }
 
-    return (
-        <KNNProvider>
-            {page}
-        </KNNProvider>
-    );
+    return page;
 };

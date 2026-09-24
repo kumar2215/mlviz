@@ -9,7 +9,7 @@ import type { KNNVisualizationData } from "../../../../types/traditional_ml/knn"
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import { useKNN } from "@/pages/traditional_ml/knn/KNNContext";
+import { useKNN } from "@/store/traditional_ml/useKNN";
 import * as d3 from "d3";
 import { useCallback, useEffect, useMemo } from "react";
 

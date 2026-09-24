@@ -7,7 +7,7 @@ import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import { renderSVM } from "@/pages/traditional_ml/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import { useSVMContext } from "@/pages/traditional_ml/svm/SVMContext";
+import { useSVM } from "@/store/traditional_ml/useSVM";
 import { useCallback, useEffect } from "react";
 
 interface VisualisationProps {
@@ -27,7 +27,7 @@ export default function SVMPredictVisualization({ points }: VisualisationProps) 
         decisionBoundary,
         makePrediction,
         predictionResult
-    } = useSVMContext();
+    } = useSVM();
 
     // Auto-reload on mount
     useEffect(() => {

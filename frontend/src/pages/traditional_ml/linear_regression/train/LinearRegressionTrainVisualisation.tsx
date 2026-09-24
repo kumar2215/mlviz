@@ -13,7 +13,7 @@ import LossMapHUD from "../LossMapHUD";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
-import { useLinearRegression } from "../LinearRegressionContext";
+import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression";
 import * as d3 from "d3";
 import { useCallback, useEffect, useState } from "react";
 
