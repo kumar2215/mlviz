@@ -1,6 +1,9 @@
 // src/App.tsx
-import { useConfigActions } from "@/store/useAppStore";
+import { useConfig } from "@/store/useConfig";
+import StoryListPage from "@/pages/StoryListPage";
 import StoryPageWrapper from "@/pages/StoryPageWrapper";
+import VisualisationPage from "@/pages/VisualisationPage";
+import VisualisationListPage from "@/pages/VisualisationListPage";
 import { useEffect } from "react";
 import { Route, Routes } from "react-router-dom";
 import IndexPage from "./pages/IndexPage";
@@ -35,7 +38,7 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
 }
 
 function App() {
-    const { fetchConfig } = useConfigActions();
+    const { fetchConfig } = useConfig();
     const blockReason = getBlockReason();
 
     useEffect(() => {
@@ -54,8 +57,20 @@ function App() {
                     element={<IndexPage />}
                 />
                 <Route
+                    path="/category/:categoryName"
+                    element={<VisualisationListPage />}
+                />
+                <Route
+                    path="/stories"
+                    element={<StoryListPage />}
+                />
+                <Route
                     path="/story/:storyName"
                     element={<StoryPageWrapper />}
+                />
+                <Route
+                    path="/viz/:visualisationName"
+                    element={<VisualisationPage />}
                 />
             </Routes>
         </div>

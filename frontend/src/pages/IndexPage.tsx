@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/store/useAppStore";
+import { useConfig } from "@/store/useConfig";
 import { Link } from "react-router-dom";
 
 const IndexPage = () => {
@@ -48,18 +48,19 @@ const IndexPage = () => {
             </div>
 
             <div className="flex-1 mx-4 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 overflow-y-auto content-start">
-                {Object.entries(config.stories).map(([name, s]) => (
+                {config.categories.map((c) => (
                     <Link
-                        key={s.name}
-                        to={`/story/${name}`}
-                    >
-                        <Button className="group w-full flex flex-col items-start justify-center text-wrap bg-gradient-to-r from-gray-50 to-white text-gray-800 hover:from-red-500 hover:to-fuchsia-600 hover:text-white transition-all duration-100 hover:shadow-lg font-light hover:font-medium rounded-3xl py-16 px-8 scroll-auto">
+                        key={c.name}
+                        to={`/category/${c.config_path}`}
+                    >   
+                        <Button className="group w-full flex flex-row justify-start items-center gap-5 text-wrap bg-gradient-to-r from-gray-50 to-white text-gray-800 hover:from-red-500 hover:to-fuchsia-600 hover:text-white transition-all duration-100 hover:shadow-lg font-light hover:font-medium rounded-3xl py-16 px-8 scroll-auto">
+                            {/* <img src={"mlviz.png"} alt={c.name} className="w-12 h-12" /> */}
                             <span className="font-mono text-left tracking-tighter text-2xl text-wrap bg-gradient-to-r from-fuchsia-500 to-blue-600 bg-clip-text text-transparent group-hover:from-fuchsia-50 group-hover:to-blue-50 group-hover:font-bold">
-                                {s.name}
+                                {c.name}
                             </span>
-                            <span className="text-sm tracking-tight text-left text-wrap mt-2">
+                            {/* <span className="text-sm tracking-tight text-left text-wrap mt-2">
                                 {s.description}
-                            </span>
+                            </span> */}
                         </Button>
                     </Link>
                 ))}

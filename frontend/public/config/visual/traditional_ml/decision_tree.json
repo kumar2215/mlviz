@@ -1,0 +1,13 @@
+{
+    "display_name": "Decision Tree",
+    "pages": [
+        {
+            "name": "DecisionTree",
+            "page_type": "dynamic",
+            "note": "Click on the node to get started! You'll see a popup on your right where you can then look at the information that the algorithm decides, like information gain.",
+            "dataset": null,
+            "parameters": {}
+        }
+    ],
+    "transitions": []
+}

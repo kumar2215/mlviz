@@ -69,10 +69,12 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         }
         contentGroupRef.current = contentGroup;
 
-        let currentZoomTransform =
-            capabilities.zoomable && zoomControls
-                ? zoomControls.getCurrentTransform?.() || d3.zoomIdentity
-                : d3.zoomIdentity;
+        // Cleanup clears the zoom hook's SVG reference between renders, but D3
+        // keeps the current transform on the SVG itself. Read it there so a
+        // stable renderer does not lose its initial centering on the next render.
+        const currentZoomTransform = capabilities.zoomable
+            ? d3.zoomTransform(svgRef.current)
+            : d3.zoomIdentity;
 
         // If the renderer or data has changed fundamentally, we might want a clear,
         // but for ongoing updates (like tree expansion), we let the renderer's .join() handle it.

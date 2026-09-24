@@ -1,35 +1,30 @@
-import { useConfig, useDataset } from "@/store/useAppStore";
-import { ModelNameProvider, ModelProvider } from "@/contexts/ModelContext";
-import ModelPage from "@/pages/model/ModelPage";
-import type { DynamicPageUnion } from "@/types/story";
-import React, { useEffect } from "react";
+import { useConfig } from "@/store/useConfig";
+import { useDataset } from "@/store/useDataset";
+import type { DynamicPageProps, IndexPageProps } from "@/types/page";
+import React, {
+    useEffect,
+    lazy,
+    Suspense,
+    type ComponentType,
+    type LazyExoticComponent,
+} from "react";
 
-interface DynamicPageProps {
-    page: DynamicPageUnion;
-}
+type LazyPageModule = {
+    default: ComponentType<IndexPageProps>;
+};
 
-const REGRESSION_DATASET_TYPES = new Set([
-    "predefined_regression",
-    "custom_regression",
-]);
-const CLASSIFICATION_DATASET_TYPES = new Set(["predefined", "custom"]);
+const pageLoaders = import.meta.glob<LazyPageModule>("./*/*/index.tsx");
+const pageComponents = Object.fromEntries(
+    Object.entries(pageLoaders).map(([path, loader]) => [path, lazy(loader)]),
+) as Record<string, LazyExoticComponent<ComponentType<IndexPageProps>>>;
 
-function isDatasetCompatible(
-    datasetType: string,
-    problemType: string,
-): boolean {
-    if (problemType === "regression") {
-        return REGRESSION_DATASET_TYPES.has(datasetType);
-    }
-    if (problemType === "classifier" || problemType === "clustering") {
-        return CLASSIFICATION_DATASET_TYPES.has(datasetType);
-    }
-    return true;
-}
-
-const DynamicPage: React.FC<DynamicPageProps> = ({ page }) => {
-    const { activeDataset, setDataset, clearDataset } = useDataset();
+const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation }) => {
+    const { setDataset } = useDataset();
     const { config } = useConfig();
+
+    if (!category || !visualisation) {
+        throw new Error("Category and/or visualisation not provided for dynamic page");
+    }
 
     // Resolve dataset if it's a reference
     const resolvedDataset =
@@ -37,44 +32,33 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page }) => {
             ? config?.datasets?.[page.dataset.name]
             : page.dataset;
 
-    const problemType =
-        page.dynamic_type === "model" ? page.problem_type : undefined;
-
     useEffect(() => {
-        if (resolvedDataset) {
-            console.log("[DynamicPage] Setting dataset:", resolvedDataset);
-            setDataset(resolvedDataset);
-        } else if (problemType && activeDataset) {
-            if (!isDatasetCompatible(activeDataset.type, problemType)) {
-                console.log(
-                    `[DynamicPage] Clearing incompatible dataset (type="${activeDataset.type}") for problem_type="${problemType}"`,
-                );
-                clearDataset();
-            }
-        }
-    }, [resolvedDataset, problemType, activeDataset, setDataset, clearDataset]);
+        setDataset(resolvedDataset ?? null);
+    }, [resolvedDataset, setDataset]);
 
-    if (resolvedDataset && activeDataset !== resolvedDataset) {
-        return null;
+    const modulePath = `./${category}/${visualisation}/index.tsx`;
+    const LazyComponent = pageComponents[modulePath];
+
+    if (!LazyComponent) {
+        return <div>Unknown page: {modulePath}</div>;
     }
 
-    if (page.dynamic_type == "none") {
-        return <></>;
-    } else if (page.dynamic_type == "model") {
-        return (
-            <ModelProvider model_name={page.model_name}>
-                <ModelNameProvider value={page.model_name}>
-                    <ModelPage
-                        model_name={page.model_name}
-                        component_type={page.component_type}
-                        parameters={page.parameters}
-                        problem_type={page.problem_type}
-                        dataset={resolvedDataset}
-                    />
-                </ModelNameProvider>
-            </ModelProvider>
-        );
-    }
+    const loading = (
+        <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+            <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
+                Loading visualisation...
+            </div>
+        </div>
+    );
+
+    return (
+        <Suspense fallback={loading}>
+            <LazyComponent
+                name={page.name}
+                parameters={page.parameters}
+            />
+        </Suspense>
+    );
 };
 
 export default DynamicPage;

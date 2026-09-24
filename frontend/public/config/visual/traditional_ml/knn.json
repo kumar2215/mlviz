@@ -1,0 +1,39 @@
+{
+    "display_name": "KNN",
+    "pages": [
+        {
+            "name": "KNNTrain",
+            "page_type": "dynamic",
+            "note": null,
+            "dataset": null,
+            "parameters": {}
+        },
+        {
+            "name": "KNNPredict",
+            "page_type": "dynamic",
+            "note": null,
+            "dataset": null,
+            "parameters": {}
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Prediction visualisation",
+                "description": "See how your points are predicted with KNN!"
+            }
+        },
+        {
+            "from": 1,
+            "to": 0,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Back to the visualisation",
+                "description": "See how the dataset is split within KNN"
+            }
+        }
+    ]
+}

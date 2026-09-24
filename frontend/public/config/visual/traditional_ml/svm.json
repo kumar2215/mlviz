@@ -1,0 +1,88 @@
+{
+    "display_name": "Support Vector Machine",
+    "pages": [
+        {
+            "name": "SVMTrain",
+            "page_type": "dynamic",
+            "note": null,
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        {
+            "name": "SVMStep",
+            "page_type": "dynamic",
+            "note": null,
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        },
+        {
+            "name": "SVMPredict",
+            "page_type": "dynamic",
+            "note": null,
+            "dataset": null,
+            "parameters": {
+                "visualisation_features": [0, 1],
+                "kernel": "linear",
+                "C": 1.0,
+                "test_size": 0.2
+            }
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "step",
+                "description": null
+            }
+        },
+        {
+            "from": 1,
+            "to": 2,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "predict",
+                "description": null
+            }
+        },
+        {
+            "from": 0,
+            "to": 2,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "predict",
+                "description": null
+            }
+        },
+        {
+            "from": 2,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": null,
+                "description": null
+            }
+        },
+        {
+            "from": 1,
+            "to": 0,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "train",
+                "description": null
+            }
+        }
+    ]
+}

@@ -1,5 +1,7 @@
 import type { ModelOption } from "@/types/parameters";
-import type { Condition, Parameters, StoryHistory } from "@/types/story";
+import type { Condition } from "@/types/condition";
+import type { Parameters } from "@/types/page";
+import type { VisualisationHistoryState } from "@/types/history";
 
 function getNestedValue(obj: any, path: string): any {
     if (!obj || !path) return undefined;
@@ -31,7 +33,7 @@ export function isConditionMet(
     if (import.meta.env.VITE_BYPASS_CONDITIONS === "true") return true;
 
     // History is passed via the special __history key (see NavigationButton / NavigationBar)
-    const history = state["__history"] as StoryHistory | undefined;
+    const history = state["__history"] as VisualisationHistoryState | undefined;
 
     switch (condition.condition_type) {
         case "Bypass":
@@ -53,14 +55,14 @@ export function isConditionMet(
         }
 
         case "Wait": {
-            const history = state["__history"] as StoryHistory | undefined;
+            const history = state["__history"] as VisualisationHistoryState | undefined;
             const now = (state["__now"] as unknown as number | undefined) ?? Date.now();
             const entries = history?.entries || [];
 
             let lastVisitTime = 0;
             // Find the most recent page_visit where the timer started
             for (let i = entries.length - 1; i >= 0; i--) {
-                if (entries[i].type === "page_visit") {
+                if (entries[i].actionType === "page_visit") {
                     lastVisitTime = entries[i].timestamp;
                     break;
                 }
@@ -75,7 +77,7 @@ export function isConditionMet(
         case "Button": {
             const entries = history?.entries || [];
             return entries.some(
-                (e) => e.type === "button_click" && e.button_id === condition.button_id
+                (e) => e.actionType === "button_click" && e.button_id === condition.button_id
             );
         }
 
@@ -91,12 +93,12 @@ export function isConditionMet(
 
         case "ActionCount": {
             const entries = history?.entries || [];
-            const count = entries.filter((e) => e.type === condition.action).length;
+            const count = entries.filter((e) => e.actionType === condition.action).length;
             return count >= condition.min;
         }
 
         case "PageVisited": {
-            const pagesVisited = history?.pagesVisited || [];
+            const pagesVisited = history?.path || [];
             return pagesVisited.includes(condition.page_id);
         }
 
@@ -147,13 +149,13 @@ export function getWaitTimeRemaining(
 ): number {
     if (condition.condition_type !== "Wait") return 0;
     
-    const history = state["__history"] as StoryHistory | undefined;
+    const history = state["__history"] as VisualisationHistoryState | undefined;
     const now = (state["__now"] as unknown as number | undefined) ?? Date.now();
     const entries = history?.entries || [];
 
     let lastVisitTime = 0;
     for (let i = entries.length - 1; i >= 0; i--) {
-        if (entries[i].type === "page_visit") {
+        if (entries[i].actionType === "page_visit") {
             lastVisitTime = entries[i].timestamp;
             break;
         }
@@ -236,7 +238,7 @@ function retrieveBlacklistParameters(
 
 export function filterParameters(
     response: ModelOption[],
-    parameters?: Record<string, string[]>
+    parameters?: Record<string, any>
 ) {
     if (!parameters) return response;
     return retrieveBlacklistParameters(
