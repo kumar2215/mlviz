@@ -39,28 +39,30 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
 }
 
 export default function App() {
+    const blockReason = getBlockReason();
+    if (blockReason) {
+        return <MobileBlockScreen reason={blockReason} />;
+    }
+
     const { loading, error, config, fetchConfig } = useConfig();
     const { visualisations } = useVisualisation();
     const { stories } = useStory();
-    const blockReason = getBlockReason();
 
     const [item, setItem] = useState<ListItem[] | Story | Visualisation | null>(null);
     const [itemName, setItemName] = useState<string>("");
+    const [invalidPath, setInvalidPath] = useState<boolean>(false);
     const location = useLocation();
     const pathname = location.pathname;
     const category = pathname.startsWith("/category/") ? pathname.slice("/category/".length).replace("/", "") : undefined;
     const storyName = pathname.startsWith("/story/") ? pathname.slice("/story/".length).replace("/", "") : undefined;
     const visualisationName = pathname.startsWith("/viz/") ? pathname.slice("/viz/".length).replace("/", "") : undefined;
 
-    if (blockReason) {
-        return <MobileBlockScreen reason={blockReason} />;
-    }
-
     useEffect(() => {
         fetchConfig();
     }, [fetchConfig]);
 
     useEffect(() => {
+        setInvalidPath(false);
         if (pathname === "/") {
             setItem(config?.categories.map((c) => ({ display_name: c.name, path: `/category/${c.config_path}`, icon: c.icon})) || null);
             setItemName("config");
@@ -82,8 +84,20 @@ export default function App() {
             setItemName("visualisation");
             setCurrentVisualisation(visualisation);
             setCurrentStory(null);
+        } else {
+            setInvalidPath(true);
         }
     }, [pathname, category, storyName, visualisationName, config, visualisations, stories]);
+
+    if (invalidPath) {
+        return (
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+                <div className="text-4xl font-bold font-mono text-red-600 mb-4">
+                    {`Invalid path: ${pathname}`}
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (
