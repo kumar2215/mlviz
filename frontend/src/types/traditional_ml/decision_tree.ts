@@ -25,7 +25,7 @@ export interface ClassDistribution {
     percentage: number;
 }
 
-export interface BaseDecisionTreeRenderProps {
+interface BaseDecisionTreeRenderProps {
     transformTreeData: (
         node: TreeNode,
         depth?: number,

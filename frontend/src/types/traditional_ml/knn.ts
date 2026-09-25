@@ -13,7 +13,7 @@ import type * as d3 from "d3";
 /**
  * Information about a single neighbor
  */
-export interface NeighborInfo {
+interface NeighborInfo {
     index: number; // Index in training data
     distance: number; // Distance from query point
     label: string; // Class label
@@ -22,7 +22,7 @@ export interface NeighborInfo {
 /**
  * Complete KNN visualization data for a single query point
  */
-export interface KNNQueryVisualization {
+interface KNNQueryVisualization {
     queryPoint: number[]; // Query point coordinates
     neighbors: NeighborInfo[]; // K-nearest neighbors
     prediction: string; // Predicted class
@@ -62,7 +62,7 @@ export interface KNNVisualizationData {
 /**
  * Props passed to the KNN render function
  */
-export interface KNNRenderProps {
+interface KNNRenderProps {
     colorScale: d3.ScaleOrdinal<string, string>;
     k: number; // Number of neighbors to highlight
     showNeighborLines?: boolean; // Show lines to neighbors

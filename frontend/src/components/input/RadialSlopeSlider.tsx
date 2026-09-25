@@ -15,11 +15,11 @@ const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v
 const toRad = (d: number) => (d * Math.PI) / 180;
 const toDeg = (r: number) => (r * 180) / Math.PI;
 
-export function slopeToAngle(slope: number, xSpan: number, ySpan: number): number {
+function slopeToAngle(slope: number, xSpan: number, ySpan: number): number {
     if (!xSpan || !ySpan) return 0;
     return clamp(toDeg(Math.atan((slope * xSpan) / ySpan)), ANGLE_MIN, ANGLE_MAX);
 }
-export function angleToSlope(deg: number, xSpan: number, ySpan: number): number {
+function angleToSlope(deg: number, xSpan: number, ySpan: number): number {
     if (!xSpan) return 0;
     return (Math.tan(toRad(deg)) * ySpan) / xSpan;
 }
@@ -41,7 +41,7 @@ function arcPath(
     return `M ${s.x} ${s.y} A ${r} ${r} 0 0 ${sweep} ${e.x} ${e.y}`;
 }
 
-export interface RadialSlopeSliderProps {
+interface RadialSlopeSliderProps {
     slope: number;
     onSlopeChange: (slope: number) => void;
     onSlopeChangeEnd?: (slope: number) => void;

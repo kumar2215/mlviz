@@ -200,4 +200,4 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
 };
 
 export default GDStepHUD;
-export type { GDStepHUDProps };
+;

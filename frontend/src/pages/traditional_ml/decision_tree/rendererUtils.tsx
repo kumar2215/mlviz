@@ -394,7 +394,7 @@ const renderDistributionBar = (
     });
 };
 
-export const getDefaultTooltipContent = (
+const getDefaultTooltipContent = (
     d: d3.HierarchyNode<TransformedNode>
 ): string => {
     let content = `<div class="font-semibold text-base mb-2">${

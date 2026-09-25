@@ -24,7 +24,7 @@ import {
  * DT-specific prediction additional data
  * Contains traversal instructions for visualization
  */
-export interface DTPredictionAdditionalData {
+interface DTPredictionAdditionalData {
     /**
      * List of traversal instructions from root to leaf
      * Each instruction indicates which direction to go at each split node

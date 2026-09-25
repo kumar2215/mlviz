@@ -1,0 +1,6 @@
+{
+    "$schema": "https://unpkg.com/knip/schema.json",
+    "ignoreIssues": {
+        "src/types/api.ts": ["exports", "types"]
+    }
+}

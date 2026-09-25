@@ -4,13 +4,11 @@
  */
 
 import type {
-    ClassificationBoundary,
     ClassificationPoint,
     Config,
     DecisionBoundary,
     PlotBounds,
     PlotPoint,
-    RegressionBoundary,
     RegressionPoint,
 } from "@/components/plots/types";
 
@@ -21,7 +19,7 @@ import type {
 /**
  * Transforms raw data into classification plot points
  */
-export function createClassificationPoints(
+function createClassificationPoints(
     data: number[][],
     labels: string[],
     classNames: string[],
@@ -55,7 +53,7 @@ export function createClassificationPoints(
 /**
  * Transforms raw data into regression plot points
  */
-export function createRegressionPoints(
+function createRegressionPoints(
     data: number[][],
     values: number[],
 ): RegressionPoint[] {
@@ -92,81 +90,13 @@ export function createPlotPoints(
 }
 
 // ============================================================================
-// Decision Boundary Transformers
-// ============================================================================
-
-/**
- * Creates a classification decision boundary from mesh data
- */
-export function createClassificationBoundary(
-    meshPoints: number[][],
-    predictions: string[],
-): ClassificationBoundary {
-    if (meshPoints.length !== predictions.length) {
-        throw new Error(
-            "Mesh points and predictions must have the same length",
-        );
-    }
-
-    const dimensions = meshPoints[0]?.length || 0;
-
-    return {
-        type: "classification",
-        meshPoints,
-        predictions,
-        dimensions,
-    };
-}
-
-/**
- * Creates a regression decision boundary from mesh data
- */
-export function createRegressionBoundary(
-    meshPoints: number[][],
-    predictions: number[],
-): RegressionBoundary {
-    if (meshPoints.length !== predictions.length) {
-        throw new Error(
-            "Mesh points and predictions must have the same length",
-        );
-    }
-
-    const dimensions = meshPoints[0]?.length || 0;
-
-    return {
-        type: "regression",
-        meshPoints,
-        predictions,
-        dimensions,
-    };
-}
-
-/**
- * Universal decision boundary creator
- */
-export function createDecisionBoundary(
-    meshPoints: number[][],
-    predictions: string[] | number[],
-    type: "classification" | "regression",
-): DecisionBoundary {
-    if (type === "classification") {
-        return createClassificationBoundary(
-            meshPoints,
-            predictions as string[],
-        );
-    } else {
-        return createRegressionBoundary(meshPoints, predictions as number[]);
-    }
-}
-
-// ============================================================================
 // Bounds Calculation
 // ============================================================================
 
 /**
  * Calculates plot bounds from data points with optional padding
  */
-export function calculatePlotBounds(
+function calculatePlotBounds(
     data: number[][],
     padding: number = 0.1,
 ): PlotBounds {
@@ -222,123 +152,4 @@ export function calculateCombinedBounds(
         padding
     });
     return bounds;
-}
-
-// ============================================================================
-// Dimension Detection
-// ============================================================================
-
-/**
- * Detects the number of dimensions in the data
- */
-export function detectDimensions(data: number[][]): 1 | 2 {
-    if (data.length === 0) {
-        throw new Error("Cannot detect dimensions from empty data");
-    }
-
-    const dims = data[0].length;
-
-    if (dims < 1 || dims > 3) {
-        throw new Error(
-            `Unsupported number of dimensions: ${dims}. Expected 1, 2, or 3.`,
-        );
-    }
-
-    return dims as 1 | 2;
-}
-
-/**
- * Validates that all data points have consistent dimensions
- */
-export function validateDimensions(data: number[][]): void {
-    if (data.length === 0) return;
-
-    const expectedDims = data[0].length;
-
-    for (let i = 1; i < data.length; i++) {
-        if (data[i].length !== expectedDims) {
-            throw new Error(
-                `Inconsistent dimensions: point ${i} has ${data[i].length} dimensions, expected ${expectedDims}`,
-            );
-        }
-    }
-}
-
-// ============================================================================
-// Data Validation
-// ============================================================================
-
-/**
- * Validates plot data and configuration
- */
-export function validatePlotData(
-    data: number[][],
-    config: Config,
-): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    // Check empty data
-    if (data.length === 0) {
-        errors.push("Data array is empty");
-    }
-
-    // Validate dimensions
-    try {
-        validateDimensions(data);
-    } catch (e) {
-        errors.push((e as Error).message);
-    }
-
-    // Validate config-specific requirements
-    if (config.type === "classification") {
-        if (config.labels.length !== data.length) {
-            errors.push(
-                `Labels length (${config.labels.length}) does not match data length (${data.length})`,
-            );
-        }
-        if (config.classNames.length === 0) {
-            errors.push("classNames array is empty");
-        }
-    } else if (config.type === "clustering") {
-        if (config.labels.length !== data.length) {
-            errors.push(
-                `Labels length (${config.labels.length}) does not match data length (${data.length})`,
-            );
-        }
-        if (config.clusterNames.length === 0) {
-            errors.push("clusterNames array is empty");
-        }
-    } else {
-        if (config.values.length !== data.length) {
-            errors.push(
-                `Values length (${config.values.length}) does not match data length (${data.length})`,
-            );
-        }
-    }
-
-    return {
-        valid: errors.length === 0,
-        errors,
-    };
-}
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/**
- * Finds unique class names from labels
- */
-export function extractClassNames(labels: string[]): string[] {
-    return Array.from(new Set(labels)).sort();
-}
-
-/**
- * Calculates value range for regression data
- */
-export function calculateValueRange(values: number[]): [number, number] {
-    if (values.length === 0) {
-        return [0, 1];
-    }
-    return [Math.min(...values), Math.max(...values)];
 }

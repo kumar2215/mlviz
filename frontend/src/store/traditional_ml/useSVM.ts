@@ -26,10 +26,6 @@ import {
  */
 interface SVMModelData extends BaseModelData, SVMTrainResponse {}
 
-export interface SVMPredictAdditionalData {
-    loss: number;
-}
-
 interface SVMStore
     extends TrainableModelState<SVMModelData>,
         VisualizableModelState<SVMModelData>,

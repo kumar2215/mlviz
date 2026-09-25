@@ -13,11 +13,11 @@ export interface StaticPageParameters {
     path: string;
 }
 
-export interface StaticPage extends BasePage, StaticPageParameters {
+interface StaticPage extends BasePage, StaticPageParameters {
     page_type: "static";
 }
 
-export interface DynamicPage extends BasePage {
+interface DynamicPage extends BasePage {
     name: string;
     page_type: "dynamic";
     parameters: Parameters;
@@ -25,7 +25,7 @@ export interface DynamicPage extends BasePage {
     path?: string;
 }
 
-export interface ReferencePage extends BasePage {
+interface ReferencePage extends BasePage {
     page_type: "reference";
     reference_type: "visualisation" | "story";
     path: string;

@@ -1,5 +1,5 @@
 
-export type ActionType =
+type ActionType =
     | "train"
     | "predict"
     | "step"
@@ -13,7 +13,7 @@ interface BaseCondition {
     description?: string;
 }
 
-export interface ParameterCheck extends BaseCondition {
+interface ParameterCheck extends BaseCondition {
     condition_type: "Parameter";
     parameter: string;
     comparator: "<" | "<=" | ">=" | ">" | "=";
@@ -21,42 +21,42 @@ export interface ParameterCheck extends BaseCondition {
     category: string;
 }
 
-export interface TimeCheck extends BaseCondition {
+interface TimeCheck extends BaseCondition {
     condition_type: "Wait";
     wait: number;
 }
 
-export interface ButtonPress extends BaseCondition {
+interface ButtonPress extends BaseCondition {
     condition_type: "Button";
     button_id: string;
 }
 
-export interface BypassCheck extends BaseCondition {
+interface BypassCheck extends BaseCondition {
     condition_type: "Bypass";
 }
 
-export interface SlideCheck extends BaseCondition {
+interface SlideCheck extends BaseCondition {
     condition_type: "Slide";
     slide_name: string;
     slide_description?: string;
 }
 
-export interface Lambda extends BaseCondition {
+interface Lambda extends BaseCondition {
     condition_type: "Lambda";
     exec_str: string;
 }
 
-export interface AndCheck extends BaseCondition {
+interface AndCheck extends BaseCondition {
     condition_type: "And";
     conditions: Condition[];
 }
 
-export interface OrCheck extends BaseCondition {
+interface OrCheck extends BaseCondition {
     condition_type: "Or";
     conditions: Condition[];
 }
 
-export interface ActionCountCheck extends BaseCondition {
+interface ActionCountCheck extends BaseCondition {
     condition_type: "ActionCount";
     /** The action type to count (e.g. "train", "step", "predict"). */
     action: ActionType;
@@ -64,13 +64,13 @@ export interface ActionCountCheck extends BaseCondition {
     min: number;
 }
 
-export interface PageVisitedCheck extends BaseCondition {
+interface PageVisitedCheck extends BaseCondition {
     condition_type: "PageVisited";
     /** The local_index of the page that must have been visited. */
     page_id: number;
 }
 
-export interface MetricCheck extends BaseCondition {
+interface MetricCheck extends BaseCondition {
     condition_type: "Metric";
     /** The metric name to check (e.g. "accuracy", "error"). */
     metric: string;

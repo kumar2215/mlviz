@@ -17,7 +17,7 @@ export interface HistoryEntry {
     metrics?: Record<string, any>; // for train / step results
 }
 
-export interface HistoryState {
+interface HistoryState {
     params: Record<string, Parameters>;
     entries: HistoryEntry[];
     path: number[];
