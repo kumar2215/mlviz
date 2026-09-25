@@ -1,9 +1,9 @@
 import NavigationButton from "@/components/navigation/NavigationButton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useVisualisation } from "@/store/useVisualisation";
 import type { Parameters } from "@/types/page";
 import type { Transition } from "@/types/story";
+import type { HistoryState } from "@/types/history";
 import { ArrowLeft, Route } from "lucide-react";
 import { useEffect, useState } from "react";
 import { isConditionMet, displayCondition } from "@/utils/conditions";
@@ -13,6 +13,7 @@ interface NavigationBarProps {
     handleNext: (pageId: number) => void;
     onBack: () => void;
     canGoBack: boolean;
+    currentHistory: HistoryState;
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({
@@ -20,9 +21,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     handleNext,
     onBack,
     canGoBack,
+    currentHistory
 }) => {
-    const { currentVisualisationHistory } = useVisualisation();
-
     // Timer state for "Wait" conditions
     const [now, setNow] = useState(Date.now());
 
@@ -40,8 +40,8 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
     }, [transitions]);
 
     const conditionState = {
-        ...currentVisualisationHistory.params,
-        __history: currentVisualisationHistory,
+        ...currentHistory.params,
+        __history: currentHistory,
         __now: now,
     } as unknown as Record<string, Parameters>;
 
@@ -73,6 +73,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                         transition={transition}
                         handleNext={handleNext}
                         conditionState={conditionState}
+                        currentHistory={currentHistory}
                     />
                 ))}
 
@@ -83,6 +84,7 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                         transition={transition}
                         handleNext={handleNext}
                         conditionState={conditionState}
+                        currentHistory={currentHistory}
                     />
                 ))}
             </div>

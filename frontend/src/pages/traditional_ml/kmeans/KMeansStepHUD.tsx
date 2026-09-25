@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
 import { useKMeans } from "@/store/traditional_ml/useKMeans";
-import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { Check, Move, Play, Plus, RotateCcw, Target } from "lucide-react";
 import React from "react";
@@ -26,7 +26,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
         clearIterationState,
         loadVisualization,
     } = useKMeans();
-    const { recordStep } = useVisualisationHistoryRecorder();
+    const { recordStep } = useHistoryRecorder();
 
     const handleRunStep = async () => {
         if (selectedCentroids.length === 0) return;

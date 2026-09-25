@@ -1,5 +1,5 @@
-import { useVisualisation } from "@/store/useVisualisation";
-import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import useUserMode from "@/hooks/useUserMode";
+import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { Parameters } from "@/types/page";
 import { filterParameters } from "@/utils/conditions";
@@ -32,8 +32,8 @@ export default function useStep(useModel: () => any, parameters: Parameters) {
     }, [model, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const { updateParams } = useVisualisation();
-    const { recordStep } = useVisualisationHistoryRecorder();
+    const { updateParams } = useUserMode().hook();
+    const { recordStep } = useHistoryRecorder();
 
     const [stepParams, setStepParams] = useState<Parameters>(
         parameters == null ? lastParams : parameters

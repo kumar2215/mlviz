@@ -1,6 +1,6 @@
-import { useVisualisation } from "@/store/useVisualisation";
+import useUserMode from "@/hooks/useUserMode";
 import { useDataset } from "@/store/useDataset";
-import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { Parameters } from "@/types/page";
 import { filterParameters } from "@/utils/conditions";
@@ -30,8 +30,8 @@ export default function useTrain(useModel: () => any, setShowAlert: (show: boole
     }, [model, data?.metadata?.feature_names]);
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const { updateParams } = useVisualisation();
-    const { recordTrain } = useVisualisationHistoryRecorder();
+    const { updateParams } = useUserMode().hook();
+    const { recordTrain } = useHistoryRecorder();
 
     useEffect(() => {
         const fetchParameters = async () => {

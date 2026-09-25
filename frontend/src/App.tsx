@@ -128,6 +128,6 @@ export default function App() {
     } else if (itemName === "story") {
         return <StoryPageWrapper key={`story:${item.name}`} story={item} />;
     } else if (itemName === "visualisation") {
-        return <VisualisationPage key={`viz:${item.name}`} userMode="visualisation" />;
+        return <VisualisationPage key={`viz:${item.name}`} />;
     }
 };

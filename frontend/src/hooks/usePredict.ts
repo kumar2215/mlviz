@@ -1,11 +1,12 @@
-import { useVisualisation } from "@/store/useVisualisation";
-import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import useUserMode from "@/hooks/useUserMode";
+import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Parameters } from "@/types/page";
 
 export default function usePredict(useModel: () => any, setShowAlert: (show: boolean) => void, parameters: Parameters) {
-    const { updateParams } = useVisualisation();
-    const { recordPredict } = useVisualisationHistoryRecorder();
+    const hook = useUserMode().hook;
+    const { updateParams } = hook();
+    const { recordPredict } = useHistoryRecorder();
 
     const {
         currentModelData,
