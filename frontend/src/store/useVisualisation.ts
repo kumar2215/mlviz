@@ -72,11 +72,12 @@ export const useVisualisation = create<VisualisationStore>()(
                 });
             } catch (err) {
                 const message = err instanceof Error ? err.message : "Unknown error";
-                console.error("Error loading config:", err);
+                console.error("Error loading visualisations:", err);
                 set((state) => {
                     state.error = message;
                     state.loading = false;
                 });
+                throw err;
             }
         },
         addPageVisit: (pageId: number) => {
