@@ -11,4 +11,5 @@ export interface Category {
 export default interface Config {
     datasets: Record<string, ActiveDataset>;
     categories: Category[];
+    stories: string[];
 }

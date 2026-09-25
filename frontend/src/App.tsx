@@ -6,7 +6,7 @@ import StoryPageWrapper from "@/pages/StoryPageWrapper";
 import VisualisationPage from "@/pages/VisualisationPage";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import type { Story } from "@/types/story";
+import type Story from "@/types/story";
 import type Visualisation from "@/types/visualisation";
 
 type BlockReason = "mobile" | "narrow" | null;

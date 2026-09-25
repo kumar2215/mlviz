@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useVisualisation } from "@/store/useVisualisation";
 import type { Parameters } from "@/types/page";
-import type { Transition } from "@/types/visualisation";
+import type { Transition } from "@/types/story";
 import { ArrowLeft, Route } from "lucide-react";
 import { useEffect, useState } from "react";
 import { isConditionMet, displayCondition } from "@/utils/conditions";

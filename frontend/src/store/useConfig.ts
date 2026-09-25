@@ -39,7 +39,11 @@ export const useConfig = create<ConfigStore>()(
                         await useVisualisation.getState().fetchVisualisations(category.config_path);
                     }),
                 );
-                await useStory.getState().fetchStories();
+                await Promise.all(
+                    config.stories.map(async (storyName) => {
+                        await useStory.getState().fetchStory(storyName);
+                    }),
+                );
                 set({ loading: false });
             } catch (err) {
                 const message = err instanceof Error ? err.message : "Unknown error";

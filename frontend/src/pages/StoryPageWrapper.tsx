@@ -2,9 +2,28 @@ import VisualisationPage from "./VisualisationPage";
 import { useStory, setCurrentStory } from "@/store/useStory";
 import { useVisualisation } from "@/store/useVisualisation";
 import { useEffect } from "react";
-import type { Transition } from "@/types/visualisation";
 import type { PageUnion } from "@/types/page";
-import type { Story } from "@/types/story";
+import type Story from "@/types/story";
+import type { Transition } from "@/types/story";
+
+function processUnrolledStory(story: Story, referencePages: number[], pageOffset: number, transitions: Transition[]): void {
+    for (let i1 = 0; i1 < referencePages.length; i1++) {
+        for (let i2 = 0; i2 < referencePages.length; i2++) {
+            if (i1 !== i2) {
+                const local_idx1 = referencePages[i1];
+                const local_idx2 = referencePages[i2];
+                const t1 = story.transitions.find(
+                    (t) => t.from === local_idx1 && t.to === local_idx2,
+                );
+                const t2 = story.transitions.find(
+                    (t) => t.from === local_idx2 && t.to === local_idx1,
+                );
+                if (t1) transitions.push({ ...t1, from: pageOffset + i1, to: pageOffset + i2 });
+                if (t2) transitions.push({ ...t2, from: pageOffset + i2, to: pageOffset + i1 });
+            }
+        }
+    }
+}
 
 export default function StoryPageWrapper({ story }: { story: Story }) {
     const { stories } = useStory();
@@ -27,6 +46,9 @@ export default function StoryPageWrapper({ story }: { story: Story }) {
                     if (!referencedStory) {
                         throw new Error(`Referenced story not found: ${referencedStoryName}`);
                     }
+                    if (referencedStory.name === story.name) {
+                        throw new Error(`Story '${story.name}' has circular reference to itself.`);
+                    }
                     const unrolledReferencedStory = unrollStory(referencedStory);
                     const referencePages = page.pages;
 
@@ -36,22 +58,7 @@ export default function StoryPageWrapper({ story }: { story: Story }) {
                     }
 
                     const pageOffset = pages.length - referencePages.length;
-                    for (let i1 = 0; i1 < referencePages.length; i1++) {
-                        for (let i2 = 0; i2 < referencePages.length; i2++) {
-                            if (i1 !== i2) {
-                                const local_idx1 = referencePages[i1];
-                                const local_idx2 = referencePages[i2];
-                                const t1 = unrolledReferencedStory.transitions.find(
-                                    (t) => t.from === local_idx1 && t.to === local_idx2,
-                                );
-                                const t2 = unrolledReferencedStory.transitions.find(
-                                    (t) => t.from === local_idx2 && t.to === local_idx1,
-                                );
-                                if (t1) transitions.push({ ...t1, from: pageOffset + i1, to: pageOffset + i2 });
-                                if (t2) transitions.push({ ...t2, from: pageOffset + i2, to: pageOffset + i1 });
-                            }
-                        }
-                    }
+                    processUnrolledStory(unrolledReferencedStory, referencePages, pageOffset, transitions);
                 } else if (referenceType === "visualisation") {
                     const visualisationCategory = page.path.split("/")[0];
                     const visualisationName = page.path.split("/")[1].replace(".json", "");
@@ -74,22 +81,7 @@ export default function StoryPageWrapper({ story }: { story: Story }) {
                     }
 
                     const pageOffset = pages.length - referencePages.length;
-                    for (let i1 = 0; i1 < referencePages.length; i1++) {
-                        for (let i2 = 0; i2 < referencePages.length; i2++) {
-                            if (i1 !== i2) {
-                                const local_idx1 = referencePages[i1];
-                                const local_idx2 = referencePages[i2];
-                                const t1 = unrolledReferenceVisualisation.transitions.find(
-                                    (t) => t.from === local_idx1 && t.to === local_idx2,
-                                );
-                                const t2 = unrolledReferenceVisualisation.transitions.find(
-                                    (t) => t.from === local_idx2 && t.to === local_idx1,
-                                );
-                                if (t1) transitions.push({ ...t1, from: pageOffset + i1, to: pageOffset + i2 });
-                                if (t2) transitions.push({ ...t2, from: pageOffset + i2, to: pageOffset + i1 });
-                            }
-                        }
-                    }
+                    processUnrolledStory(unrolledReferenceVisualisation, referencePages, pageOffset, transitions);
                 } else {
                     throw new Error(`Unknown reference type: ${referenceType}`);
                 }

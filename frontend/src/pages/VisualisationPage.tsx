@@ -6,7 +6,7 @@ import { Sidenote } from "@/components/Sidenote";
 import { getCurrentVisualisation, useVisualisation } from "@/store/useVisualisation";
 import { getCurrentStory, useStory } from "@/store/useStory";
 import type { PageUnion } from "@/types/page";
-import type { Transition } from "@/types/visualisation";
+import type { Transition } from "@/types/story";
 import { House } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";

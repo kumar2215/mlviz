@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { useVisualisation } from "@/store/useVisualisation";
 import type { Parameters } from "@/types/page";
-import type { Transition } from "@/types/visualisation";
+import type { Transition } from "@/types/story";
 import {
     displayCondition,
     getWaitTimeRemaining,
