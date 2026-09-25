@@ -41,6 +41,32 @@ export const useZoomControls = ({
     const dynamicBoundsRef = useRef(contentBounds);
     const dynamicPanMarginRef = useRef(panMargin);
 
+    const getCurrentTransform = useCallback((): d3.ZoomTransform | null => {
+        if (svgSelectionRef.current) {
+            return d3.zoomTransform(svgSelectionRef.current.node()!);
+        }
+        return null;
+    }, []);
+
+    const setZoom = useCallback(
+        (transform: d3.ZoomTransform, animated = true) => {
+            if (zoomBehaviorRef.current && svgSelectionRef.current) {
+                if (animated) {
+                    svgSelectionRef.current
+                        .transition()
+                        .duration(500)
+                        .call(zoomBehaviorRef.current.transform, transform);
+                } else {
+                    svgSelectionRef.current.call(
+                        zoomBehaviorRef.current.transform,
+                        transform
+                    );
+                }
+            }
+        },
+        []
+    );
+
     const createZoomBehavior = useCallback(
         (
             svgSelection: d3.Selection<SVGSVGElement, unknown, null, undefined>,
@@ -381,7 +407,7 @@ export const useZoomControls = ({
 
             return zoom;
         },
-        [scaleExtent, enablePan, onZoomChange, contentBounds, clickableSelector]
+        [scaleExtent, enablePan, onZoomChange, clickableSelector, getCurrentTransform, setZoom]
     );
 
     const resetTransformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
@@ -398,32 +424,6 @@ export const useZoomControls = ({
                 .call(zoomBehaviorRef.current.transform, resetTransformRef.current);
         }
     }, []);
-
-    const getCurrentTransform = useCallback((): d3.ZoomTransform | null => {
-        if (svgSelectionRef.current) {
-            return d3.zoomTransform(svgSelectionRef.current.node()!);
-        }
-        return null;
-    }, []);
-
-    const setZoom = useCallback(
-        (transform: d3.ZoomTransform, animated = true) => {
-            if (zoomBehaviorRef.current && svgSelectionRef.current) {
-                if (animated) {
-                    svgSelectionRef.current
-                        .transition()
-                        .duration(500)
-                        .call(zoomBehaviorRef.current.transform, transform);
-                } else {
-                    svgSelectionRef.current.call(
-                        zoomBehaviorRef.current.transform,
-                        transform
-                    );
-                }
-            }
-        },
-        []
-    );
 
     const zoomTo = useCallback(
         (scale: number, center?: [number, number], animated = true) => {

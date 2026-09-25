@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
  * Calculates the scale factor based on screen width/breakpoints.
  * This matches the index.css scaling logic.
  */
-export const getScaleFactor = () => {
+const getScaleFactor = () => {
     if (typeof window === "undefined") return 1.0;
     const width = window.innerWidth;
     if (width >= 3840) return 2.0; // 4k

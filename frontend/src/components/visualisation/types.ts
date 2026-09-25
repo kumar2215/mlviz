@@ -83,13 +83,13 @@ export interface VisualisationDataConfig {
     ) => void;
 }
 
-export interface VisualizationStyleConfig {
+interface VisualizationStyleConfig {
     dimensions?: { width?: number; height?: number };
     theme?: "light" | "dark" | "auto";
     className?: string;
 }
 
-export interface VisualizationControlsConfig {
+interface VisualizationControlsConfig {
     controlsPosition?:
         | "top-right"
         | "top-left"
@@ -98,12 +98,12 @@ export interface VisualizationControlsConfig {
     controlsStyle?: "overlay" | "panel" | "toolbar";
 }
 
-export interface VisualizationLayoutConfig {
+interface VisualizationLayoutConfig {
     topControls?: React.ReactNode;
     bottomInfo?: React.ReactNode;
 }
 
-export interface VisualizationEventHandlers {
+interface VisualizationEventHandlers {
     onStepChange?: (step: number) => void;
     onZoomChange?: (transform: d3.ZoomTransform) => void;
 }
@@ -174,26 +174,3 @@ export interface VisualisationColors {
         border: string;
     };
 }
-
-export const defaultColors: VisualisationColors = {
-    play: {
-        bg: "#3b82f6", // bg-blue-500
-        hover: "#2563eb", // bg-blue-600
-        active: "#1d4ed8", // bg-blue-700
-    },
-    pause: {
-        bg: "#ef4444", // bg-red-500
-        hover: "#dc2626", // bg-red-600
-        active: "#b91c1c", // bg-red-700
-    },
-    restart: {
-        bg: "#22c55e", // bg-green-500
-        hover: "#16a34a", // bg-green-600
-        active: "#15803d", // bg-green-700
-    },
-    neutral: {
-        bg: "#f3f4f6", // bg-gray-100
-        hover: "#e5e7eb", // bg-gray-200
-        border: "#d1d5db", // border-gray-300
-    },
-};

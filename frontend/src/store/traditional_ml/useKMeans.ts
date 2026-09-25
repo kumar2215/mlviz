@@ -39,7 +39,7 @@ interface KMeansModelData extends BaseModelData, KMeansTrainResponse {
  * KMeans-specific prediction additional data
  * Contains cluster assignment details
  */
-export interface KMeansPredictionAdditionalData {
+interface KMeansPredictionAdditionalData {
     assignments: number[];
     distance_matrix: number[][];
     assigned_distances: number[];

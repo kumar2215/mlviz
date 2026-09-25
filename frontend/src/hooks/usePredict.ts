@@ -66,7 +66,7 @@ export default function usePredict(useModel: () => any, setShowAlert: (show: boo
                 return prevPoints;
             });
         }
-    }, [currentFeatures]);
+    }, [currentFeatures, updateParams]);
 
     const lastPredictedPointsRef = useRef<string>("");
 

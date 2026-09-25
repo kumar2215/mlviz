@@ -209,9 +209,10 @@ export function displayCondition(condition: Condition): string {
         case "PageVisited":
             return `Visit page ${condition.page_id}`;
 
-        case "Metric":
+        case "Metric": {
             const modeText = condition.evaluation_mode === "latest" ? " (latest result)" : "";
             return `Achieve ${condition.metric} ${condition.comparator} ${condition.value}${modeText}`;
+        }
 
         default: {
             const exhaustiveCheck: never = condition;

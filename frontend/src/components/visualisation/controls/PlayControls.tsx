@@ -46,7 +46,7 @@ const PlayControls: React.FC<PlayControlsProps> = ({
     };
 
     return (
-        <div className={`flex align-center items-center gap-2 ${className}`}>
+        <div className={`flex items-center gap-2 ${className}`}>
             <Button
                 onClick={handlePlayPause}
                 title={
@@ -58,9 +58,9 @@ const PlayControls: React.FC<PlayControlsProps> = ({
                 }
                 className={
                     isPlaying
-                        ? `${buttonStyle} !bg-gradient-to-r !from-teal-500 !to-emerald-600 !hover:bg-gradient-to-r !hover:from-teal-700 !hover:to-emerald-800`
+                        ? `${buttonStyle} !bg-gradient-to-r !from-teal-500 !to-emerald-600`
                         : currentStep >= maxSteps
-                        ? `${buttonStyle} !bg-gradient-to-r !from-red-500 !to-orange-600 !hover:bg-gradient-to-r !hover:from-red-700 !hover:to-orange-800`
+                        ? `${buttonStyle} !bg-gradient-to-r !from-red-500 !to-orange-600`
                         : `${buttonStyle}`
                 }
             >

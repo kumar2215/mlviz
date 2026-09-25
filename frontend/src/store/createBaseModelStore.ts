@@ -8,7 +8,7 @@ import { create, type StoreApi } from "zustand";
 /**
  * Base interface that all model data types should extend
  */
-export interface BaseModelData {}
+export type BaseModelData = object;
 
 /**
  * Configuration for the base model store

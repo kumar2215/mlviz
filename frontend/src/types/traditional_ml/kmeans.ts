@@ -7,20 +7,10 @@ import type { VisualisationRenderContext } from "@/components/visualisation/type
 import * as d3 from "d3";
 
 // ============================================================================
-// Centroid Data
-// ============================================================================
-
-export interface CentroidData {
-    position: number[];
-    clusterId: number;
-    color?: string;
-}
-
-// ============================================================================
 // Iteration Data
 // ============================================================================
 
-export interface KMeansIterationVisualization {
+interface KMeansIterationVisualization {
     iteration: number;
     assignments: number[];
     centroids: number[][];
@@ -42,32 +32,32 @@ export interface KMeansIterationVisualization {
 export interface KMeansVisualizationData {
     // Data points
     dataPoints: number[][];
-    
+
     // Iterations (for playback)
     iterations: KMeansIterationVisualization[];
     totalIterations: number;
-    
+
     // Final results
     converged: boolean;
     finalCentroids: number[][];
     finalAssignments: number[];
-    
+
     // Decision boundary (optional)
     decisionBoundary?: {
         meshPoints: number[][];
         predictions: number[] | string[];
         dimensions: number;
     };
-    
+
     // Metadata
     featureNames: string[];
     nDimensions: number;
     nClusters: number;
-    
+
     // Visualization-specific
     visualisationFeatureIndices?: number[];
     visualisationFeatureNames?: string[];
-    
+
     // Query points (for prediction mode)
     queries?: Array<{
         queryPoint: number[];
@@ -95,20 +85,4 @@ export interface RenderKMeansProps {
         activeClusterCount?: number;
         legendPosition?: "top-right" | "top-left" | "bottom-right" | "bottom-left";
     };
-}
-
-// ============================================================================
-// Centroid Placement
-// ============================================================================
-
-export interface CentroidPlacementState {
-    centroids: number[][];
-    isPlacingCentroids: boolean;
-    maxCentroids?: number;
-}
-
-export interface CentroidPlacementHandlers {
-    onAddCentroid: (position: number[]) => void;
-    onRemoveCentroid: (index: number) => void;
-    onClearCentroids: () => void;
 }

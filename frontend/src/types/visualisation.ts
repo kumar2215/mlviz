@@ -1,16 +1,5 @@
-import type { Condition } from "@/types/condition";
-import type { PageUnion } from "@/types/page";
+import type Story from "@/types/story";
 
-export interface Transition {
-    from: number;
-    to: number;
-    condition: Condition;
-}
-
-export default interface Visualisation {
+export default interface Visualisation extends Story {
     category: string;
-    name: string;
-    display_name: string;
-    pages: PageUnion[];
-    transitions: Transition[];
 }

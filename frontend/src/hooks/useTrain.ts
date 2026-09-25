@@ -14,10 +14,10 @@ export default function useTrain(useModel: () => any, setShowAlert: (show: boole
 
     // Try to get lastParams from the store (different models use different names)
     // Use useMemo to maintain stable reference
+    const { lastParams: storedParams, lastTrainedParams } = model;
     const lastParams = useMemo(
-        () =>
-            (model as any).lastParams || (model as any).lastTrainedParams || {},
-        [(model as any).lastParams, (model as any).lastTrainedParams],
+        () => storedParams || lastTrainedParams || {},
+        [storedParams, lastTrainedParams],
     );
 
     // Get feature names from the model store (for KNN dynamic feature dropdowns)
@@ -40,7 +40,7 @@ export default function useTrain(useModel: () => any, setShowAlert: (show: boole
         };
 
         fetchParameters();
-    }, []);
+    }, [getParameters, parameters]);
 
     const [trainingParams, setTrainingParams] = useState<Parameters>(
         parameters == null ? lastParams : parameters,
@@ -66,7 +66,7 @@ export default function useTrain(useModel: () => any, setShowAlert: (show: boole
         // For a TrainPage, we always want to perform actual training if parameters are provided.
         // loadVisualization is more appropriate for VizOnlyPage or preview states where metrics are not needed.
         train(trainParams);
-    }, [parameters, train, resetModelData, (model as any).loadVisualization, activeDataset]);
+    }, [parameters, train, resetModelData, activeDataset]);
 
 
     const handleTrainModel = async () => {

@@ -1,10 +1,10 @@
 import type { components } from "@/types/api";
 
 // DATASET TYPES
-export type Dataset =
+type Dataset =
     | components["schemas"]["ClassificationDataset"]
     | components["schemas"]["RegressionDataset"];
-export type PredefinedDataset =
+type PredefinedDataset =
     | components["schemas"]["PredefinedClassificationDataset"]
     | components["schemas"]["PredefinedRegressionDataset"];
 

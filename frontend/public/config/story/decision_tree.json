@@ -1,0 +1,107 @@
+{
+    "display_name": "Decision Tree",
+    "pages": [
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/dtree/decision_tree_01.md"
+        },
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/dtree/decision_tree_02.md"
+        },
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/dtree/decision_tree_03.md"
+        },
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/dtree/decision_tree_04.md"
+        },
+        {
+            "page_type": "reference",
+            "reference_type": "visualisation",
+            "path": "traditional_ml/decision_tree.json",
+            "pages": [0]
+        },
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/dtree/decision_tree_05.md"
+        },
+        {
+            "page_type": "static",
+            "note": "",
+            "text": "",
+            "path": "md/dtree/decision_tree_08.md"
+        }
+    ],
+    "transitions": [
+        {
+            "from": 0,
+            "to": 1,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Next",
+                "description": null
+            }
+        },
+        {
+            "from": 1,
+            "to": 2,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Next",
+                "description": null
+            }
+        },
+        {
+            "from": 2,
+            "to": 3,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Next",
+                "description": null
+            }
+        },
+        {
+            "from": 3,
+            "to": 4,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Build a tree!",
+                "description": null
+            }
+        },
+        {
+            "from": 4,
+            "to": 5,
+            "condition": {
+                "condition_type": "Metric",
+                "name": "Reach the desired accuracy!",
+                "description": "Make it so your accuracy is at least 0.9!",
+                "metric": "train.accuracy",
+                "comparator": ">=",
+                "value": 0.9,
+                "evaluation_mode": "latest"
+            }
+        },
+        {
+            "from": 5,
+            "to": 6,
+            "condition": {
+                "condition_type": "Bypass",
+                "name": "Next",
+                "description": null
+            }
+        }
+    ]
+}

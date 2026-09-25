@@ -1,66 +1,35 @@
 import { Button } from "@/components/ui/button";
-import { useConfig } from "@/store/useConfig";
 import { Link } from "react-router-dom";
 
-const IndexPage = () => {
-    const { config, loading, error } = useConfig();
+export type ListItem = {
+    display_name: string;
+    path: string;
+    icon?: string;
+};
 
-    if (loading) {
-        return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
-                    Loading configurations...
-                </div>
-            </div>
-        );
-    }
-
-    if (error || !config) {
-        return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="text-4xl font-bold font-mono text-red-600 mb-4">
-                    Error loading config
-                </div>
-                <div className="text-sm font-mono text-gray-600 mb-8">
-                    {error || "Config not found"}
-                </div>
-                <Button
-                    onClick={() => {
-                        window.location.href = window.location.pathname;
-                    }}
-                    className="bg-white text-gray-800 hover:bg-gray-100 border border-gray-200 rounded-full px-6"
-                >
-                    Reset to Default Config
-                </Button>
-            </div>
-        );
-    }
-
+export default function ListPage({ listItems }: { listItems: ListItem[]; }) {
     return (
         <div className="h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-blue-50 to-fuchsia-50">
             <div className="flex flex-col justify-self-center text-center mb-4 shrink-0">
-                <h1 className="w-fit mx-auto font-extrabold tracking-tighter font-width-expanded pt-8 px-3 rounded-md bg-gradient-to-r from-fuchsia-600 to-blue-400 bg-clip-text text-transparent font-bold !text-7xl hover:opacity-80 transition-opacity">
+                <h1 className="w-fit mx-auto tracking-tighter font-width-expanded pt-8 px-3 rounded-md bg-gradient-to-r from-fuchsia-600 to-blue-400 bg-clip-text text-transparent font-bold !text-7xl hover:opacity-80 transition-opacity">
                     mlviz
                 </h1>
-                <p className="w-fit mx-auto font-mono text-xs tracking-tightest bg-gradient-to-r from-fuchsia-900 to-blue-700 bg-clip-text text-transparent">
+                <p className="w-fit mx-auto font-mono text-xs bg-gradient-to-r from-fuchsia-900 to-blue-700 bg-clip-text text-transparent">
                     machine learning visualisations
                 </p>
             </div>
 
             <div className="flex-1 mx-4 grid grid-cols-1 lg:grid-cols-2 2xl:grid-cols-3 gap-4 p-4 overflow-y-auto content-start">
-                {config.categories.map((c) => (
+                {listItems.map((l) => (
                     <Link
-                        key={c.name}
-                        to={`/category/${c.config_path}`}
+                        key={l.display_name}
+                        to={l.path}
                     >   
                         <Button className="group w-full flex flex-row justify-start items-center gap-5 text-wrap bg-gradient-to-r from-gray-50 to-white text-gray-800 hover:from-red-500 hover:to-fuchsia-600 hover:text-white transition-all duration-100 hover:shadow-lg font-light hover:font-medium rounded-3xl py-16 px-8 scroll-auto">
-                            {/* <img src={"mlviz.png"} alt={c.name} className="w-12 h-12" /> */}
+                            {/* {l.icon && <img src={`icons/${l.icon}`} alt={l.display_name} className="w-12 h-12" />} */}
                             <span className="font-mono text-left tracking-tighter text-2xl text-wrap bg-gradient-to-r from-fuchsia-500 to-blue-600 bg-clip-text text-transparent group-hover:from-fuchsia-50 group-hover:to-blue-50 group-hover:font-bold">
-                                {c.name}
+                                {l.display_name}
                             </span>
-                            {/* <span className="text-sm tracking-tight text-left text-wrap mt-2">
-                                {s.description}
-                            </span> */}
                         </Button>
                     </Link>
                 ))}
@@ -83,5 +52,3 @@ const IndexPage = () => {
         </div>
     );
 };
-
-export default IndexPage;

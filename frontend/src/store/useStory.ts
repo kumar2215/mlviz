@@ -1,15 +1,15 @@
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { Story, Stories } from "@/types/story";
+import type Story from "@/types/story";
 import type { HistoryEntry, StoryHistoryState } from "@/types/history";
 
 interface StoryStore {
     currentStory: Story | null;
     currentStoryHistory: StoryHistoryState;
-    stories: Stories;
+    stories: Record<string, Story>;
     loading: boolean;
     error: string | null;
-    fetchStories: () => Promise<void>;
+    fetchStory: (storyName: string) => Promise<void>;
     addPageVisit: (pageId: number) => void;
     getPreviousPageId: () => number | undefined;
     recordAction: (action: HistoryEntry) => void;
@@ -28,26 +28,23 @@ export const useStory = create<StoryStore>()(
         stories: {},
         loading: false,
         error: null,
-        fetchStories: async () => {
-            if (Object.keys(get().stories).length > 0) return; // Already loaded
+        fetchStory: async (storyName: string) => {
+            if (get().stories[storyName]) return; // Already loaded
             set((state) => {
                 state.loading = true;
                 state.error = null;
             });
             try {
                 const response = await fetch(
-                    `${import.meta.env.BASE_URL}config/story/stories.json`,
+                    `${import.meta.env.BASE_URL}config/story/${storyName}.json`,
                 );
                 if (!response.ok) {
                     throw new Error(`Failed to fetch story file, status: ${response.statusText}`);
                 }
                 const data = await response.json();
-                const stories = Object.keys(data).reduce((acc: Stories, key: string) => {
-                    acc[key] = { ...data[key], name: key };
-                    return acc;
-                }, {}) as Stories;
+                const story = { ...data, name: storyName } as Story;
                 set((state) => {
-                    state.stories = stories;
+                    state.stories[storyName] = story;
                     state.loading = false;
                 });
             } catch (err) {
@@ -92,15 +89,12 @@ export const useStory = create<StoryStore>()(
     })),
 );
 
-export function getCurrentStory(): Story | null {
-    return useStory.getState().currentStory;
-}
-
-export function setCurrentStory(story: Story) {
+export function setCurrentStory(story: Story | null): void {
     useStory.setState((state) => {
+        if (story) state.stories[story.name] = story;  // To prevent multiple unrolls of the same story
         state.currentStory = story;
         state.currentStoryHistory = {
-            story_id: story.name || "",
+            story_id: story?.name || "",
             params: {},
             entries: [],
             path: [],

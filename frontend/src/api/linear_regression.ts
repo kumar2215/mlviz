@@ -12,9 +12,6 @@ import type { components } from "@/types/api";
 // Type Aliases (auto-generated from OpenAPI spec)
 // ============================================================================
 
-export type LinearRegressionParameters =
-    components["schemas"]["LinearRegressionParameters"];
-
 export type LinearRegressionVisualisationRequest =
     components["schemas"]["LinearRegressionVisualisationRequest"];
 export type LinearRegressionVisualisationResponse =

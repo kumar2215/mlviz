@@ -65,7 +65,7 @@ export default function SVMStepVisualisation() {
             // Compute dynamic decision boundary regions for the current weights
             let dynamicBoundary = undefined;
             if (decisionBoundary?.meshPoints) {
-                const classNames = visualizationData.metadata?.class_names ?? [
+                const classLabels = visualizationData.metadata?.class_names ?? [
                     "Class 0",
                     "Class 1",
                 ];
@@ -75,11 +75,11 @@ export default function SVMStepVisualisation() {
                             currentW1 * point[0] +
                             currentW2 * point[1] +
                             currentBias;
-                        return classNames[score > 0 ? 1 : 0];
+                        return classLabels[score > 0 ? 1 : 0];
                     },
                 );
                 dynamicBoundary = {
-                    type: "classification" as "classification",
+                    type: "classification" as const,
                     meshPoints: decisionBoundary.meshPoints,
                     predictions: dynamicPredictions,
                     dimensions: decisionBoundary.dimensions,

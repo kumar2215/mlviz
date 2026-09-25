@@ -29,9 +29,10 @@ export default function DecisionTreeVisualization() {
     } = useDecisionTree();
 
 
+    const initializeTree = manualTree.initialize;
     useEffect(() => {
-        manualTree.initialize();
-    }, []);
+        initializeTree();
+    }, [initializeTree]);
 
     // All hooks must be called before any early returns
     useEffect(() => {

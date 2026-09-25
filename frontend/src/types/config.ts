@@ -1,6 +1,6 @@
 import type { ActiveDataset } from "@/types/dataset";
 
-export interface Category {
+interface Category {
     name: string;
     description: string;
     icon: string;
@@ -11,4 +11,5 @@ export interface Category {
 export default interface Config {
     datasets: Record<string, ActiveDataset>;
     categories: Category[];
+    stories: string[];
 }

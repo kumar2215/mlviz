@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
 import { useVisualisation } from "@/store/useVisualisation";
 import type { Parameters } from "@/types/page";
-import type { Transition } from "@/types/visualisation";
+import type { Transition } from "@/types/story";
 import {
     displayCondition,
     getWaitTimeRemaining,
@@ -79,7 +79,7 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
                     <div
                         className={`
                         shrink-0 w-6 flex items-center justify-center
-                        ${isNavigable ? "bg-emerald-200/60" : "bg-stone-200/60 hover:"}
+                        ${isNavigable ? "bg-emerald-200/60" : "bg-stone-200/60"}
                         `}
                     >
                         <span className="text-[0.6rem] font-semibold tracking-widest uppercase -rotate-90 whitespace-nowrap flex items-center gap-1">

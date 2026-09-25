@@ -35,5 +35,8 @@
                 "tokenization.json"
             ]
         }
+    ],
+    "stories": [
+        "decision_tree"
     ]
 }
