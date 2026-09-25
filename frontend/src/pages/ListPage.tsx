@@ -11,10 +11,10 @@ export default function ListPage({ listItems }: { listItems: ListItem[]; }) {
     return (
         <div className="h-screen w-screen overflow-hidden flex flex-col bg-gradient-to-br from-blue-50 to-fuchsia-50">
             <div className="flex flex-col justify-self-center text-center mb-4 shrink-0">
-                <h1 className="w-fit mx-auto font-extrabold tracking-tighter font-width-expanded pt-8 px-3 rounded-md bg-gradient-to-r from-fuchsia-600 to-blue-400 bg-clip-text text-transparent font-bold !text-7xl hover:opacity-80 transition-opacity">
+                <h1 className="w-fit mx-auto tracking-tighter font-width-expanded pt-8 px-3 rounded-md bg-gradient-to-r from-fuchsia-600 to-blue-400 bg-clip-text text-transparent font-bold !text-7xl hover:opacity-80 transition-opacity">
                     mlviz
                 </h1>
-                <p className="w-fit mx-auto font-mono text-xs tracking-tightest bg-gradient-to-r from-fuchsia-900 to-blue-700 bg-clip-text text-transparent">
+                <p className="w-fit mx-auto font-mono text-xs bg-gradient-to-r from-fuchsia-900 to-blue-700 bg-clip-text text-transparent">
                     machine learning visualisations
                 </p>
             </div>

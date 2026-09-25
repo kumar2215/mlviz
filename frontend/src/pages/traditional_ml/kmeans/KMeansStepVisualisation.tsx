@@ -48,8 +48,8 @@ export default function KMeansStepVisualisation() {
     useEffect(() => {
         if (!kmeansData) {
             setMode("ready");
-        } else if (mode === "ready" && selectedCentroids.length > 0) {
-            setMode("selecting");
+        } else if (selectedCentroids.length > 0) {
+            setMode((currentMode) => currentMode === "ready" ? "selecting" : currentMode);
         }
     }, [kmeansData, selectedCentroids.length]);
 

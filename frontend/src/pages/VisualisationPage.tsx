@@ -3,8 +3,8 @@ import DynamicPage from "@/pages/DynamicPage";
 import StaticPage from "@/pages/StaticPage";
 import { Button } from "@/components/ui/button";
 import { Sidenote } from "@/components/Sidenote";
-import { getCurrentVisualisation, useVisualisation } from "@/store/useVisualisation";
-import { getCurrentStory, useStory } from "@/store/useStory";
+import { useVisualisation } from "@/store/useVisualisation";
+import { useStory } from "@/store/useStory";
 import type { PageUnion } from "@/types/page";
 import type { Transition } from "@/types/story";
 import { House } from "lucide-react";
@@ -12,26 +12,16 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export default function VisualisationPage({ userMode }: { userMode: "story" | "visualisation" }) {
-    const story = getCurrentStory();
-    const visualisation = getCurrentVisualisation();
+    const storyState = useStory();
+    const visualisationState = useVisualisation();
+    const { currentStoryHistory, currentStory: story } = storyState;
+    const { currentVisualisationHistory, currentVisualisation: visualisation } = visualisationState;
     const inStoryMode = userMode === "story";
-
-    const { addPageVisit, getPreviousPageId, recordAction } = inStoryMode ? useStory() : useVisualisation();
-    const currentHistory = inStoryMode ? useStory().currentStoryHistory : useVisualisation().currentVisualisationHistory;
-    const path = currentHistory!.path;
+    const { addPageVisit, getPreviousPageId, recordAction } = inStoryMode ? storyState : visualisationState;
+    const path = (inStoryMode ? currentStoryHistory : currentVisualisationHistory)!.path;
     const pages = (inStoryMode ? story : visualisation)!.pages;
     const transitions = (inStoryMode ? story : visualisation)!.transitions;
     const name = (inStoryMode ? story : visualisation)!.name;
-
-    if (!pages || pages.length === 0) {
-        return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="text-2xl font-mono text-fuchsia-600">
-                    {`${inStoryMode ? "Story" : "Visualisation"} '${name}' is under construction.`}
-                </div>
-            </div>
-        );
-    }
 
     const [currentPageId, setCurrentPageId] = useState(0);
     const currentPage: PageUnion = pages[currentPageId];
@@ -42,7 +32,17 @@ export default function VisualisationPage({ userMode }: { userMode: "story" | "v
             timestamp: Date.now(),
             page_id: currentPageId,
         });
-    }, []);
+    }, [currentPageId, recordAction]);
+
+    if (!pages || pages.length === 0) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+                <div className="text-2xl font-mono text-fuchsia-600">
+                    {`${inStoryMode ? "Story" : "Visualisation"} '${name}' is under construction.`}
+                </div>
+            </div>
+        );
+    }
 
     const getAvailableTransitions = (): Transition[] => {
         return transitions.filter(
@@ -111,7 +111,7 @@ export default function VisualisationPage({ userMode }: { userMode: "story" | "v
                 </p>
                 <Link to={"/"}>
                     <Button
-                        className="bg-gradient-to-br from-fuchsia-500 to-purple-500 text-gray-800 hover:from-blue-700 hover:to-purple-700 text-white transition-all duration-100 hover:shadow-2xl size-8"
+                        className="bg-gradient-to-br from-fuchsia-500 to-purple-500 hover:from-blue-700 hover:to-purple-700 transition-all duration-100 hover:shadow-2xl size-8"
                         size="icon"
                     >
                         <House />

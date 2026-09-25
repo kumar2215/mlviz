@@ -89,10 +89,6 @@ export const useStory = create<StoryStore>()(
     })),
 );
 
-export function getCurrentStory(): Story | null {
-    return useStory.getState().currentStory;
-}
-
 export function setCurrentStory(story: Story | null): void {
     useStory.setState((state) => {
         if (story) state.stories[story.name] = story;  // To prevent multiple unrolls of the same story

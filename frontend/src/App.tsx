@@ -40,9 +40,6 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
 
 export default function App() {
     const blockReason = getBlockReason();
-    if (blockReason) {
-        return <MobileBlockScreen reason={blockReason} />;
-    }
 
     const { loading, error, config, fetchConfig } = useConfig();
     const { visualisations } = useVisualisation();
@@ -88,6 +85,10 @@ export default function App() {
             setInvalidPath(true);
         }
     }, [pathname, category, storyName, visualisationName, config, visualisations, stories]);
+
+    if (blockReason) {
+        return <MobileBlockScreen reason={blockReason} />;
+    }
 
     if (invalidPath) {
         return (

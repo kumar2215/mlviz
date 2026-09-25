@@ -13,7 +13,7 @@ export default function DecisionTreePage() {
 
     useEffect(() => {
         resetModelData();
-    }, []);
+    }, [resetModelData]);
 
     // Record a manual_evaluate action each time the user causes a tree evaluation
     // (metrics change after the initial reset, i.e. after the first split/mark-as-leaf)
@@ -25,7 +25,7 @@ export default function DecisionTreePage() {
                 hasInitialData.current = true;
             }
         }
-    }, [currentModelData?.metrics]);
+    }, [currentModelData?.metrics, recordManualEvaluate]);
 
     return (
         <div className="grid grid-cols-10 mx-auto w-full h-full">

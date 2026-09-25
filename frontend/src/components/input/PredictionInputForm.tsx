@@ -15,20 +15,20 @@ const PredictionInputForm: React.FC<PredictionInputFormProps> = ({
         useState<Record<string, number>>(initialPoints);
 
     useEffect(() => {
-        const initialKeys = Object.keys(initialPoints);
-        const formKeys = Object.keys(formPoints);
+        setFormPoints((formPoints) => {
+            const initialKeys = Object.keys(initialPoints);
+            const formKeys = Object.keys(formPoints);
 
-        const featureSetsDifferent =
-            initialKeys.length !== formKeys.length ||
-            initialKeys.some((key) => !formKeys.includes(key));
+            const featureSetsDifferent =
+                initialKeys.length !== formKeys.length ||
+                initialKeys.some((key) => !formKeys.includes(key));
 
-        const valuesChanged = initialKeys.some(
-            (key) => initialPoints[key] !== formPoints[key]
-        );
+            const valuesChanged = initialKeys.some(
+                (key) => initialPoints[key] !== formPoints[key]
+            );
 
-        if (featureSetsDifferent || valuesChanged) {
-            setFormPoints(initialPoints);
-        }
+            return featureSetsDifferent || valuesChanged ? initialPoints : formPoints;
+        });
     }, [initialPoints]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

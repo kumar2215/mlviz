@@ -25,71 +25,70 @@ function processUnrolledStory(story: Story, referencePages: number[], pageOffset
     }
 }
 
-export default function StoryPageWrapper({ story }: { story: Story }) {
-    const { stories } = useStory();
+function unrollStory(story: Story): Story {
+    const { stories } = useStory.getState();
+    if (story.pages.filter((page) => page.page_type === "reference").length === 0) {
+        return story; // No references, return as is
+    }
+    const pages: PageUnion[] = [];
+    const transitions: Transition[] = [...story.transitions];
 
-    function unrollStory(story: Story): Story {
-        if (story.pages.filter((page) => page.page_type === "reference").length === 0) {
-            return story; // No references, return as is
-        }
-        let pages: PageUnion[] = [];
-        let transitions: Transition[] = story.transitions;
-
-        for (const page of story.pages) {
-            if (page.page_type !== "reference") {
-                pages.push(page);
-            } else {
-                const referenceType = page.reference_type;
-                if (referenceType === "story") {
-                    const referencedStoryName = page.path;
-                    const referencedStory = stories[referencedStoryName];
-                    if (!referencedStory) {
-                        throw new Error(`Referenced story not found: ${referencedStoryName}`);
-                    }
-                    if (referencedStory.name === story.name) {
-                        throw new Error(`Story '${story.name}' has circular reference to itself.`);
-                    }
-                    const unrolledReferencedStory = unrollStory(referencedStory);
-                    const referencePages = page.pages;
-
-                    for (const index of referencePages) {
-                        const referencePage = unrolledReferencedStory.pages[index];
-                        pages.push(referencePage);
-                    }
-
-                    const pageOffset = pages.length - referencePages.length;
-                    processUnrolledStory(unrolledReferencedStory, referencePages, pageOffset, transitions);
-                } else if (referenceType === "visualisation") {
-                    const visualisationCategory = page.path.split("/")[0];
-                    const visualisationName = page.path.split("/")[1].replace(".json", "");
-                    const referenceVisualisation = Object.values(useVisualisation.getState().visualisations).find(
-                        (v) => v.category === visualisationCategory && v.name === visualisationName,
-                    );
-                    if (!referenceVisualisation) {
-                        throw new Error(`Referenced visualisation not found: ${visualisationName}`);
-                    }
-                    const unrolledReferenceVisualisation = unrollStory(referenceVisualisation);
-                    const referencePages = page.pages;
-
-                    for (const index of referencePages) {
-                        const referencePage = { ...unrolledReferenceVisualisation.pages[index] };
-                        if (referencePage.page_type === "dynamic") {
-                            referencePage.category = visualisationCategory;
-                            referencePage.path = visualisationName;
-                        }
-                        pages.push(referencePage);
-                    }
-
-                    const pageOffset = pages.length - referencePages.length;
-                    processUnrolledStory(unrolledReferenceVisualisation, referencePages, pageOffset, transitions);
-                } else {
-                    throw new Error(`Unknown reference type: ${referenceType}`);
+    for (const page of story.pages) {
+        if (page.page_type !== "reference") {
+            pages.push(page);
+        } else {
+            const referenceType = page.reference_type;
+            if (referenceType === "story") {
+                const referencedStoryName = page.path;
+                const referencedStory = stories[referencedStoryName];
+                if (!referencedStory) {
+                    throw new Error(`Referenced story not found: ${referencedStoryName}`);
                 }
+                if (referencedStory.name === story.name) {
+                    throw new Error(`Story '${story.name}' has circular reference to itself.`);
+                }
+                const unrolledReferencedStory = unrollStory(referencedStory);
+                const referencePages = page.pages;
+
+                for (const index of referencePages) {
+                    const referencePage = unrolledReferencedStory.pages[index];
+                    pages.push(referencePage);
+                }
+
+                const pageOffset = pages.length - referencePages.length;
+                processUnrolledStory(unrolledReferencedStory, referencePages, pageOffset, transitions);
+            } else if (referenceType === "visualisation") {
+                const visualisationCategory = page.path.split("/")[0];
+                const visualisationName = page.path.split("/")[1].replace(".json", "");
+                const referenceVisualisation = Object.values(useVisualisation.getState().visualisations).find(
+                    (v) => v.category === visualisationCategory && v.name === visualisationName,
+                );
+                if (!referenceVisualisation) {
+                    throw new Error(`Referenced visualisation not found: ${visualisationName}`);
+                }
+                const unrolledReferenceVisualisation = unrollStory(referenceVisualisation);
+                const referencePages = page.pages;
+
+                for (const index of referencePages) {
+                    const referencePage = { ...unrolledReferenceVisualisation.pages[index] };
+                    if (referencePage.page_type === "dynamic") {
+                        referencePage.category = visualisationCategory;
+                        referencePage.path = visualisationName;
+                    }
+                    pages.push(referencePage);
+                }
+
+                const pageOffset = pages.length - referencePages.length;
+                processUnrolledStory(unrolledReferenceVisualisation, referencePages, pageOffset, transitions);
+            } else {
+                throw new Error(`Unknown reference type: ${referenceType}`);
             }
         }
-        return { ...story, pages, transitions };
     }
+    return { ...story, pages, transitions };
+}
 
+export default function StoryPageWrapper({ story }: { story: Story }) {
     useEffect(() => {
         const unrolledStory = unrollStory(story);
         setCurrentStory(unrolledStory);

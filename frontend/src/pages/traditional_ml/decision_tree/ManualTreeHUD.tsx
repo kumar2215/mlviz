@@ -17,11 +17,13 @@ import { useDecisionTree } from "@/store/traditional_ml/useDecisionTree";
 import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import { GitBranch, Leaf, Split } from "lucide-react";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { renderInformationGainGraph } from "./rendererUtils";
 
+const EMPTY_NAMES: string[] = [];
+
 const ManualTreeHUD: React.FC = () => {
-    const { manualTree, currentModelData, getFeatureNames, getClassNames } = useDecisionTree();
+    const { manualTree, getFeatureNames, getClassNames } = useDecisionTree();
 
     const {
         selectedNodePath,
@@ -37,11 +39,8 @@ const ManualTreeHUD: React.FC = () => {
     const vizRef = useRef<SVGSVGElement>(null);
     const exploredIndicesCache = useRef(new Map<string, Set<number>>());
 
-    const featureNames = useMemo(
-        () => getFeatureNames() || [],
-        [getFeatureNames, currentModelData],
-    );
-    const classNames = useMemo(() => getClassNames() || [], [getClassNames, currentModelData]);
+    const featureNames = getFeatureNames() || EMPTY_NAMES;
+    const classNames = getClassNames() || EMPTY_NAMES;
 
     // Clear exploration cache when the selected node changes
     useEffect(() => {

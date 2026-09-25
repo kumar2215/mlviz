@@ -18,12 +18,13 @@ export default function KNNTrainVisualisation() {
         visualizationData: knnData,
         isVisualizationLoading,
         visualizationError,
-        loadVisualization,
         lastVisualizationParams,
     } = useKNN();
 
     // Auto-load visualization on mount if we have stored params
     useEffect(() => {
+        const { visualizationData: knnData, isVisualizationLoading,
+            lastVisualizationParams, loadVisualization } = useKNN.getState();
         if (!knnData && !isVisualizationLoading && Object.keys(lastVisualizationParams).length > 0) {
             loadVisualization(lastVisualizationParams);
         }

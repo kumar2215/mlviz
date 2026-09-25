@@ -23,10 +23,6 @@ export default function SVMTrainVisualisation() {
         lastVisualizationParams,
         iterations,
         decisionBoundary,
-        currentW1,
-        currentW2,
-        currentBias,
-        setManualWeights,
     } = useSVM();
 
     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
@@ -62,6 +58,7 @@ export default function SVMTrainVisualisation() {
             // Synchronize weights for Loss Map HUD using a non-recursive update
             if (currentIter) {
                 const { w1, w2, b } = currentIter;
+                const { currentW1, currentW2, currentBias, setManualWeights } = useSVM.getState();
                 // Only update if different to avoid infinite re-renders
                 if (w1 !== currentW1 || w2 !== currentW2 || b !== currentBias) {
                     setManualWeights(w1, w2, b);
@@ -71,7 +68,7 @@ export default function SVMTrainVisualisation() {
             // 2. Decide coordinates and boundary
             const activePoints = visualizationData.points ?? [];
             let activeBoundary = decisionBoundary ?? undefined;
-            let activeSVIndices = currentIter?.support_vector_indices ?? visualizationData.support_vector_indices;
+            const activeSVIndices = currentIter?.support_vector_indices ?? visualizationData.support_vector_indices;
 
             // Playback override
             if (currentIter?.mesh_predictions && decisionBoundary?.meshPoints) {

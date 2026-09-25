@@ -1,5 +1,18 @@
 # React + TypeScript + Vite
 
+## Tailwind checks
+
+Run `npm run lint` from `frontend` to check TypeScript/React code and Tailwind
+classes across the frontend. To show errors without the existing `any` warnings,
+run `npm run lint -- --quiet`.
+
+ESLint uses `eslint-plugin-better-tailwindcss` with `src/index.css` as the Tailwind
+entry point. Unknown classes and conflicting utilities are errors. The three custom
+font-width selectors in
+`src/index.css` are explicitly allowed. Class ordering and formatting rules are off.
+The plugin stays on version 3.x to support the current Tailwind 4.1.11 installation.
+These static checks do not catch every dynamic class or visual layout issue.
+
 ## Unused code cleanup
 
 Run `npx knip` from this directory to review unused code before running

@@ -112,10 +112,6 @@ export const useVisualisation = create<VisualisationStore>()(
     })),
 );
 
-export function getCurrentVisualisation(): Visualisation | null {
-    return useVisualisation.getState().currentVisualisation;
-}
-
 export function setCurrentVisualisation(visualisation: Visualisation | null): void {
     useVisualisation.setState((state) => {
         state.currentVisualisation = visualisation;

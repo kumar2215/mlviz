@@ -17,9 +17,10 @@ export default function useStep(useModel: () => any, parameters: Parameters) {
     } = model;
 
     // Standardize lastParams access
+    const { lastParams: storedParams, lastVisualizationParams } = model;
     const lastParams = useMemo(
-        () => (model as any).lastParams || (model as any).lastVisualizationParams || {},
-        [(model as any).lastParams, (model as any).lastVisualizationParams]
+        () => storedParams || lastVisualizationParams || {},
+        [storedParams, lastVisualizationParams]
     );
 
     // Get feature names for parameter mapping

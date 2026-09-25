@@ -277,8 +277,8 @@ export const useSVM = createBaseModelStore<SVMModelData, SVMStore>(
                     // SVM decision function: f(x) = w1*x + w2*y + b
                     const score = currentW1 * xVal + currentW2 * yVal + currentBias;
                     const classIndex = score > 0 ? 1 : 0;
-                    const classNames = meta.class_names ?? ["Class 0", "Class 1"];
-                    const predictedClass = classNames[classIndex] ?? `Class ${classIndex}`;
+                    const classLabels = meta.class_names ?? ["Class 0", "Class 1"];
+                    const predictedClass = classLabels[classIndex] ?? `Class ${classIndex}`;
                     set({
                         singlePointPrediction: {
                             predictedClass,
