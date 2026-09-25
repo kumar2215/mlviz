@@ -94,5 +94,5 @@ export default function StoryPageWrapper({ story }: { story: Story }) {
         setCurrentStory(unrolledStory);
     }, [story]);
 
-    return <VisualisationPage userMode="story" />;
+    return <VisualisationPage key={`story:${story.name}`} userMode="story" />;
 };

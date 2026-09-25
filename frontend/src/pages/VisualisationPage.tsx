@@ -101,7 +101,7 @@ export default function VisualisationPage({ userMode }: { userMode: "story" | "v
                         onBack={handleBack}
                         canGoBack={canGoBack}
                     />
-                    {currentPage.note && <Sidenote note={currentPage.note} />}
+                    {currentPage?.note && <Sidenote note={currentPage.note} />}
                 </div>
             </div>
 
