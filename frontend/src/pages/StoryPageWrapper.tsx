@@ -25,7 +25,15 @@ function processUnrolledStory(story: Story, referencePages: number[], pageOffset
     }
 }
 
-function unrollStory(story: Story): Story {
+function unrollStory(story: Story, activeStories: ReadonlySet<Story> = new Set()): Story {
+    if (activeStories.has(story)) {
+        const referenceChain = [...activeStories, story].map((entry) => entry.name).join(" -> ");
+        throw new Error(`Circular story reference: ${referenceChain}`);
+    }
+    // Each branch gets its own ancestors so shared references remain valid.
+    const nextActiveStories = new Set(activeStories);
+    nextActiveStories.add(story);
+
     const { stories } = useStory.getState();
     if (story.pages.filter((page) => page.page_type === "reference").length === 0) {
         return story; // No references, return as is
@@ -44,10 +52,7 @@ function unrollStory(story: Story): Story {
                 if (!referencedStory) {
                     throw new Error(`Referenced story not found: ${referencedStoryName}`);
                 }
-                if (referencedStory.name === story.name) {
-                    throw new Error(`Story '${story.name}' has circular reference to itself.`);
-                }
-                const unrolledReferencedStory = unrollStory(referencedStory);
+                const unrolledReferencedStory = unrollStory(referencedStory, nextActiveStories);
                 const referencePages = page.pages;
 
                 for (const index of referencePages) {
@@ -66,7 +71,7 @@ function unrollStory(story: Story): Story {
                 if (!referenceVisualisation) {
                     throw new Error(`Referenced visualisation not found: ${visualisationName}`);
                 }
-                const unrolledReferenceVisualisation = unrollStory(referenceVisualisation);
+                const unrolledReferenceVisualisation = unrollStory(referenceVisualisation, nextActiveStories);
                 const referencePages = page.pages;
 
                 for (const index of referencePages) {
@@ -94,5 +99,5 @@ export default function StoryPageWrapper({ story }: { story: Story }) {
         setCurrentStory(unrolledStory);
     }, [story]);
 
-    return <VisualisationPage userMode="story" />;
+    return <VisualisationPage key={`story:${story.name}`} />;
 };

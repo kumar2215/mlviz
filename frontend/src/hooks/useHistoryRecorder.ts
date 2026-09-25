@@ -1,10 +1,10 @@
 import type { ActionType, HistoryEntry } from "@/types/history";
 import type { Parameters } from "@/types/page";
-import { useVisualisation } from "@/store/useVisualisation";
+import useUserMode from "@/hooks/useUserMode";
 import { useMemo } from "react";
 
-export function useVisualisationHistoryRecorder() {
-    const { recordAction } = useVisualisation();
+export default function useHistoryRecorder() {
+    const { recordAction } = useUserMode().hook();
 
     return useMemo(() => {
         const record = (

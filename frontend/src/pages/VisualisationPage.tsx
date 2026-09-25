@@ -5,23 +5,25 @@ import { Button } from "@/components/ui/button";
 import { Sidenote } from "@/components/Sidenote";
 import { useVisualisation } from "@/store/useVisualisation";
 import { useStory } from "@/store/useStory";
+import useUserMode from "@/hooks/useUserMode";
 import type { PageUnion } from "@/types/page";
 import type { Transition } from "@/types/story";
 import { House } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
-export default function VisualisationPage({ userMode }: { userMode: "story" | "visualisation" }) {
-    const storyState = useStory();
-    const visualisationState = useVisualisation();
-    const { currentStoryHistory, currentStory: story } = storyState;
-    const { currentVisualisationHistory, currentVisualisation: visualisation } = visualisationState;
+export default function VisualisationPage() {
+    const { userMode, item, hook } = useUserMode();
+    const { currentStoryHistory } = useStory();
+    const { currentVisualisationHistory, currentVisualisation: visualisation } = useVisualisation();
+
     const inStoryMode = userMode === "story";
-    const { addPageVisit, getPreviousPageId, recordAction } = inStoryMode ? storyState : visualisationState;
-    const path = (inStoryMode ? currentStoryHistory : currentVisualisationHistory)!.path;
-    const pages = (inStoryMode ? story : visualisation)!.pages;
-    const transitions = (inStoryMode ? story : visualisation)!.transitions;
-    const name = (inStoryMode ? story : visualisation)!.name;
+    const { addPageVisit, getPreviousPageId, recordAction } = hook();
+    const currentHistory = inStoryMode ? currentStoryHistory : currentVisualisationHistory;
+    const path = currentHistory!.path;
+    const pages = item.pages;
+    const transitions = item.transitions;
+    const name = item.name;
 
     const [currentPageId, setCurrentPageId] = useState(0);
     const currentPage: PageUnion = pages[currentPageId];
@@ -100,8 +102,9 @@ export default function VisualisationPage({ userMode }: { userMode: "story" | "v
                         handleNext={handleNavigate}
                         onBack={handleBack}
                         canGoBack={canGoBack}
+                        currentHistory={currentHistory}
                     />
-                    {currentPage.note && <Sidenote note={currentPage.note} />}
+                    {currentPage?.note && <Sidenote note={currentPage.note} />}
                 </div>
             </div>
 

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
-import { useVisualisation } from "@/store/useVisualisation";
+import type { HistoryState } from "@/types/history";
 import type { Parameters } from "@/types/page";
 import type { Transition } from "@/types/story";
 import {
@@ -14,20 +14,20 @@ interface NavigationButtonProps {
     transition: Transition;
     handleNext: (pageId: number) => void;
     conditionState?: Record<string, Parameters>;
+    currentHistory: HistoryState;
 }
 
 const NavigationButton: React.FC<NavigationButtonProps> = ({
     transition,
     handleNext,
     conditionState,
+    currentHistory,
 }) => {
-    const { currentVisualisationHistory } = useVisualisation();
-
     const _conditionState =
         conditionState ??
         ({
-            ...currentVisualisationHistory.params,
-            __history: currentVisualisationHistory,
+            ...currentHistory.params,
+            __history: currentHistory,
         } as unknown as Record<string, Parameters>);
 
     const isNavigable = isConditionMet(transition.condition, _conditionState);

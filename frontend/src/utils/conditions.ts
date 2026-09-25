@@ -1,7 +1,7 @@
 import type { ModelOption } from "@/types/parameters";
 import type { Condition } from "@/types/condition";
 import type { Parameters } from "@/types/page";
-import type { VisualisationHistoryState } from "@/types/history";
+import type { HistoryState } from "@/types/history";
 
 function getNestedValue(obj: any, path: string): any {
     if (!obj || !path) return undefined;
@@ -33,7 +33,7 @@ export function isConditionMet(
     if (import.meta.env.VITE_BYPASS_CONDITIONS === "true") return true;
 
     // History is passed via the special __history key (see NavigationButton / NavigationBar)
-    const history = state["__history"] as VisualisationHistoryState | undefined;
+    const history = state["__history"] as HistoryState | undefined;
 
     switch (condition.condition_type) {
         case "Bypass":
@@ -55,7 +55,7 @@ export function isConditionMet(
         }
 
         case "Wait": {
-            const history = state["__history"] as VisualisationHistoryState | undefined;
+            const history = state["__history"] as HistoryState | undefined;
             const now = (state["__now"] as unknown as number | undefined) ?? Date.now();
             const entries = history?.entries || [];
 
@@ -149,7 +149,7 @@ export function getWaitTimeRemaining(
 ): number {
     if (condition.condition_type !== "Wait") return 0;
     
-    const history = state["__history"] as VisualisationHistoryState | undefined;
+    const history = state["__history"] as HistoryState | undefined;
     const now = (state["__now"] as unknown as number | undefined) ?? Date.now();
     const entries = history?.entries || [];
 

@@ -35,11 +35,12 @@ export const useStory = create<StoryStore>()(
                 state.error = null;
             });
             try {
+                const filePath = `config/story/${storyName}.json`;
                 const response = await fetch(
-                    `${import.meta.env.BASE_URL}config/story/${storyName}.json`,
+                    `${import.meta.env.BASE_URL}${filePath}`,
                 );
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch story file, status: ${response.statusText}`);
+                    throw new Error(`Failed to fetch story file: ${filePath}, status: ${response.statusText}`);
                 }
                 const data = await response.json();
                 const story = { ...data, name: storyName } as Story;
@@ -54,6 +55,7 @@ export const useStory = create<StoryStore>()(
                     state.error = message;
                     state.loading = false;
                 });
+                throw err;
             }
         },
         addPageVisit: (pageId: number) => {

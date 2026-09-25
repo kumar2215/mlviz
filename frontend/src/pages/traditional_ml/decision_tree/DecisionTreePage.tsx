@@ -1,12 +1,12 @@
 import { useDecisionTree } from "@/store/traditional_ml/useDecisionTree";
 import DecisionTree from "@/pages/traditional_ml/decision_tree/DecisionTreeVisualization";
 import ClassifierResults from "@/components/results/ClassifierResults";
-import { useVisualisationHistoryRecorder } from "@/hooks/useVisualisationHistoryRecorder";
+import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useEffect, useRef } from "react";
 
 export default function DecisionTreePage() {
     const { currentModelData, resetModelData } = useDecisionTree();
-    const { recordManualEvaluate } = useVisualisationHistoryRecorder();
+    const { recordManualEvaluate } = useHistoryRecorder();
 
     // Track whether the initial model data has been set so we don't fire on mount
     const hasInitialData = useRef(false);

@@ -126,8 +126,8 @@ export default function App() {
     if (Array.isArray(item)) {
         return <ListPage listItems={item} />;
     } else if (itemName === "story") {
-        return <StoryPageWrapper story={item} />;
+        return <StoryPageWrapper key={`story:${item.name}`} story={item} />;
     } else if (itemName === "visualisation") {
-        return <VisualisationPage userMode="visualisation" />;
+        return <VisualisationPage key={`viz:${item.name}`} />;
     }
 };
