@@ -14,18 +14,16 @@ import { useCallback, useEffect, useState } from "react";
 import SVMStepHUD, { type SVMStepMode } from "./SVMStepHUD";
 
 export default function SVMStepVisualisation() {
-    const {
-        visualizationData,
-        isVisualizationLoading,
-        visualizationError,
-        loadVisualization,
-        lastVisualizationParams,
-        currentW1,
-        currentW2,
-        currentBias,
-        stepData,
-        decisionBoundary,
-    } = useSVM();
+    const visualizationData = useSVM(state => state.visualizationData);
+    const isVisualizationLoading = useSVM(state => state.isVisualizationLoading);
+    const visualizationError = useSVM(state => state.visualizationError);
+    const loadVisualization = useSVM(state => state.loadVisualization);
+    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
+    const currentW1 = useSVM(state => state.currentW1);
+    const currentW2 = useSVM(state => state.currentW2);
+    const currentBias = useSVM(state => state.currentBias);
+    const stepData = useSVM(state => state.stepData);
+    const decisionBoundary = useSVM(state => state.decisionBoundary);
 
     const [mode, setMode] = useState<SVMStepMode>("idle");
     const [learningRate, setLearningRate] = useState(0.01);

@@ -4,7 +4,8 @@ import useUserMode from "@/hooks/useUserMode";
 import { useMemo } from "react";
 
 export default function useHistoryRecorder() {
-    const { recordAction } = useUserMode().hook();
+    const { hook: useModeStore } = useUserMode();
+    const recordAction = useModeStore(state => state.recordAction);
 
     return useMemo(() => {
         const record = (

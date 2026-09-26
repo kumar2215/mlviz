@@ -5,7 +5,8 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useEffect, useRef } from "react";
 
 export default function DecisionTreePage() {
-    const { currentModelData, resetModelData } = useDecisionTree();
+    const currentModelData = useDecisionTree(state => state.currentModelData);
+    const resetModelData = useDecisionTree(state => state.resetModelData);
     const { recordManualEvaluate } = useHistoryRecorder();
 
     // Track whether the initial model data has been set so we don't fire on mount

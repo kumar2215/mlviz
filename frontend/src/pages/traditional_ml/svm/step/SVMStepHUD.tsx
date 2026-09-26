@@ -22,19 +22,17 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
     onLearningRateChange,
 }) => {
     const scaleFactor = useScaleFactor();
-    const {
-        currentW1,
-        currentW2,
-        currentBias,
-        setManualWeights,
-        performStep,
-        isStepLoading,
-        stepData,
-        visualizationData,
-        computeHingeLoss,
-        lastVisualizationParams,
-        makePrediction
-    } = useSVM();
+    const currentW1 = useSVM(state => state.currentW1);
+    const currentW2 = useSVM(state => state.currentW2);
+    const currentBias = useSVM(state => state.currentBias);
+    const setManualWeights = useSVM(state => state.setManualWeights);
+    const performStep = useSVM(state => state.performStep);
+    const isStepLoading = useSVM(state => state.isStepLoading);
+    const stepData = useSVM(state => state.stepData);
+    const visualizationData = useSVM(state => state.visualizationData);
+    const computeHingeLoss = useSVM(state => state.computeHingeLoss);
+    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
+    const makePrediction = useSVM(state => state.makePrediction);
 
     const interceptId = useId();
     const widthId = useId();

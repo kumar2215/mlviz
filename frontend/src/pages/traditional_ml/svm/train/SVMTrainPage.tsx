@@ -5,7 +5,7 @@ import { useSVM } from "@/store/traditional_ml/useSVM";
 import type { Parameters } from "@/types/page";
 
 export default function SVMTrainPage({ parameters } : { parameters: Parameters }) {
-    const { data } = useSVM();
+    const data = useSVM(state => state.data);
     
     const resultsComponent = () => (
         <ClassifierResults

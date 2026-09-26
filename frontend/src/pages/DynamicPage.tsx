@@ -19,8 +19,8 @@ const pageComponents = Object.fromEntries(
 ) as Record<string, LazyExoticComponent<ComponentType<IndexPageProps>>>;
 
 const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation }) => {
-    const { setDataset } = useDataset();
-    const { config } = useConfig();
+    const setDataset = useDataset(state => state.setDataset);
+    const config = useConfig(state => state.config);
 
     if (!category || !visualisation) {
         throw new Error("Category and/or visualisation not provided for dynamic page");

@@ -21,16 +21,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import KMeansStepHUD, { type KMeansStepMode } from "./KMeansStepHUD";
 
 export default function KMeansStepVisualisation() {
-    const {
-        visualizationData: kmeansData,
-        loadVisualization,
-        lastVisualizationParams,
-        stepData,
-        selectedCentroids,
-        setSelectedCentroids,
-        setIsPlacingCentroids,
-        centroidHistory,
-    } = useKMeans();
+    const kmeansData = useKMeans(state => state.visualizationData);
+    const loadVisualization = useKMeans(state => state.loadVisualization);
+    const lastVisualizationParams = useKMeans(state => state.lastVisualizationParams);
+    const stepData = useKMeans(state => state.stepData);
+    const selectedCentroids = useKMeans(state => state.selectedCentroids);
+    const setSelectedCentroids = useKMeans(state => state.setSelectedCentroids);
+    const setIsPlacingCentroids = useKMeans(state => state.setIsPlacingCentroids);
+    const centroidHistory = useKMeans(state => state.centroidHistory);
 
     const scaleFactor = useScaleFactor();
     const [mode, setMode] = useState<KMeansStepMode>("ready");

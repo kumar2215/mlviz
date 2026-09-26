@@ -5,6 +5,7 @@ import { useDecisionTree } from "@/store/traditional_ml/useDecisionTree";
 import type { TreeNode } from "@/types/model";
 import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import { useCallback, useEffect, useMemo } from "react";
+import { useShallow } from "zustand/react/shallow";
 import ManualTreeHUD from "./ManualTreeHUD";
 
 const capabilities: VisualisationCapabilities = {
@@ -22,11 +23,9 @@ const capabilities: VisualisationCapabilities = {
 };
 
 export default function DecisionTreeVisualization() {
-    const {
-        manualTree,
-        getFeatureNames,
-        getClassNames,
-    } = useDecisionTree();
+    const manualTree = useDecisionTree(state => state.manualTree);
+    const featureNames = useDecisionTree(useShallow(state => state.getFeatureNames() || []));
+    const classes = useDecisionTree(useShallow(state => state.getClassNames()));
 
 
     const initializeTree = manualTree.initialize;
@@ -77,7 +76,6 @@ export default function DecisionTreeVisualization() {
         return base;
     }, []);
 
-    const classes = getClassNames();
     const colorScale = useMemo(() => {
         const classColors = new Map<string, string>();
 
@@ -100,7 +98,7 @@ export default function DecisionTreeVisualization() {
                 transformTreeData,
                 colorScale,
                 selectedNodePath: manualTree.selectedNodePath,
-                featureNames: getFeatureNames() || [],
+                featureNames,
                 featureStats: manualTree.featureStats,
                 selectedFeature: manualTree.selectedFeature,
                 selectedThreshold: manualTree.selectedThreshold,
@@ -115,7 +113,7 @@ export default function DecisionTreeVisualization() {
             },
             mode: "manual",
         }),
-        [transformTreeData, colorScale, manualTree, getFeatureNames, handleNodeClick]
+        [transformTreeData, colorScale, manualTree, featureNames, handleNodeClick]
     );
 
     

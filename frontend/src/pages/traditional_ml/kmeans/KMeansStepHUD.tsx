@@ -16,16 +16,14 @@ interface KMeansStepHUDProps {
 
 const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
     const scaleFactor = useScaleFactor();
-    const {
-        selectedCentroids,
-        setSelectedCentroids,
-        performStep,
-        isStepLoading,
-        stepData,
-        lastVisualizationParams,
-        clearIterationState,
-        loadVisualization,
-    } = useKMeans();
+    const selectedCentroids = useKMeans(state => state.selectedCentroids);
+    const setSelectedCentroids = useKMeans(state => state.setSelectedCentroids);
+    const performStep = useKMeans(state => state.performStep);
+    const isStepLoading = useKMeans(state => state.isStepLoading);
+    const stepData = useKMeans(state => state.stepData);
+    const lastVisualizationParams = useKMeans(state => state.lastVisualizationParams);
+    const clearIterationState = useKMeans(state => state.clearIterationState);
+    const loadVisualization = useKMeans(state => state.loadVisualization);
     const { recordStep } = useHistoryRecorder();
 
     const handleRunStep = async () => {

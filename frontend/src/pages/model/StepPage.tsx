@@ -1,9 +1,10 @@
 import ModelOptionsForm from "@/components/input/ModelOptionsForm";
 import useStep from "@/hooks/useStep";
 import type { Parameters } from "@/types/page";
+import type { ModelSelectorHook } from "@/types/modelStore";
 
 type StepPageProps = {
-    useModel: () => any;
+    useModel: ModelSelectorHook;
     parameters: Parameters;
     StepVisualizationComponent: React.FC;
 }

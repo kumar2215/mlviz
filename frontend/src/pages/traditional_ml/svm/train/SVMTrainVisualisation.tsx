@@ -15,15 +15,13 @@ import * as d3 from "d3";
 import { useCallback, useEffect, useState } from "react";
 
 export default function SVMTrainVisualisation() {
-    const {
-        visualizationData,
-        isVisualizationLoading,
-        visualizationError,
-        train,
-        lastVisualizationParams,
-        iterations,
-        decisionBoundary,
-    } = useSVM();
+    const visualizationData = useSVM(state => state.visualizationData);
+    const isVisualizationLoading = useSVM(state => state.isVisualizationLoading);
+    const visualizationError = useSVM(state => state.visualizationError);
+    const train = useSVM(state => state.train);
+    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
+    const iterations = useSVM(state => state.iterations);
+    const decisionBoundary = useSVM(state => state.decisionBoundary);
 
     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
 

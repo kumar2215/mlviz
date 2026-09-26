@@ -18,14 +18,12 @@ interface VisualisationProps {
 }
 
 export default function KNNPredictVisualization({ points }: VisualisationProps) {
-    const {
-        predictionData,
-        isPredictionLoading,
-        predictionError,
-        visualizationData,
-        loadVisualization,
-        isVisualizationLoading,
-    } = useKNN();
+    const predictionData = useKNN(state => state.predictionData);
+    const isPredictionLoading = useKNN(state => state.isPredictionLoading);
+    const predictionError = useKNN(state => state.predictionError);
+    const visualizationData = useKNN(state => state.visualizationData);
+    const loadVisualization = useKNN(state => state.loadVisualization);
+    const isVisualizationLoading = useKNN(state => state.isVisualizationLoading);
 
     // Load visualization data if not already loaded
     useEffect(() => {
