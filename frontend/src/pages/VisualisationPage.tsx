@@ -13,12 +13,15 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 export default function VisualisationPage() {
-    const { userMode, item, hook } = useUserMode();
-    const { currentStoryHistory } = useStory();
-    const { currentVisualisationHistory, currentVisualisation: visualisation } = useVisualisation();
+    const { userMode, item, hook: useModeStore } = useUserMode();
+    const currentStoryHistory = useStory(state => state.currentStoryHistory);
+    const currentVisualisationHistory = useVisualisation(state => state.currentVisualisationHistory);
+    const visualisation = useVisualisation(state => state.currentVisualisation);
 
     const inStoryMode = userMode === "story";
-    const { addPageVisit, getPreviousPageId, recordAction } = hook();
+    const addPageVisit = useModeStore(state => state.addPageVisit);
+    const getPreviousPageId = useModeStore(state => state.getPreviousPageId);
+    const recordAction = useModeStore(state => state.recordAction);
     const currentHistory = inStoryMode ? currentStoryHistory : currentVisualisationHistory;
     const path = currentHistory!.path;
     const pages = item.pages;

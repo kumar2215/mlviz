@@ -4,33 +4,37 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { Parameters } from "@/types/page";
 import { filterParameters } from "@/utils/conditions";
+import type { ModelSelectorHook } from "@/types/modelStore";
+import { useShallow } from "zustand/react/shallow";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export default function useTrain(useModel: () => any, setShowAlert: (show: boolean) => void, parameters: Parameters) {
-    const model = useModel();
+export default function useTrain(useModel: ModelSelectorHook, setShowAlert: (show: boolean) => void, parameters: Parameters) {
+    const isLoading = useModel(state => state.isLoading);
+    const train = useModel(state => state.train);
+    const getParameters = useModel(state => state.getParameters);
+    const resetModelData = useModel(state => state.resetModelData);
     const activeDataset = useDataset(state => state.activeDataset);
-    const { isLoading, data, train, getParameters, resetModelData } = model;
     const hasInitialized = useRef(false);
 
     // Try to get lastParams from the store (different models use different names)
     // Use useMemo to maintain stable reference
-    const { lastParams: storedParams, lastTrainedParams } = model;
+    const storedParams = useModel(state => state.lastParams);
+    const lastTrainedParams = useModel(state => state.lastTrainedParams);
     const lastParams = useMemo(
         () => storedParams || lastTrainedParams || {},
         [storedParams, lastTrainedParams],
     );
 
     // Get feature names from the model store (for KNN dynamic feature dropdowns)
-    const featureNames = useMemo(() => {
-        if (typeof (model as any).getFeatureNames === "function") {
-            return (model as any).getFeatureNames();
-        }
-        // Fallback to metadata if available
-        return data?.metadata?.feature_names || null;
-    }, [model, data?.metadata?.feature_names]);
+    const featureNames = useModel(useShallow((state): string[] | null =>
+        typeof state.getFeatureNames === "function"
+            ? state.getFeatureNames()
+            : state.data?.metadata?.feature_names || null,
+    ));
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const { updateParams } = useUserMode().hook();
+    const { hook: useModeStore } = useUserMode();
+    const updateParams = useModeStore(state => state.updateParams);
     const { recordTrain } = useHistoryRecorder();
 
     useEffect(() => {

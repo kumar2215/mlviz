@@ -18,29 +18,26 @@ import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import { GitBranch, Leaf, Split } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useShallow } from "zustand/react/shallow";
 import { renderInformationGainGraph } from "./rendererUtils";
 
 const EMPTY_NAMES: string[] = [];
 
 const ManualTreeHUD: React.FC = () => {
-    const { manualTree, getFeatureNames, getClassNames } = useDecisionTree();
-
-    const {
-        selectedNodePath,
-        featureStats,
-        selectedFeature,
-        selectedThreshold,
-        loadFeatureStats,
-        updateThreshold,
-        splitNode,
-        markAsLeaf,
-    } = manualTree;
+    const selectedNodePath = useDecisionTree(state => state.manualTree.selectedNodePath);
+    const featureStats = useDecisionTree(state => state.manualTree.featureStats);
+    const selectedFeature = useDecisionTree(state => state.manualTree.selectedFeature);
+    const selectedThreshold = useDecisionTree(state => state.manualTree.selectedThreshold);
+    const loadFeatureStats = useDecisionTree(state => state.manualTree.loadFeatureStats);
+    const updateThreshold = useDecisionTree(state => state.manualTree.updateThreshold);
+    const splitNode = useDecisionTree(state => state.manualTree.splitNode);
+    const markAsLeaf = useDecisionTree(state => state.manualTree.markAsLeaf);
 
     const vizRef = useRef<SVGSVGElement>(null);
     const exploredIndicesCache = useRef(new Map<string, Set<number>>());
 
-    const featureNames = getFeatureNames() || EMPTY_NAMES;
-    const classNames = getClassNames() || EMPTY_NAMES;
+    const featureNames = useDecisionTree(useShallow(state => state.getFeatureNames() || EMPTY_NAMES));
+    const classNames = useDecisionTree(useShallow(state => state.getClassNames() || EMPTY_NAMES));
 
     // Clear exploration cache when the selected node changes
     useEffect(() => {

@@ -15,19 +15,17 @@ interface VisualisationProps {
 }
 
 export default function SVMPredictVisualization({ points }: VisualisationProps) {
-    const {
-        visualizationData,
-        isVisualizationLoading,
-        visualizationError,
-        loadVisualization,
-        lastVisualizationParams,
-        currentW1,
-        currentW2,
-        currentBias,
-        decisionBoundary,
-        makePrediction,
-        predictionResult
-    } = useSVM();
+    const visualizationData = useSVM(state => state.visualizationData);
+    const isVisualizationLoading = useSVM(state => state.isVisualizationLoading);
+    const visualizationError = useSVM(state => state.visualizationError);
+    const loadVisualization = useSVM(state => state.loadVisualization);
+    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
+    const currentW1 = useSVM(state => state.currentW1);
+    const currentW2 = useSVM(state => state.currentW2);
+    const currentBias = useSVM(state => state.currentBias);
+    const decisionBoundary = useSVM(state => state.decisionBoundary);
+    const makePrediction = useSVM(state => state.makePrediction);
+    const predictionResult = useSVM(state => state.predictionResult);
 
     // Auto-reload on mount
     useEffect(() => {

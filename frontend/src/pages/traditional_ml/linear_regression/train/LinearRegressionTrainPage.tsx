@@ -6,7 +6,7 @@ import type { Parameters } from "@/types/page";
 import type { RegressionMetadata } from "@/types/model";
 
 export default function LinearRegressionTrainPage({ parameters } : { parameters: Parameters }) {
-    const { data } = useLinearRegression();
+    const data = useLinearRegression(state => state.data);
     
     const resultsComponent = () => (
         <RegressionResults

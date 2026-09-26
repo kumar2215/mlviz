@@ -12,14 +12,12 @@ interface SVMLossMapHUDProps {
 }
 
 const SVMLossMapHUD: React.FC<SVMLossMapHUDProps> = ({ mode }) => {
-    const {
-        currentW1,
-        currentW2,
-        currentBias,
-        computeHingeLoss,
-        currentModelData,
-        stepData,
-    } = useSVM();
+    const currentW1 = useSVM(state => state.currentW1);
+    const currentW2 = useSVM(state => state.currentW2);
+    const currentBias = useSVM(state => state.currentBias);
+    const computeHingeLoss = useSVM(state => state.computeHingeLoss);
+    const currentModelData = useSVM(state => state.currentModelData);
+    const stepData = useSVM(state => state.stepData);
 
     // Compute generic parameter bounds (could be dynamic or fixed for visualization)
     const bounds = useMemo(() => {

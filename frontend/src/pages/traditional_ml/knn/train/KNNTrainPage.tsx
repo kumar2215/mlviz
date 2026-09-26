@@ -5,7 +5,7 @@ import { useKNN } from "@/store/traditional_ml/useKNN";
 import type { Parameters } from "@/types/page";
 
 export default function KNNTrainPage({ parameters } : { parameters: Parameters }) {
-    const { data } = useKNN();
+    const data = useKNN(state => state.data);
     
     const resultsComponent = () => (
         <ClassifierResults

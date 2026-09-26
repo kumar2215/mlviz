@@ -26,16 +26,14 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
     onLearningRateChange,
 }) => {
     const scaleFactor = useScaleFactor();
-    const {
-        currentSlope,
-        currentIntercept,
-        setCurrentLine,
-        performStep,
-        isStepLoading,
-        stepData,
-        visualizationData,
-        computeR2,
-    } = useLinearRegression();
+    const currentSlope = useLinearRegression(state => state.currentSlope);
+    const currentIntercept = useLinearRegression(state => state.currentIntercept);
+    const setCurrentLine = useLinearRegression(state => state.setCurrentLine);
+    const performStep = useLinearRegression(state => state.performStep);
+    const isStepLoading = useLinearRegression(state => state.isStepLoading);
+    const stepData = useLinearRegression(state => state.stepData);
+    const visualizationData = useLinearRegression(state => state.visualizationData);
+    const computeR2 = useLinearRegression(state => state.computeR2);
 
     const fs = (n: number) => `${n * scaleFactor}px`;
     const points = visualizationData?.points ?? [];

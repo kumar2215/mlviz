@@ -17,17 +17,15 @@ import * as d3 from "d3";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 export default function LinearRegressionStepVisualisation() {
-    const {
-        visualizationData,
-        isVisualizationLoading,
-        visualizationError,
-        loadVisualization,
-        lastVisualizationParams,
-        currentSlope,
-        currentIntercept,
-        stepData,
-        randomizeLine,
-    } = useLinearRegression();
+    const visualizationData = useLinearRegression(state => state.visualizationData);
+    const isVisualizationLoading = useLinearRegression(state => state.isVisualizationLoading);
+    const visualizationError = useLinearRegression(state => state.visualizationError);
+    const loadVisualization = useLinearRegression(state => state.loadVisualization);
+    const lastVisualizationParams = useLinearRegression(state => state.lastVisualizationParams);
+    const currentSlope = useLinearRegression(state => state.currentSlope);
+    const currentIntercept = useLinearRegression(state => state.currentIntercept);
+    const stepData = useLinearRegression(state => state.stepData);
+    const randomizeLine = useLinearRegression(state => state.randomizeLine);
 
     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(
         null,

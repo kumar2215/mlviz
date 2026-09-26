@@ -3,9 +3,10 @@ import useTrain from "@/hooks/useTrain";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useState } from "react";
 import type { Parameters } from "@/types/page";
+import type { ModelSelectorHook } from "@/types/modelStore";
 
 type TrainPageProps = {
-    useModel: () => any;
+    useModel: ModelSelectorHook;
     parameters: Parameters;
     TrainVisualizationComponent: React.FC;
     ResultsComponent: React.FC;
