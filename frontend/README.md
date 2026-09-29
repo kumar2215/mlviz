@@ -1,5 +1,12 @@
 # React + TypeScript + Vite
 
+## Performance comparison
+
+The [state migration benchmark](../benchmarks/state-migration/README.md) automates
+the same linear-regression interaction against two committed revisions, using
+fixed data and separate production/profiling builds. Run it from
+benchmarks/state-migration with npm ci followed by npm run bench.
+
 ## Tailwind checks
 
 Run `npm run lint` from `frontend` to check TypeScript/React code and Tailwind

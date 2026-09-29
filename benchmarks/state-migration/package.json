@@ -1,0 +1,12 @@
+{
+  "name": "mlviz-state-migration-benchmark",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bench": "node run.mjs",
+    "test": "node --test stats.test.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
