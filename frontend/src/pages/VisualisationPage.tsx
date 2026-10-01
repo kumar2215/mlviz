@@ -9,7 +9,7 @@ import useUserMode from "@/hooks/useUserMode";
 import type { PageUnion } from "@/types/page";
 import type { Transition } from "@/types/story";
 import { House } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 
 export default function VisualisationPage() {
@@ -29,7 +29,16 @@ export default function VisualisationPage() {
     const name = item.name;
 
     const [currentPageId, setCurrentPageId] = useState(0);
+    const [subpageIndex, setSubpageIndex] = useState(0);
+    const [readySubpages, setReadySubpages] = useState<Record<number, boolean>>({});
+    const [replayKey, setReplayKey] = useState(0);
     const currentPage: PageUnion = pages[currentPageId];
+    const activeDynamicPage = currentPage?.page_type === "mixed" && currentPage.dynamic_page.page_type === "dynamic" ? currentPage.dynamic_page : currentPage?.page_type === "dynamic" ? currentPage : null;
+    const subpages = activeDynamicPage?.subpages ?? [];
+    const isLastSubpage = subpages.length === 0 || subpageIndex === subpages.length - 1;
+    const markSubpageReady = useCallback(() => {
+        setReadySubpages(previous => previous[subpageIndex] ? previous : { ...previous, [subpageIndex]: true });
+    }, [subpageIndex]);
 
     useEffect(() => {
         recordAction({
@@ -50,7 +59,7 @@ export default function VisualisationPage() {
     }
 
     const getAvailableTransitions = (): Transition[] => {
-        return transitions.filter(
+        return (isLastSubpage ? transitions : []).filter(
             (transition) => transition.from === currentPageId,
         );
     };
@@ -58,16 +67,26 @@ export default function VisualisationPage() {
     const handleNavigate = (pageId: number) => {
         addPageVisit(currentPageId);
         setCurrentPageId(pageId);
+        setSubpageIndex(0);
+        setReadySubpages({});
+        setReplayKey(value => value + 1);
     };
 
     const handleBack = () => {
+        if (subpageIndex > 0) {
+            setSubpageIndex(value => value - 1);
+            return;
+        }
         const previousPageId = getPreviousPageId();
         if (previousPageId !== undefined) {
             setCurrentPageId(previousPageId);
+            setSubpageIndex(0);
+            setReadySubpages({});
+            setReplayKey(value => value + 1);
         }
     };
 
-    const canGoBack = path.length > 0;
+    const canGoBack = path.length > 0 || subpageIndex > 0;
 
     const renderPage = () => {
         if (!currentPage) {
@@ -89,7 +108,35 @@ export default function VisualisationPage() {
                 page={currentPage}
                 category={category!}
                 visualisation={name!}
+                subpageIndex={subpageIndex}
+                replayKey={replayKey}
+                onSubpageReady={markSubpageReady}
             />;
+        } else if (currentPage.page_type === "mixed") {
+            const { static_page, dynamic_page } = currentPage;
+            if (dynamic_page.page_type !== "dynamic") {
+                throw new Error("Mixed page reference was not resolved");
+            }
+            const category = inStoryMode ? dynamic_page.category : visualisation?.category;
+            const name = inStoryMode ? dynamic_page.path : visualisation?.name;
+
+            return (
+                <div className="flex h-full min-h-0 w-full flex-col overflow-hidden">
+                    <StaticPage {...static_page} compact />
+                    <div className="min-h-0 flex-1 overflow-hidden">
+                        <DynamicPage
+                            page={dynamic_page}
+                            category={category!}
+                            visualisation={name!}
+                            subpageIndex={subpageIndex}
+                            replayKey={replayKey}
+                            onSubpageReady={markSubpageReady}
+                        />
+                    </div>
+                </div>
+            );
+        } else {
+            throw new Error(`Unknown page type: ${currentPage.page_type}`);
         }
     };
 
@@ -106,6 +153,17 @@ export default function VisualisationPage() {
                         onBack={handleBack}
                         canGoBack={canGoBack}
                         currentHistory={currentHistory}
+                        subpage={subpages.length > 0 ? {
+                            index: subpageIndex,
+                            labels: subpages,
+                            canAdvance: Boolean(readySubpages[subpageIndex]),
+                            onNext: () => setSubpageIndex(value => value + 1),
+                            onReplay: () => {
+                                setSubpageIndex(0);
+                                setReadySubpages({});
+                                setReplayKey(value => value + 1);
+                            },
+                        } : undefined}
                     />
                     {currentPage?.note && <Sidenote note={currentPage.note} />}
                 </div>
@@ -113,7 +171,7 @@ export default function VisualisationPage() {
 
             <footer className="shrink-0 border-t border-gray-200 px-4 py-2 flex items-center justify-between text-sm tracking-tight">
                 <p className="bg-gradient-to-r text-xs from-fuchsia-700 to-cyan-700 bg-clip-text text-transparent font-semibold font-mono">
-                    {inStoryMode ? "Story" : "Visualisation"}/{name} [page {currentPageId}]
+                    {inStoryMode ? "Story" : "Visualisation"}/{name} [page {currentPageId}]{subpages.length > 0 ? ` [step ${subpageIndex + 1}/${subpages.length}]` : ""}
                 </p>
                 <Link to={"/"}>
                     <Button

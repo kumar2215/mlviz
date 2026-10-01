@@ -1273,6 +1273,416 @@
         }
       }
     },
+    "/api/bpe/state": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "State",
+        "operationId": "state_api_bpe_state_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeStateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bpe/check-counts": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "Check Counts",
+        "operationId": "check_counts_api_bpe_check_counts_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeCountCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bpe/check-merge": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "Check Merge",
+        "operationId": "check_merge_api_bpe_check_merge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeMergeCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bpe/check-restore": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "Check Restore",
+        "operationId": "check_restore_api_bpe_check_restore_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeRestoreCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bpe/check-tokenizations": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "Check Tokenizations",
+        "operationId": "check_tokenizations_api_bpe_check_tokenizations_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeTokenCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeCheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/regex/state": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Regex State",
+        "operationId": "regex_state_api_tokenization_regex_state_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegexStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegexStateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/regex/preview": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Regex Preview",
+        "operationId": "regex_preview_api_tokenization_regex_preview_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegexChoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegexPreviewResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/regex/check": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Regex Check",
+        "operationId": "regex_check_api_tokenization_regex_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegexChoiceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/porter/state": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Porter State",
+        "operationId": "porter_state_api_tokenization_porter_state_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PorterStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PorterStateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/porter/check": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Porter Check",
+        "operationId": "porter_check_api_tokenization_porter_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PorterCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health Check",
@@ -1322,6 +1732,359 @@
         "title": "AnyParameterInfo",
         "description": "Any type parameter."
       },
+      "BpeCheckResponse": {
+        "properties": {
+          "correct": {
+            "type": "boolean",
+            "title": "Correct"
+          },
+          "tokens": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tokens"
+          }
+        },
+        "type": "object",
+        "required": [
+          "correct"
+        ],
+        "title": "BpeCheckResponse"
+      },
+      "BpeCountAnswer": {
+        "properties": {
+          "left": {
+            "type": "string",
+            "title": "Left"
+          },
+          "right": {
+            "type": "string",
+            "title": "Right"
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "left",
+          "right",
+          "count"
+        ],
+        "title": "BpeCountAnswer"
+      },
+      "BpeCountCheckRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedBpeDataset"
+          },
+          "round_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Round Index"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/BpeCountAnswer"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "round_index",
+          "answers"
+        ],
+        "title": "BpeCountCheckRequest"
+      },
+      "BpeMergeCheckRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedBpeDataset"
+          },
+          "round_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Round Index"
+          },
+          "pair": {
+            "$ref": "#/components/schemas/BpePair"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "round_index",
+          "pair"
+        ],
+        "title": "BpeMergeCheckRequest"
+      },
+      "BpePair": {
+        "properties": {
+          "left": {
+            "type": "string",
+            "title": "Left"
+          },
+          "right": {
+            "type": "string",
+            "title": "Right"
+          }
+        },
+        "type": "object",
+        "required": [
+          "left",
+          "right"
+        ],
+        "title": "BpePair"
+      },
+      "BpePairCount": {
+        "properties": {
+          "left": {
+            "type": "string",
+            "title": "Left"
+          },
+          "right": {
+            "type": "string",
+            "title": "Right"
+          },
+          "count": {
+            "type": "integer",
+            "title": "Count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "left",
+          "right",
+          "count"
+        ],
+        "title": "BpePairCount"
+      },
+      "BpeRestoreCheckRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedBpeDataset"
+          },
+          "round_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Round Index"
+          },
+          "selected_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Selected Index"
+          },
+          "right_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Right Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "round_index",
+          "selected_index",
+          "right_index"
+        ],
+        "title": "BpeRestoreCheckRequest"
+      },
+      "BpeRound": {
+        "properties": {
+          "before": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenWord"
+            },
+            "type": "array",
+            "title": "Before"
+          },
+          "counts": {
+            "items": {
+              "$ref": "#/components/schemas/BpePairCount"
+            },
+            "type": "array",
+            "title": "Counts"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/BpePair"
+            },
+            "type": "array",
+            "title": "Questions"
+          },
+          "rule": {
+            "$ref": "#/components/schemas/BpePair"
+          },
+          "after": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenWord"
+            },
+            "type": "array",
+            "title": "After"
+          }
+        },
+        "type": "object",
+        "required": [
+          "before",
+          "counts",
+          "questions",
+          "rule",
+          "after"
+        ],
+        "title": "BpeRound"
+      },
+      "BpeStateRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedBpeDataset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset"
+        ],
+        "title": "BpeStateRequest"
+      },
+      "BpeStateResponse": {
+        "properties": {
+          "initial": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenWord"
+            },
+            "type": "array",
+            "title": "Initial"
+          },
+          "rounds": {
+            "items": {
+              "$ref": "#/components/schemas/BpeRound"
+            },
+            "type": "array",
+            "title": "Rounds"
+          },
+          "test_words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Test Words"
+          },
+          "restore_word": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restore Word"
+          },
+          "restore_initial": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restore Initial"
+          }
+        },
+        "type": "object",
+        "required": [
+          "initial",
+          "rounds",
+          "test_words",
+          "restore_word",
+          "restore_initial"
+        ],
+        "title": "BpeStateResponse"
+      },
+      "BpeTokenAnswer": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "title": "Word"
+          },
+          "tokens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tokens"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "tokens"
+        ],
+        "title": "BpeTokenAnswer"
+      },
+      "BpeTokenCheckRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedBpeDataset"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenAnswer"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "answers"
+        ],
+        "title": "BpeTokenCheckRequest"
+      },
+      "BpeTokenWord": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "title": "Word"
+          },
+          "tokens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tokens"
+          },
+          "frequency": {
+            "type": "integer",
+            "title": "Frequency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "tokens",
+          "frequency"
+        ],
+        "title": "BpeTokenWord"
+      },
       "CacheInfoResponse": {
         "properties": {
           "enabled": {
@@ -1360,6 +2123,19 @@
         ],
         "title": "CacheInfoResponse",
         "description": "Response model for cache information."
+      },
+      "CheckResponse": {
+        "properties": {
+          "correct": {
+            "type": "boolean",
+            "title": "Correct"
+          }
+        },
+        "type": "object",
+        "required": [
+          "correct"
+        ],
+        "title": "CheckResponse"
       },
       "ClassificationDataset": {
         "properties": {
@@ -4482,6 +5258,150 @@
         "title": "NumberParameterInfo",
         "description": "Number parameter with optional range and step."
       },
+      "PorterAnswer": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Word"
+          },
+          "stem": {
+            "type": "string",
+            "maxLength": 64,
+            "title": "Stem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "stem"
+        ],
+        "title": "PorterAnswer"
+      },
+      "PorterChange": {
+        "properties": {
+          "step": {
+            "type": "string",
+            "title": "Step"
+          },
+          "word": {
+            "type": "string",
+            "title": "Word"
+          }
+        },
+        "type": "object",
+        "required": [
+          "step",
+          "word"
+        ],
+        "title": "PorterChange"
+      },
+      "PorterCheckRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedPorterDataset"
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/PorterAnswer"
+            },
+            "type": "array",
+            "title": "Answers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "answers"
+        ],
+        "title": "PorterCheckRequest"
+      },
+      "PorterExample": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "title": "Word"
+          },
+          "stem": {
+            "type": "string",
+            "title": "Stem"
+          },
+          "changes": {
+            "items": {
+              "$ref": "#/components/schemas/PorterChange"
+            },
+            "type": "array",
+            "title": "Changes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "stem",
+          "changes"
+        ],
+        "title": "PorterExample"
+      },
+      "PorterStateRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedPorterDataset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset"
+        ],
+        "title": "PorterStateRequest"
+      },
+      "PorterStateResponse": {
+        "properties": {
+          "examples": {
+            "items": {
+              "$ref": "#/components/schemas/PorterExample"
+            },
+            "type": "array",
+            "title": "Examples"
+          },
+          "quiz_words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Quiz Words"
+          }
+        },
+        "type": "object",
+        "required": [
+          "examples",
+          "quiz_words"
+        ],
+        "title": "PorterStateResponse"
+      },
+      "PredefinedBpeDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "predefined_bpe",
+            "title": "Type",
+            "default": "predefined_bpe"
+          },
+          "name": {
+            "type": "string",
+            "enum": [
+              "walkthrough",
+              "practice"
+            ],
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "PredefinedBpeDataset"
+      },
       "PredefinedClassificationDataset": {
         "properties": {
           "type": {
@@ -4525,6 +5445,46 @@
         "title": "PredefinedClassificationDataset",
         "description": "Reference to a predefined (classification) dataset."
       },
+      "PredefinedPorterDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "predefined_porter",
+            "title": "Type",
+            "default": "predefined_porter"
+          },
+          "name": {
+            "type": "string",
+            "const": "suffixes",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "PredefinedPorterDataset"
+      },
+      "PredefinedRegexDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "predefined_regex",
+            "title": "Type",
+            "default": "predefined_regex"
+          },
+          "name": {
+            "type": "string",
+            "const": "punctuation",
+            "title": "Name"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "PredefinedRegexDataset"
+      },
       "PredefinedRegressionDataset": {
         "properties": {
           "type": {
@@ -4561,6 +5521,120 @@
         "type": "object",
         "title": "PredefinedRegressionDataset",
         "description": "Reference to a predefined regression dataset."
+      },
+      "RegexChoiceRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedRegexDataset"
+          },
+          "option_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Option Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "option_id"
+        ],
+        "title": "RegexChoiceRequest"
+      },
+      "RegexMatch": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "start": {
+            "type": "integer",
+            "title": "Start"
+          },
+          "end": {
+            "type": "integer",
+            "title": "End"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "start",
+          "end"
+        ],
+        "title": "RegexMatch"
+      },
+      "RegexOption": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "pattern": {
+            "type": "string",
+            "title": "Pattern"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "pattern"
+        ],
+        "title": "RegexOption"
+      },
+      "RegexPreviewResponse": {
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/RegexMatch"
+            },
+            "type": "array",
+            "title": "Matches"
+          }
+        },
+        "type": "object",
+        "required": [
+          "matches"
+        ],
+        "title": "RegexPreviewResponse"
+      },
+      "RegexStateRequest": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/PredefinedRegexDataset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset"
+        ],
+        "title": "RegexStateRequest"
+      },
+      "RegexStateResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "options": {
+            "items": {
+              "$ref": "#/components/schemas/RegexOption"
+            },
+            "type": "array",
+            "title": "Options"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "options"
+        ],
+        "title": "RegexStateResponse"
       },
       "RegressionDataset": {
         "properties": {
@@ -5862,6 +6936,13 @@
           "type": {
             "type": "string",
             "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
           }
         },
         "type": "object",

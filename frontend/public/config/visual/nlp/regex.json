@@ -1,0 +1,14 @@
+{
+    "display_name": "Regex",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "name": "RegexTokenizer",
+            "dataset": { "type": "predefined_regex", "name": "punctuation" },
+            "parameters": {},
+            "completion_button_id": "regex-tokenizer-v1",
+            "subpages": ["Compare patterns", "Choose a tokenizer"]
+        }
+    ],
+    "transitions": []
+}

@@ -1,0 +1,14 @@
+{
+    "display_name": "Porter Stemming",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "name": "PorterStemmer",
+            "dataset": { "type": "predefined_porter", "name": "suffixes" },
+            "parameters": {},
+            "completion_button_id": "porter-stemming-v1",
+            "subpages": ["Watch suffix rules", "Predict stems"]
+        }
+    ],
+    "transitions": []
+}

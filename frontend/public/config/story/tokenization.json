@@ -1,0 +1,44 @@
+{
+    "display_name": "Tokenization",
+    "pages": [
+        { "page_type": "static", "text": "", "path": "md/tokenization/brief.md" },
+        { "page_type": "static", "text": "", "path": "md/tokenization/regex.md" },
+        {
+            "page_type": "mixed",
+            "static_page": { "page_type": "static", "text": "", "path": "md/tokenization/regex-try.md" },
+            "dynamic_page": { "page_type": "reference", "reference_type": "visualisation", "path": "nlp/regex.json", "pages": [0] }
+        },
+        { "page_type": "static", "text": "", "path": "md/tokenization/porter.md" },
+        {
+            "page_type": "mixed",
+            "static_page": { "page_type": "static", "text": "", "path": "md/tokenization/porter-try.md" },
+            "dynamic_page": { "page_type": "reference", "reference_type": "visualisation", "path": "nlp/porter.json", "pages": [0] }
+        },
+        { "page_type": "static", "text": "", "path": "md/bpe/what-and-why.md" },
+        {
+            "page_type": "mixed",
+            "static_page": { "page_type": "static", "text": "", "path": "md/bpe/walkthrough.md" },
+            "dynamic_page": { "page_type": "reference", "reference_type": "visualisation", "path": "nlp/tokenization.json", "pages": [0] }
+        },
+        {
+            "page_type": "mixed",
+            "static_page": { "page_type": "static", "text": "", "path": "md/bpe/merge.md" },
+            "dynamic_page": { "page_type": "reference", "reference_type": "visualisation", "path": "nlp/tokenization.json", "pages": [1] }
+        },
+        {
+            "page_type": "mixed",
+            "static_page": { "page_type": "static", "text": "", "path": "md/bpe/training.md" },
+            "dynamic_page": { "page_type": "reference", "reference_type": "visualisation", "path": "nlp/tokenization.json", "pages": [2] }
+        },
+        { "page_type": "static", "text": "", "path": "md/tokenization/debrief.md" }
+    ],
+    "transitions": [
+        { "from": 0, "to": 1, "condition": { "condition_type": "Bypass", "name": "Explore regex" } },
+        { "from": 1, "to": 2, "condition": { "condition_type": "Bypass", "name": "Try the patterns" } },
+        { "from": 2, "to": 3, "condition": { "condition_type": "Button", "button_id": "regex-tokenizer-v1", "name": "Explore stemming" } },
+        { "from": 3, "to": 4, "condition": { "condition_type": "Bypass", "name": "Try Porter stemming" } },
+        { "from": 4, "to": 5, "condition": { "condition_type": "Button", "button_id": "porter-stemming-v1", "name": "Explore BPE" } },
+        { "from": 5, "to": 6, "condition": { "condition_type": "Bypass", "name": "Watch BPE learn" } },
+        { "from": 8, "to": 9, "condition": { "condition_type": "Button", "button_id": "bpe-train-low-v1", "name": "Compare the methods" } }
+    ]
+}

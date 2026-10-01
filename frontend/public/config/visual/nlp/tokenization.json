@@ -1,5 +1,33 @@
 {
-    "display_name": "Tokenization",
-    "pages": [],
-    "transitions": []
+    "display_name": "BPE Tokenization",
+    "pages": [
+        {
+            "page_type": "dynamic",
+            "name": "BpeWalkthrough",
+            "dataset": { "type": "predefined_bpe", "name": "walkthrough" },
+            "parameters": {},
+            "completion_button_id": "bpe-walkthrough-v1",
+            "subpages": ["Character corpus", "Count the first pair", "Apply the first merge", "Count again", "Apply the second merge", "Learned rules"]
+        },
+        {
+            "page_type": "dynamic",
+            "name": "BpeMerge",
+            "dataset": { "type": "predefined_bpe", "name": "walkthrough" },
+            "parameters": {},
+            "completion_button_id": "bpe-lowest-v1",
+            "subpages": ["Apply rule one", "Apply rule two", "Restored tokens"]
+        },
+        {
+            "page_type": "dynamic",
+            "name": "BpeTraining",
+            "dataset": { "type": "predefined_bpe", "name": "practice" },
+            "parameters": {},
+            "completion_button_id": "bpe-train-low-v1",
+            "subpages": ["Count pair frequencies", "Choose the first merge", "Recount pairs", "Choose the second merge", "Tokenize new words", "Results"]
+        }
+    ],
+    "transitions": [
+        { "from": 0, "to": 1, "condition": { "condition_type": "Button", "button_id": "bpe-walkthrough-v1", "name": "Restore lowest" } },
+        { "from": 1, "to": 2, "condition": { "condition_type": "Button", "button_id": "bpe-lowest-v1", "name": "Train BPE" } }
+    ]
 }

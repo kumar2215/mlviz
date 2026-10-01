@@ -2,7 +2,7 @@ import MarkdownWrapper from "@/components/markdown/MarkdownWrapper";
 import type { StaticPageParameters } from "@/types/page";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-const StaticPage: React.FC<StaticPageParameters> = ({ text, path }) => {
+const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ text, path, compact = false }) => {
     const [content, setContent] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
@@ -99,6 +99,16 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, path }) => {
         observer.observe(containerRef.current);
         return () => observer.disconnect();
     }, []);
+
+    if (compact) {
+        return (
+            <div className="w-full shrink-0 bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-2">
+                <div className="mx-auto max-w-5xl [&_h1]:!my-0 [&_h1]:!text-2xl [&_p]:!mb-0 [&_p]:!text-sm [&_p]:!leading-snug [&_div]:!p-0">
+                    {loading ? "Loading markdown..." : error ? `Error: ${error}` : <MarkdownWrapper>{content}</MarkdownWrapper>}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center h-full w-full overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">

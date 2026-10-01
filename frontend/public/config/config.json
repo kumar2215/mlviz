@@ -32,11 +32,14 @@
             "icon": "nlp_icon.png",
             "config_path": "nlp",
             "files": [
+                "regex.json",
+                "porter.json",
                 "tokenization.json"
             ]
         }
     ],
     "stories": [
-        "decision_tree"
+        "decision_tree",
+        "tokenization"
     ]
 }

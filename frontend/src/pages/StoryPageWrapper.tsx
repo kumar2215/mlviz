@@ -7,20 +7,11 @@ import type Story from "@/types/story";
 import type { Transition } from "@/types/story";
 
 function processUnrolledStory(story: Story, referencePages: number[], pageOffset: number, transitions: Transition[]): void {
-    for (let i1 = 0; i1 < referencePages.length; i1++) {
-        for (let i2 = 0; i2 < referencePages.length; i2++) {
-            if (i1 !== i2) {
-                const local_idx1 = referencePages[i1];
-                const local_idx2 = referencePages[i2];
-                const t1 = story.transitions.find(
-                    (t) => t.from === local_idx1 && t.to === local_idx2,
-                );
-                const t2 = story.transitions.find(
-                    (t) => t.from === local_idx2 && t.to === local_idx1,
-                );
-                if (t1) transitions.push({ ...t1, from: pageOffset + i1, to: pageOffset + i2 });
-                if (t2) transitions.push({ ...t2, from: pageOffset + i2, to: pageOffset + i1 });
-            }
+    for (const transition of story.transitions) {
+        const from = referencePages.indexOf(transition.from);
+        const to = referencePages.indexOf(transition.to);
+        if (from !== -1 && to !== -1) {
+            transitions.push({ ...transition, from: pageOffset + from, to: pageOffset + to });
         }
     }
 }
@@ -35,14 +26,40 @@ function unrollStory(story: Story, activeStories: ReadonlySet<Story> = new Set()
     nextActiveStories.add(story);
 
     const { stories } = useStory.getState();
-    if (story.pages.filter((page) => page.page_type === "reference").length === 0) {
+    if (story.pages.every((page) => page.page_type !== "reference" && !(page.page_type === "mixed" && page.dynamic_page.page_type === "reference"))) {
         return story; // No references, return as is
     }
     const pages: PageUnion[] = [];
     const transitions: Transition[] = [...story.transitions];
+    const mixedVisualPages = new Map<string, { story: Story; indices: Map<number, number> }>();
 
     for (const page of story.pages) {
-        if (page.page_type !== "reference") {
+        if (page.page_type === "mixed" && page.dynamic_page.page_type === "reference") {
+            const reference = page.dynamic_page;
+            if (reference.reference_type !== "visualisation" || reference.pages.length !== 1) {
+                throw new Error("A mixed page must reference exactly one visualisation page");
+            }
+            const [category, file] = reference.path.split("/");
+            const visualisationName = file?.replace(".json", "");
+            const visualisation = Object.values(useVisualisation.getState().visualisations).find(
+                (entry) => entry.category === category && entry.name === visualisationName,
+            );
+            if (!visualisation) {
+                throw new Error(`Referenced visualisation not found: ${reference.path}`);
+            }
+            const resolvedVisualisation = unrollStory(visualisation, nextActiveStories);
+            const referencedPage = resolvedVisualisation.pages[reference.pages[0]];
+            if (!referencedPage || referencedPage.page_type !== "dynamic") {
+                throw new Error(`Referenced page is not dynamic: ${reference.path}#${reference.pages[0]}`);
+            }
+            pages.push({
+                ...page,
+                dynamic_page: { ...referencedPage, category, path: visualisationName },
+            });
+            const group = mixedVisualPages.get(reference.path) ?? { story: resolvedVisualisation, indices: new Map<number, number>() };
+            group.indices.set(reference.pages[0], pages.length - 1);
+            mixedVisualPages.set(reference.path, group);
+        } else if (page.page_type !== "reference") {
             pages.push(page);
         } else {
             const referenceType = page.reference_type;
@@ -87,6 +104,15 @@ function unrollStory(story: Story, activeStories: ReadonlySet<Story> = new Set()
                 processUnrolledStory(unrolledReferenceVisualisation, referencePages, pageOffset, transitions);
             } else {
                 throw new Error(`Unknown reference type: ${referenceType}`);
+            }
+        }
+    }
+    for (const { story: visualisation, indices } of mixedVisualPages.values()) {
+        for (const transition of visualisation.transitions) {
+            const from = indices.get(transition.from);
+            const to = indices.get(transition.to);
+            if (from !== undefined && to !== undefined) {
+                transitions.push({ ...transition, from, to });
             }
         }
     }

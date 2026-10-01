@@ -837,6 +837,176 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/bpe/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** State */
+        post: operations["state_api_bpe_state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bpe/check-counts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Counts */
+        post: operations["check_counts_api_bpe_check_counts_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bpe/check-merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Merge */
+        post: operations["check_merge_api_bpe_check_merge_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bpe/check-restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Restore */
+        post: operations["check_restore_api_bpe_check_restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/bpe/check-tokenizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check Tokenizations */
+        post: operations["check_tokenizations_api_bpe_check_tokenizations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tokenization/regex/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Regex State */
+        post: operations["regex_state_api_tokenization_regex_state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tokenization/regex/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Regex Preview */
+        post: operations["regex_preview_api_tokenization_regex_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tokenization/regex/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Regex Check */
+        post: operations["regex_check_api_tokenization_regex_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tokenization/porter/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Porter State */
+        post: operations["porter_state_api_tokenization_porter_state_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/tokenization/porter/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Porter Check */
+        post: operations["porter_check_api_tokenization_porter_check_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -878,6 +1048,114 @@ export interface components {
              */
             type: "any";
         };
+        /** BpeCheckResponse */
+        BpeCheckResponse: {
+            /** Correct */
+            correct: boolean;
+            /** Tokens */
+            tokens?: string[] | null;
+        };
+        /** BpeCountAnswer */
+        BpeCountAnswer: {
+            /** Left */
+            left: string;
+            /** Right */
+            right: string;
+            /** Count */
+            count: number;
+        };
+        /** BpeCountCheckRequest */
+        BpeCountCheckRequest: {
+            dataset: components["schemas"]["PredefinedBpeDataset"];
+            /** Round Index */
+            round_index: number;
+            /** Answers */
+            answers: components["schemas"]["BpeCountAnswer"][];
+        };
+        /** BpeMergeCheckRequest */
+        BpeMergeCheckRequest: {
+            dataset: components["schemas"]["PredefinedBpeDataset"];
+            /** Round Index */
+            round_index: number;
+            pair: components["schemas"]["BpePair"];
+        };
+        /** BpePair */
+        BpePair: {
+            /** Left */
+            left: string;
+            /** Right */
+            right: string;
+        };
+        /** BpePairCount */
+        BpePairCount: {
+            /** Left */
+            left: string;
+            /** Right */
+            right: string;
+            /** Count */
+            count: number;
+        };
+        /** BpeRestoreCheckRequest */
+        BpeRestoreCheckRequest: {
+            dataset: components["schemas"]["PredefinedBpeDataset"];
+            /** Round Index */
+            round_index: number;
+            /** Selected Index */
+            selected_index: number;
+            /** Right Index */
+            right_index: number;
+        };
+        /** BpeRound */
+        BpeRound: {
+            /** Before */
+            before: components["schemas"]["BpeTokenWord"][];
+            /** Counts */
+            counts: components["schemas"]["BpePairCount"][];
+            /** Questions */
+            questions: components["schemas"]["BpePair"][];
+            rule: components["schemas"]["BpePair"];
+            /** After */
+            after: components["schemas"]["BpeTokenWord"][];
+        };
+        /** BpeStateRequest */
+        BpeStateRequest: {
+            dataset: components["schemas"]["PredefinedBpeDataset"];
+        };
+        /** BpeStateResponse */
+        BpeStateResponse: {
+            /** Initial */
+            initial: components["schemas"]["BpeTokenWord"][];
+            /** Rounds */
+            rounds: components["schemas"]["BpeRound"][];
+            /** Test Words */
+            test_words: string[];
+            /** Restore Word */
+            restore_word: string | null;
+            /** Restore Initial */
+            restore_initial: string[] | null;
+        };
+        /** BpeTokenAnswer */
+        BpeTokenAnswer: {
+            /** Word */
+            word: string;
+            /** Tokens */
+            tokens: string[];
+        };
+        /** BpeTokenCheckRequest */
+        BpeTokenCheckRequest: {
+            dataset: components["schemas"]["PredefinedBpeDataset"];
+            /** Answers */
+            answers: components["schemas"]["BpeTokenAnswer"][];
+        };
+        /** BpeTokenWord */
+        BpeTokenWord: {
+            /** Word */
+            word: string;
+            /** Tokens */
+            tokens: string[];
+            /** Frequency */
+            frequency: number;
+        };
         /**
          * CacheInfoResponse
          * @description Response model for cache information.
@@ -891,6 +1169,11 @@ export interface components {
             max_size: number;
             /** Keys */
             keys: string[] | string;
+        };
+        /** CheckResponse */
+        CheckResponse: {
+            /** Correct */
+            correct: boolean;
         };
         /**
          * ClassificationDataset
@@ -2347,6 +2630,60 @@ export interface components {
             /** Step */
             step?: number | null;
         };
+        /** PorterAnswer */
+        PorterAnswer: {
+            /** Word */
+            word: string;
+            /** Stem */
+            stem: string;
+        };
+        /** PorterChange */
+        PorterChange: {
+            /** Step */
+            step: string;
+            /** Word */
+            word: string;
+        };
+        /** PorterCheckRequest */
+        PorterCheckRequest: {
+            dataset: components["schemas"]["PredefinedPorterDataset"];
+            /** Answers */
+            answers: components["schemas"]["PorterAnswer"][];
+        };
+        /** PorterExample */
+        PorterExample: {
+            /** Word */
+            word: string;
+            /** Stem */
+            stem: string;
+            /** Changes */
+            changes: components["schemas"]["PorterChange"][];
+        };
+        /** PorterStateRequest */
+        PorterStateRequest: {
+            dataset: components["schemas"]["PredefinedPorterDataset"];
+        };
+        /** PorterStateResponse */
+        PorterStateResponse: {
+            /** Examples */
+            examples: components["schemas"]["PorterExample"][];
+            /** Quiz Words */
+            quiz_words: string[];
+        };
+        /** PredefinedBpeDataset */
+        PredefinedBpeDataset: {
+            /**
+             * Type
+             * @default predefined_bpe
+             * @constant
+             */
+            type: "predefined_bpe";
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "walkthrough" | "practice";
+        };
         /**
          * PredefinedClassificationDataset
          * @description Reference to a predefined (classification) dataset.
@@ -2372,6 +2709,34 @@ export interface components {
              * @default 2025
              */
             random_state: number;
+        };
+        /** PredefinedPorterDataset */
+        PredefinedPorterDataset: {
+            /**
+             * Type
+             * @default predefined_porter
+             * @constant
+             */
+            type: "predefined_porter";
+            /**
+             * Name
+             * @constant
+             */
+            name: "suffixes";
+        };
+        /** PredefinedRegexDataset */
+        PredefinedRegexDataset: {
+            /**
+             * Type
+             * @default predefined_regex
+             * @constant
+             */
+            type: "predefined_regex";
+            /**
+             * Name
+             * @constant
+             */
+            name: "punctuation";
         };
         /**
          * PredefinedRegressionDataset
@@ -2399,6 +2764,46 @@ export interface components {
              * @default 2025
              */
             random_state: number;
+        };
+        /** RegexChoiceRequest */
+        RegexChoiceRequest: {
+            dataset: components["schemas"]["PredefinedRegexDataset"];
+            /** Option Id */
+            option_id: string;
+        };
+        /** RegexMatch */
+        RegexMatch: {
+            /** Text */
+            text: string;
+            /** Start */
+            start: number;
+            /** End */
+            end: number;
+        };
+        /** RegexOption */
+        RegexOption: {
+            /** Id */
+            id: string;
+            /** Label */
+            label: string;
+            /** Pattern */
+            pattern: string;
+        };
+        /** RegexPreviewResponse */
+        RegexPreviewResponse: {
+            /** Matches */
+            matches: components["schemas"]["RegexMatch"][];
+        };
+        /** RegexStateRequest */
+        RegexStateRequest: {
+            dataset: components["schemas"]["PredefinedRegexDataset"];
+        };
+        /** RegexStateResponse */
+        RegexStateResponse: {
+            /** Text */
+            text: string;
+            /** Options */
+            options: components["schemas"]["RegexOption"][];
         };
         /**
          * RegressionDataset
@@ -3003,6 +3408,10 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+            /** Input */
+            input?: unknown;
+            /** Context */
+            ctx?: Record<string, never>;
         };
     };
     responses: never;
@@ -3856,6 +4265,336 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SVMPredictResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    state_api_bpe_state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BpeStateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BpeStateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_counts_api_bpe_check_counts_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BpeCountCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BpeCheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_merge_api_bpe_check_merge_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BpeMergeCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BpeCheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_restore_api_bpe_check_restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BpeRestoreCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BpeCheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    check_tokenizations_api_bpe_check_tokenizations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BpeTokenCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BpeCheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    regex_state_api_tokenization_regex_state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegexStateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegexStateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    regex_preview_api_tokenization_regex_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegexChoiceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegexPreviewResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    regex_check_api_tokenization_regex_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegexChoiceRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    porter_state_api_tokenization_porter_state_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PorterStateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PorterStateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    porter_check_api_tokenization_porter_check_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PorterCheckRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckResponse"];
                 };
             };
             /** @description Validation Error */
