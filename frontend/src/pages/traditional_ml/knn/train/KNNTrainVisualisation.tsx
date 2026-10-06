@@ -14,12 +14,10 @@ import * as d3 from "d3";
 import { useCallback, useEffect, useMemo } from "react";
 
 export default function KNNTrainVisualisation() {
-    const {
-        visualizationData: knnData,
-        isVisualizationLoading,
-        visualizationError,
-        lastVisualizationParams,
-    } = useKNN();
+    const knnData = useKNN(state => state.visualizationData);
+    const isVisualizationLoading = useKNN(state => state.isVisualizationLoading);
+    const visualizationError = useKNN(state => state.visualizationError);
+    const lastVisualizationParams = useKNN(state => state.lastVisualizationParams);
 
     // Auto-load visualization on mount if we have stored params
     useEffect(() => {

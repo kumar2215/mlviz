@@ -3,36 +3,35 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import type { ModelOption } from "@/types/parameters";
 import type { Parameters } from "@/types/page";
 import { filterParameters } from "@/utils/conditions";
+import type { ModelSelectorHook } from "@/types/modelStore";
+import { useShallow } from "zustand/react/shallow";
 import { useEffect, useMemo, useRef, useState } from "react";
 
-export default function useStep(useModel: () => any, parameters: Parameters) {
-    const model = useModel();
-    const { 
-        isLoading,
-        data,
-        train,
-        loadVisualization,
-        getParameters,
-        resetModelData
-    } = model;
+export default function useStep(useModel: ModelSelectorHook, parameters: Parameters) {
+    const isLoading = useModel(state => state.isLoading);
+    const train = useModel(state => state.train);
+    const loadVisualization = useModel(state => state.loadVisualization);
+    const getParameters = useModel(state => state.getParameters);
+    const resetModelData = useModel(state => state.resetModelData);
 
     // Standardize lastParams access
-    const { lastParams: storedParams, lastVisualizationParams } = model;
+    const storedParams = useModel(state => state.lastParams);
+    const lastVisualizationParams = useModel(state => state.lastVisualizationParams);
     const lastParams = useMemo(
         () => storedParams || lastVisualizationParams || {},
         [storedParams, lastVisualizationParams]
     );
 
     // Get feature names for parameter mapping
-    const featureNames = useMemo(() => {
-        if (typeof (model as any).getFeatureNames === "function") {
-            return (model as any).getFeatureNames();
-        }
-        return data?.metadata?.feature_names || null;
-    }, [model, data?.metadata?.feature_names]);
+    const featureNames = useModel(useShallow((state): string[] | null =>
+        typeof state.getFeatureNames === "function"
+            ? state.getFeatureNames()
+            : state.data?.metadata?.feature_names || null,
+    ));
 
     const [options, setOptions] = useState<ModelOption[]>([]);
-    const { updateParams } = useUserMode().hook();
+    const { hook: useModeStore } = useUserMode();
+    const updateParams = useModeStore(state => state.updateParams);
     const { recordStep } = useHistoryRecorder();
 
     const [stepParams, setStepParams] = useState<Parameters>(

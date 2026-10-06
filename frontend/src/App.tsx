@@ -41,9 +41,12 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
 export default function App() {
     const blockReason = getBlockReason();
 
-    const { loading, error, config, fetchConfig } = useConfig();
-    const { visualisations } = useVisualisation();
-    const { stories } = useStory();
+    const loading = useConfig(state => state.loading);
+    const error = useConfig(state => state.error);
+    const config = useConfig(state => state.config);
+    const fetchConfig = useConfig(state => state.fetchConfig);
+    const visualisations = useVisualisation(state => state.visualisations);
+    const stories = useStory(state => state.stories);
 
     const [item, setItem] = useState<ListItem[] | Story | Visualisation | null>(null);
     const [itemName, setItemName] = useState<string>("");

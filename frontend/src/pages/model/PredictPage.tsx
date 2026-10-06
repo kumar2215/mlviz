@@ -3,9 +3,10 @@ import usePredict from "@/hooks/usePredict";
 import { SuccessAlert } from "@/components/ui/CustomAlerts";
 import { useState } from "react";
 import type { Parameters } from "@/types/page";
+import type { ModelSelectorHook } from "@/types/modelStore";
 
 type PredictPageProps = {
-    useModel: () => any;
+    useModel: ModelSelectorHook;
     parameters: Parameters;
     PredictVisualizationComponent: React.FC<{ points?: Record<string, number> | null }>;
 }

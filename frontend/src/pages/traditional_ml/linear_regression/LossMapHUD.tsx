@@ -11,13 +11,11 @@ interface LossMapHUDProps {
 }
 
 const LossMapHUD: React.FC<LossMapHUDProps> = ({ mode }) => {
-    const {
-        visualizationData,
-        currentSlope,
-        currentIntercept,
-        computeMSE,
-        stepData,
-    } = useLinearRegression();
+    const visualizationData = useLinearRegression(state => state.visualizationData);
+    const currentSlope = useLinearRegression(state => state.currentSlope);
+    const currentIntercept = useLinearRegression(state => state.currentIntercept);
+    const computeMSE = useLinearRegression(state => state.computeMSE);
+    const stepData = useLinearRegression(state => state.stepData);
 
     // Compute bounds once based on data
     const bounds = useMemo(() => {

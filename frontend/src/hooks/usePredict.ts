@@ -1,30 +1,28 @@
 import useUserMode from "@/hooks/useUserMode";
 import useHistoryRecorder from "@/hooks/useHistoryRecorder";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Parameters } from "@/types/page";
+import type { ModelSelectorHook } from "@/types/modelStore";
+import { useShallow } from "zustand/react/shallow";
 
-export default function usePredict(useModel: () => any, setShowAlert: (show: boolean) => void, parameters: Parameters) {
-    const hook = useUserMode().hook;
-    const { updateParams } = hook();
+export default function usePredict(useModel: ModelSelectorHook, setShowAlert: (show: boolean) => void, parameters: Parameters) {
+    const { hook: useModeStore } = useUserMode();
+    const updateParams = useModeStore(state => state.updateParams);
     const { recordPredict } = useHistoryRecorder();
 
-    const {
-        currentModelData,
-        getFeatureNames,
-        getPredictiveFeatureNames,
-        predict,
-        isPredicting,
-    } = useModel();
+    const currentModelData = useModel(state => state.currentModelData);
+    const predict = useModel(state => state.predict);
+    const isPredicting = useModel(state => state.isPredicting);
 
     const [predictionInputPoints, setPredictionInputPoints] = useState<
         Record<string, number>
     >(parameters?.presetPoints || {});
 
-    const rawFeatures = (typeof getPredictiveFeatureNames === 'function'
-        ? getPredictiveFeatureNames()
-        : getFeatureNames()) || [];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    const currentFeatures = useMemo(() => rawFeatures, [JSON.stringify(rawFeatures)]);
+    const currentFeatures = useModel(useShallow((state): string[] =>
+        (typeof state.getPredictiveFeatureNames === "function"
+            ? state.getPredictiveFeatureNames()
+            : state.getFeatureNames()) || [],
+    ));
 
     useEffect(() => {
         if (currentFeatures.length > 0) {

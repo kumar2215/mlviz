@@ -17,13 +17,11 @@ interface LineControlHUDProps {
 
 const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
     const scaleFactor = useScaleFactor();
-    const {
-        currentSlope,
-        currentIntercept,
-        setCurrentLine,
-        visualizationData,
-        evaluateLine,
-    } = useLinearRegression();
+    const currentSlope = useLinearRegression(state => state.currentSlope);
+    const currentIntercept = useLinearRegression(state => state.currentIntercept);
+    const setCurrentLine = useLinearRegression(state => state.setCurrentLine);
+    const visualizationData = useLinearRegression(state => state.visualizationData);
+    const evaluateLine = useLinearRegression(state => state.evaluateLine);
 
     const interceptId = useId();
 
