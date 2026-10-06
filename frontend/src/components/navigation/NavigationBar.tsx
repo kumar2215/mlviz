@@ -1,35 +1,34 @@
 import NavigationButton from "@/components/navigation/NavigationButton";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { CurrentStoryContext } from "@/contexts/StoryContext";
-import type { Edge, Parameters } from "@/types/story";
-import { displayCondition, isConditionMet } from "@/utils/conditions";
+import type { Parameters } from "@/types/page";
+import type { Transition } from "@/types/story";
+import type { HistoryState } from "@/types/history";
 import { ArrowLeft, Route } from "lucide-react";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { isConditionMet, displayCondition } from "@/utils/conditions";
 
 interface NavigationBarProps {
-    edges: Edge[];
-    handler: (h: number) => void;
+    transitions: Transition[];
+    handleNext: (pageId: number) => void;
     onBack: () => void;
     canGoBack: boolean;
+    currentHistory: HistoryState;
 }
 
 const NavigationBar: React.FC<NavigationBarProps> = ({
-    edges,
-    handler,
+    transitions,
+    handleNext,
     onBack,
     canGoBack,
+    currentHistory
 }) => {
-    const context = useContext(CurrentStoryContext);
-    if (!context) throw new Error("Must be within CurrentStoryProvider");
-    const { storyState } = context;
-
     // Timer state for "Wait" conditions
     const [now, setNow] = useState(Date.now());
 
     useEffect(() => {
-        const hasWaitConditions = edges.some(
-            (e) => e.condition.condition_type === "Wait",
+        const hasWaitConditions = transitions.some(
+            (t) => t.condition.condition_type === "Wait",
         );
         if (!hasWaitConditions) return;
 
@@ -38,18 +37,18 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
         }, 250); // Re-evaluate roughly 4 times a second
 
         return () => clearInterval(intervalId);
-    }, [edges]);
+    }, [transitions]);
 
     const conditionState = {
-        ...storyState.params,
-        __history: storyState.history,
+        ...currentHistory.params,
+        __history: currentHistory,
         __now: now,
     } as unknown as Record<string, Parameters>;
 
-    const completeEdges = edges.filter((a) =>
+    const completeTransitions = transitions.filter((a) =>
         isConditionMet(a.condition, conditionState),
     );
-    const incompleteEdges = edges.filter(
+    const incompleteTransitions = transitions.filter(
         (a) => !isConditionMet(a.condition, conditionState),
     );
 
@@ -68,22 +67,24 @@ const NavigationBar: React.FC<NavigationBarProps> = ({
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Back
                 </Button>
-                {completeEdges.map((edge) => (
+                {completeTransitions.map((transition) => (
                     <NavigationButton
-                        key={displayCondition(edge.condition)}
-                        edge={edge}
-                        handler={handler}
+                        key={displayCondition(transition.condition)}
+                        transition={transition}
+                        handleNext={handleNext}
                         conditionState={conditionState}
+                        currentHistory={currentHistory}
                     />
                 ))}
 
-                {completeEdges && incompleteEdges && <Separator />}
-                {incompleteEdges.map((edge) => (
+                {completeTransitions && incompleteTransitions && <Separator />}
+                {incompleteTransitions.map((transition) => (
                     <NavigationButton
-                        key={displayCondition(edge.condition)}
-                        edge={edge}
-                        handler={handler}
+                        key={displayCondition(transition.condition)}
+                        transition={transition}
+                        handleNext={handleNext}
                         conditionState={conditionState}
+                        currentHistory={currentHistory}
                     />
                 ))}
             </div>

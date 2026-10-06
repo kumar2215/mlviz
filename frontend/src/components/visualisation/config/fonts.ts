@@ -1,4 +1,4 @@
-export interface FontConfig {
+interface FontConfig {
     family: string;
     weights: {
         normal: string;
@@ -14,7 +14,7 @@ export interface FontConfig {
     };
 }
 
-export const FONT_PRESETS: Record<string, FontConfig> = {
+const FONT_PRESETS: Record<string, FontConfig> = {
     inter: {
         family: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
         weights: { normal: "400", medium: "500", bold: "600" },
@@ -40,9 +40,7 @@ export const FONT_PRESETS: Record<string, FontConfig> = {
     },
 } as const;
 
-export const ACTIVE_FONTS: FontConfig = FONT_PRESETS.inter;
-
-type FontPresetName = keyof typeof FONT_PRESETS;
+const ACTIVE_FONTS: FontConfig = FONT_PRESETS.inter;
 
 export interface ApplyFontHelpers {
     family: (selection: any) => any;
@@ -126,35 +124,6 @@ const createFontHelpers = (fontConfig: FontConfig): ApplyFontHelpers => ({
 });
 
 export const applyFont: ApplyFontHelpers = createFontHelpers(ACTIVE_FONTS);
-
-export const applyFontPreset = (preset: FontPresetName): ApplyFontHelpers =>
-    createFontHelpers(FONT_PRESETS[preset]);
-
-export const loadWebFonts = async (): Promise<void> => {
-    const fontLinks = [
-        "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
-        "https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&display=swap",
-        "https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600&display=swap",
-    ];
-
-    fontLinks.forEach((href) => {
-        if (!document.querySelector(`link[href="${href}"]`)) {
-            const link = document.createElement("link");
-            link.rel = "stylesheet";
-            link.href = href;
-            document.head.appendChild(link);
-        }
-    });
-
-    if ("fonts" in document) {
-        try {
-            await document.fonts.ready;
-            console.log("Visualization fonts loaded successfully");
-        } catch (error) {
-            console.warn("Font loading failed, using fallbacks:", error);
-        }
-    }
-};
 
 export const fontUrlMapping = {
     Inter: "https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.16/files/inter-latin-400-normal.woff2",

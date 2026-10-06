@@ -4,11 +4,8 @@
  */
 
 import type {
-    ClassificationConfig,
-    ClusteringConfig,
     Config,
     PlotPoint,
-    RegressionConfig,
 } from "@/components/plots/types";
 import {
     createColorScale,
@@ -50,8 +47,6 @@ export const DEFAULT_BOUNDARY_OPACITY = 0.3;
 
 // 1D specific constants
 export const STRIP_HEIGHT_RATIO = 0.3;
-export const JITTER_AMOUNT = 0.8;
-
 // ============================================================================
 // Color Scale Utilities
 // ============================================================================
@@ -115,31 +110,5 @@ export function createBoundaryColorScale(
             config.colorScheme || "viridis"
         );
         return (prediction) => continuousScale(prediction);
-    }
-}
-
-export function makeGetColor(
-    config: ClassificationConfig
-): (p: string) => string;
-export function makeGetColor(config: ClusteringConfig): (p: string) => string;
-export function makeGetColor(config: RegressionConfig): (p: number) => string;
-export function makeGetColor(config: Config) {
-    if (config.type === "classification" || config.type === "clustering") {
-        const names = config.type === "classification" ? config.classNames : config.clusterNames;
-        const scale = createColorScale(
-            names,
-            config.colorScheme ?? "default"
-        );
-        return (p: string) => scale(p);
-    } else {
-        const range: [number, number] = config.valueRange ?? [
-            Math.min(...config.values),
-            Math.max(...config.values),
-        ];
-        const scale = createContinuousColorScale(
-            range,
-            config.colorScheme ?? "viridis"
-        );
-        return (p: number) => scale(p);
     }
 }

@@ -35,10 +35,37 @@ export const useZoomControls = ({
         null,
         undefined
     > | null>(null);
+    const rubberBandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Store dynamic bounds that can be updated
     const dynamicBoundsRef = useRef(contentBounds);
     const dynamicPanMarginRef = useRef(panMargin);
+
+    const getCurrentTransform = useCallback((): d3.ZoomTransform | null => {
+        if (svgSelectionRef.current) {
+            return d3.zoomTransform(svgSelectionRef.current.node()!);
+        }
+        return null;
+    }, []);
+
+    const setZoom = useCallback(
+        (transform: d3.ZoomTransform, animated = true) => {
+            if (zoomBehaviorRef.current && svgSelectionRef.current) {
+                if (animated) {
+                    svgSelectionRef.current
+                        .transition()
+                        .duration(500)
+                        .call(zoomBehaviorRef.current.transform, transform);
+                } else {
+                    svgSelectionRef.current.call(
+                        zoomBehaviorRef.current.transform,
+                        transform
+                    );
+                }
+            }
+        },
+        []
+    );
 
     const createZoomBehavior = useCallback(
         (
@@ -49,8 +76,6 @@ export const useZoomControls = ({
             const zoom = d3
                 .zoom<SVGSVGElement, unknown>()
                 .scaleExtent(scaleExtent);
-
-            let rubberBandTimer: NodeJS.Timeout | null = null;
 
             if (!dynamicBoundsRef.current) {
                 // No content bounds provided — apply a 10% inset translate extent
@@ -180,11 +205,11 @@ export const useZoomControls = ({
 
                 // Add snap-back behavior on zoom end
                 zoom.on("end", () => {
-                    if (rubberBandTimer) {
-                        clearTimeout(rubberBandTimer);
+                    if (rubberBandTimerRef.current) {
+                        clearTimeout(rubberBandTimerRef.current);
                     }
 
-                    rubberBandTimer = setTimeout(() => {
+                    rubberBandTimerRef.current = setTimeout(() => {
                         const currentTransform = getCurrentTransform();
                         if (currentTransform && svgSelectionRef.current) {
                             const currentBounds = dynamicBoundsRef.current;
@@ -382,7 +407,7 @@ export const useZoomControls = ({
 
             return zoom;
         },
-        [scaleExtent, enablePan, onZoomChange, contentBounds, clickableSelector]
+        [scaleExtent, enablePan, onZoomChange, clickableSelector, getCurrentTransform, setZoom]
     );
 
     const resetTransformRef = useRef<d3.ZoomTransform>(d3.zoomIdentity);
@@ -399,32 +424,6 @@ export const useZoomControls = ({
                 .call(zoomBehaviorRef.current.transform, resetTransformRef.current);
         }
     }, []);
-
-    const getCurrentTransform = useCallback((): d3.ZoomTransform | null => {
-        if (svgSelectionRef.current) {
-            return d3.zoomTransform(svgSelectionRef.current.node()!);
-        }
-        return null;
-    }, []);
-
-    const setZoom = useCallback(
-        (transform: d3.ZoomTransform, animated = true) => {
-            if (zoomBehaviorRef.current && svgSelectionRef.current) {
-                if (animated) {
-                    svgSelectionRef.current
-                        .transition()
-                        .duration(500)
-                        .call(zoomBehaviorRef.current.transform, transform);
-                } else {
-                    svgSelectionRef.current.call(
-                        zoomBehaviorRef.current.transform,
-                        transform
-                    );
-                }
-            }
-        },
-        []
-    );
 
     const zoomTo = useCallback(
         (scale: number, center?: [number, number], animated = true) => {
@@ -459,7 +458,6 @@ export const useZoomControls = ({
         zoomBehavior: zoomBehaviorRef.current,
         svgSelection: svgSelectionRef.current,
         resetZoom,
-        getCurrentTransform,
         createZoomBehavior,
         setZoom,
         zoomTo,
@@ -468,6 +466,23 @@ export const useZoomControls = ({
         // Make these accessible for BaseVisualization
         contentBounds: dynamicBoundsRef.current,
         panMargin: dynamicPanMarginRef.current,
+        // Destroy method for HMR cleanup - removes all D3 event listeners
+        destroy: () => {
+            if (rubberBandTimerRef.current) {
+                clearTimeout(rubberBandTimerRef.current);
+                rubberBandTimerRef.current = null;
+            }
+            if (zoomBehaviorRef.current && svgSelectionRef.current) {
+                // Remove all zoom event listeners (this is the key for HMR cleanup)
+                zoomBehaviorRef.current.on("zoom", null);
+                zoomBehaviorRef.current.on("end", null);
+                zoomBehaviorRef.current.on("start", null);
+                svgSelectionRef.current.interrupt().on(".zoom", null);
+                // Clear the references to allow garbage collection
+                svgSelectionRef.current = null;
+                zoomBehaviorRef.current = null;
+            }
+        },
     } as ZoomControlState & {
         createZoomBehavior: typeof createZoomBehavior;
         setZoom: typeof setZoom;

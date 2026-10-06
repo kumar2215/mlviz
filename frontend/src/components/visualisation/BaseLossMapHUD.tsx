@@ -17,7 +17,7 @@ interface LossGrid {
     maxLoss: number;
 }
 
-export interface BaseLossMapHUDProps {
+interface BaseLossMapHUDProps {
     xRange: [number, number];
     yRange: [number, number];
     xLabel: string;

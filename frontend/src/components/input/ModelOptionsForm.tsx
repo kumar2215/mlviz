@@ -1,7 +1,7 @@
 import ModelOptionWrapper from "@/components/input/ModelOptionWrapper";
 import type { ModelOption } from "@/types/parameters";
 interface ModelOptionsFormProps {
-    optionsConfig: ModelOption[];
+    options: ModelOption[];
     params: Record<string, any>;
     setParams: (newParams: Record<string, any>) => void;
     onTrainModel: () => void;
@@ -11,7 +11,7 @@ interface ModelOptionsFormProps {
 }
 
 const ModelOptionsForm = ({
-    optionsConfig,
+    options,
     params,
     setParams,
     onTrainModel,
@@ -21,7 +21,7 @@ const ModelOptionsForm = ({
 }: ModelOptionsFormProps) => {
     return (
         <div className="flex flex-col gap-4">
-            {optionsConfig.map((option: ModelOption) => (
+            {options.map((option: ModelOption) => (
                 <ModelOptionWrapper
                     option={option}
                     params={params}

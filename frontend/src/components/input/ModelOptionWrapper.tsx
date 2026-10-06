@@ -41,7 +41,7 @@ const ModelOptionWrapper = <T extends Record<string, any>>({
 
     const renderInput = () => {
         switch (option.type) {
-            case "select":
+            case "select": {
                 // Handle dynamic feature options
                 let selectOption = option as SelectOption;
                 let displayFeatureNames: string[] | undefined = undefined;
@@ -84,6 +84,7 @@ const ModelOptionWrapper = <T extends Record<string, any>>({
                         featureNames={displayFeatureNames}
                     />
                 );
+            }
             case "int":
                 return (
                     <IntegerInput

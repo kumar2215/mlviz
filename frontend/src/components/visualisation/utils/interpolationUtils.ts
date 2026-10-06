@@ -47,25 +47,3 @@ export const isElementVisible = (
     const { currentStep = 0 } = context.state;
     return elementDepth < Math.ceil(currentStep);
 };
-
-/**
- * Generic interface for elements that support interpolation
- * Can be extended by specific visualization types
- */
-export interface InterpolatedElement {
-    depth: number;
-    interpolationFactor?: number;
-}
-
-/**
- * Apply interpolation factor to a collection of elements
- */
-export const applyInterpolationFactors = <T extends InterpolatedElement>(
-    elements: T[],
-    context: VisualisationRenderContext
-): T[] => {
-    return elements.map(element => ({
-        ...element,
-        interpolationFactor: calculateInterpolationFactor(element.depth, context)
-    }));
-};

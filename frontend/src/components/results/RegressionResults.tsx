@@ -1,10 +1,10 @@
-import { useLinearRegression } from "@/contexts/models/LinearRegressionContext";
+import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression";
 import type { RegressionResultData } from "@/types/model";
 import { ChartColumnIncreasing } from "lucide-react";
 import MetricSection from "./MetricSection";
 
 const Results = ({ metrics, metadata }: RegressionResultData) => {
-    const { isEvaluating } = useLinearRegression();
+    const isEvaluating = useLinearRegression(state => state.isEvaluating);
 
     if (!metrics || !metadata || !metrics.train) {
         return <></>;

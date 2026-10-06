@@ -11,21 +11,6 @@
  * - scatter2DRenderer.ts: 2D scatter plot rendering
  */
 
-// Re-export types and utilities
-export type {
-    ScatterRenderOptions,
-} from "@/components/plots/utils/scatterRenderHelpers";
-
-export {
-    createBoundaryColorScale,
-    createScatterColorScale,
-    DEFAULT_MARGIN,
-    DEFAULT_POINT_OPACITY,
-    DEFAULT_POINT_RADIUS,
-    JITTER_AMOUNT,
-    STRIP_HEIGHT_RATIO,
-} from "@/components/plots/utils/scatterRenderHelpers";
-
 // Re-export dimension-specific renderers
 export { renderScatter1D } from "@/components/plots/dimensions/scatter1DrendererUtils";
 export { renderScatter2D } from "@/components/plots/dimensions/scatter2DrendererUtils";

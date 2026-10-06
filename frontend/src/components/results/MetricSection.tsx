@@ -1,12 +1,12 @@
 import React from "react";
 
-export const formatMetric = (x: number) =>
+const formatMetric = (x: number) =>
     x.toLocaleString(undefined, {
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
     });
 
-export interface MetricSectionProps {
+interface MetricSectionProps {
     title: string;
     metrics: Record<string, number>;
     children?: React.ReactNode;

@@ -248,7 +248,7 @@ export function renderScatter2D(
 // Helper Functions
 // ============================================================================
 
-export function renderDecisionBoundary2D(
+function renderDecisionBoundary2D(
     g: d3.Selection<SVGGElement, unknown, null, undefined>,
     boundary: DecisionBoundary,
     xScale: d3.ScaleLinear<number, number>,

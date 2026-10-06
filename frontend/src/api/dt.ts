@@ -53,29 +53,6 @@ export const trainModel = async (
 };
 
 /**
- * Gets the feature names for prediction based on training parameters.
- * @param request Training request parameters to determine the dataset
- * @returns A promise resolving to an array of feature names
- */
-export const getPredictParameters = async (
-    request: Partial<DecisionTreeRequest>
-): Promise<string[]> => {
-    const response = await fetch(`${API_BASE_URL}/predict_params`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(request),
-    });
-
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    return response.json();
-};
-
-/**
  * Calculates statistics for a potential node split in manual tree building.
  * @param request Manual node statistics request
  * @returns A promise resolving to node statistics and masks

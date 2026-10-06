@@ -2,7 +2,7 @@ import { applyFont } from "@/components/visualisation/config/fonts";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import * as d3 from "d3";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 interface TooltipData {
     actual: string;
@@ -21,7 +21,10 @@ interface ConfusionMatrixProps {
     aspectRatio?: number;
 }
 
-const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
+const ConfusionMatrixContent: React.FC<ConfusionMatrixProps & {
+    classes: string[];
+    matrix: number[][];
+}> = ({
     classes,
     matrix,
     minSize = 180,
@@ -31,10 +34,6 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
     const scaleFactor = useScaleFactor();
     const scaledMinSize = minSize * scaleFactor;
     const scaledMinCellSize = minCellSize * scaleFactor;
-
-    if (!classes || !matrix) {
-        return <></>;
-    }
 
     const svgRef = useRef<SVGSVGElement>(null);
     const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -94,7 +93,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
     const { width, height } = getResponsiveDimensions();
 
     // Center the scroll position
-    const centerScroll = () => {
+    const centerScroll = useCallback(() => {
         if (!scrollContainerRef.current) return;
 
         const container = scrollContainerRef.current;
@@ -112,7 +111,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
         if (height > containerHeight) {
             container.scrollTop = Math.max(0, centerY);
         }
-    };
+    }, [width, height]);
 
     useEffect(() => {
         if (!svgRef.current || !classes || !matrix || dimensions.width === 0)
@@ -300,25 +299,27 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
             .text("Actual");
 
         // Center scroll after rendering - use setTimeout to ensure DOM is updated
-        setTimeout(() => {
+        const timer = setTimeout(() => {
             centerScroll();
         }, 0);
-    }, [classes, matrix, width, height, dimensions, minCellSize]);
+        return () => clearTimeout(timer);
+    }, [classes, matrix, width, height, dimensions, scaleFactor, scaledMinCellSize, centerScroll]);
 
     // Also center scroll when container dimensions change
     useEffect(() => {
         if (dimensions.width > 0 && dimensions.height > 0) {
-            setTimeout(() => {
+            const timer = setTimeout(() => {
                 centerScroll();
             }, 100); // Small delay to ensure container is ready
+            return () => clearTimeout(timer);
         }
-    }, [dimensions.width, dimensions.height, width, height]);
+    }, [dimensions.width, dimensions.height, centerScroll]);
 
     // Check if scrolling is needed
     const needsScrolling = width > dimensions.width && dimensions.width > 0;
 
     return (
-        <div className="w-full h-full flex flex-col align-start overflow-hidden min-h-0">
+        <div className="w-full h-full flex flex-col overflow-hidden min-h-0">
             <div
                 ref={containerRef}
                 className="relative min-h-0"
@@ -370,4 +371,7 @@ const ConfusionMatrix: React.FC<ConfusionMatrixProps> = ({
     );
 };
 
-export default ConfusionMatrix;
+export default function ConfusionMatrix(props: ConfusionMatrixProps) {
+    if (!props.classes || !props.matrix) return null;
+    return <ConfusionMatrixContent {...props} classes={props.classes} matrix={props.matrix} />;
+}

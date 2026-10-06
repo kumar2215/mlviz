@@ -13,6 +13,13 @@ export default defineConfig(({ mode }) => ({
         },
     },
     server: {
+        // The app is developed from a Windows-mounted path in WSL. Native file
+        // events are unreliable there, so polling is required for Vite to see
+        // source changes and send HMR updates.
+        watch: {
+            usePolling: true,
+            interval: 250,
+        },
         // Only use proxy in development mode
         proxy:
             mode === "development"

@@ -30,28 +30,22 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
     const visualizationRef = useRef<HTMLDivElement>(null);
     const scaleFactor = useScaleFactor();
 
-    const playControls = capabilities.playable
-        ? usePlayControls({
-              maxSteps: capabilities.playable.maxSteps,
-              stepDuration: capabilities.playable.stepDuration,
-              autoPlay: capabilities.playable.autoPlay,
-              interpolationSteps: capabilities.playable.interpolationSteps,
-              onStepChange,
-          })
-        : undefined;
-
-    const zoomControls = capabilities.zoomable
-        ? useZoomControls({
-              scaleExtent: capabilities.zoomable.scaleExtent,
-              enablePan: capabilities.zoomable.enablePan,
-              contentBounds: capabilities.zoomable.contentBounds,
-              panMargin: capabilities.zoomable.panMargin,
-              clickableSelector: capabilities.zoomable.clickableSelector,
-              onZoomChange,
-          })
-        : undefined;
+    const playback = usePlayControls({
+        maxSteps: capabilities.playable?.maxSteps ?? 0,
+        stepDuration: capabilities.playable?.stepDuration,
+        autoPlay: capabilities.playable?.autoPlay ?? false,
+        interpolationSteps: capabilities.playable?.interpolationSteps,
+        onStepChange: capabilities.playable ? onStepChange : undefined,
+    });
+    const zoom = useZoomControls({
+        ...capabilities.zoomable,
+        onZoomChange: capabilities.zoomable ? onZoomChange : undefined,
+    });
+    const playControls = capabilities.playable ? playback : undefined;
+    const zoomControls = capabilities.zoomable ? zoom : undefined;
 
     const lastRendererRef = useRef<any>(null);
+    const contentGroupRef = useRef<d3.Selection<SVGGElement, unknown, null, undefined> | null>(null);
     const normalizationRef = useRef<{ x: number; y: number } | null>(null);
 
     React.useLayoutEffect(() => {
@@ -66,11 +60,14 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
                 .attr("class", "content-container")
                 .attr("transform", `translate(${MARGIN.left}, ${MARGIN.top})`);
         }
+        contentGroupRef.current = contentGroup;
 
-        let currentZoomTransform =
-            capabilities.zoomable && zoomControls
-                ? zoomControls.getCurrentTransform?.() || d3.zoomIdentity
-                : d3.zoomIdentity;
+        // Cleanup clears the zoom hook's SVG reference between renders, but D3
+        // keeps the current transform on the SVG itself. Read it there so a
+        // stable renderer does not lose its initial centering on the next render.
+        const currentZoomTransform = capabilities.zoomable
+            ? d3.zoomTransform(svgRef.current)
+            : d3.zoomIdentity;
 
         // If the renderer or data has changed fundamentally, we might want a clear,
         // but for ongoing updates (like tree expansion), we let the renderer's .join() handle it.
@@ -208,7 +205,25 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         theme,
         playControls?.currentStep,
         playControls?.isPlaying,
+        playControls?.maxSteps,
+        scaleFactor,
+        zoomControls,
     ]);
+
+    // Cleanup effect for HMR and unmount
+    React.useLayoutEffect(() => {
+        return () => {
+            const group = contentGroupRef.current;
+            if (group) {
+                group.selectAll("*").remove();
+            }
+            
+            // Clean up D3 zoom behavior for HMR
+            if (zoomControls?.destroy) {
+                zoomControls.destroy();
+            }
+        };
+    }, [zoomControls]);
 
     return (
         <div

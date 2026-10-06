@@ -434,7 +434,7 @@ export const useExport = ({
             setExportStatus("error");
             setTimeout(resetExportStatus, 5000);
         }
-    }, [svgRef, filename, resetExportStatus]);
+    }, [svgRef, filename, resetExportStatus, convertTextToPaths]);
 
     const exportAsImage = useCallback(
         async (format: "png"): Promise<void> => {

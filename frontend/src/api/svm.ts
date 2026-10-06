@@ -11,18 +11,7 @@ export type SVMPredictRequest = components["schemas"]["SVMPredictRequest"];
 export type SVMPredictResponse = components["schemas"]["SVMPredictResponse"];
 export type SVMStepRequest = components["schemas"]["SVMStepRequest"];
 export type SVMStepResponse = components["schemas"]["SVMStepResponse"];
-export type SVMVisualisationRequest = components["schemas"]["SVMVisualisationRequest"];
-export type SVMVisualisationResponse = components["schemas"]["SVMVisualisationResponse"];
-
 // For internal frontend use if needed
-export interface SVMPoint {
-    id: number;
-    x: [number, number];
-    y: number; // class label
-    margin_distance?: number;
-    is_support_vector?: boolean;
-}
-
 const API_BASE_URL = `${BASE_URL}/api/svm`;
 
 // --- API Calls ---
