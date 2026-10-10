@@ -1,5 +1,48 @@
 # State migration benchmark
 
+## Controlled selector suite
+
+Run every shared visualization speed test on the audited broad-subscription and
+selective-subscription commits:
+
+    npm run suite --prefix benchmarks/state-migration -- --comparison selectors --baseline bddf296 --candidate ac889ef
+
+This covers all nine pages registered identically in both revisions: decision-tree
+manual, KNN train/predict, K-means step, linear train/step, and SVM train/predict/step.
+The five historical modes removed before these commits cannot be compared here.
+Both versions already use Zustand. The controlled change includes field selectors,
+shallow comparison of derived arrays, and reactive mode subscriptions; store
+implementations, D3 renderers, dependencies, public configuration and backend match.
+The runner verifies the exact audited commits, dependency locks, changed-file scope,
+and matching registries, and archives the revision diff with the results.
+
+Every existing metric is collected: production task/script/layout/style duration,
+separate profiling-build React duration/commits/component render counts, and the
+supplementary rendering-opportunity P50/P95 for synchronous controls. This estimate
+does not measure actual paint latency or establish that a change is noticeable.
+The same fixtures, real UI actions, alternating paired trials, warm-ups, validation,
+and confidence intervals described below apply. Outputs use `results/<timestamp>-selectors/`.
+Success-alert timers run normally; their phase is not frozen, so they can add
+commits during repeated training/prediction and alter screenshot alert visibility.
+Paired workload values and final outcomes match; commit counts describe observed
+work, rather than a fixed number of store notifications.
+
+Validate all nine scenarios first:
+
+    npm run suite --prefix benchmarks/state-migration -- --comparison selectors --baseline bddf296 --candidate ac889ef --smoke --runs 1 --warmups 0 --steps 4
+
+After a complete default run, generate an overview and audit its evidence:
+
+    npm run overview --prefix benchmarks/state-migration -- results/<timestamp>-selectors/raw.json
+    npm run verify --prefix benchmarks/state-migration -- results/<timestamp>-selectors/raw.json
+
+Pass paths relative to the benchmark directory when invoking these npm scripts.
+The verifier checks full default-run coverage, matched starting/final states, input
+counts, finite metrics, summaries and confidence intervals, archived source hashes,
+screenshots, and the audited diff.
+Its optional `--staged` also checks that all result files are included in Git and
+that every result file's bytes survive staging.
+
 ## Full handover suite
 
 Run a fresh comparison of the Context version tagged `handover` with the

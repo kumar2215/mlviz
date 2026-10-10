@@ -1,2 +1,4 @@
 # Preserve raw evidence and hashed harness archives byte for byte on Windows.
 results/** -text
+# Git patches include whitespace in context markers and the original source.
+results/**/revision-diff.patch -whitespace

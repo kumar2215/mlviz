@@ -13,6 +13,7 @@ import { quantile, summarize, pairedDifferenceCI } from './stats.mjs';
 import { writeCheckpoint } from './checkpoint.mjs';
 
 const { values } = parseArgs({ options: {
+  comparison: { type: 'string', default: 'handover' },
   baseline: { type: 'string', default: 'handover' }, candidate: { type: 'string', default: 'test-benchmark' },
   runs: { type: 'string', default: '20' }, warmups: { type: 'string', default: '3' }, steps: { type: 'string', default: '40' }, points: { type: 'string', default: '250' }, cpu: { type: 'string', default: '1' },
   scenarios: { type: 'string' }, smoke: { type: 'boolean', default: false },
@@ -24,14 +25,17 @@ if (resumeFile) assert([path.join(here, 'results') + path.sep, path.join(here, '
 const previous = resumeFile ? JSON.parse(readFileSync(resumeFile, 'utf8')) : null;
 if (previous) assert.equal(previous.status, 'failed', 'Only a failed checkpoint can be resumed');
 const options = previous ? { ...previous.options, resume: values.resume, restart: values.restart, 'resume-reason': values['resume-reason'] } : { ...values };
+assert(['handover', 'selectors'].includes(options.comparison || 'handover'), 'Unknown comparison');
+const selectorComparison = options.comparison === 'selectors';
+const available = selectorComparison ? scenarios.filter(s => s.page) : scenarios;
 for (const key of ['runs', 'warmups', 'steps', 'points', 'cpu']) {
   options[key] = Number(options[key]);
   assert(Number.isInteger(options[key]) && options[key] >= (key === 'warmups' ? 0 : key === 'points' ? 2 : 1), 'Invalid --' + key);
 }
 assert(options.steps <= 80, 'Use at most 80 steps to stay inside threshold and bias ranges');
-const selected = options.scenarios ? scenarios.filter(s => options.scenarios.split(',').includes(s.id)) : scenarios;
+const selected = options.scenarios ? available.filter(s => options.scenarios.split(',').includes(s.id)) : available;
 assert(selected.length && (!options.scenarios || selected.length === new Set(options.scenarios.split(',')).size), 'Unknown scenario');
-const output = resumeFile ? path.dirname(resumeFile) : path.join(here, options.smoke ? '.cache/smoke' : 'results', new Date().toISOString().replaceAll(/[:.]/g, '-') + '-handover');
+const output = resumeFile ? path.dirname(resumeFile) : path.join(here, options.smoke ? '.cache/smoke' : 'results', new Date().toISOString().replaceAll(/[:.]/g, '-') + (selectorComparison ? '-selectors' : '-handover'));
 mkdirSync(output, { recursive: true });
 const data = fixtures(options.points);
 const freshReport = {
@@ -303,10 +307,10 @@ async function trial(browser, variant, scenario, mode, url, index, warmup) {
 }
 
 function finish() {
-  const text = ['# Handover visualization comparison', '', `Baseline: ${report.variants[0].ref} @ ${report.variants[0].sha}`, `Candidate: ${report.variants[1].ref} @ ${report.variants[1].sha}`, '', `${options.runs} measured pairs, ${options.warmups} warm-up pairs per scenario/build; ${options.steps} real UI actions per trial; ${options.points} fixture points; CPU ${options.cpu}x. Chrome ${report.environment.browser}.`, '', 'Positive reduction means less work. Values are median [Q25, Q75]. Confidence intervals bootstrap whole paired trials (candidate minus baseline). An interval spanning zero does not establish a direction. Fewer than 20 pairs is only a smoke test.', '', 'All 14 registered handover visualizations are covered: 12 model/mode combinations in the default config (15 pages), plus 2 registered prediction modes not linked there. Duplicate pages are measured once. Five modes have no current counterpart and receive baseline-only measurements; there is no invented percentage for them. Deprecated decision-tree components and the unregistered KNN learning component cannot be reached through the historical app registry and are excluded. Viz-only dispatch reuses training components. Exact historical config and registry sources are saved beside this report.', '', 'Production task/script/layout/style durations come from CDP and include automation/measurement overhead. React times and component function invocation counts come from separate profiling builds; commits use one root Profiler. D3 work is outside React actualDuration. HUD counts aggregate the mounted model HUDs.', '', 'Rendering-opportunity delay is input capture → rAF → setTimeout, not paint latency, INP, FPS, or perceived response time. It is reported only for synchronous controls; asynchronous training/prediction actions have no latency estimate. Fixed API fixtures measure frontend update costs, not backend training or real network latency. The fixtures hold workload size constant and are not estimates of typical user behavior.', '', 'This compares whole revisions, including layout, renderer, routing, dependency and other refactor differences. It cannot isolate Zustand as the cause. Intervals are per metric, without multiple-comparison correction; isolated significant changes are exploratory.', ''];
+  const text = [selectorComparison ? '# Zustand selector comparison' : '# Handover visualization comparison', '', `Baseline: ${report.variants[0].ref} @ ${report.variants[0].sha}`, `Candidate: ${report.variants[1].ref} @ ${report.variants[1].sha}`, '', `${options.runs} measured pairs, ${options.warmups} warm-up pairs per scenario/build; ${options.steps} real UI actions per trial; ${options.points} fixture points; CPU ${options.cpu}x. Chrome ${report.environment.browser}.`, '', 'Positive reduction means less work. Values are median [Q25, Q75]. Confidence intervals bootstrap whole paired trials (candidate minus baseline). An interval spanning zero does not establish a direction. Fewer than 20 pairs is only a smoke test.', '', (selectorComparison ? `All ${selected.length} selected shared visualization scenarios are paired. The complete selector suite covers all nine pages registered identically in both revisions: decision-tree manual, KNN train/predict, K-means step, linear train/step, and SVM train/predict/step. The five historical modes removed before either revision cannot be compared here. Exact registries for both revisions and the source diff are saved beside this report.` : 'All 14 registered handover visualizations are covered: 12 model/mode combinations in the default config (15 pages), plus 2 registered prediction modes not linked there. Duplicate pages are measured once. Five modes have no current counterpart and receive baseline-only measurements; there is no invented percentage for them. Deprecated decision-tree components and the unregistered KNN learning component cannot be reached through the historical app registry and are excluded. Viz-only dispatch reuses training components. Exact historical config and registry sources are saved beside this report.'), '', 'Production task/script/layout/style durations come from CDP and include automation/measurement overhead. React times and component function invocation counts come from separate profiling builds; commits use one root Profiler. D3 work is outside React actualDuration. HUD counts aggregate the mounted model HUDs.', '', 'Rendering-opportunity delay is input capture → rAF → setTimeout, not paint latency, INP, FPS, or perceived response time. It is reported only for synchronous controls; asynchronous training/prediction actions have no latency estimate. Fixed API fixtures measure frontend update costs, not backend training or real network latency. The fixtures hold workload size constant and are not estimates of typical user behavior.', '', (selectorComparison ? 'This controlled comparison isolates the audited subscription optimization package: field selectors, shallow derived-array selectors, and reactive mode subscriptions. Store implementations, D3 renderers, dependencies, public configuration and backend are identical. Both versions already use Zustand, so this does not measure Context versus Zustand. Work totals and rendering-opportunity estimates do not establish perceived speed. Intervals are per metric, without multiple-comparison correction; isolated significant changes are exploratory.' : 'This compares whole revisions, including layout, renderer, routing, dependency and other refactor differences. It cannot isolate Zustand as the cause. Intervals are per metric, without multiple-comparison correction; isolated significant changes are exploratory.'), ''];
   const comparisons = [];
   for (const s of selected) {
-    text.push(`## ${s.id}`, '', `Workload: ${s.action}. ${s.page ? 'Paired comparison.' : 'Removed from candidate registry; baseline only.'}`, '', '| Build | Metric | handover | test-benchmark | Reduction | 95% CI Δ |', '|---|---|---:|---:|---:|---:|');
+    text.push(`## ${s.id}`, '', `Workload: ${s.action}. ${s.page ? 'Paired comparison.' : 'Removed from candidate registry; baseline only.'}`, '', '| Build | Metric | baseline | candidate | Reduction | 95% CI Δ |', '|---|---|---:|---:|---:|---:|');
     for (const mode of ['production', 'profile']) {
       const a = report.trials.filter(t => t.scenario === s.id && t.mode === mode && !t.warmup && t.variant === 'baseline').sort((a, b) => a.index - b.index);
       const b = report.trials.filter(t => t.scenario === s.id && t.mode === mode && !t.warmup && t.variant === 'candidate').sort((a, b) => a.index - b.index);
@@ -341,8 +345,21 @@ try {
   report.variants = [prepare(previous?.variants[0].sha || options.baseline, 'baseline'), prepare(previous?.variants[1].sha || options.candidate, 'candidate')];
   if (previous) report.variants.forEach((v, i) => { assert.equal(v.sha, previous.variants[i].sha); assert.equal(v.lockSha256, previous.variants[i].lockSha256); v.ref = previous.variants[i].ref; });
   persist();
-  assert.equal(report.variants[0].kind, 'context', 'The historical suite expects a Context baseline');
+  assert.equal(report.variants[0].kind, selectorComparison ? 'zustand' : 'context', 'Unexpected baseline state management');
   assert.equal(report.variants[1].kind, 'zustand', 'The historical suite expects a Zustand candidate');
+  if (selectorComparison) {
+    // Restrict this causal claim to the commit pair whose full diff was audited.
+    assert.equal(report.variants[0].sha, 'bddf2967c3bf74ded9a88a2abc2924e914b97583');
+    assert.equal(report.variants[1].sha, 'ac889ef39017e225dcc7884520df8b75919c83c0');
+    assert.equal(report.variants[0].lockSha256, report.variants[1].lockSha256);
+    const gitDiff = args => execFileSync('git', ['diff', ...args, report.variants[0].sha, report.variants[1].sha], { cwd: repository, encoding: 'utf8' });
+    const patch = gitDiff(['--no-ext-diff', '--binary']);
+    const changedFiles = gitDiff(['--name-only']).trim().split('\n');
+    assert.equal(changedFiles.length, 33);
+    assert(changedFiles.every(file => file.startsWith('frontend/src/') && !file.startsWith('frontend/src/store/') && !file.includes('Renderer') && !file.includes('rendererUtils') && !file.startsWith('frontend/src/components/visualisation/')));
+    writeFileSync(path.join(output, 'revision-diff.patch'), patch);
+    report.scope = { kind: 'selector-subscription-optimization', changedFiles, diffSha256: createHash('sha256').update(patch).digest('hex'), unchanged: ['store implementations', 'D3 renderers', 'dependencies', 'public configuration', 'backend'], includes: ['field selectors', 'shallow derived-array selectors', 'reactive mode subscriptions'] };
+  }
   const candidateSources = {};
   const candidatePages = [];
   for (const model of ['decision_tree', 'knn', 'kmeans', 'linear_regression', 'svm']) {
@@ -352,6 +369,11 @@ try {
   }
   assert.deepEqual(scenarios.filter(s => s.page).map(s => s.page).sort(), candidatePages.sort(), 'Candidate registry changed; update coverage mappings first');
   writeFileSync(path.join(output, 'candidate-registry.json'), JSON.stringify(candidateSources, null, 2));
+  if (selectorComparison) {
+    const baselineSources = Object.fromEntries(Object.keys(candidateSources).map(model => [model, execFileSync('git', ['show', `${report.variants[0].sha}:frontend/src/pages/traditional_ml/${model}/index.tsx`], { cwd: repository, encoding: 'utf8' })]));
+    assert.deepEqual(baselineSources, candidateSources, 'Both revisions must expose identical visualization pages');
+    writeFileSync(path.join(output, 'baseline-registry.json'), JSON.stringify(baselineSources, null, 2));
+  }
   browser = await chromium.launch({ channel: 'chrome', headless: true });
   if (previous) assert.equal(previous.environment.browser, browser.version(), 'Chrome changed; start a fresh run');
   report.environment.browser = browser.version();

@@ -5,6 +5,8 @@
   "scripts": {
     "bench": "node run.mjs",
     "suite": "node suite.mjs",
+    "overview": "node overview.mjs",
+    "verify": "node verify.mjs",
     "test": "node --test stats.test.mjs"
   },
   "devDependencies": {

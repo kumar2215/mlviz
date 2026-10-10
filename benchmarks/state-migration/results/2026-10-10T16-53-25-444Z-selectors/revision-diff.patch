@@ -1,0 +1,877 @@
+diff --git a/frontend/src/App.tsx b/frontend/src/App.tsx
+index 0edda0f..8ea3b25 100644
+--- a/frontend/src/App.tsx
++++ b/frontend/src/App.tsx
+@@ -41,9 +41,12 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
+ export default function App() {
+     const blockReason = getBlockReason();
+ 
+-    const { loading, error, config, fetchConfig } = useConfig();
+-    const { visualisations } = useVisualisation();
+-    const { stories } = useStory();
++    const loading = useConfig(state => state.loading);
++    const error = useConfig(state => state.error);
++    const config = useConfig(state => state.config);
++    const fetchConfig = useConfig(state => state.fetchConfig);
++    const visualisations = useVisualisation(state => state.visualisations);
++    const stories = useStory(state => state.stories);
+ 
+     const [item, setItem] = useState<ListItem[] | Story | Visualisation | null>(null);
+     const [itemName, setItemName] = useState<string>("");
+diff --git a/frontend/src/components/results/RegressionResults.tsx b/frontend/src/components/results/RegressionResults.tsx
+index 8c2d832..e21fc7b 100644
+--- a/frontend/src/components/results/RegressionResults.tsx
++++ b/frontend/src/components/results/RegressionResults.tsx
+@@ -4,7 +4,7 @@ import { ChartColumnIncreasing } from "lucide-react";
+ import MetricSection from "./MetricSection";
+ 
+ const Results = ({ metrics, metadata }: RegressionResultData) => {
+-    const { isEvaluating } = useLinearRegression();
++    const isEvaluating = useLinearRegression(state => state.isEvaluating);
+ 
+     if (!metrics || !metadata || !metrics.train) {
+         return <></>;
+diff --git a/frontend/src/hooks/useHistoryRecorder.ts b/frontend/src/hooks/useHistoryRecorder.ts
+index b01f27c..64ae7ca 100644
+--- a/frontend/src/hooks/useHistoryRecorder.ts
++++ b/frontend/src/hooks/useHistoryRecorder.ts
+@@ -4,7 +4,8 @@ import useUserMode from "@/hooks/useUserMode";
+ import { useMemo } from "react";
+ 
+ export default function useHistoryRecorder() {
+-    const { recordAction } = useUserMode().hook();
++    const { hook: useModeStore } = useUserMode();
++    const recordAction = useModeStore(state => state.recordAction);
+ 
+     return useMemo(() => {
+         const record = (
+diff --git a/frontend/src/hooks/usePredict.ts b/frontend/src/hooks/usePredict.ts
+index 1601bb9..63b553e 100644
+--- a/frontend/src/hooks/usePredict.ts
++++ b/frontend/src/hooks/usePredict.ts
+@@ -1,30 +1,28 @@
+ import useUserMode from "@/hooks/useUserMode";
+ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
+-import { useEffect, useMemo, useRef, useState } from "react";
++import { useEffect, useRef, useState } from "react";
+ import type { Parameters } from "@/types/page";
++import type { ModelSelectorHook } from "@/types/modelStore";
++import { useShallow } from "zustand/react/shallow";
+ 
+-export default function usePredict(useModel: () => any, setShowAlert: (show: boolean) => void, parameters: Parameters) {
+-    const hook = useUserMode().hook;
+-    const { updateParams } = hook();
++export default function usePredict(useModel: ModelSelectorHook, setShowAlert: (show: boolean) => void, parameters: Parameters) {
++    const { hook: useModeStore } = useUserMode();
++    const updateParams = useModeStore(state => state.updateParams);
+     const { recordPredict } = useHistoryRecorder();
+ 
+-    const {
+-        currentModelData,
+-        getFeatureNames,
+-        getPredictiveFeatureNames,
+-        predict,
+-        isPredicting,
+-    } = useModel();
++    const currentModelData = useModel(state => state.currentModelData);
++    const predict = useModel(state => state.predict);
++    const isPredicting = useModel(state => state.isPredicting);
+ 
+     const [predictionInputPoints, setPredictionInputPoints] = useState<
+         Record<string, number>
+     >(parameters?.presetPoints || {});
+ 
+-    const rawFeatures = (typeof getPredictiveFeatureNames === 'function'
+-        ? getPredictiveFeatureNames()
+-        : getFeatureNames()) || [];
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-    const currentFeatures = useMemo(() => rawFeatures, [JSON.stringify(rawFeatures)]);
++    const currentFeatures = useModel(useShallow((state): string[] =>
++        (typeof state.getPredictiveFeatureNames === "function"
++            ? state.getPredictiveFeatureNames()
++            : state.getFeatureNames()) || [],
++    ));
+ 
+     useEffect(() => {
+         if (currentFeatures.length > 0) {
+diff --git a/frontend/src/hooks/useStep.ts b/frontend/src/hooks/useStep.ts
+index ca80d26..a64f965 100644
+--- a/frontend/src/hooks/useStep.ts
++++ b/frontend/src/hooks/useStep.ts
+@@ -3,36 +3,35 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
+ import type { ModelOption } from "@/types/parameters";
+ import type { Parameters } from "@/types/page";
+ import { filterParameters } from "@/utils/conditions";
++import type { ModelSelectorHook } from "@/types/modelStore";
++import { useShallow } from "zustand/react/shallow";
+ import { useEffect, useMemo, useRef, useState } from "react";
+ 
+-export default function useStep(useModel: () => any, parameters: Parameters) {
+-    const model = useModel();
+-    const { 
+-        isLoading,
+-        data,
+-        train,
+-        loadVisualization,
+-        getParameters,
+-        resetModelData
+-    } = model;
++export default function useStep(useModel: ModelSelectorHook, parameters: Parameters) {
++    const isLoading = useModel(state => state.isLoading);
++    const train = useModel(state => state.train);
++    const loadVisualization = useModel(state => state.loadVisualization);
++    const getParameters = useModel(state => state.getParameters);
++    const resetModelData = useModel(state => state.resetModelData);
+ 
+     // Standardize lastParams access
+-    const { lastParams: storedParams, lastVisualizationParams } = model;
++    const storedParams = useModel(state => state.lastParams);
++    const lastVisualizationParams = useModel(state => state.lastVisualizationParams);
+     const lastParams = useMemo(
+         () => storedParams || lastVisualizationParams || {},
+         [storedParams, lastVisualizationParams]
+     );
+ 
+     // Get feature names for parameter mapping
+-    const featureNames = useMemo(() => {
+-        if (typeof (model as any).getFeatureNames === "function") {
+-            return (model as any).getFeatureNames();
+-        }
+-        return data?.metadata?.feature_names || null;
+-    }, [model, data?.metadata?.feature_names]);
++    const featureNames = useModel(useShallow((state): string[] | null =>
++        typeof state.getFeatureNames === "function"
++            ? state.getFeatureNames()
++            : state.data?.metadata?.feature_names || null,
++    ));
+ 
+     const [options, setOptions] = useState<ModelOption[]>([]);
+-    const { updateParams } = useUserMode().hook();
++    const { hook: useModeStore } = useUserMode();
++    const updateParams = useModeStore(state => state.updateParams);
+     const { recordStep } = useHistoryRecorder();
+ 
+     const [stepParams, setStepParams] = useState<Parameters>(
+diff --git a/frontend/src/hooks/useTrain.ts b/frontend/src/hooks/useTrain.ts
+index 637a3a8..49b5030 100644
+--- a/frontend/src/hooks/useTrain.ts
++++ b/frontend/src/hooks/useTrain.ts
+@@ -4,33 +4,37 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
+ import type { ModelOption } from "@/types/parameters";
+ import type { Parameters } from "@/types/page";
+ import { filterParameters } from "@/utils/conditions";
++import type { ModelSelectorHook } from "@/types/modelStore";
++import { useShallow } from "zustand/react/shallow";
+ import { useEffect, useMemo, useRef, useState } from "react";
+ 
+-export default function useTrain(useModel: () => any, setShowAlert: (show: boolean) => void, parameters: Parameters) {
+-    const model = useModel();
++export default function useTrain(useModel: ModelSelectorHook, setShowAlert: (show: boolean) => void, parameters: Parameters) {
++    const isLoading = useModel(state => state.isLoading);
++    const train = useModel(state => state.train);
++    const getParameters = useModel(state => state.getParameters);
++    const resetModelData = useModel(state => state.resetModelData);
+     const activeDataset = useDataset(state => state.activeDataset);
+-    const { isLoading, data, train, getParameters, resetModelData } = model;
+     const hasInitialized = useRef(false);
+ 
+     // Try to get lastParams from the store (different models use different names)
+     // Use useMemo to maintain stable reference
+-    const { lastParams: storedParams, lastTrainedParams } = model;
++    const storedParams = useModel(state => state.lastParams);
++    const lastTrainedParams = useModel(state => state.lastTrainedParams);
+     const lastParams = useMemo(
+         () => storedParams || lastTrainedParams || {},
+         [storedParams, lastTrainedParams],
+     );
+ 
+     // Get feature names from the model store (for KNN dynamic feature dropdowns)
+-    const featureNames = useMemo(() => {
+-        if (typeof (model as any).getFeatureNames === "function") {
+-            return (model as any).getFeatureNames();
+-        }
+-        // Fallback to metadata if available
+-        return data?.metadata?.feature_names || null;
+-    }, [model, data?.metadata?.feature_names]);
++    const featureNames = useModel(useShallow((state): string[] | null =>
++        typeof state.getFeatureNames === "function"
++            ? state.getFeatureNames()
++            : state.data?.metadata?.feature_names || null,
++    ));
+ 
+     const [options, setOptions] = useState<ModelOption[]>([]);
+-    const { updateParams } = useUserMode().hook();
++    const { hook: useModeStore } = useUserMode();
++    const updateParams = useModeStore(state => state.updateParams);
+     const { recordTrain } = useHistoryRecorder();
+ 
+     useEffect(() => {
+diff --git a/frontend/src/hooks/useUserMode.ts b/frontend/src/hooks/useUserMode.ts
+index d3d1827..abc8ddc 100644
+--- a/frontend/src/hooks/useUserMode.ts
++++ b/frontend/src/hooks/useUserMode.ts
+@@ -1,9 +1,20 @@
+ import { useStory } from "@/store/useStory";
+ import { useVisualisation } from "@/store/useVisualisation";
++import type Story from "@/types/story";
++import type Visualisation from "@/types/visualisation";
+ 
+-export default function useUserMode() {
+-    const currentStory = useStory.getState().currentStory;
+-    const currentVisualisation = useVisualisation.getState().currentVisualisation;
++type ModeActions = Pick<
++    ReturnType<typeof useStory.getState>,
++    "addPageVisit" | "getPreviousPageId" | "recordAction" | "updateParams"
++>;
++type ModeSelectorHook = <Selected>(selector: (state: ModeActions) => Selected) => Selected;
++type UserMode =
++    | { userMode: "story"; item: Story; hook: ModeSelectorHook }
++    | { userMode: "visualisation"; item: Visualisation; hook: ModeSelectorHook };
++
++export default function useUserMode(): UserMode {
++    const currentStory = useStory(state => state.currentStory);
++    const currentVisualisation = useVisualisation(state => state.currentVisualisation);
+ 
+     if (currentStory !== null && currentVisualisation === null) {
+         return { userMode: "story" as const, item: currentStory, hook: useStory };
+diff --git a/frontend/src/pages/DynamicPage.tsx b/frontend/src/pages/DynamicPage.tsx
+index 8b69aa3..1ef47fa 100644
+--- a/frontend/src/pages/DynamicPage.tsx
++++ b/frontend/src/pages/DynamicPage.tsx
+@@ -19,8 +19,8 @@ const pageComponents = Object.fromEntries(
+ ) as Record<string, LazyExoticComponent<ComponentType<IndexPageProps>>>;
+ 
+ const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation }) => {
+-    const { setDataset } = useDataset();
+-    const { config } = useConfig();
++    const setDataset = useDataset(state => state.setDataset);
++    const config = useConfig(state => state.config);
+ 
+     if (!category || !visualisation) {
+         throw new Error("Category and/or visualisation not provided for dynamic page");
+diff --git a/frontend/src/pages/VisualisationPage.tsx b/frontend/src/pages/VisualisationPage.tsx
+index 7ecd990..6d61a9b 100644
+--- a/frontend/src/pages/VisualisationPage.tsx
++++ b/frontend/src/pages/VisualisationPage.tsx
+@@ -13,12 +13,15 @@ import { useState, useEffect } from "react";
+ import { Link } from "react-router-dom";
+ 
+ export default function VisualisationPage() {
+-    const { userMode, item, hook } = useUserMode();
+-    const { currentStoryHistory } = useStory();
+-    const { currentVisualisationHistory, currentVisualisation: visualisation } = useVisualisation();
++    const { userMode, item, hook: useModeStore } = useUserMode();
++    const currentStoryHistory = useStory(state => state.currentStoryHistory);
++    const currentVisualisationHistory = useVisualisation(state => state.currentVisualisationHistory);
++    const visualisation = useVisualisation(state => state.currentVisualisation);
+ 
+     const inStoryMode = userMode === "story";
+-    const { addPageVisit, getPreviousPageId, recordAction } = hook();
++    const addPageVisit = useModeStore(state => state.addPageVisit);
++    const getPreviousPageId = useModeStore(state => state.getPreviousPageId);
++    const recordAction = useModeStore(state => state.recordAction);
+     const currentHistory = inStoryMode ? currentStoryHistory : currentVisualisationHistory;
+     const path = currentHistory!.path;
+     const pages = item.pages;
+diff --git a/frontend/src/pages/model/PredictPage.tsx b/frontend/src/pages/model/PredictPage.tsx
+index 956c1f5..10914eb 100644
+--- a/frontend/src/pages/model/PredictPage.tsx
++++ b/frontend/src/pages/model/PredictPage.tsx
+@@ -3,9 +3,10 @@ import usePredict from "@/hooks/usePredict";
+ import { SuccessAlert } from "@/components/ui/CustomAlerts";
+ import { useState } from "react";
+ import type { Parameters } from "@/types/page";
++import type { ModelSelectorHook } from "@/types/modelStore";
+ 
+ type PredictPageProps = {
+-    useModel: () => any;
++    useModel: ModelSelectorHook;
+     parameters: Parameters;
+     PredictVisualizationComponent: React.FC<{ points?: Record<string, number> | null }>;
+ }
+diff --git a/frontend/src/pages/model/StepPage.tsx b/frontend/src/pages/model/StepPage.tsx
+index f0c9ef1..a967b9b 100644
+--- a/frontend/src/pages/model/StepPage.tsx
++++ b/frontend/src/pages/model/StepPage.tsx
+@@ -1,9 +1,10 @@
+ import ModelOptionsForm from "@/components/input/ModelOptionsForm";
+ import useStep from "@/hooks/useStep";
+ import type { Parameters } from "@/types/page";
++import type { ModelSelectorHook } from "@/types/modelStore";
+ 
+ type StepPageProps = {
+-    useModel: () => any;
++    useModel: ModelSelectorHook;
+     parameters: Parameters;
+     StepVisualizationComponent: React.FC;
+ }
+diff --git a/frontend/src/pages/model/TrainPage.tsx b/frontend/src/pages/model/TrainPage.tsx
+index f8ce89d..2878158 100644
+--- a/frontend/src/pages/model/TrainPage.tsx
++++ b/frontend/src/pages/model/TrainPage.tsx
+@@ -3,9 +3,10 @@ import useTrain from "@/hooks/useTrain";
+ import { SuccessAlert } from "@/components/ui/CustomAlerts";
+ import { useState } from "react";
+ import type { Parameters } from "@/types/page";
++import type { ModelSelectorHook } from "@/types/modelStore";
+ 
+ type TrainPageProps = {
+-    useModel: () => any;
++    useModel: ModelSelectorHook;
+     parameters: Parameters;
+     TrainVisualizationComponent: React.FC;
+     ResultsComponent: React.FC;
+diff --git a/frontend/src/pages/traditional_ml/decision_tree/DecisionTreePage.tsx b/frontend/src/pages/traditional_ml/decision_tree/DecisionTreePage.tsx
+index 7656343..db14bc6 100644
+--- a/frontend/src/pages/traditional_ml/decision_tree/DecisionTreePage.tsx
++++ b/frontend/src/pages/traditional_ml/decision_tree/DecisionTreePage.tsx
+@@ -5,7 +5,8 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
+ import { useEffect, useRef } from "react";
+ 
+ export default function DecisionTreePage() {
+-    const { currentModelData, resetModelData } = useDecisionTree();
++    const currentModelData = useDecisionTree(state => state.currentModelData);
++    const resetModelData = useDecisionTree(state => state.resetModelData);
+     const { recordManualEvaluate } = useHistoryRecorder();
+ 
+     // Track whether the initial model data has been set so we don't fire on mount
+diff --git a/frontend/src/pages/traditional_ml/decision_tree/DecisionTreeVisualization.tsx b/frontend/src/pages/traditional_ml/decision_tree/DecisionTreeVisualization.tsx
+index 017d278..3389425 100644
+--- a/frontend/src/pages/traditional_ml/decision_tree/DecisionTreeVisualization.tsx
++++ b/frontend/src/pages/traditional_ml/decision_tree/DecisionTreeVisualization.tsx
+@@ -5,6 +5,7 @@ import { useDecisionTree } from "@/store/traditional_ml/useDecisionTree";
+ import type { TreeNode } from "@/types/model";
+ import { DEFAULT_COLORS } from "@/utils/colorUtils";
+ import { useCallback, useEffect, useMemo } from "react";
++import { useShallow } from "zustand/react/shallow";
+ import ManualTreeHUD from "./ManualTreeHUD";
+ 
+ const capabilities: VisualisationCapabilities = {
+@@ -22,11 +23,9 @@ const capabilities: VisualisationCapabilities = {
+ };
+ 
+ export default function DecisionTreeVisualization() {
+-    const {
+-        manualTree,
+-        getFeatureNames,
+-        getClassNames,
+-    } = useDecisionTree();
++    const manualTree = useDecisionTree(state => state.manualTree);
++    const featureNames = useDecisionTree(useShallow(state => state.getFeatureNames() || []));
++    const classes = useDecisionTree(useShallow(state => state.getClassNames()));
+ 
+ 
+     const initializeTree = manualTree.initialize;
+@@ -77,7 +76,6 @@ export default function DecisionTreeVisualization() {
+         return base;
+     }, []);
+ 
+-    const classes = getClassNames();
+     const colorScale = useMemo(() => {
+         const classColors = new Map<string, string>();
+ 
+@@ -100,7 +98,7 @@ export default function DecisionTreeVisualization() {
+                 transformTreeData,
+                 colorScale,
+                 selectedNodePath: manualTree.selectedNodePath,
+-                featureNames: getFeatureNames() || [],
++                featureNames,
+                 featureStats: manualTree.featureStats,
+                 selectedFeature: manualTree.selectedFeature,
+                 selectedThreshold: manualTree.selectedThreshold,
+@@ -115,7 +113,7 @@ export default function DecisionTreeVisualization() {
+             },
+             mode: "manual",
+         }),
+-        [transformTreeData, colorScale, manualTree, getFeatureNames, handleNodeClick]
++        [transformTreeData, colorScale, manualTree, featureNames, handleNodeClick]
+     );
+ 
+     
+diff --git a/frontend/src/pages/traditional_ml/decision_tree/ManualTreeHUD.tsx b/frontend/src/pages/traditional_ml/decision_tree/ManualTreeHUD.tsx
+index 26649c0..e73bc23 100644
+--- a/frontend/src/pages/traditional_ml/decision_tree/ManualTreeHUD.tsx
++++ b/frontend/src/pages/traditional_ml/decision_tree/ManualTreeHUD.tsx
+@@ -18,29 +18,26 @@ import { DEFAULT_COLORS } from "@/utils/colorUtils";
+ import * as d3 from "d3";
+ import { GitBranch, Leaf, Split } from "lucide-react";
+ import { useEffect, useRef } from "react";
++import { useShallow } from "zustand/react/shallow";
+ import { renderInformationGainGraph } from "./rendererUtils";
+ 
+ const EMPTY_NAMES: string[] = [];
+ 
+ const ManualTreeHUD: React.FC = () => {
+-    const { manualTree, getFeatureNames, getClassNames } = useDecisionTree();
+-
+-    const {
+-        selectedNodePath,
+-        featureStats,
+-        selectedFeature,
+-        selectedThreshold,
+-        loadFeatureStats,
+-        updateThreshold,
+-        splitNode,
+-        markAsLeaf,
+-    } = manualTree;
++    const selectedNodePath = useDecisionTree(state => state.manualTree.selectedNodePath);
++    const featureStats = useDecisionTree(state => state.manualTree.featureStats);
++    const selectedFeature = useDecisionTree(state => state.manualTree.selectedFeature);
++    const selectedThreshold = useDecisionTree(state => state.manualTree.selectedThreshold);
++    const loadFeatureStats = useDecisionTree(state => state.manualTree.loadFeatureStats);
++    const updateThreshold = useDecisionTree(state => state.manualTree.updateThreshold);
++    const splitNode = useDecisionTree(state => state.manualTree.splitNode);
++    const markAsLeaf = useDecisionTree(state => state.manualTree.markAsLeaf);
+ 
+     const vizRef = useRef<SVGSVGElement>(null);
+     const exploredIndicesCache = useRef(new Map<string, Set<number>>());
+ 
+-    const featureNames = getFeatureNames() || EMPTY_NAMES;
+-    const classNames = getClassNames() || EMPTY_NAMES;
++    const featureNames = useDecisionTree(useShallow(state => state.getFeatureNames() || EMPTY_NAMES));
++    const classNames = useDecisionTree(useShallow(state => state.getClassNames() || EMPTY_NAMES));
+ 
+     // Clear exploration cache when the selected node changes
+     useEffect(() => {
+diff --git a/frontend/src/pages/traditional_ml/kmeans/KMeansStepHUD.tsx b/frontend/src/pages/traditional_ml/kmeans/KMeansStepHUD.tsx
+index 7f915fa..2964a24 100644
+--- a/frontend/src/pages/traditional_ml/kmeans/KMeansStepHUD.tsx
++++ b/frontend/src/pages/traditional_ml/kmeans/KMeansStepHUD.tsx
+@@ -16,16 +16,14 @@ interface KMeansStepHUDProps {
+ 
+ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
+     const scaleFactor = useScaleFactor();
+-    const {
+-        selectedCentroids,
+-        setSelectedCentroids,
+-        performStep,
+-        isStepLoading,
+-        stepData,
+-        lastVisualizationParams,
+-        clearIterationState,
+-        loadVisualization,
+-    } = useKMeans();
++    const selectedCentroids = useKMeans(state => state.selectedCentroids);
++    const setSelectedCentroids = useKMeans(state => state.setSelectedCentroids);
++    const performStep = useKMeans(state => state.performStep);
++    const isStepLoading = useKMeans(state => state.isStepLoading);
++    const stepData = useKMeans(state => state.stepData);
++    const lastVisualizationParams = useKMeans(state => state.lastVisualizationParams);
++    const clearIterationState = useKMeans(state => state.clearIterationState);
++    const loadVisualization = useKMeans(state => state.loadVisualization);
+     const { recordStep } = useHistoryRecorder();
+ 
+     const handleRunStep = async () => {
+diff --git a/frontend/src/pages/traditional_ml/kmeans/KMeansStepVisualisation.tsx b/frontend/src/pages/traditional_ml/kmeans/KMeansStepVisualisation.tsx
+index 2133b5d..9d91f04 100644
+--- a/frontend/src/pages/traditional_ml/kmeans/KMeansStepVisualisation.tsx
++++ b/frontend/src/pages/traditional_ml/kmeans/KMeansStepVisualisation.tsx
+@@ -21,16 +21,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+ import KMeansStepHUD, { type KMeansStepMode } from "./KMeansStepHUD";
+ 
+ export default function KMeansStepVisualisation() {
+-    const {
+-        visualizationData: kmeansData,
+-        loadVisualization,
+-        lastVisualizationParams,
+-        stepData,
+-        selectedCentroids,
+-        setSelectedCentroids,
+-        setIsPlacingCentroids,
+-        centroidHistory,
+-    } = useKMeans();
++    const kmeansData = useKMeans(state => state.visualizationData);
++    const loadVisualization = useKMeans(state => state.loadVisualization);
++    const lastVisualizationParams = useKMeans(state => state.lastVisualizationParams);
++    const stepData = useKMeans(state => state.stepData);
++    const selectedCentroids = useKMeans(state => state.selectedCentroids);
++    const setSelectedCentroids = useKMeans(state => state.setSelectedCentroids);
++    const setIsPlacingCentroids = useKMeans(state => state.setIsPlacingCentroids);
++    const centroidHistory = useKMeans(state => state.centroidHistory);
+ 
+     const scaleFactor = useScaleFactor();
+     const [mode, setMode] = useState<KMeansStepMode>("ready");
+diff --git a/frontend/src/pages/traditional_ml/knn/predict/KNNPredictVisualization.tsx b/frontend/src/pages/traditional_ml/knn/predict/KNNPredictVisualization.tsx
+index 8a9a779..bfbb194 100644
+--- a/frontend/src/pages/traditional_ml/knn/predict/KNNPredictVisualization.tsx
++++ b/frontend/src/pages/traditional_ml/knn/predict/KNNPredictVisualization.tsx
+@@ -18,14 +18,12 @@ interface VisualisationProps {
+ }
+ 
+ export default function KNNPredictVisualization({ points }: VisualisationProps) {
+-    const {
+-        predictionData,
+-        isPredictionLoading,
+-        predictionError,
+-        visualizationData,
+-        loadVisualization,
+-        isVisualizationLoading,
+-    } = useKNN();
++    const predictionData = useKNN(state => state.predictionData);
++    const isPredictionLoading = useKNN(state => state.isPredictionLoading);
++    const predictionError = useKNN(state => state.predictionError);
++    const visualizationData = useKNN(state => state.visualizationData);
++    const loadVisualization = useKNN(state => state.loadVisualization);
++    const isVisualizationLoading = useKNN(state => state.isVisualizationLoading);
+ 
+     // Load visualization data if not already loaded
+     useEffect(() => {
+diff --git a/frontend/src/pages/traditional_ml/knn/train/KNNTrainPage.tsx b/frontend/src/pages/traditional_ml/knn/train/KNNTrainPage.tsx
+index c5b54c6..b3bac0c 100644
+--- a/frontend/src/pages/traditional_ml/knn/train/KNNTrainPage.tsx
++++ b/frontend/src/pages/traditional_ml/knn/train/KNNTrainPage.tsx
+@@ -5,7 +5,7 @@ import { useKNN } from "@/store/traditional_ml/useKNN";
+ import type { Parameters } from "@/types/page";
+ 
+ export default function KNNTrainPage({ parameters } : { parameters: Parameters }) {
+-    const { data } = useKNN();
++    const data = useKNN(state => state.data);
+     
+     const resultsComponent = () => (
+         <ClassifierResults
+diff --git a/frontend/src/pages/traditional_ml/knn/train/KNNTrainVisualisation.tsx b/frontend/src/pages/traditional_ml/knn/train/KNNTrainVisualisation.tsx
+index e3bebdc..36e7c84 100644
+--- a/frontend/src/pages/traditional_ml/knn/train/KNNTrainVisualisation.tsx
++++ b/frontend/src/pages/traditional_ml/knn/train/KNNTrainVisualisation.tsx
+@@ -14,12 +14,10 @@ import * as d3 from "d3";
+ import { useCallback, useEffect, useMemo } from "react";
+ 
+ export default function KNNTrainVisualisation() {
+-    const {
+-        visualizationData: knnData,
+-        isVisualizationLoading,
+-        visualizationError,
+-        lastVisualizationParams,
+-    } = useKNN();
++    const knnData = useKNN(state => state.visualizationData);
++    const isVisualizationLoading = useKNN(state => state.isVisualizationLoading);
++    const visualizationError = useKNN(state => state.visualizationError);
++    const lastVisualizationParams = useKNN(state => state.lastVisualizationParams);
+ 
+     // Auto-load visualization on mount if we have stored params
+     useEffect(() => {
+diff --git a/frontend/src/pages/traditional_ml/linear_regression/LineControlHUD.tsx b/frontend/src/pages/traditional_ml/linear_regression/LineControlHUD.tsx
+index 909c253..c225378 100644
+--- a/frontend/src/pages/traditional_ml/linear_regression/LineControlHUD.tsx
++++ b/frontend/src/pages/traditional_ml/linear_regression/LineControlHUD.tsx
+@@ -17,13 +17,11 @@ interface LineControlHUDProps {
+ 
+ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
+     const scaleFactor = useScaleFactor();
+-    const {
+-        currentSlope,
+-        currentIntercept,
+-        setCurrentLine,
+-        visualizationData,
+-        evaluateLine,
+-    } = useLinearRegression();
++    const currentSlope = useLinearRegression(state => state.currentSlope);
++    const currentIntercept = useLinearRegression(state => state.currentIntercept);
++    const setCurrentLine = useLinearRegression(state => state.setCurrentLine);
++    const visualizationData = useLinearRegression(state => state.visualizationData);
++    const evaluateLine = useLinearRegression(state => state.evaluateLine);
+ 
+     const interceptId = useId();
+ 
+diff --git a/frontend/src/pages/traditional_ml/linear_regression/LossMapHUD.tsx b/frontend/src/pages/traditional_ml/linear_regression/LossMapHUD.tsx
+index 2b2fe2f..899a63f 100644
+--- a/frontend/src/pages/traditional_ml/linear_regression/LossMapHUD.tsx
++++ b/frontend/src/pages/traditional_ml/linear_regression/LossMapHUD.tsx
+@@ -11,13 +11,11 @@ interface LossMapHUDProps {
+ }
+ 
+ const LossMapHUD: React.FC<LossMapHUDProps> = ({ mode }) => {
+-    const {
+-        visualizationData,
+-        currentSlope,
+-        currentIntercept,
+-        computeMSE,
+-        stepData,
+-    } = useLinearRegression();
++    const visualizationData = useLinearRegression(state => state.visualizationData);
++    const currentSlope = useLinearRegression(state => state.currentSlope);
++    const currentIntercept = useLinearRegression(state => state.currentIntercept);
++    const computeMSE = useLinearRegression(state => state.computeMSE);
++    const stepData = useLinearRegression(state => state.stepData);
+ 
+     // Compute bounds once based on data
+     const bounds = useMemo(() => {
+diff --git a/frontend/src/pages/traditional_ml/linear_regression/step/GDStepHUD.tsx b/frontend/src/pages/traditional_ml/linear_regression/step/GDStepHUD.tsx
+index eb06eb1..d52dda3 100644
+--- a/frontend/src/pages/traditional_ml/linear_regression/step/GDStepHUD.tsx
++++ b/frontend/src/pages/traditional_ml/linear_regression/step/GDStepHUD.tsx
+@@ -26,16 +26,14 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
+     onLearningRateChange,
+ }) => {
+     const scaleFactor = useScaleFactor();
+-    const {
+-        currentSlope,
+-        currentIntercept,
+-        setCurrentLine,
+-        performStep,
+-        isStepLoading,
+-        stepData,
+-        visualizationData,
+-        computeR2,
+-    } = useLinearRegression();
++    const currentSlope = useLinearRegression(state => state.currentSlope);
++    const currentIntercept = useLinearRegression(state => state.currentIntercept);
++    const setCurrentLine = useLinearRegression(state => state.setCurrentLine);
++    const performStep = useLinearRegression(state => state.performStep);
++    const isStepLoading = useLinearRegression(state => state.isStepLoading);
++    const stepData = useLinearRegression(state => state.stepData);
++    const visualizationData = useLinearRegression(state => state.visualizationData);
++    const computeR2 = useLinearRegression(state => state.computeR2);
+ 
+     const fs = (n: number) => `${n * scaleFactor}px`;
+     const points = visualizationData?.points ?? [];
+diff --git a/frontend/src/pages/traditional_ml/linear_regression/step/LinearRegressionStepVisualisation.tsx b/frontend/src/pages/traditional_ml/linear_regression/step/LinearRegressionStepVisualisation.tsx
+index ee6059a..0e771e4 100644
+--- a/frontend/src/pages/traditional_ml/linear_regression/step/LinearRegressionStepVisualisation.tsx
++++ b/frontend/src/pages/traditional_ml/linear_regression/step/LinearRegressionStepVisualisation.tsx
+@@ -17,17 +17,15 @@ import * as d3 from "d3";
+ import { useCallback, useEffect, useRef, useState } from "react";
+ 
+ export default function LinearRegressionStepVisualisation() {
+-    const {
+-        visualizationData,
+-        isVisualizationLoading,
+-        visualizationError,
+-        loadVisualization,
+-        lastVisualizationParams,
+-        currentSlope,
+-        currentIntercept,
+-        stepData,
+-        randomizeLine,
+-    } = useLinearRegression();
++    const visualizationData = useLinearRegression(state => state.visualizationData);
++    const isVisualizationLoading = useLinearRegression(state => state.isVisualizationLoading);
++    const visualizationError = useLinearRegression(state => state.visualizationError);
++    const loadVisualization = useLinearRegression(state => state.loadVisualization);
++    const lastVisualizationParams = useLinearRegression(state => state.lastVisualizationParams);
++    const currentSlope = useLinearRegression(state => state.currentSlope);
++    const currentIntercept = useLinearRegression(state => state.currentIntercept);
++    const stepData = useLinearRegression(state => state.stepData);
++    const randomizeLine = useLinearRegression(state => state.randomizeLine);
+ 
+     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(
+         null,
+diff --git a/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainPage.tsx b/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainPage.tsx
+index 49fe8ef..4881d67 100644
+--- a/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainPage.tsx
++++ b/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainPage.tsx
+@@ -6,7 +6,7 @@ import type { Parameters } from "@/types/page";
+ import type { RegressionMetadata } from "@/types/model";
+ 
+ export default function LinearRegressionTrainPage({ parameters } : { parameters: Parameters }) {
+-    const { data } = useLinearRegression();
++    const data = useLinearRegression(state => state.data);
+     
+     const resultsComponent = () => (
+         <RegressionResults
+diff --git a/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainVisualisation.tsx b/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainVisualisation.tsx
+index c80572b..6a0b111 100644
+--- a/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainVisualisation.tsx
++++ b/frontend/src/pages/traditional_ml/linear_regression/train/LinearRegressionTrainVisualisation.tsx
+@@ -18,15 +18,13 @@ import * as d3 from "d3";
+ import { useCallback, useEffect, useState } from "react";
+ 
+ export default function LinearRegressionTrainVisualisation() {
+-    const {
+-        visualizationData,
+-        isVisualizationLoading,
+-        visualizationError,
+-        train,
+-        lastVisualizationParams,
+-        currentSlope,
+-        currentIntercept,
+-    } = useLinearRegression();
++    const visualizationData = useLinearRegression(state => state.visualizationData);
++    const isVisualizationLoading = useLinearRegression(state => state.isVisualizationLoading);
++    const visualizationError = useLinearRegression(state => state.visualizationError);
++    const train = useLinearRegression(state => state.train);
++    const lastVisualizationParams = useLinearRegression(state => state.lastVisualizationParams);
++    const currentSlope = useLinearRegression(state => state.currentSlope);
++    const currentIntercept = useLinearRegression(state => state.currentIntercept);
+ 
+     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
+ 
+diff --git a/frontend/src/pages/traditional_ml/svm/SVMLossMapHUD.tsx b/frontend/src/pages/traditional_ml/svm/SVMLossMapHUD.tsx
+index 0a38d2e..b6bd8f7 100644
+--- a/frontend/src/pages/traditional_ml/svm/SVMLossMapHUD.tsx
++++ b/frontend/src/pages/traditional_ml/svm/SVMLossMapHUD.tsx
+@@ -12,14 +12,12 @@ interface SVMLossMapHUDProps {
+ }
+ 
+ const SVMLossMapHUD: React.FC<SVMLossMapHUDProps> = ({ mode }) => {
+-    const {
+-        currentW1,
+-        currentW2,
+-        currentBias,
+-        computeHingeLoss,
+-        currentModelData,
+-        stepData,
+-    } = useSVM();
++    const currentW1 = useSVM(state => state.currentW1);
++    const currentW2 = useSVM(state => state.currentW2);
++    const currentBias = useSVM(state => state.currentBias);
++    const computeHingeLoss = useSVM(state => state.computeHingeLoss);
++    const currentModelData = useSVM(state => state.currentModelData);
++    const stepData = useSVM(state => state.stepData);
+ 
+     // Compute generic parameter bounds (could be dynamic or fixed for visualization)
+     const bounds = useMemo(() => {
+diff --git a/frontend/src/pages/traditional_ml/svm/predict/SVMPredictVisualization.tsx b/frontend/src/pages/traditional_ml/svm/predict/SVMPredictVisualization.tsx
+index 396eefe..07b5517 100644
+--- a/frontend/src/pages/traditional_ml/svm/predict/SVMPredictVisualization.tsx
++++ b/frontend/src/pages/traditional_ml/svm/predict/SVMPredictVisualization.tsx
+@@ -15,19 +15,17 @@ interface VisualisationProps {
+ }
+ 
+ export default function SVMPredictVisualization({ points }: VisualisationProps) {
+-    const {
+-        visualizationData,
+-        isVisualizationLoading,
+-        visualizationError,
+-        loadVisualization,
+-        lastVisualizationParams,
+-        currentW1,
+-        currentW2,
+-        currentBias,
+-        decisionBoundary,
+-        makePrediction,
+-        predictionResult
+-    } = useSVM();
++    const visualizationData = useSVM(state => state.visualizationData);
++    const isVisualizationLoading = useSVM(state => state.isVisualizationLoading);
++    const visualizationError = useSVM(state => state.visualizationError);
++    const loadVisualization = useSVM(state => state.loadVisualization);
++    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
++    const currentW1 = useSVM(state => state.currentW1);
++    const currentW2 = useSVM(state => state.currentW2);
++    const currentBias = useSVM(state => state.currentBias);
++    const decisionBoundary = useSVM(state => state.decisionBoundary);
++    const makePrediction = useSVM(state => state.makePrediction);
++    const predictionResult = useSVM(state => state.predictionResult);
+ 
+     // Auto-reload on mount
+     useEffect(() => {
+diff --git a/frontend/src/pages/traditional_ml/svm/step/SVMStepHUD.tsx b/frontend/src/pages/traditional_ml/svm/step/SVMStepHUD.tsx
+index 6c71531..07bcc60 100644
+--- a/frontend/src/pages/traditional_ml/svm/step/SVMStepHUD.tsx
++++ b/frontend/src/pages/traditional_ml/svm/step/SVMStepHUD.tsx
+@@ -22,19 +22,17 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
+     onLearningRateChange,
+ }) => {
+     const scaleFactor = useScaleFactor();
+-    const {
+-        currentW1,
+-        currentW2,
+-        currentBias,
+-        setManualWeights,
+-        performStep,
+-        isStepLoading,
+-        stepData,
+-        visualizationData,
+-        computeHingeLoss,
+-        lastVisualizationParams,
+-        makePrediction
+-    } = useSVM();
++    const currentW1 = useSVM(state => state.currentW1);
++    const currentW2 = useSVM(state => state.currentW2);
++    const currentBias = useSVM(state => state.currentBias);
++    const setManualWeights = useSVM(state => state.setManualWeights);
++    const performStep = useSVM(state => state.performStep);
++    const isStepLoading = useSVM(state => state.isStepLoading);
++    const stepData = useSVM(state => state.stepData);
++    const visualizationData = useSVM(state => state.visualizationData);
++    const computeHingeLoss = useSVM(state => state.computeHingeLoss);
++    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
++    const makePrediction = useSVM(state => state.makePrediction);
+ 
+     const interceptId = useId();
+     const widthId = useId();
+diff --git a/frontend/src/pages/traditional_ml/svm/step/SVMStepVisualisation.tsx b/frontend/src/pages/traditional_ml/svm/step/SVMStepVisualisation.tsx
+index 7be1d63..14cc36a 100644
+--- a/frontend/src/pages/traditional_ml/svm/step/SVMStepVisualisation.tsx
++++ b/frontend/src/pages/traditional_ml/svm/step/SVMStepVisualisation.tsx
+@@ -14,18 +14,16 @@ import { useCallback, useEffect, useState } from "react";
+ import SVMStepHUD, { type SVMStepMode } from "./SVMStepHUD";
+ 
+ export default function SVMStepVisualisation() {
+-    const {
+-        visualizationData,
+-        isVisualizationLoading,
+-        visualizationError,
+-        loadVisualization,
+-        lastVisualizationParams,
+-        currentW1,
+-        currentW2,
+-        currentBias,
+-        stepData,
+-        decisionBoundary,
+-    } = useSVM();
++    const visualizationData = useSVM(state => state.visualizationData);
++    const isVisualizationLoading = useSVM(state => state.isVisualizationLoading);
++    const visualizationError = useSVM(state => state.visualizationError);
++    const loadVisualization = useSVM(state => state.loadVisualization);
++    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
++    const currentW1 = useSVM(state => state.currentW1);
++    const currentW2 = useSVM(state => state.currentW2);
++    const currentBias = useSVM(state => state.currentBias);
++    const stepData = useSVM(state => state.stepData);
++    const decisionBoundary = useSVM(state => state.decisionBoundary);
+ 
+     const [mode, setMode] = useState<SVMStepMode>("idle");
+     const [learningRate, setLearningRate] = useState(0.01);
+diff --git a/frontend/src/pages/traditional_ml/svm/train/SVMTrainPage.tsx b/frontend/src/pages/traditional_ml/svm/train/SVMTrainPage.tsx
+index 0cf7d23..1271118 100644
+--- a/frontend/src/pages/traditional_ml/svm/train/SVMTrainPage.tsx
++++ b/frontend/src/pages/traditional_ml/svm/train/SVMTrainPage.tsx
+@@ -5,7 +5,7 @@ import { useSVM } from "@/store/traditional_ml/useSVM";
+ import type { Parameters } from "@/types/page";
+ 
+ export default function SVMTrainPage({ parameters } : { parameters: Parameters }) {
+-    const { data } = useSVM();
++    const data = useSVM(state => state.data);
+     
+     const resultsComponent = () => (
+         <ClassifierResults
+diff --git a/frontend/src/pages/traditional_ml/svm/train/SVMTrainVisualisation.tsx b/frontend/src/pages/traditional_ml/svm/train/SVMTrainVisualisation.tsx
+index baf5a5d..a957908 100644
+--- a/frontend/src/pages/traditional_ml/svm/train/SVMTrainVisualisation.tsx
++++ b/frontend/src/pages/traditional_ml/svm/train/SVMTrainVisualisation.tsx
+@@ -15,15 +15,13 @@ import * as d3 from "d3";
+ import { useCallback, useEffect, useState } from "react";
+ 
+ export default function SVMTrainVisualisation() {
+-    const {
+-        visualizationData,
+-        isVisualizationLoading,
+-        visualizationError,
+-        train,
+-        lastVisualizationParams,
+-        iterations,
+-        decisionBoundary,
+-    } = useSVM();
++    const visualizationData = useSVM(state => state.visualizationData);
++    const isVisualizationLoading = useSVM(state => state.isVisualizationLoading);
++    const visualizationError = useSVM(state => state.visualizationError);
++    const train = useSVM(state => state.train);
++    const lastVisualizationParams = useSVM(state => state.lastVisualizationParams);
++    const iterations = useSVM(state => state.iterations);
++    const decisionBoundary = useSVM(state => state.decisionBoundary);
+ 
+     const [focusedLabels, setFocusedLabels] = useState<Set<string> | null>(null);
+ 
+diff --git a/frontend/src/types/modelStore.ts b/frontend/src/types/modelStore.ts
+new file mode 100644
+index 0000000..27cb306
+--- /dev/null
++++ b/frontend/src/types/modelStore.ts
+@@ -0,0 +1,5 @@
++/**
++ * Shared pages accept different model stores. Require a selector at this boundary
++ * so their hooks cannot accidentally subscribe to an entire model again.
++ */
++export type ModelSelectorHook = <Selected>(selector: (state: any) => Selected) => Selected;
