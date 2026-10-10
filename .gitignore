@@ -87,6 +87,5 @@ quartz/replit.nix
 config/old_configs
 frontend/.env.development
 
-# Reproducible performance benchmark snapshots and raw runs
+# Disposable benchmark snapshots; measured results are tracked
 benchmarks/state-migration/.cache/
-benchmarks/state-migration/results/

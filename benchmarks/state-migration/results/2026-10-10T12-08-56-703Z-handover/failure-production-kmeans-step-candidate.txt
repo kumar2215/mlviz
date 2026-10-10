@@ -1,0 +1,43 @@
+AssertionError [ERR_ASSERTION]: Incorrect centroid selection sequence
+
+0 !== 1
+
+    at action (file:///C:/Users/Kumar%20Lenovo%20PC/Desktop/Kumar/NUS/My_Mods/FYP/mlviz/benchmarks/state-migration/suite.mjs:193:16)
+    at async trial (file:///C:/Users/Kumar%20Lenovo%20PC/Desktop/Kumar/NUS/My_Mods/FYP/mlviz/benchmarks/state-migration/suite.mjs:215:45)
+    at async file:///C:/Users/Kumar%20Lenovo%20PC/Desktop/Kumar/NUS/My_Mods/FYP/mlviz/benchmarks/state-migration/suite.mjs:327:36
+{"errors":[],"requests":[{"path":"/config/config.json","payload":{}},{"path":"/config/visual/traditional_ml/kmeans.json","payload":{}},{"path":"/api/kmeans/params","payload":{}},{"path":"/api/kmeans/train","payload":{"parameters":{"visualisation_features":[0,1],"n_neighbors":5,"kernel":"linear","C":1,"centroids":[],"feature_1":0,"feature_2":1},"centroids":[],"visualisation_features":[0,1]}}]}
+Apply Parameters
+Step-by-Step Training
+
+Start by choosing initial points as cluster centers.
+
+Start Placing
+−5
+−4
+−3
+−2
+−1
+0
+1
+2
+3
+4
+5
+x
+−4
+−3
+−2
+−1
+0
+1
+2
+3
+4
+y
+Unassigned
+
+Pathways
+
+Back
+
+Visualisation/kmeans [page 0]

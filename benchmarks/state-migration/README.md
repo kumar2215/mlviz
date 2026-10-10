@@ -1,5 +1,85 @@
 # State migration benchmark
 
+## Full handover suite
+
+Run a fresh comparison of the Context version tagged `handover` with the
+optimized Zustand branch `test-benchmark`:
+
+    npm ci --prefix benchmarks/state-migration
+    npm run suite --prefix benchmarks/state-migration
+
+The suite covers all 14 visualizations registered in the historical app:
+
+| Model | Historical modes | Comparable current modes |
+|---|---|---|
+| Decision tree | train, predict, manual | manual |
+| KNN | train, predict | train, predict |
+| K-means | train, predict, step | step |
+| Linear regression | train, predict, step | train, step |
+| SVM | train, predict, step | train, predict, step |
+
+The default historical config links 12 unique modes through 15 pages. K-means
+and linear prediction are registered but not linked there; the suite includes
+them too. Duplicate story pages use one workload per component. The five
+removed modes receive baseline-only measurements, with no comparative delta.
+Deprecated decision-tree components and unregistered KNN learning code have no
+reachable app route and are excluded. Viz-only routes reuse training components.
+The report saves the exact historical config and registry sources as evidence.
+
+Workloads use real UI events: intercept/bias keyboard changes, manual-tree
+threshold changes, centroid placement/toggles, retraining, and prediction queries.
+Each trial checks initialization, actual input counts, point counts where
+applicable, expected final controls/query payloads, network requests, browser
+errors, visual output, and profiling activity. Initial random line generation is
+fixed to `Math.random() = 0.5` in both isolated browser contexts. SVM prediction
+starts with the same saved model fixture in each context because the historical
+prediction page requires an already trained model. Both begin with weights
+`w1=0, w2=1, b=0`. Predictions use
+the same query sequence; SVM calculates the individual query locally while its
+API request evaluates the current weights. Decision-tree prediction playback is
+advanced outside timing to validate the resulting highlighted branch.
+
+Defaults are 20 measured pairs and 3 warm-up pairs per scenario/build, 40 actions
+per trial, 250 points, and no CPU throttling. Trials are sequential, fresh contexts
+alternate A/B then B/A, and production timing is separate from React profiling.
+Training/prediction response bodies are fixed fixtures: this measures frontend
+processing, not training speed or real network latency. No rendering-opportunity
+latency is reported for asynchronous workloads. Per-metric intervals are
+exploratory and have no multiple-comparison correction. Whole-revision differences
+include renderer, layout, dependencies, routing and other refactors; they cannot
+be attributed to Zustand alone.
+
+Validate workloads before a long run (smoke artifacts stay in ignored `.cache`):
+
+    npm run suite --prefix benchmarks/state-migration -- --smoke --runs 1 --warmups 0 --steps 4
+
+Filter a diagnosis with `--scenarios knn-train,svm-step`, or change committed refs
+with `--baseline` / `--candidate`. Results, raw trial data, screenshots, commit IDs,
+hardware/browser settings and fixture/harness hashes go into **Git-trackable**
+`results/<timestamp>-handover/`. Only disposable `.cache/` remains ignored. Include
+new results in a Git commit to preserve them; removing an ignore rule alone does
+not make files committed.
+The local `.gitattributes` preserves archived evidence without line-ending
+conversion, so its recorded hashes remain valid after a Windows checkout.
+
+If a validation check stops a long run, retain the failed checkpoint and resume
+with its original settings and frozen source commits:
+
+    npm run suite --prefix benchmarks/state-migration -- --resume results/<timestamp>-handover/raw.json --restart kmeans-step:production
+
+`--restart` discards the named scenario/build block and repeats its warm-ups and
+measurements. Other complete pairs are retained; any incomplete pair is repeated
+in full. Resume verifies the fixture hash, Node/Chrome versions, CPU and dependency
+locks. Each trial carries a harness hash, compared pairs must share one, and the
+exact harness sources plus the failed checkpoint are preserved for audit. Only
+resume after a change outside the timed workload; a changed timed action, metric
+definition or fixture requires a fresh comparison for the affected scenarios.
+Use `--resume-reason "explanation"` to record another type of recovery. Checkpoints
+are replaced atomically between trials, with bounded retries for transient Windows
+file locks; checkpoint writing and retry delays are outside all timing windows.
+
+## Original single-scenario harness
+
 Automates one representative interaction in the real app: change the
 linear-regression intercept using the range input's native keyboard handling.
 The plot, loss map, controls, and results panel are mounted on both revisions.
@@ -66,11 +146,11 @@ it does not eliminate OS scheduling, thermal throttling, or measurement noise.
 - Alternates A/B then B/A within each build mode. Trials run sequentially.
 - Rejects runs with browser errors, unexpected API/config calls, wrong slider
   values/input counts, absent plot updates, or missing profiling instrumentation.
-  Zero renders of an instrumented component is a valid optimization outcome.
+Zero renders of an instrumented component is a valid optimization outcome.
 
 ## Measurements and output
 
-Each run writes an ignored results/timestamp directory:
+Each run writes a Git-trackable results/timestamp directory:
 
 - summary.md: medians, interquartile ranges, percentage reductions, and paired
   bootstrap 95% intervals for differences in medians.
