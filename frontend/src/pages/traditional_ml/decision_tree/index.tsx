@@ -1,12 +1,21 @@
 import DecisionTree from "./DecisionTreePage";
+import LessonPage from "./lesson/LessonPage";
 import type { IndexPageProps } from "@/types/page";
 
-export default function IndexPage({ name }: IndexPageProps) {
+export default function IndexPage(props: IndexPageProps) {
+    const { name } = props;
     let page = null;
 
     switch (name) {
         case "DecisionTree":
             page = <DecisionTree />;
+            break;
+        case "FollowQuestions":
+        case "NameTreeParts":
+        case "CompareIrisSplits":
+        case "TraceTraining":
+        case "FinalPrediction":
+            page = <LessonPage {...props} />;
             break;
         default:
             break;

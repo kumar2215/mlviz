@@ -4,7 +4,7 @@ import { useVisualisation, setCurrentVisualisation } from "@/store/useVisualisat
 import ListPage, { type ListItem } from "./pages/ListPage";
 import StoryPageWrapper from "@/pages/StoryPageWrapper";
 import VisualisationPage from "@/pages/VisualisationPage";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type Story from "@/types/story";
 import type Visualisation from "@/types/visualisation";
@@ -53,6 +53,7 @@ export default function App() {
     const [invalidPath, setInvalidPath] = useState<boolean>(false);
     const location = useLocation();
     const pathname = location.pathname;
+    const previousPathname = useRef<string | null>(null);
     const category = pathname.startsWith("/category/") ? pathname.slice("/category/".length).replace("/", "") : undefined;
     const storyName = pathname.startsWith("/story/") ? pathname.slice("/story/".length).replace("/", "") : undefined;
     const visualisationName = pathname.startsWith("/viz/") ? pathname.slice("/viz/".length).replace("/", "") : undefined;
@@ -62,6 +63,8 @@ export default function App() {
     }, [fetchConfig]);
 
     useEffect(() => {
+        const routeChanged = previousPathname.current !== pathname;
+        previousPathname.current = pathname;
         setInvalidPath(false);
         if (pathname === "/") {
             setItem(config?.categories.map((c) => ({ display_name: c.name, path: `/category/${c.config_path}`, icon: c.icon})) || null);
@@ -76,7 +79,11 @@ export default function App() {
             const story = stories[storyName!];
             setItem(story);
             setItemName("story");
-            setCurrentStory(story);
+            // StoryPageWrapper expands references before rendering. An App effect
+            // rerun must not replace that expanded story or reset its history.
+            if (routeChanged || useStory.getState().currentStory?.name !== story?.name) {
+                setCurrentStory(story);
+            }
             setCurrentVisualisation(null);
         } else if (pathname.startsWith("/viz/")) {
             const visualisation = visualisations[visualisationName!];
