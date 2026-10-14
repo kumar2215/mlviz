@@ -1,3 +1,3 @@
-# Compare regex tokens
+# Explore regex
 
-Preview each pattern, then choose the one that keeps contractions whole and punctuation separate.
+Regular expressions describe character patterns. Change the text, select a preset or edit the pattern, then click **Test pattern**. Compare the highlighted matches with the tokens produced. Try different ways of handling words, punctuation, numbers, and contractions.

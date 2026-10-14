@@ -1,5 +1,12 @@
-# Porter stemming: group related forms
+# Porter’s suffix rules
 
-After splitting text into words, a stemmer can reduce related forms to a shared stem. The original **Porter stemmer** applies ordered English suffix rules: `caresses` becomes `caress`, and `ponies` becomes `poni`. A stem need not be a dictionary word; its purpose is to group forms for comparison.
+Porter applies these groups **in order**. Examples below show the result of that group, before later rules run.
 
-Stemming changes a word that has already been found. It does not decide where the word begins or ends. Watch which rule steps change each example, then predict a few stems yourself. [Porter algorithm reference](https://tartarus.org/martin/PorterStemmer/index.html)
+- **1a–1b, plurals/verbs:** `sses → ss`, `ies → i`; drop `s` except in `ss`. For `eed`, use `eed → ee` only if `m > 0`. Other `ed`/`ing` endings are removed if the remainder has a vowel; then adjust doubled consonants or restore `e`: `hopping → hop`.
+- **1c, final y:** `y → i` if the remainder has a vowel: `happy → happi`; keep `sky`.
+- **2, longer suffixes:** for `m > 0`, e.g. `ational → ate`, `izer → ize`: `relational → relate`.
+- **3, shorter suffixes:** for `m > 0`, e.g. `icate → ic`, remove `ful`/`ness`: `hopeful → hope`.
+- **4, remaining endings:** for `m > 1`, remove endings such as `ment`, `ance`, or `al`: `adjustment → adjust`. Remove `ion` only after `s` or `t`.
+- **5, final e/ll:** remove `e` for `m > 1`, or `m = 1` without a short CVC ending; reduce `ll → l` for `m > 1`: `probate → probat`, but keep `rate`.
+
+**m** counts vowel-to-consonant transitions in the remaining stem. **CVC** means consonant–vowel–consonant, excluding final `w`, `x`, or `y`. These conditions prevent indiscriminate suffix removal.

@@ -17,18 +17,23 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
     });
 
     useEffect(() => {
+        const controller = new AbortController();
+        setError(null);
+        setHasOverflow(false);
         // If raw text is provided, use it directly
         if (text) {
             setContent(text);
+            setLoading(false);
             return;
         }
 
+        setContent("");
+        setLoading(false);
         // If path is provided, fetch the markdown file
         if (path) {
             setLoading(true);
-            setError(null);
 
-            fetch(path)
+            fetch(path, { signal: controller.signal })
                 .then((response) => {
                     if (!response.ok) {
                         throw new Error(
@@ -38,14 +43,17 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
                     return response.text();
                 })
                 .then((markdownText) => {
+                    if (controller.signal.aborted) return;
                     setContent(markdownText);
                     setLoading(false);
                 })
                 .catch((err) => {
+                    if (controller.signal.aborted) return;
                     setError(err.message);
                     setLoading(false);
                 });
         }
+        return () => controller.abort();
     }, [text, path]);
 
     useEffect(() => {

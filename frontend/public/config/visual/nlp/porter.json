@@ -1,14 +1,61 @@
 {
-    "display_name": "Porter Stemming",
-    "pages": [
-        {
-            "page_type": "dynamic",
-            "name": "PorterStemmer",
-            "dataset": { "type": "predefined_porter", "name": "suffixes" },
-            "parameters": {},
-            "completion_button_id": "porter-stemming-v1",
-            "subpages": ["Watch suffix rules", "Predict stems"]
-        }
-    ],
-    "transitions": []
+  "display_name": "Porter Stemming",
+  "pages": [
+    {
+      "page_type": "dynamic",
+      "name": "PorterExplore",
+      "dataset": {
+        "type": "predefined_porter",
+        "name": "rules"
+      },
+      "parameters": {},
+      "completion_button_id": "porter-rules-v1",
+      "subpages": [
+        "Plurals and verb endings",
+        "Final y",
+        "Replace longer suffixes",
+        "Shorten suffixes",
+        "Remove remaining endings",
+        "Final e and double l"
+      ]
+    },
+    {
+      "page_type": "dynamic",
+      "name": "PorterLab",
+      "dataset": {
+        "type": "predefined_porter",
+        "name": "suffixes"
+      },
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
+      "name": "PorterFamilies",
+      "dataset": {
+        "type": "predefined_porter",
+        "name": "families"
+      },
+      "parameters": {},
+      "completion_button_id": "porter-families-v2"
+    }
+  ],
+  "transitions": [
+    {
+      "from": 0,
+      "to": 1,
+      "condition": {
+        "condition_type": "Button",
+        "button_id": "porter-rules-v1",
+        "name": "Predict suffix changes"
+      }
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Group word forms"
+      }
+    }
+  ]
 }

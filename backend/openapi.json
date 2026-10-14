@@ -1478,6 +1478,88 @@
         }
       }
     },
+    "/api/bpe/apply/state": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "Apply State",
+        "operationId": "apply_state_api_bpe_apply_state_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeStateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeApplyStateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bpe/apply/merge": {
+      "post": {
+        "tags": [
+          "Byte Pair Encoding"
+        ],
+        "summary": "Apply Merge",
+        "operationId": "apply_merge_api_bpe_apply_merge_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BpeApplyMoveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BpeApplyMoveResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/tokenization/regex/state": {
       "post": {
         "tags": [
@@ -1683,6 +1765,88 @@
         }
       }
     },
+    "/api/tokenization/porter/check-step": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Porter Step",
+        "operationId": "porter_step_api_tokenization_porter_check_step_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PorterStepRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/tokenization/porter/check-placement": {
+      "post": {
+        "tags": [
+          "Tokenization"
+        ],
+        "summary": "Porter Placement",
+        "operationId": "porter_placement_api_tokenization_porter_check_placement_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PorterPlacementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health Check",
@@ -1731,6 +1895,129 @@
         ],
         "title": "AnyParameterInfo",
         "description": "Any type parameter."
+      },
+      "BpeApplyMoveRequest": {
+        "properties": {
+          "dataset": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedBpeDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomBpeDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_bpe": "#/components/schemas/CustomBpeDataset",
+                "predefined_bpe": "#/components/schemas/PredefinedBpeDataset"
+              }
+            }
+          },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenAnswer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Answers"
+          },
+          "rule_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Rule Index"
+          },
+          "word_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Word Index"
+          },
+          "left_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Left Index"
+          },
+          "right_index": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Right Index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "answers",
+          "rule_index",
+          "word_index",
+          "left_index",
+          "right_index"
+        ],
+        "title": "BpeApplyMoveRequest"
+      },
+      "BpeApplyMoveResponse": {
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenAnswer"
+            },
+            "type": "array",
+            "title": "Answers"
+          },
+          "rule_index": {
+            "type": "integer",
+            "title": "Rule Index"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          },
+          "correct": {
+            "type": "boolean",
+            "title": "Correct"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answers",
+          "rule_index",
+          "complete",
+          "correct",
+          "message"
+        ],
+        "title": "BpeApplyMoveResponse"
+      },
+      "BpeApplyStateResponse": {
+        "properties": {
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/BpeTokenAnswer"
+            },
+            "type": "array",
+            "title": "Answers"
+          },
+          "rule_index": {
+            "type": "integer",
+            "title": "Rule Index"
+          },
+          "complete": {
+            "type": "boolean",
+            "title": "Complete"
+          }
+        },
+        "type": "object",
+        "required": [
+          "answers",
+          "rule_index",
+          "complete"
+        ],
+        "title": "BpeApplyStateResponse"
       },
       "BpeCheckResponse": {
         "properties": {
@@ -1786,7 +2073,22 @@
       "BpeCountCheckRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedBpeDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedBpeDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomBpeDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_bpe": "#/components/schemas/CustomBpeDataset",
+                "predefined_bpe": "#/components/schemas/PredefinedBpeDataset"
+              }
+            }
           },
           "round_index": {
             "type": "integer",
@@ -1813,7 +2115,22 @@
       "BpeMergeCheckRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedBpeDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedBpeDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomBpeDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_bpe": "#/components/schemas/CustomBpeDataset",
+                "predefined_bpe": "#/components/schemas/PredefinedBpeDataset"
+              }
+            }
           },
           "round_index": {
             "type": "integer",
@@ -1876,7 +2193,22 @@
       "BpeRestoreCheckRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedBpeDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedBpeDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomBpeDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_bpe": "#/components/schemas/CustomBpeDataset",
+                "predefined_bpe": "#/components/schemas/PredefinedBpeDataset"
+              }
+            }
           },
           "round_index": {
             "type": "integer",
@@ -1950,7 +2282,22 @@
       "BpeStateRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedBpeDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedBpeDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomBpeDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_bpe": "#/components/schemas/CustomBpeDataset",
+                "predefined_bpe": "#/components/schemas/PredefinedBpeDataset"
+              }
+            }
           }
         },
         "type": "object",
@@ -2042,7 +2389,22 @@
       "BpeTokenCheckRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedBpeDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedBpeDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomBpeDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_bpe": "#/components/schemas/CustomBpeDataset",
+                "predefined_bpe": "#/components/schemas/PredefinedBpeDataset"
+              }
+            }
           },
           "answers": {
             "items": {
@@ -2084,6 +2446,28 @@
           "frequency"
         ],
         "title": "BpeTokenWord"
+      },
+      "BpeWord": {
+        "properties": {
+          "word": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "title": "Word"
+          },
+          "frequency": {
+            "type": "integer",
+            "maximum": 1000.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Frequency"
+          }
+        },
+        "type": "object",
+        "required": [
+          "word",
+          "frequency"
+        ],
+        "title": "BpeWord"
       },
       "CacheInfoResponse": {
         "properties": {
@@ -2129,6 +2513,11 @@
           "correct": {
             "type": "boolean",
             "title": "Correct"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "default": ""
           }
         },
         "type": "object",
@@ -2331,6 +2720,101 @@
           "train"
         ],
         "title": "ClassificationMetrics"
+      },
+      "CustomBpeDataset": {
+        "properties": {
+          "words": {
+            "items": {
+              "$ref": "#/components/schemas/BpeWord"
+            },
+            "type": "array",
+            "maxItems": 8,
+            "minItems": 1,
+            "title": "Words"
+          },
+          "rounds": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Rounds",
+            "default": 2
+          },
+          "test_words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "title": "Test Words"
+          },
+          "restore_word": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Restore Word"
+          },
+          "type": {
+            "type": "string",
+            "const": "custom_bpe",
+            "title": "Type",
+            "default": "custom_bpe"
+          }
+        },
+        "type": "object",
+        "required": [
+          "words"
+        ],
+        "title": "CustomBpeDataset"
+      },
+      "CustomPorterDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "custom_porter",
+            "title": "Type",
+            "default": "custom_porter"
+          },
+          "words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 6,
+            "minItems": 1,
+            "title": "Words"
+          }
+        },
+        "type": "object",
+        "required": [
+          "words"
+        ],
+        "title": "CustomPorterDataset"
+      },
+      "CustomRegexDataset": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "const": "custom_regex",
+            "title": "Type",
+            "default": "custom_regex"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "CustomRegexDataset"
       },
       "DatasetInfo": {
         "properties": {
@@ -5300,7 +5784,22 @@
       "PorterCheckRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedPorterDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedPorterDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomPorterDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_porter": "#/components/schemas/CustomPorterDataset",
+                "predefined_porter": "#/components/schemas/PredefinedPorterDataset"
+              }
+            }
           },
           "answers": {
             "items": {
@@ -5333,6 +5832,13 @@
             },
             "type": "array",
             "title": "Changes"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/PorterStep"
+            },
+            "type": "array",
+            "title": "Steps"
           }
         },
         "type": "object",
@@ -5343,10 +5849,86 @@
         ],
         "title": "PorterExample"
       },
+      "PorterGroup": {
+        "properties": {
+          "stem": {
+            "type": "string",
+            "title": "Stem"
+          },
+          "words": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Words"
+          }
+        },
+        "type": "object",
+        "required": [
+          "stem",
+          "words"
+        ],
+        "title": "PorterGroup"
+      },
+      "PorterPlacementRequest": {
+        "properties": {
+          "dataset": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedPorterDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomPorterDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_porter": "#/components/schemas/CustomPorterDataset",
+                "predefined_porter": "#/components/schemas/PredefinedPorterDataset"
+              }
+            }
+          },
+          "word": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Word"
+          },
+          "stem": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Stem"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "word",
+          "stem"
+        ],
+        "title": "PorterPlacementRequest"
+      },
       "PorterStateRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedPorterDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedPorterDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomPorterDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_porter": "#/components/schemas/CustomPorterDataset",
+                "predefined_porter": "#/components/schemas/PredefinedPorterDataset"
+              }
+            }
           }
         },
         "type": "object",
@@ -5370,14 +5952,105 @@
             },
             "type": "array",
             "title": "Quiz Words"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/PorterGroup"
+            },
+            "type": "array",
+            "title": "Groups"
           }
         },
         "type": "object",
         "required": [
           "examples",
-          "quiz_words"
+          "quiz_words",
+          "groups"
         ],
         "title": "PorterStateResponse"
+      },
+      "PorterStep": {
+        "properties": {
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          },
+          "label": {
+            "type": "string",
+            "title": "Label"
+          },
+          "before": {
+            "type": "string",
+            "title": "Before"
+          },
+          "after": {
+            "type": "string",
+            "title": "After"
+          },
+          "candidates": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Candidates"
+          }
+        },
+        "type": "object",
+        "required": [
+          "index",
+          "label",
+          "before",
+          "after",
+          "candidates"
+        ],
+        "title": "PorterStep"
+      },
+      "PorterStepRequest": {
+        "properties": {
+          "dataset": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedPorterDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomPorterDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_porter": "#/components/schemas/CustomPorterDataset",
+                "predefined_porter": "#/components/schemas/PredefinedPorterDataset"
+              }
+            }
+          },
+          "word": {
+            "type": "string",
+            "maxLength": 32,
+            "minLength": 1,
+            "title": "Word"
+          },
+          "step_index": {
+            "type": "integer",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Step Index"
+          },
+          "answer": {
+            "type": "string",
+            "maxLength": 32,
+            "title": "Answer"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dataset",
+          "word",
+          "step_index",
+          "answer"
+        ],
+        "title": "PorterStepRequest"
       },
       "PredefinedBpeDataset": {
         "properties": {
@@ -5455,7 +6128,11 @@
           },
           "name": {
             "type": "string",
-            "const": "suffixes",
+            "enum": [
+              "rules",
+              "suffixes",
+              "families"
+            ],
             "title": "Name"
           }
         },
@@ -5525,21 +6202,97 @@
       "RegexChoiceRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedRegexDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedRegexDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomRegexDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_regex": "#/components/schemas/CustomRegexDataset",
+                "predefined_regex": "#/components/schemas/PredefinedRegexDataset"
+              }
+            }
           },
           "option_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Option Id"
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pattern"
+          },
+          "flags": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "IGNORECASE",
+                "MULTILINE",
+                "DOTALL"
+              ]
+            },
+            "type": "array",
+            "maxItems": 3,
+            "title": "Flags"
+          },
+          "goal_id": {
             "type": "string",
             "maxLength": 64,
-            "minLength": 1,
-            "title": "Option Id"
+            "title": "Goal Id",
+            "default": "contractions"
           }
         },
         "type": "object",
         "required": [
-          "dataset",
-          "option_id"
+          "dataset"
         ],
         "title": "RegexChoiceRequest"
+      },
+      "RegexGoal": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "text"
+        ],
+        "title": "RegexGoal"
       },
       "RegexMatch": {
         "properties": {
@@ -5595,6 +6348,11 @@
             },
             "type": "array",
             "title": "Matches"
+          },
+          "truncated": {
+            "type": "boolean",
+            "title": "Truncated",
+            "default": false
           }
         },
         "type": "object",
@@ -5606,7 +6364,22 @@
       "RegexStateRequest": {
         "properties": {
           "dataset": {
-            "$ref": "#/components/schemas/PredefinedRegexDataset"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PredefinedRegexDataset"
+              },
+              {
+                "$ref": "#/components/schemas/CustomRegexDataset"
+              }
+            ],
+            "title": "Dataset",
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "custom_regex": "#/components/schemas/CustomRegexDataset",
+                "predefined_regex": "#/components/schemas/PredefinedRegexDataset"
+              }
+            }
           }
         },
         "type": "object",
@@ -5627,12 +6400,20 @@
             },
             "type": "array",
             "title": "Options"
+          },
+          "goals": {
+            "items": {
+              "$ref": "#/components/schemas/RegexGoal"
+            },
+            "type": "array",
+            "title": "Goals"
           }
         },
         "type": "object",
         "required": [
           "text",
-          "options"
+          "options",
+          "goals"
         ],
         "title": "RegexStateResponse"
       },

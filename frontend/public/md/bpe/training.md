@@ -1,3 +1,3 @@
-# Train and test BPE
+# Learn BPE by merging
 
-Count adjacent pairs using each word’s frequency, choose the strongest merge, then split new words with the rules you learned. Separate tokens with spaces and include `</w>`.
+Edit the corpus: one **word frequency** per line. Select the most frequent adjacent pair and merge it throughout the corpus; frequencies weight the counts. Recount after every merge. For ties, choose the alphabetically first pair. `</w>` marks a word boundary.

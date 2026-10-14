@@ -4,11 +4,11 @@ from fastapi import HTTPException
 from pydantic import ValidationError
 
 from api.tokenization import porter_check, porter_state, regex_check, regex_preview, regex_state
-from models.tokenization import (
+from models.text_preprocessing import (
     PorterAnswer, PorterCheckRequest, PorterStateRequest, PredefinedPorterDataset,
     PredefinedRegexDataset, RegexChoiceRequest, RegexStateRequest,
 )
-from services.tokenization_service import porter_example, porter_stem
+from services.text_preprocessing_service import porter_example, porter_stem
 
 
 class TokenizationTests(unittest.TestCase):
@@ -49,6 +49,20 @@ class TokenizationTests(unittest.TestCase):
             PredefinedRegexDataset(name="unknown")
         with self.assertRaises(ValidationError):
             PredefinedPorterDataset(name="unknown")
+
+    def test_rule_examples_match_each_algorithm_stage(self):
+        state = porter_state(PorterStateRequest(dataset=PredefinedPorterDataset(name="rules")))
+        expected = [("hopping", "hop"), ("happy", "happi"), ("relational", "relate"),
+                    ("hopeful", "hope"), ("adjustment", "adjust"), ("probate", "probat")]
+        for index, (word, result) in enumerate(expected):
+            example = state.examples[index]
+            self.assertEqual(example.word, word)
+            self.assertEqual(example.steps[index].after, result)
+            self.assertNotEqual(example.steps[index].before, result)
+            self.assertEqual(example.stem, porter_stem(word))
+        for word, index in [("feed", 0), ("sky", 1), ("rate", 5)]:
+            step = porter_example(word).steps[index]
+            self.assertEqual(step.before, step.after)
 
 
 if __name__ == "__main__":

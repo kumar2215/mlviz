@@ -3,6 +3,7 @@ from collections import Counter
 from models.bpe import (
     BpeCorpus, BpePair, BpePairCount, BpeRound, BpeStateResponse,
     BpeTokenWord, BpeWord, PredefinedBpeDataset,
+    BpeApplyStateResponse, BpeTokenAnswer,
 )
 
 END = "</w>"
@@ -98,3 +99,44 @@ def tokenize(word: str, rounds: list[BpeRound]) -> list[str]:
     for round_data in rounds:
         tokens = merge_tokens(tokens, round_data.rule)
     return tokens
+
+
+def advance_rule(answers: list[BpeTokenAnswer], rounds: list[BpeRound], index: int) -> BpeApplyStateResponse:
+    while index < len(rounds):
+        rule = rounds[index].rule
+        if any(merge_tokens(answer.tokens, rule) != answer.tokens for answer in answers):
+            break
+        index += 1
+    return BpeApplyStateResponse(answers=answers, rule_index=index, complete=index == len(rounds))
+
+
+def initial_application(source) -> BpeApplyStateResponse:
+    state = train(source)
+    if not state.test_words:
+        raise ValueError("Enter at least one test word")
+    return advance_rule([BpeTokenAnswer(word=word, tokens=initial_tokens(word)) for word in state.test_words], state.rounds, 0)
+
+
+def apply_selected(request):
+    state = train(request.dataset)
+    if request.rule_index >= len(state.rounds) or request.word_index >= len(request.answers):
+        raise ValueError("Selected rule or word is out of range")
+    if [answer.word for answer in request.answers] != state.test_words:
+        raise ValueError("Answers must contain the current test words in order")
+    rule = state.rounds[request.rule_index].rule
+    for answer in request.answers:
+        before = tokenize(answer.word, state.rounds[:request.rule_index])
+        after = merge_tokens(before, rule)
+        if answer.tokens not in (before, after):
+            raise ValueError("Token state does not match the learned rules")
+    answer = request.answers[request.word_index]
+    left = request.left_index
+    correct = (
+        request.right_index == left + 1
+        and left + 1 < len(answer.tokens)
+        and answer.tokens[left] == rule.left and answer.tokens[left + 1] == rule.right
+    )
+    answers = [item.model_copy(deep=True) for item in request.answers]
+    if correct:
+        answers[request.word_index].tokens = merge_tokens(answer.tokens, rule)
+    return correct, advance_rule(answers, state.rounds, request.rule_index)

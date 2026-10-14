@@ -1,14 +1,39 @@
 {
-    "display_name": "Regex",
-    "pages": [
-        {
-            "page_type": "dynamic",
-            "name": "RegexTokenizer",
-            "dataset": { "type": "predefined_regex", "name": "punctuation" },
-            "parameters": {},
-            "completion_button_id": "regex-tokenizer-v1",
-            "subpages": ["Compare patterns", "Choose a tokenizer"]
-        }
-    ],
-    "transitions": []
+  "display_name": "Regex",
+  "pages": [
+    {
+      "page_type": "dynamic",
+      "name": "RegexPlayground",
+      "dataset": {
+        "type": "predefined_regex",
+        "name": "punctuation"
+      },
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
+      "name": "RegexChallenges",
+      "dataset": {
+        "type": "predefined_regex",
+        "name": "punctuation"
+      },
+      "parameters": {},
+      "completion_button_id": "regex-objectives-v2",
+      "subpages": [
+        "Contractions",
+        "Decimal numbers",
+        "Social text"
+      ]
+    }
+  ],
+  "transitions": [
+    {
+      "from": 0,
+      "to": 1,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Try the objectives"
+      }
+    }
+  ]
 }

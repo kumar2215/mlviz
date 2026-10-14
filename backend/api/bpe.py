@@ -4,8 +4,9 @@ from models.bpe import (
     BpeCheckResponse, BpeCountCheckRequest, BpeMergeCheckRequest,
     BpeRestoreCheckRequest, BpeStateRequest, BpeStateResponse,
     BpeTokenCheckRequest,
+    BpeApplyMoveRequest, BpeApplyMoveResponse, BpeApplyStateResponse,
 )
-from services.bpe_service import merge_tokens, tokenize, train
+from services.bpe_service import apply_selected, initial_application, merge_tokens, tokenize, train
 
 router = APIRouter()
 
@@ -71,3 +72,21 @@ def check_tokenizations(request: BpeTokenCheckRequest):
         and all(given.get(word) == tokenize(word, state_data.rounds) for word in expected_words)
     )
     return BpeCheckResponse(correct=correct)
+
+
+@router.post("/apply/state", response_model=BpeApplyStateResponse)
+def apply_state(request: BpeStateRequest):
+    try:
+        return initial_application(request.dataset)
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error
+
+
+@router.post("/apply/merge", response_model=BpeApplyMoveResponse)
+def apply_merge(request: BpeApplyMoveRequest):
+    try:
+        correct, result = apply_selected(request)
+        return BpeApplyMoveResponse(**result.model_dump(), correct=correct,
+            message="Rule applied. Continue with the remaining tokens." if correct else "Select an adjacent pair matching the current rule.")
+    except ValueError as error:
+        raise HTTPException(status_code=400, detail=str(error)) from error

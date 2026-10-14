@@ -34,6 +34,9 @@ export default function VisualisationPage() {
     const [replayKey, setReplayKey] = useState(0);
     const currentPage: PageUnion = pages[currentPageId];
     const activeDynamicPage = currentPage?.page_type === "mixed" && currentPage.dynamic_page.page_type === "dynamic" ? currentPage.dynamic_page : currentPage?.page_type === "dynamic" ? currentPage : null;
+    const pageCompleted = Boolean(activeDynamicPage?.completion_button_id && currentHistory?.entries.some(
+        entry => entry.actionType === "button_click" && entry.button_id === activeDynamicPage.completion_button_id,
+    ));
     const subpages = activeDynamicPage?.subpages ?? [];
     const isLastSubpage = subpages.length === 0 || subpageIndex === subpages.length - 1;
     const markSubpageReady = useCallback(() => {
@@ -156,7 +159,7 @@ export default function VisualisationPage() {
                         subpage={subpages.length > 0 ? {
                             index: subpageIndex,
                             labels: subpages,
-                            canAdvance: Boolean(readySubpages[subpageIndex]),
+                            canAdvance: Boolean(readySubpages[subpageIndex]) || pageCompleted,
                             onNext: () => setSubpageIndex(value => value + 1),
                             onReplay: () => {
                                 setSubpageIndex(0);

@@ -40,6 +40,6 @@
     ],
     "stories": [
         "decision_tree",
-        "tokenization"
+        "text_preprocessing"
     ]
 }
