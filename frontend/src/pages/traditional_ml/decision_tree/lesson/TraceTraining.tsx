@@ -33,10 +33,10 @@ export default function TraceTraining({ completionButtonId }: { completionButton
     return <Frame><DragSurface>
         <h2 className="shrink-0 text-lg font-semibold">Rebuild the training sequence</h2>
         <div className="grid min-h-0 flex-1 grid-cols-2 gap-4">
-            <section className="flex min-h-0 flex-col justify-center gap-3 rounded-xl bg-indigo-50 p-4"><h3 className="font-semibold text-indigo-900">Steps to place</h3>{[2, 0, 3, 1].filter(step => !slots.includes(step)).map(step => <DragChip key={step} id={String(step)} label={`Training step: ${steps[step]}`}>{steps[step]}</DragChip>)}{slots.every(step => step !== null) && <p className="text-sm text-indigo-800">All steps placed.</p>}</section>
+            <section className="flex min-h-0 flex-col justify-center gap-3 rounded-xl bg-blue-50 p-4"><h3 className="font-semibold text-blue-900">Steps to place</h3>{[2, 0, 3, 1].filter(step => !slots.includes(step)).map(step => <DragChip key={step} id={String(step)} label={`Training step: ${steps[step]}`}>{steps[step]}</DragChip>)}{slots.every(step => step !== null) && <p className="text-sm text-blue-800">All steps placed.</p>}</section>
             <section className="flex min-h-0 flex-col justify-center gap-2" aria-label="Training sequence">{slots.map((step, index) => <div key={index}>
                 <DropTarget label={`Training position ${index + 1}`} disabled={finished} onPlace={id => place(id, index)} className={`flex items-center gap-2 ${checked && step !== index ? "!border-amber-500 !bg-amber-50" : ""}`}><span className="lesson-part-marker shrink-0">{index + 1}</span>{step === null ? <span className="text-sm text-slate-500">Drop a step</span> : <DragChip id={String(step)} disabled={finished} label={`Placed step: ${steps[step]}`}>{steps[step]}</DragChip>}</DropTarget>
-                {index < slots.length - 1 && <div aria-hidden="true" className="text-center text-sm leading-none text-indigo-400">↓</div>}
+                {index < slots.length - 1 && <div aria-hidden="true" className="text-center text-sm leading-none text-blue-400">↓</div>}
             </div>)}</section>
         </div>
         <div className="flex shrink-0 justify-end"><Button className={selectedClass} disabled={slots.some(step => step === null) || finished} onClick={check}>Check sequence</Button></div>

@@ -11,9 +11,9 @@ app = FastAPI(
     description="API documentation including ML model training and data analysis.",
     version="1.0.0",
     contact={
-        "name": "zaidan sani",
-        "url": "https://mzaidanbs.github.io",
-        "email": "mzaidanbs@gmail.com"
+        "name": "kumar",
+        "url": "https://github.com/kumar2215",
+        "email": "kumar.kg279@gmail.com"
     },
     license_info={
         "name": "Apache 2.0",

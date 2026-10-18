@@ -22,9 +22,9 @@ app.config['SWAGGER'] = {
                     'including ML model training and data analysis.'),
     'version': '1.0.0',
     'contact': {
-        'name': 'Zaidan',
-        'url': 'https://mzaidanbs.github.io',
-        'email': 'mzaidanbs@gmail.com'
+        'name': 'Kumar',
+        'url': 'https://github.com/kumar2215',
+        'email': 'kumar.kg279@gmail.com'
     },
     'license': {
         'name': 'Apache 2.0',

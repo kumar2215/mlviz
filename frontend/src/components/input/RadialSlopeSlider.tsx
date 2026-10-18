@@ -64,7 +64,7 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
 
     const angle = slopeToAngle(slope, xSpan, ySpan);
     const hp    = arcPt(angle, cx, cy, r);
-    const color = angle >= 0 ? "#6366f1" : "#f97316";
+    const color = angle >= 0 ? "#0284c7" : "#f97316";
 
     // Indicator line sits inside the arc curve (higher than the peak)
     const previewY   = cy + r * 0.6;

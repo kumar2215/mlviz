@@ -1,3 +1,4 @@
+import { DEFAULT_COLORS } from "@/utils/colorUtils";
 /**
  * KMeans Step-by-Step Training Visualization
  * Specialized for an iterative cycle: Select -> Run Step -> Preview Next -> Repeat
@@ -113,7 +114,7 @@ export default function KMeansStepVisualisation() {
         return d3
             .scaleOrdinal<string>()
             .domain(domain)
-            .range([...d3.schemeCategory10.slice(0, n), UNASSIGNED_COLOR]);
+            .range([...DEFAULT_COLORS.slice(0, n), UNASSIGNED_COLOR]);
     }, [selectedCentroids.length]);
 
     const handlePointClick = useCallback(

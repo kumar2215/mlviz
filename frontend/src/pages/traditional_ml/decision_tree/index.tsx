@@ -22,7 +22,7 @@ export default function IndexPage(props: IndexPageProps) {
     }
 
     if (!page) {
-        page = <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">Unknown page: {name}</div>;
+        page = <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">Unknown page: {name}</div>;
     }
 
     return page;

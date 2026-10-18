@@ -1,11 +1,14 @@
 import MarkdownWrapper from "@/components/markdown/MarkdownWrapper";
+import PageLoading from "@/components/layout/PageLoading";
 import type { StaticPageParameters } from "@/types/page";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ text, path, compact = false }) => {
-    const [content, setContent] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+    const [loaded, setLoaded] = useState<{ path: string; content: string; error: string | null } | null>(null);
+    const loadedDocument = loaded?.path === path ? loaded : null;
+    const content = text || loadedDocument?.content || "";
+    const loading = !text && Boolean(path) && !loadedDocument;
+    const error = text ? null : loadedDocument?.error ?? null;
 
     const contentRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -17,22 +20,10 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
     });
 
     useEffect(() => {
-        const controller = new AbortController();
-        setError(null);
         setHasOverflow(false);
-        // If raw text is provided, use it directly
-        if (text) {
-            setContent(text);
-            setLoading(false);
-            return;
-        }
-
-        setContent("");
-        setLoading(false);
-        // If path is provided, fetch the markdown file
-        if (path) {
-            setLoading(true);
-
+        if (!text && path) {
+            const controller = new AbortController();
+            setLoaded(null);
             fetch(path, { signal: controller.signal })
                 .then((response) => {
                     if (!response.ok) {
@@ -44,16 +35,14 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
                 })
                 .then((markdownText) => {
                     if (controller.signal.aborted) return;
-                    setContent(markdownText);
-                    setLoading(false);
+                    setLoaded({ path, content: markdownText, error: null });
                 })
                 .catch((err) => {
                     if (controller.signal.aborted) return;
-                    setError(err.message);
-                    setLoading(false);
+                    setLoaded({ path, content: "", error: err instanceof Error ? err.message : "Could not load this page." });
                 });
+            return () => controller.abort();
         }
-        return () => controller.abort();
     }, [text, path]);
 
     useEffect(() => {
@@ -110,21 +99,19 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
 
     if (compact) {
         return (
-            <div className="w-full shrink-0 bg-gradient-to-br from-blue-50 to-purple-50 px-4 py-2">
-                <div className="mx-auto max-w-5xl [&_h1]:!my-0 [&_h1]:!text-2xl [&_p]:!mb-0 [&_p]:!text-sm [&_p]:!leading-snug [&_div]:!p-0">
-                    {loading ? "Loading markdown..." : error ? `Error: ${error}` : <MarkdownWrapper>{content}</MarkdownWrapper>}
-                </div>
+            <div className="w-full shrink-0 px-4 py-2">
+                {loading ? <div className="h-24"><PageLoading label="Loading page…" /></div> : <div className="mx-auto max-w-5xl [&_h1]:!my-0 [&_h1]:!text-2xl [&_p]:!mb-0 [&_p]:!text-sm [&_p]:!leading-snug [&_div]:!p-0">
+                    {error ? <p role="alert" className="text-center text-red-600">Error: {error}</p> : <MarkdownWrapper>{content}</MarkdownWrapper>}
+                </div>}
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col items-center h-full w-full overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="flex flex-col items-center h-full w-full overflow-hidden bg-page">
             <div ref={containerRef} className="w-7/10 flex-1 flex flex-col min-h-0 py-6 px-6 relative">
                 {loading && (
-                    <div className="text-center text-gray-600 my-auto">
-                        Loading markdown...
-                    </div>
+                    <PageLoading label="Loading page…" />
                 )}
                 {error && (
                     <div className="text-center text-red-600 my-auto">

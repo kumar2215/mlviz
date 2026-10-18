@@ -57,8 +57,8 @@ export default function FollowQuestions({ completionButtonId }: { completionButt
     };
 
     return <Frame><DragSurface>
-        <div className="flex shrink-0 items-center justify-between gap-2"><h2 className="text-lg font-semibold">Sort the flowers</h2><span className="text-sm font-medium text-indigo-800">{finished ? "6 / 6 at leaves" : stage === 0 ? "Root split" : "Petal-width split"}</span></div>
-        <div className="flex min-h-20 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg border border-indigo-100 bg-indigo-50 p-2" aria-label="Flowers to sort">
+        <div className="flex shrink-0 items-center justify-between gap-2"><h2 className="text-lg font-semibold">Sort the flowers</h2><span className="text-sm font-medium text-blue-800">{finished ? "6 / 6 at leaves" : stage === 0 ? "Root split" : "Petal-width split"}</span></div>
+        <div className="flex min-h-20 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg border border-blue-100 bg-blue-50 p-2" aria-label="Flowers to sort">
             {activeFlowers.map(flower => <DragChip key={flower.id} id={flower.id} label={`Flower ${flower.id}: length ${flower.length}, width ${flower.width}`}><FlowerIcon /><span className="text-left"><strong>{flower.id}</strong><span className="block text-xs">L {flower.length.toFixed(1)} · W {flower.width.toFixed(1)} cm</span></span></DragChip>)}
             {finished && <span className="text-sm font-medium text-emerald-800">Every flower is in a leaf below.</span>}
         </div>

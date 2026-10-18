@@ -5,22 +5,22 @@
 }
 @utility lesson-tree-node { position: absolute; transform: translate(-50%, -50%); text-align: center; font-size: 13px; }
 @utility lesson-question {
-    border: 2px solid #a5b4fc; border-radius: 12px; background: #eef2ff; padding: 10px; font-weight: 600; color: #312e81;
+    border: 2px solid #93c5fd; border-radius: 12px; background: #eff6ff; padding: 10px; font-weight: 600; color: #1e3a8a;
     @media (max-height: 800px) { padding: 8px; }
 }
-@utility lesson-question-active { border-color: #4f46e5; box-shadow: 0 0 0 3px #e0e7ff; }
+@utility lesson-question-active { border-color: #2563eb; box-shadow: 0 0 0 3px #dbeafe; }
 @utility lesson-drop {
-    min-height: 70px; border: 2px dashed #a5b4fc; border-radius: 12px; padding: 8px; background: #fff; outline-offset: 3px; transition: background .15s, border-color .15s;
+    min-height: 70px; border: 2px dashed #93c5fd; border-radius: 12px; padding: 8px; background: #fff; outline-offset: 3px; transition: background .15s, border-color .15s;
     @media (max-height: 800px) { min-height: 62px; padding: 6px; }
 }
-@utility lesson-drop-ready { cursor: pointer; border-color: #6366f1; background: #eef2ff; }
-@utility lesson-drop-hover { border-color: #4f46e5; background: #c7d2fe; }
+@utility lesson-drop-ready { cursor: pointer; border-color: #0284c7; background: #eff6ff; }
+@utility lesson-drop-hover { border-color: #2563eb; background: #bfdbfe; }
 @utility lesson-leaf {
     border: 2px solid #a7f3d0; border-radius: 12px; padding: 8px; background: #ecfdf5; min-height: 70px;
     @media (max-height: 800px) { min-height: 62px; padding: 6px; }
 }
 @utility lesson-branch-label { position: absolute; border-radius: 6px; padding: 2px 8px; background: #f8fafc; font-size: 12px; font-weight: 600; color: #475569; transform: translate(-50%, -50%); }
-@utility lesson-part-marker { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #4338ca; color: #fff; font-size: 12px; font-weight: 700; }
+@utility lesson-part-marker { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #1d4ed8; color: #fff; font-size: 12px; font-weight: 700; }
 @utility lesson-split-branches {
     position: relative; padding-top: 24px;
     &::before { content: ""; position: absolute; left: 25%; right: 25%; top: 8px; height: 16px; border: solid #94a3b8; border-width: 2px 2px 0; }

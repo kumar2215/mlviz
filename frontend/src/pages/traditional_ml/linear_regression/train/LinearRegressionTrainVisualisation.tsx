@@ -3,7 +3,7 @@
  * Runs OLS training and shows:
  *  - Scatter plot
  *  - Optimal OLS line (dashed green)
- *  - User-adjustable line (solid indigo) + live R²
+ *  - User-adjustable line (solid blue) + live R²
  *  - Train / test metrics panel
  */
 

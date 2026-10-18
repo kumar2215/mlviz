@@ -4,6 +4,7 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useDataset } from "@/store/useDataset";
 import type { IndexPageProps } from "@/types/page";
 import RegexEditor from "./RegexEditor";
+import PageLoading from "@/components/layout/PageLoading";
 
 export default function IndexPage({ name, subpageIndex = 0, replayKey = 0, onSubpageReady, completionButtonId }: IndexPageProps) {
     const dataset = useDataset(state => state.activeDataset);
@@ -17,7 +18,7 @@ export default function IndexPage({ name, subpageIndex = 0, replayKey = 0, onSub
         return () => { active = false; };
     }, [dataset]);
     if (error) return <div role="alert" className="p-4">{error}</div>;
-    if (!data) return <div className="p-4">Loading regex examples…</div>;
+    if (!data) return <PageLoading label="Loading regex examples…" />;
     if (name === "RegexPlayground") return <RegexEditor key={`play-${replayKey}`} data={data} />;
     if (name === "RegexChallenges" && onSubpageReady && completionButtonId) {
         const goal = data.goals[subpageIndex];

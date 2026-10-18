@@ -26,7 +26,7 @@ function MobileBlockScreen({ reason }: { reason: BlockReason }) {
     return (
         <div className="w-screen h-screen flex flex-col items-center justify-center bg-white px-8 text-center gap-6">
             <div className="text-4xl">{isMobile ? "📱" : "↔️"}</div>
-            <h1 className="text-2xl bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent font-semibold font-mono tracking-tight">
+            <h1 className="text-2xl bg-gradient-to-r from-sky-500 to-cyan-500 bg-clip-text text-transparent font-semibold font-mono tracking-tight">
                 {isMobile ? "Desktop Only" : "Window Too Narrow"}
             </h1>
             <p className="text-gray-500 max-w-sm">
@@ -67,10 +67,10 @@ export default function App() {
         previousPathname.current = pathname;
         setInvalidPath(false);
         if (pathname === "/") {
-            setItem(config?.categories.map((c) => ({ display_name: c.name, path: `/category/${c.config_path}`, icon: c.icon})) || null);
+            setItem(config?.categories.map((c) => ({ display_name: c.name, path: `/category/${c.config_path}`, icon: c.icon, description: c.description })) || null);
             setItemName("config");
         } else if (pathname.startsWith("/category/")) {
-            setItem(Object.values(visualisations).filter((v) => v.category === category).map((v) => ({ display_name: v.display_name, path: `/viz/${v.name}` })) || null);
+            setItem(Object.values(visualisations).filter((v) => v.category === category).map((v) => ({ display_name: v.display_name, path: `/viz/${v.name}`, pageCount: v.pages.length })) || null);
             setItemName("visualisations");
         } else if (pathname.startsWith("/stories")) {
             setItem(Object.values(stories).map((s) => ({ display_name: s.display_name, path: `/story/${s.name}` })) || null);
@@ -102,7 +102,7 @@ export default function App() {
 
     if (invalidPath) {
         return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">
                 <div className="text-4xl font-bold font-mono text-red-600 mb-4">
                     {`Invalid path: ${pathname}`}
                 </div>
@@ -112,8 +112,8 @@ export default function App() {
 
     if (loading) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-                <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
+            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">
+                <div className="animate-pulse text-2xl font-mono text-sky-600">
                     {`Loading ${itemName}...`}
                 </div>
             </div>
@@ -122,7 +122,7 @@ export default function App() {
 
     if (error || !item) {
         return (
-            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+            <div className="h-screen w-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">
                 <div className="text-4xl font-bold font-mono text-red-600 mb-4">
                     {`Error loading ${itemName}`}
                 </div>

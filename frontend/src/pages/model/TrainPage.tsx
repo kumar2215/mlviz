@@ -16,12 +16,12 @@ export default function TrainPage({ useModel, parameters, TrainVisualizationComp
     const [showAlert, setShowAlert] = useState(false);
 
     return (
-        <div className="flex flex-row w-full h-full min-h-0 relative overflow-hidden bg-gray-200">
+        <div className="flex flex-row w-full h-full min-h-0 relative overflow-hidden bg-page">
             {showAlert && (
                 <SuccessAlert description="Model trained successfully." />
             )}
 
-            <div className="shrink-0 w-40 shadow-lg overflow-auto p-4 bg-gradient-to-br from-blue-50 to-purple-50 border-r border-gray-300">
+            <div className="shrink-0 w-40 shadow-lg overflow-auto p-4 bg-gradient-to-br from-blue-50 to-blue-50 border-r border-gray-300">
                 <ModelOptionsForm
                     {...useTrain(useModel, setShowAlert, parameters)}
                     buttonLabel="Train Model"
@@ -32,7 +32,7 @@ export default function TrainPage({ useModel, parameters, TrainVisualizationComp
                 <TrainVisualizationComponent />
             </div>
 
-            <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-purple-50 border-l border-gray-300 overflow-auto">
+            <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-blue-50 border-l border-gray-300 overflow-auto">
                 <ResultsComponent />
             </div>
         </div>

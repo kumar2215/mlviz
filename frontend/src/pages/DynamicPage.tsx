@@ -1,6 +1,7 @@
 import { useConfig } from "@/store/useConfig";
 import { useDataset } from "@/store/useDataset";
 import type { DynamicPageProps, IndexPageProps } from "@/types/page";
+import PageLoading from "@/components/layout/PageLoading";
 import React, {
     useEffect,
     lazy,
@@ -43,16 +44,9 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation
         return <div>Unknown page: {modulePath}</div>;
     }
 
-    const loading = (
-        <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
-            <div className="animate-pulse text-2xl font-mono text-fuchsia-600">
-                Loading visualisation...
-            </div>
-        </div>
-    );
-
     return (
-        <Suspense fallback={loading}>
+        <div className="h-full min-h-0 w-full overflow-hidden bg-page">
+        <Suspense fallback={<PageLoading label="Loading visualisation…" />}>
             <LazyComponent
                 name={page.name}
                 parameters={page.parameters}
@@ -62,6 +56,7 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation
                 completionButtonId={page.completion_button_id}
             />
         </Suspense>
+        </div>
     );
 };
 

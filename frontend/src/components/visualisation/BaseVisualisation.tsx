@@ -1,3 +1,4 @@
+import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import React, { useRef } from "react";
 import { useScaleFactor } from "../../hooks/useScaleFactor";
@@ -146,7 +147,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
             },
             styling: {
                 theme: theme === "auto" ? "light" : theme,
-                colorScale: d3.scaleOrdinal(d3.schemeCategory10),
+                colorScale: d3.scaleOrdinal(DEFAULT_COLORS),
             },
         };
 

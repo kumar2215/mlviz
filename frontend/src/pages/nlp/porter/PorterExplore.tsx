@@ -49,13 +49,13 @@ export default function PorterExplore({ subpageIndex, completionButtonId, onSubp
             <Button key={item.word} className={optionClass} disabled={pending} aria-pressed={selectedIndex === index} onClick={() => { setWordIndex(index); setRevealed(false); setFeedback("Apply this group to compare the result."); }}>{item.word}</Button>,
         )}</div>
         <div className="grid min-h-0 flex-1 grid-cols-2 gap-3">
-            <section className="flex min-h-0 flex-col justify-center gap-3 rounded-xl bg-violet-50 p-4">
-                <h3 className="text-sm font-semibold text-violet-900">{step?.label ?? "Loading rule group…"}</h3>
+            <section className="flex min-h-0 flex-col justify-center gap-3 rounded-xl bg-sky-50 p-4">
+                <h3 className="text-sm font-semibold text-sky-900">{step?.label ?? "Loading rule group…"}</h3>
                 <div><p className="mb-1 text-xs text-slate-600">Input at this stage</p><p className="break-all rounded-lg bg-white p-3 text-center font-mono text-2xl">{step?.before}</p></div>
                 <Button className={actionClass} disabled={pending || !step || revealed} onClick={apply}>Apply rule group</Button>
                 {revealed && step && <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3"><p className="text-xs text-emerald-800">{step.before === step.after ? "Unchanged" : "Result of this group"}</p><p className="break-all font-mono text-2xl text-emerald-950">{step.after}</p></div>}
             </section>
-            <section className="min-h-0 overflow-auto rounded-xl border border-violet-100 p-3">
+            <section className="min-h-0 overflow-auto rounded-xl border border-sky-100 p-3">
                 <h3 className="mb-2 font-semibold">Earlier rule groups</h3>
                 {word?.steps?.slice(0, subpageIndex).map(item => <div key={item.index} className="mb-2 rounded-lg bg-slate-50 p-2"><p className="text-xs text-slate-600">{item.label}</p><p className="break-all font-mono text-sm">{item.before} → {item.after}</p></div>)}
                 {subpageIndex === 0 && <p className="text-sm text-slate-500">Original word: <code>{word?.word}</code></p>}

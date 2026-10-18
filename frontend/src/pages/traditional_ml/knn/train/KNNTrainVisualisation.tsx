@@ -1,3 +1,4 @@
+import { DEFAULT_COLORS } from "@/utils/colorUtils";
 /**
  * KNN Training Visualization
  * Displays the training dataset with decision boundaries
@@ -84,7 +85,7 @@ export default function KNNTrainVisualisation() {
                 .scaleOrdinal<string>()
                 .domain(visualizationData.classNames)
                 .range(
-                    d3.schemeCategory10.slice(
+                    DEFAULT_COLORS.slice(
                         0,
                         visualizationData.classNames.length
                     )

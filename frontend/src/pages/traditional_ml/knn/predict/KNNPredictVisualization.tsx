@@ -1,3 +1,4 @@
+import { DEFAULT_COLORS } from "@/utils/colorUtils";
 /**
  * KNN Prediction Visualization
  * Displays training data, query points, and neighbor connections
@@ -145,7 +146,7 @@ export default function KNNPredictVisualization({ points }: VisualisationProps) 
                 .scaleOrdinal<string>()
                 .domain(visualizationData_transformed.classNames)
                 .range(
-                    d3.schemeCategory10.slice(
+                    DEFAULT_COLORS.slice(
                         0,
                         visualizationData_transformed.classNames.length
                     )

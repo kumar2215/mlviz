@@ -20,7 +20,7 @@ export default function PredictPage({ useModel, parameters, PredictVisualization
             {showAlert && (
                 <SuccessAlert description="Prediction completed." />
             )}
-            <div className="col-span-2 shadow-lg justify-between overflow-auto p-4 bg-gradient-to-br from-blue-50 to-purple-50 min-h-0">
+            <div className="col-span-2 shadow-lg justify-between overflow-auto p-4 bg-gradient-to-br from-blue-50 to-blue-50 min-h-0">
                 <PredictionInputForm
                     features={currentFeatures}
                     initialPoints={predictionInputPoints}

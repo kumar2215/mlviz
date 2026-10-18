@@ -54,7 +54,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
             icon={
                 <TrendingUp
                     style={{ width: fs(14), height: fs(14) }}
-                    className="text-indigo-500"
+                    className="text-blue-500"
                 />
             }
             title="Line Controls"
@@ -74,7 +74,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                         Intercept (b)
                     </label>
                     <span
-                        className="font-mono text-indigo-600 font-bold"
+                        className="font-mono text-blue-600 font-bold"
                         style={{ fontSize: fs(12) }}
                     >
                         {currentIntercept.toFixed(1)}
@@ -96,7 +96,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                     onTouchEnd={() =>
                         evaluateLine(currentSlope, currentIntercept)
                     }
-                    className="w-full accent-indigo-500"
+                    className="w-full accent-blue-500"
                 />
             </div>
 
@@ -116,7 +116,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                         Slope (m)
                     </span>
                     <span
-                        className="font-mono text-indigo-600 font-bold"
+                        className="font-mono text-blue-600 font-bold"
                         style={{ fontSize: fs(12) }}
                     >
                         {currentSlope.toFixed(4)}

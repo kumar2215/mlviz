@@ -30,9 +30,9 @@ export function isConditionMet(
     condition: Condition,
     state: Record<string, Parameters>
 ): boolean {
-    if (import.meta.env.VITE_BYPASS_CONDITIONS === "true") return true;
+    if (import.meta.env?.VITE_BYPASS_CONDITIONS === "true") return true;
 
-    // History is passed via the special __history key (see NavigationButton / NavigationBar)
+    // History is passed via the special __history key by the pathway navigation.
     const history = state["__history"] as HistoryState | undefined;
 
     switch (condition.condition_type) {

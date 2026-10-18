@@ -21,8 +21,8 @@ export default function NameTreeParts({ completionButtonId }: { completionButton
         } else setFeedback(`${letters[index]} is the ${id.toLowerCase()}.`);
     };
     return <Frame><DragSurface>
-        <div className="flex shrink-0 items-center justify-between"><h2 className="text-lg font-semibold">Label the tree</h2><span className="text-sm text-indigo-800">{Object.keys(answers).length} / 4 matched</span></div>
-        <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg bg-indigo-50 p-2">{["Leaf", "Root", "Split node", "Branch"].filter(part => !Object.values(answers).includes(part)).map(part => <DragChip key={part} id={part} label={`Label ${part}`}>{part}</DragChip>)}{finished && <span className="text-sm text-emerald-800">All labels placed.</span>}</div>
+        <div className="flex shrink-0 items-center justify-between"><h2 className="text-lg font-semibold">Label the tree</h2><span className="text-sm text-blue-800">{Object.keys(answers).length} / 4 matched</span></div>
+        <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg bg-blue-50 p-2">{["Leaf", "Root", "Split node", "Branch"].filter(part => !Object.values(answers).includes(part)).map(part => <DragChip key={part} id={part} label={`Label ${part}`}>{part}</DragChip>)}{finished && <span className="text-sm text-emerald-800">All labels placed.</span>}</div>
         <div className="flex min-h-0 flex-1 gap-3">
             <div className="flex w-44 shrink-0 flex-col justify-center gap-3">{letters.map((letter, index) => <DropTarget key={letter} label={`Label box ${letter}`} disabled={Boolean(answers[index])} onPlace={id => place(id, index)} className={`flex items-center gap-2 ${answers[index] ? "!border-emerald-300 !bg-emerald-50" : ""}`}><span className="lesson-part-marker">{letter}</span><span className="text-sm font-medium">{answers[index] ?? "Drop label"}</span></DropTarget>)}</div>
             <div className="lesson-tree" aria-label="Tree with parts A through D">

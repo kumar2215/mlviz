@@ -59,7 +59,7 @@ const TRAIN_COLOR = "#64748b"; // slate-500
 const TEST_COLOR = "#94a3b8"; // slate-400
 const USER_LINE_COLOR = "#3b82f6"; // blue-500
 const OPTIMAL_LINE_COLOR = "#10b981"; // emerald-500
-const PROPOSED_LINE_COLOR = "#6366f1"; // indigo-500
+const PROPOSED_LINE_COLOR = "#0284c7"; // blue-500
 const ERROR_LINE_COLOR = "#ef4444"; // red-500
 const PREDICTION_POINT_COLOR = "#3b82f6"; // blue-500
 
