@@ -147,8 +147,7 @@
       "from": 2,
       "to": 3,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "regex-objectives-v2",
+        "condition_type": "Completed",
         "name": "Review the patterns"
       }
     },
@@ -172,8 +171,7 @@
       "from": 7,
       "to": 8,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "porter-families-v2",
+        "condition_type": "Completed",
         "name": "Learn BPE merges"
       }
     },
@@ -181,8 +179,7 @@
       "from": 9,
       "to": 10,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "bpe-tokenization-v2",
+        "condition_type": "Completed",
         "name": "Compare the methods"
       }
     }

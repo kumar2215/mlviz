@@ -209,7 +209,7 @@ def render_edge_list(
                 )
             
             with col_cond:
-                condition_types = ["Bypass", "Parameter", "Wait", "Button", "Lambda", "Slide", "ActionCount", "PageVisited", "Metric"]
+                condition_types = ["Bypass", "Completed", "Parameter", "Wait", "Button", "Lambda", "Slide", "ActionCount", "PageVisited", "Metric"]
                 current_cond_type = edge.get("condition", {}).get("condition_type", "Bypass")
                 cond_type = st.selectbox(
                     "Condition",
@@ -460,6 +460,9 @@ def render_condition_config(
                     key=f"{key_prefix}_wait_{edge_index}"
                 )
             
+            elif condition_type == "Completed":
+                st.caption("Unlocks when the source page's exercise is complete. No ID is needed.")
+
             elif condition_type == "Button":
                 st.text_input(
                     "Button ID",
@@ -488,7 +491,7 @@ def render_condition_config(
                 )
 
             elif condition_type == "ActionCount":
-                action_types = ["train", "predict", "step", "manual_evaluate", "page_visit", "button_click"]
+                action_types = ["train", "predict", "step", "manual_evaluate", "page_visit", "page_complete", "button_click"]
                 existing_action = existing_condition.get("action", "train")
                 col_act, col_min = st.columns(2)
                 with col_act:

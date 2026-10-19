@@ -22,8 +22,7 @@
           "type": "reference",
           "name": "decision_tree_flowers"
         },
-        "parameters": {},
-        "completion_button_id": "dtree-follow-questions"
+        "parameters": {}
       }
     },
     {
@@ -38,8 +37,7 @@
         "name": "NameTreeParts",
         "category": "traditional_ml",
         "path": "decision_tree",
-        "parameters": {},
-        "completion_button_id": "dtree-name-parts"
+        "parameters": {}
       }
     },
     {
@@ -60,8 +58,7 @@
           "test_size": 0.25,
           "random_state": 2025
         },
-        "parameters": {},
-        "completion_button_id": "dtree-compare-iris"
+        "parameters": {}
       }
     },
     {
@@ -84,8 +81,7 @@
         "name": "TraceTraining",
         "category": "traditional_ml",
         "path": "decision_tree",
-        "parameters": {},
-        "completion_button_id": "dtree-trace-training"
+        "parameters": {}
       }
     },
     {
@@ -117,8 +113,7 @@
       "from": 1,
       "to": 2,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "dtree-follow-questions",
+        "condition_type": "Completed",
         "name": "Name the tree parts"
       }
     },
@@ -126,8 +121,7 @@
       "from": 2,
       "to": 3,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "dtree-name-parts",
+        "condition_type": "Completed",
         "name": "Explore Iris splits"
       }
     },
@@ -135,8 +129,7 @@
       "from": 3,
       "to": 4,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "dtree-compare-iris",
+        "condition_type": "Completed",
         "name": "Build a tree!"
       }
     },
@@ -157,8 +150,7 @@
       "from": 5,
       "to": 6,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "dtree-trace-training",
+        "condition_type": "Completed",
         "name": "Finish the story"
       }
     }

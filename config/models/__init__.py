@@ -32,6 +32,7 @@ from .conditions import (
     BaseCondition,
     ButtonPress,
     BypassCheck,
+    CompletedCheck,
     Condition,
     Lambda,
     OrCondition,
@@ -157,6 +158,7 @@ __all__ = [
     # Conditions
     "BaseCondition",
     "BypassCheck",
+    "CompletedCheck",
     "SlideCheck",
     "ParameterCheck",
     "TimeCheck",

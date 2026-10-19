@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { calculateNodeStats } from "@/api/dt";
 import { Button } from "@/components/ui/button";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useDataset } from "@/store/useDataset";
 import type { components } from "@/types/api";
 import { choiceClass, Frame, Result, selectedClass } from "./shared";
@@ -22,14 +21,13 @@ function Branch({ label, stats }: { label: string; stats?: NodeStats }) {
     </div>;
 }
 
-export default function CompareIrisSplits({ completionButtonId }: { completionButtonId: string }) {
+export default function CompareIrisSplits({ onComplete }: { onComplete: () => void }) {
     const dataset = useDataset(state => state.activeDataset);
     const [thresholds, setThresholds] = useState([2.5, 4.5]);
     const [results, setResults] = useState<(NodeResponse | null)[]>([null, null]);
     const [pending, setPending] = useState<number | null>(null);
     const [feedback, setFeedback] = useState("Recalculate both questions, then choose the better split.");
     const [finished, setFinished] = useState(false);
-    const { recordButtonClick } = useHistoryRecorder();
 
     const updateThreshold = (index: number, value: number) => {
         setThresholds(previous => previous.map((threshold, i) => i === index ? value : threshold));
@@ -69,7 +67,7 @@ export default function CompareIrisSplits({ completionButtonId }: { completionBu
             return;
         }
         setFeedback(tied ? "Both splits have equal gain, so either is equally good. The next page is unlocked." : `Correct. Split ${index === 0 ? "A" : "B"} reduces impurity more. The next page is unlocked.`);
-        if (!finished) { setFinished(true); recordButtonClick(completionButtonId); }
+        if (!finished) { setFinished(true); onComplete(); }
     };
 
     return <Frame>

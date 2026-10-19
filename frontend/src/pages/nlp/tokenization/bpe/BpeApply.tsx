@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { applyBpePair, checkBpeTokenizations, loadBpeApplication, loadBpeState, type BpeApplication, type BpeState } from "@/api/bpe";
 import { Button } from "@/components/ui/button";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useDataset } from "@/store/useDataset";
 import { useTokenization } from "@/store/nlp/useTextPreprocessing";
 import type { CustomBpeDataset } from "@/types/dataset";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
 import WordsEditor from "../../shared/WordsEditor";
 
-export default function BpeApply({ completionButtonId }: { completionButtonId: string }) {
+export default function BpeApply({ onComplete }: { onComplete: () => void }) {
     const activeDataset = useDataset(state => state.activeDataset);
     const [source, setSource] = useState<CustomBpeDataset | null>(null);
     const [model, setModel] = useState<BpeState | null>(null);
@@ -19,7 +18,6 @@ export default function BpeApply({ completionButtonId }: { completionButtonId: s
     const [completed, setCompleted] = useState(false);
     const [feedback, setFeedback] = useState("Select a left token, then its right neighbour to apply the highlighted rule.");
     const saveSource = useTokenization(state => state.setBpeSource);
-    const { recordButtonClick } = useHistoryRecorder();
     useEffect(() => {
         if (activeDataset?.type !== "predefined_bpe" && activeDataset?.type !== "custom_bpe") return;
         let active = true;
@@ -59,7 +57,7 @@ export default function BpeApply({ completionButtonId }: { completionButtonId: s
         try {
             const result = await checkBpeTokenizations(source, application.answers);
             setFeedback(result.correct ? "All words use the learned rules." : "Some token boundaries still need a merge.");
-            if (result.correct) { setCompleted(true); recordButtonClick(completionButtonId); }
+            if (result.correct) { setCompleted(true); onComplete(); }
         } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not check tokens."); }
         finally { setPending(false); }
     };

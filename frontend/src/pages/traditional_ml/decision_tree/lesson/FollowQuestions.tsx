@@ -1,5 +1,4 @@
 import { useState } from "react";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useDataset } from "@/store/useDataset";
 import { DragChip, DragSurface, DropTarget, FlowerIcon, Frame, Result, TreeEdges, TreeNode } from "./shared";
 
@@ -9,13 +8,12 @@ function FlowerGroup({ ids }: { ids: string[] }) {
     return <div className="mt-1 flex flex-wrap justify-center gap-1">{ids.map(id => <span key={id} className="flex items-center gap-1 rounded-md border border-emerald-200 bg-white px-2 py-1 text-xs"><FlowerIcon small />{id}</span>)}</div>;
 }
 
-export default function FollowQuestions({ completionButtonId }: { completionButtonId: string }) {
+export default function FollowQuestions({ onComplete }: { onComplete: () => void }) {
     const dataset = useDataset(state => state.activeDataset);
     const [stage, setStage] = useState(0);
     const [rootGroups, setRootGroups] = useState<Record<string, Side>>({});
     const [childGroups, setChildGroups] = useState<Record<string, Side>>({});
     const [feedback, setFeedback] = useState("Sort all flowers at the root.");
-    const { recordButtonClick } = useHistoryRecorder();
     const lengthIndex = dataset?.type === "custom" ? dataset.feature_names?.indexOf("petal length (cm)") ?? -1 : -1;
     const widthIndex = dataset?.type === "custom" ? dataset.feature_names?.indexOf("petal width (cm)") ?? -1 : -1;
     if (dataset?.type !== "custom" || lengthIndex < 0 || widthIndex < 0 || !dataset.X.length
@@ -46,7 +44,7 @@ export default function FollowQuestions({ completionButtonId }: { completionButt
                 const remaining = Object.values(next).filter(side => side === "right").length;
                 setStage(remaining ? 1 : 2);
                 setFeedback(remaining ? `Root split complete. Sort the ${remaining} remaining flowers by petal width.` : `All ${flowers.length} flowers reached their species leaves. The next page is unlocked.`);
-                if (!remaining) recordButtonClick(completionButtonId);
+                if (!remaining) onComplete();
             } else setFeedback(`${id} follows the ${side} branch. Keep sorting the root.`);
         } else {
             const next = { ...childGroups, [id]: side };
@@ -54,7 +52,7 @@ export default function FollowQuestions({ completionButtonId }: { completionButt
             if (Object.keys(next).length === rootRight.length) {
                 setStage(2);
                 setFeedback(`All ${flowers.length} flowers reached their species leaves. The next page is unlocked.`);
-                recordButtonClick(completionButtonId);
+                onComplete();
             } else setFeedback(`${id} reached a leaf. Sort the remaining flowers.`);
         }
     };

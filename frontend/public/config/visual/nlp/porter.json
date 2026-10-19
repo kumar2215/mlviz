@@ -9,7 +9,6 @@
         "name": "rules"
       },
       "parameters": {},
-      "completion_button_id": "porter-rules-v1",
       "subpages": [
         "Plurals and verb endings",
         "Final y",
@@ -35,8 +34,7 @@
         "type": "predefined_porter",
         "name": "families"
       },
-      "parameters": {},
-      "completion_button_id": "porter-families-v2"
+      "parameters": {}
     }
   ],
   "transitions": [
@@ -44,8 +42,7 @@
       "from": 0,
       "to": 1,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "porter-rules-v1",
+        "condition_type": "Completed",
         "name": "Predict suffix changes"
       }
     },

@@ -27,14 +27,13 @@ function FinalPrediction() {
     </Frame>;
 }
 
-export default function LessonPage({ name, completionButtonId }: IndexPageProps) {
+export default function LessonPage({ name, onComplete }: IndexPageProps) {
     if (name === "FinalPrediction") return <FinalPrediction />;
-    if (!completionButtonId) return <div role="alert" className="p-4">This page is missing its completion button.</div>;
     switch (name) {
-        case "FollowQuestions": return <FollowQuestions completionButtonId={completionButtonId} />;
-        case "NameTreeParts": return <NameTreeParts completionButtonId={completionButtonId} />;
-        case "CompareIrisSplits": return <CompareIrisSplits completionButtonId={completionButtonId} />;
-        case "TraceTraining": return <TraceTraining completionButtonId={completionButtonId} />;
+        case "FollowQuestions": return <FollowQuestions onComplete={onComplete} />;
+        case "NameTreeParts": return <NameTreeParts onComplete={onComplete} />;
+        case "CompareIrisSplits": return <CompareIrisSplits onComplete={onComplete} />;
+        case "TraceTraining": return <TraceTraining onComplete={onComplete} />;
         default: return <div role="alert" className="p-4">Unknown decision tree page: {name}</div>;
     }
 }

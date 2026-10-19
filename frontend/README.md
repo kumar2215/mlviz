@@ -32,6 +32,25 @@ Run `npm test` with Node.js 22.6 or newer for focused pathway/store, condition, 
 and colour-palette checks. Run `npm run build` and `npm run lint -- --quiet` for
 TypeScript, bundling, and styling validation.
 
+## Exercise completion
+
+Dynamic exercises receive `onComplete()` and call it when their success criteria
+are met. Navigation records one `page_complete` history event for the resolved
+page and unlocks outgoing transitions with `"condition_type": "Completed"`.
+The learner selects when to continue. `Completed` always refers to the transition's
+source page, including inside `And` and `Or` conditions and expanded story references.
+
+Subpage exercises call `onSubpageReady()` for each successful step, followed by
+`onComplete()` on the final step. Every configured subpage must be ready before the
+page can complete. Callbacks from earlier presentations are ignored; review and
+Replay preserve completion history while resetting presentation progress.
+
+To migrate older configs, remove `completion_button_id` from pages and replace
+their completion-based `Button` conditions with `Completed`, removing `button_id`.
+Replace exercise calls to `recordButtonClick(completionButtonId)` with `onComplete()`.
+Generic `Button` conditions remain available for named-button interactions.
+Config-builder checks run with `python -m unittest discover -s tests -v` from `config`.
+
 ## Tailwind checks
 
 Run `npm run lint` from `frontend` to check TypeScript/React code and Tailwind

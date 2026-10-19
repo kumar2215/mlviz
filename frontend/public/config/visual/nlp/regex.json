@@ -18,7 +18,6 @@
         "name": "punctuation"
       },
       "parameters": {},
-      "completion_button_id": "regex-objectives-v2",
       "subpages": [
         "Contractions",
         "Decimal numbers",

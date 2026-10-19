@@ -1,24 +1,22 @@
 import { useState } from "react";
 import { checkPorterStep } from "@/api/text_preprocessing";
 import { Button } from "@/components/ui/button";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { actionClass, LabFrame, optionClass, Status } from "../shared/LabFrame";
 import WordsEditor from "../shared/WordsEditor";
 import { usePorterExamples } from "./usePorterExamples";
 
 interface Props {
     subpageIndex: number;
-    completionButtonId: string;
+    onComplete: () => void;
     onSubpageReady: () => void;
 }
 
-export default function PorterExplore({ subpageIndex, completionButtonId, onSubpageReady }: Props) {
+export default function PorterExplore({ subpageIndex, onComplete, onSubpageReady }: Props) {
     const examples = usePorterExamples();
     const [wordIndex, setWordIndex] = useState(subpageIndex);
     const [revealed, setRevealed] = useState(false);
     const [checking, setChecking] = useState(false);
     const [feedback, setFeedback] = useState("Apply the current group to see whether this word changes.");
-    const { recordButtonClick } = useHistoryRecorder();
     const selectedIndex = Math.min(wordIndex, (examples.data?.examples.length ?? 1) - 1);
     const word = examples.data?.examples[selectedIndex];
     const step = word?.steps?.[subpageIndex];
@@ -33,7 +31,7 @@ export default function PorterExplore({ subpageIndex, completionButtonId, onSubp
                 setRevealed(true);
                 setFeedback(step.before === step.after ? "Unchanged: this group’s suffix and stem conditions do not trigger a change." : result.message);
                 onSubpageReady();
-                if (subpageIndex === (word.steps?.length ?? 0) - 1) recordButtonClick(completionButtonId);
+                if (subpageIndex === (word.steps?.length ?? 0) - 1) onComplete();
             } else setFeedback("The rule result changed. Reload the word examples and try again.");
         } catch (error) {
             setFeedback(error instanceof Error ? error.message : "Could not apply the rule group.");

@@ -22,7 +22,6 @@ interface DynamicPage extends BasePage {
     page_type: "dynamic";
     parameters: Parameters;
     subpages?: string[];
-    completion_button_id?: string;
     category?: string;
     path?: string;
 }
@@ -49,6 +48,7 @@ export interface DynamicPageProps {
     subpageIndex?: number;
     replayKey?: number;
     onSubpageReady?: () => void;
+    onComplete: () => void;
 }
 
 export interface IndexPageProps {
@@ -57,5 +57,5 @@ export interface IndexPageProps {
     subpageIndex?: number;
     replayKey?: number;
     onSubpageReady?: () => void;
-    completionButtonId?: string;
+    onComplete: () => void;
 }
