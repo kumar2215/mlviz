@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import type Story from "@/types/story";
 import type Visualisation from "@/types/visualisation";
+import { configuredStories, configuredVisualisations } from "@/utils/catalog";
 
 type BlockReason = "mobile" | "narrow" | null;
 
@@ -70,10 +71,10 @@ export default function App() {
             setItem(config?.categories.map((c) => ({ display_name: c.name, path: `/category/${c.config_path}`, icon: c.icon, description: c.description })) || null);
             setItemName("config");
         } else if (pathname.startsWith("/category/")) {
-            setItem(Object.values(visualisations).filter((v) => v.category === category).map((v) => ({ display_name: v.display_name, path: `/viz/${v.name}`, pageCount: v.pages.length })) || null);
+            setItem(configuredVisualisations(config, visualisations, category).map((v) => ({ display_name: v.display_name, path: `/viz/${v.name}`, pageCount: v.pages.length })));
             setItemName("visualisations");
         } else if (pathname.startsWith("/stories")) {
-            setItem(Object.values(stories).map((s) => ({ display_name: s.display_name, path: `/story/${s.name}` })) || null);
+            setItem(configuredStories(config, stories).map((s) => ({ display_name: s.display_name, path: `/story/${s.name}` })));
             setItemName("stories");
         } else if (pathname.startsWith("/story/")) {
             const story = stories[storyName!];
