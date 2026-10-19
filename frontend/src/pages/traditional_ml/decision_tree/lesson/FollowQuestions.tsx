@@ -1,15 +1,8 @@
 import { useState } from "react";
 import useHistoryRecorder from "@/hooks/useHistoryRecorder";
+import { useDataset } from "@/store/useDataset";
 import { DragChip, DragSurface, DropTarget, FlowerIcon, Frame, Result, TreeEdges, TreeNode } from "./shared";
 
-const flowers = [
-    { id: "F1", length: 1.5, width: 0.3 },
-    { id: "F2", length: 4.5, width: 1.4 },
-    { id: "F3", length: 6.0, width: 2.1 },
-    { id: "F4", length: 1.8, width: 0.4 },
-    { id: "F5", length: 5.5, width: 2.0 },
-    { id: "F6", length: 4.1, width: 1.3 },
-];
 type Side = "left" | "right";
 
 function FlowerGroup({ ids }: { ids: string[] }) {
@@ -17,11 +10,19 @@ function FlowerGroup({ ids }: { ids: string[] }) {
 }
 
 export default function FollowQuestions({ completionButtonId }: { completionButtonId: string }) {
+    const dataset = useDataset(state => state.activeDataset);
     const [stage, setStage] = useState(0);
     const [rootGroups, setRootGroups] = useState<Record<string, Side>>({});
     const [childGroups, setChildGroups] = useState<Record<string, Side>>({});
-    const [feedback, setFeedback] = useState("Sort all six flowers at the root.");
+    const [feedback, setFeedback] = useState("Sort all flowers at the root.");
     const { recordButtonClick } = useHistoryRecorder();
+    const lengthIndex = dataset?.type === "custom" ? dataset.feature_names?.indexOf("petal length (cm)") ?? -1 : -1;
+    const widthIndex = dataset?.type === "custom" ? dataset.feature_names?.indexOf("petal width (cm)") ?? -1 : -1;
+    if (dataset?.type !== "custom" || lengthIndex < 0 || widthIndex < 0 || !dataset.X.length
+        || dataset.X.some(row => !Number.isFinite(row[lengthIndex]) || !Number.isFinite(row[widthIndex]))) {
+        return <Frame><div role="alert">The flower dataset is unavailable or missing petal measurements.</div></Frame>;
+    }
+    const flowers = dataset.X.map((row, index) => ({ id: `F${index + 1}`, length: row[lengthIndex], width: row[widthIndex] }));
     const finished = stage === 2;
     const activeFlowers = flowers.filter(flower => stage === 0 ? !rootGroups[flower.id] : stage === 1 && rootGroups[flower.id] === "right" && !childGroups[flower.id]);
     const rootLeft = flowers.filter(flower => rootGroups[flower.id] === "left").map(flower => flower.id);
@@ -42,22 +43,24 @@ export default function FollowQuestions({ completionButtonId }: { completionButt
             const next = { ...rootGroups, [id]: side };
             setRootGroups(next);
             if (Object.keys(next).length === flowers.length) {
-                setStage(1);
-                setFeedback("Root split complete. Sort the four remaining flowers by petal width.");
+                const remaining = Object.values(next).filter(side => side === "right").length;
+                setStage(remaining ? 1 : 2);
+                setFeedback(remaining ? `Root split complete. Sort the ${remaining} remaining flowers by petal width.` : `All ${flowers.length} flowers reached their species leaves. The next page is unlocked.`);
+                if (!remaining) recordButtonClick(completionButtonId);
             } else setFeedback(`${id} follows the ${side} branch. Keep sorting the root.`);
         } else {
             const next = { ...childGroups, [id]: side };
             setChildGroups(next);
             if (Object.keys(next).length === rootRight.length) {
                 setStage(2);
-                setFeedback("All six flowers reached their species leaves. The next page is unlocked.");
+                setFeedback(`All ${flowers.length} flowers reached their species leaves. The next page is unlocked.`);
                 recordButtonClick(completionButtonId);
             } else setFeedback(`${id} reached a leaf. Sort the remaining flowers.`);
         }
     };
 
     return <Frame><DragSurface>
-        <div className="flex shrink-0 items-center justify-between gap-2"><h2 className="text-lg font-semibold">Sort the flowers</h2><span className="text-sm font-medium text-blue-800">{finished ? "6 / 6 at leaves" : stage === 0 ? "Root split" : "Petal-width split"}</span></div>
+        <div className="flex shrink-0 items-center justify-between gap-2"><h2 className="text-lg font-semibold">Sort the flowers</h2><span className="text-sm font-medium text-blue-800">{finished ? `${flowers.length} / ${flowers.length} at leaves` : stage === 0 ? "Root split" : "Petal-width split"}</span></div>
         <div className="flex min-h-20 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg border border-blue-100 bg-blue-50 p-2" aria-label="Flowers to sort">
             {activeFlowers.map(flower => <DragChip key={flower.id} id={flower.id} label={`Flower ${flower.id}: length ${flower.length}, width ${flower.width}`}><FlowerIcon /><span className="text-left"><strong>{flower.id}</strong><span className="block text-xs">L {flower.length.toFixed(1)} · W {flower.width.toFixed(1)} cm</span></span></DragChip>)}
             {finished && <span className="text-sm font-medium text-emerald-800">Every flower is in a leaf below.</span>}

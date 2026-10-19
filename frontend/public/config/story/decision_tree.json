@@ -18,6 +18,10 @@
         "name": "FollowQuestions",
         "category": "traditional_ml",
         "path": "decision_tree",
+        "dataset": {
+          "type": "reference",
+          "name": "decision_tree_flowers"
+        },
         "parameters": {},
         "completion_button_id": "dtree-follow-questions"
       }
