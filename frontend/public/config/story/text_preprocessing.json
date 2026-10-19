@@ -4,7 +4,8 @@
     {
       "page_type": "static",
       "text": "",
-      "path": "md/tokenization/brief.md"
+      "path": "md/tokenization/brief.md",
+      "name": "Preparing text for a model"
     },
     {
       "page_type": "mixed",
@@ -41,12 +42,14 @@
     {
       "page_type": "static",
       "text": "",
-      "path": "md/tokenization/regex.md"
+      "path": "md/tokenization/regex.md",
+      "name": "Which pattern fits which text?"
     },
     {
       "page_type": "static",
       "text": "",
-      "path": "md/tokenization/porter.md"
+      "path": "md/tokenization/porter.md",
+      "name": "Porter's suffix rules"
     },
     {
       "page_type": "mixed",
@@ -131,7 +134,8 @@
     {
       "page_type": "static",
       "text": "",
-      "path": "md/tokenization/debrief.md"
+      "path": "md/tokenization/debrief.md",
+      "name": "Three tools, three choices"
     }
   ],
   "transitions": [

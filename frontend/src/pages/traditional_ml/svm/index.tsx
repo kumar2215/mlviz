@@ -8,13 +8,13 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
     let page = null;
 
     switch (name) {
-        case "SVMStep":
+        case "SVM Step":
             page = <SVMStep parameters={parameters} />;
             break;
-        case "SVMTrain":
+        case "SVM Train":
             page = <SVMTrain parameters={parameters} />;
             break
-        case "SVMPredict":
+        case "SVM Predict":
             page = <SVMPredict parameters={parameters} />;
             break;
         default:

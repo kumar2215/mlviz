@@ -3,6 +3,7 @@ import type { ActiveDataset, DatasetReference } from "@/types/dataset";
 export type Parameters = Record<string, any>;
 
 interface BasePage {
+    name?: string;
     page_type: "static" | "dynamic" | "mixed" | "reference";
     dataset?: ActiveDataset | DatasetReference | null;
     note?: string;

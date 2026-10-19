@@ -4,6 +4,11 @@ import { configuredStories, configuredVisualisations } from "../src/utils/catalo
 import type Config from "../src/types/config.ts";
 import type Story from "../src/types/story.ts";
 import type Visualisation from "../src/types/visualisation.ts";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+import { getDynamicPage, pageTitle } from "../src/components/navigation/pathwayModel.ts";
+import { unrollStory } from "../src/utils/storyReferences.ts";
+import type { PageUnion } from "../src/types/page.ts";
 
 const story = (name: string): Story => ({ name, display_name: name, pages: [], transitions: [] });
 const visualisation = (name: string, category = "traditional_ml"): Visualisation => ({ ...story(name), category });
@@ -54,4 +59,44 @@ test("lists omit unavailable and unconfigured entries and never include another 
 
 test("config order also applies to numeric story names", () => {
     assert.deepEqual(configuredStories({ ...config(), stories: ["10", "2"] }, { "2": story("2"), "10": story("10") }).map(item => item.name), ["10", "2"]);
+});
+
+test("every bundled page name is readable navigation text and matches its component dispatcher", () => {
+    const readConfig = (path: string) => JSON.parse(readFileSync(new URL(`../public/config/${path}`, import.meta.url), "utf8"));
+    const root = readConfig("config.json") as Config;
+    const visualisations: Record<string, Visualisation> = {};
+    const stories: Record<string, Story> = {};
+    const dispatchers = new Map<string, Set<string>>();
+    const checkPage = (page: PageUnion, index: number, category?: string, visualisationName?: string) => {
+        const dynamic = getDynamicPage(page);
+        assert.equal(pageTitle(page, index), page.name || dynamic?.name);
+        assert.ok(pageTitle(page, index).trim().length > 0);
+        if (!dynamic) return;
+        const path = `${category ?? dynamic.category}/${visualisationName ?? dynamic.path}/index.tsx`;
+        if (!dispatchers.has(path)) {
+            const source = ts.createSourceFile(path, readFileSync(new URL(`../src/pages/${path}`, import.meta.url), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+            const names = new Set<string>();
+            const visit = (node: ts.Node) => {
+                if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression)) names.add(node.expression.text);
+                if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
+                    && ts.isIdentifier(node.left) && node.left.text === "name" && ts.isStringLiteral(node.right)) names.add(node.right.text);
+                ts.forEachChild(node, visit);
+            };
+            visit(source);
+            dispatchers.set(path, names);
+        }
+        assert.ok(dispatchers.get(path)!.has(dynamic.name), `${path} must render the configured name "${dynamic.name}"`);
+    };
+    for (const category of root.categories) {
+        for (const file of category.files) {
+            const name = file.replace(/\.json$/, "");
+            const entry: Visualisation = { ...readConfig(`visual/${category.config_path}/${file}`), name, category: category.config_path };
+            visualisations[name] = entry;
+            entry.pages.forEach((page, index) => checkPage(page, index, entry.category, name));
+        }
+    }
+    for (const name of root.stories) stories[name] = { ...readConfig(`story/${name}.json`), name };
+    for (const entry of Object.values(stories)) {
+        unrollStory(entry, { stories, visualisations }).pages.forEach((page, index) => checkPage(page, index));
+    }
 });

@@ -163,6 +163,9 @@ test("the expanded NLP story uses the local source page for each exercise's comp
     assert.equal(expanded.pages.length, 11);
     for (let pageId = 0; pageId < expanded.pages.length - 1; pageId++) {
         assert.equal(store.getState().currentPageId, pageId);
+        const page = expanded.pages[pageId];
+        const namedPage = page.page_type === "mixed" ? page.dynamic_page : page;
+        assert.equal(selectPathwayNode(store.getState(), pageId).title, namedPage.name);
         if (completionPages.has(pageId)) {
             assert.equal(selectPathwayNode(store.getState(), pageId + 1).state, "locked");
             completeSubpages(store);
@@ -192,8 +195,10 @@ test("repeated mixed references to the same exercise have independent completion
     }, { stories: {}, visualisations: { tokenization: bpe } });
     const { store, source } = session(expanded);
     const firstComplete = completionCallback(store);
+    assert.equal(selectPathwayNode(store.getState(), 0).title, bpe.pages[0].name);
     firstComplete();
     store.getState().navigatePage(1);
+    assert.equal(selectPathwayNode(store.getState(), 1).title, bpe.pages[0].name);
     firstComplete();
     assert.equal(selectPathwayNode(store.getState(), 2).state, "locked");
     completionCallback(store)();
@@ -214,6 +219,7 @@ test("completion conditions follow remapped transitions inside a multi-page refe
     assert.ok(expanded.transitions.some(edge => edge.from === 1 && edge.to === 2 && edge.condition.condition_type === "Completed"));
     const { store } = session(expanded);
     store.getState().navigatePage(1);
+    assert.equal(selectPathwayNode(store.getState(), 1).title, bpe.pages[0].name);
     assert.equal(selectPathwayNode(store.getState(), 2).state, "locked");
     completionCallback(store)();
     assert.equal(selectPathwayNode(store.getState(), 2).state, "available");
@@ -309,18 +315,16 @@ test("late readiness callbacks, locked destinations, and premature replay cannot
     assert.equal(store.getState().replayKey, 0);
 });
 
-test("resolved config updates preserve progress and stale title responses are ignored", () => {
+test("resolved config updates refresh page names without resetting progress", () => {
     const config = definition();
     const { store } = session(config);
     store.getState().markSubpageReady(0, 0);
     const progress = store.getState().progressByPage;
-    const resolved = { ...config, pages: [...config.pages], transitions: [...config.transitions] };
+    const resolved = { ...config, pages: config.pages.map((page, index) => index === 0 ? { ...page, name: "Updated Exercise" } : page), transitions: [...config.transitions] };
+    assert.equal(selectPathwayNode(store.getState(), 0).title, "Exercise");
     store.getState().setDefinition(resolved);
     assert.strictEqual(store.getState().progressByPage, progress);
-    store.getState().setTitles(config.pages, ["Stale"]);
-    assert.equal(store.getState().titles[0], "Exercise");
-    store.getState().setTitles(resolved.pages, ["Resolved", "Next", "Last"]);
-    assert.equal(selectPathwayNode(store.getState(), 0).title, "Resolved");
+    assert.equal(selectPathwayNode(store.getState(), 0).title, "Updated Exercise");
 });
 
 test("each activity gets isolated state and keyboard focus follows layout order without navigating", () => {

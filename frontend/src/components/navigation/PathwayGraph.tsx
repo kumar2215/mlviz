@@ -1,22 +1,20 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, LocateFixed } from "lucide-react";
 import { displayCondition } from "@/utils/conditions";
-import { edgePath, visibleNodes, type Viewport } from "./pathwayModel";
-import usePageTitles from "./usePageTitles";
+import { edgePath, pageTitle, visibleNodes, type Viewport } from "./pathwayModel";
 import PathwayPageNode from "./PathwayPageNode";
 import { useShallow } from "zustand/react/shallow";
 import { usePathway } from "@/store/usePathway";
 import { transitionAvailable } from "@/store/pathwayStore";
 
 export default function PathwayGraph() {
-    const { pages, layout, currentPageId, traversed, focusRequest, setTitles } = usePathway(useShallow(state => ({
+    const { pages, layout, currentPageId, traversed, focusRequest } = usePathway(useShallow(state => ({
         pages: state.pages, layout: state.layout, currentPageId: state.currentPageId, traversed: state.traversed,
-        focusRequest: state.focusRequest, setTitles: state.setTitles,
+        focusRequest: state.focusRequest,
     })));
     const availableEdges = usePathway(useShallow(state => state.layout.edges.filter(edge => transitionAvailable(state, edge.transition)).map(edge => edge.id)));
     const availableIds = useMemo(() => new Set(availableEdges), [availableEdges]);
-    const titles = usePageTitles(pages);
-    useEffect(() => { setTitles(pages, titles); }, [pages, titles, setTitles]);
+    const titles = useMemo(() => pages.map(pageTitle), [pages]);
     const scrollRef = useRef<HTMLDivElement>(null);
     const markerId = `pathway-arrow-${useId().replace(/:/g, "")}`;
     const [viewport, setViewport] = useState<Viewport>({ top: 0, left: 0, width: 200, height: 300 });

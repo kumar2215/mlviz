@@ -3,7 +3,7 @@ import type { HistoryEntry, HistoryState } from "../types/history.ts";
 import type { PageUnion, Parameters } from "../types/page.ts";
 import type { Transition } from "../types/story.ts";
 import { displayCondition, isConditionMet } from "../utils/conditions.ts";
-import { fallbackPageTitle, getDynamicPage, layoutPathway, selectSubpage, subpageControls, transitionKey, type PathwayLayout, type SubpageProgress } from "../components/navigation/pathwayModel.ts";
+import { pageTitle, getDynamicPage, layoutPathway, selectSubpage, subpageControls, transitionKey, type PathwayLayout, type SubpageProgress } from "../components/navigation/pathwayModel.ts";
 
 export interface PathwayDefinition { pages: PageUnion[]; transitions: Transition[] }
 export interface PageProgressContext {
@@ -23,7 +23,6 @@ export interface PathwayHistorySource {
 export interface PathwayState extends PathwayDefinition {
     sessionId: string | null;
     layout: PathwayLayout;
-    titles: string[];
     history: HistoryState;
     now: number;
     currentPageId: number;
@@ -35,7 +34,6 @@ export interface PathwayState extends PathwayDefinition {
     focusRequest: { pageId: number; serial: number } | null;
     setDefinition: (definition: PathwayDefinition) => void;
     openSession: (sessionId: string, definition: PathwayDefinition, source: PathwayHistorySource) => void;
-    setTitles: (pages: PageUnion[], titles: string[]) => void;
     syncHistory: (history: HistoryState) => void;
     refreshTime: () => void;
     start: () => void;
@@ -76,7 +74,7 @@ export function selectPathwayNode(state: PathwayState, pageId: number) {
     return {
         node: state.layout.nodes.find(node => node.id === pageId),
         state: status,
-        title: state.titles[pageId],
+        title: pageTitle(state.pages[pageId], pageId),
         reason,
         labels: pageSubpages(state, pageId),
         progress,
@@ -99,7 +97,6 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
             ...definition,
             sessionId: null,
             layout: layoutPathway(definition.pages, definition.transitions),
-            titles: definition.pages.map(fallbackPageTitle),
             history: source.getHistory(),
             now: now(),
             currentPageId: 0,
@@ -117,17 +114,13 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                     return;
                 }
                 started = false;
-                set({ ...next, sessionId, layout: layoutPathway(next.pages, next.transitions), titles: next.pages.map(fallbackPageTitle),
+                set({ ...next, sessionId, layout: layoutPathway(next.pages, next.transitions),
                     history: source.getHistory(), now: now(), currentPageId: 0, subpageIndex: 0, replayKey: get().replayKey + 1,
                     progressByPage: {}, visitedPages: new Set([0]), traversed: new Set(), focusRequest: null });
             },
             setDefinition: next => {
                 if (get().pages === next.pages && get().transitions === next.transitions) return;
-                set({ ...next, layout: layoutPathway(next.pages, next.transitions), titles: next.pages.map(fallbackPageTitle) });
-            },
-            setTitles: (pages, titles) => {
-                if (get().pages !== pages || get().titles.every((title, index) => title === titles[index]) && get().titles.length === titles.length) return;
-                set({ titles });
+                set({ ...next, layout: layoutPathway(next.pages, next.transitions) });
             },
             syncHistory: history => { if (get().history !== history) set({ history, now: now() }); },
             refreshTime: () => {

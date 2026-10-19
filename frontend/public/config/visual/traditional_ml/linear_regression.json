@@ -2,7 +2,7 @@
     "display_name": "Linear Regression",
     "pages": [
         {
-            "name": "LinearRegressionStep",
+            "name": "Linear Regression Step",
             "page_type": "dynamic",
             "note": "Use the HUD to change your line, or continue running the gradient descent! (This page is a WIP - we will add a Loss Map soon)",
             "dataset": null,
@@ -15,7 +15,7 @@
             }
         },
         {
-            "name": "LinearRegressionTrain",
+            "name": "Linear Regression Train",
             "page_type": "dynamic",
             "note": "Use the HUD to change your line (This page is a WIP - we will add a Loss Map soon)",
             "dataset": {

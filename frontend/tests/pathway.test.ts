@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { layoutPathway, markdownTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes } from "../src/components/navigation/pathwayModel.ts";
+import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes } from "../src/components/navigation/pathwayModel.ts";
 import { displayCondition, isConditionMet } from "../src/utils/conditions.ts";
 import { usePreviewSession } from "../src/store/usePreviewSession.ts";
 import { createColorScale, createContinuousColorScale, type PaletteName, type ContinuousSchemeName } from "../src/utils/colorUtils.ts";
@@ -112,10 +112,16 @@ test("a visible subpage is active, not completed; a restarted ring clears old se
     assert.equal(segmentState(0, { index: 0, completed: [] }, false), "future");
 });
 
-test("node titles support Markdown frontmatter, headings, inline formatting, and a missing title", () => {
-    assert.equal(markdownTitle('---\ntitle: "Follow a tree"\n---\n# Other heading'), "Follow a tree");
-    assert.equal(markdownTitle("# Try **two** [patterns](example)"), "Try two patterns");
-    assert.equal(markdownTitle("A plain paragraph"), null);
+test("navigation uses configured page names directly without reading or formatting Markdown", () => {
+    assert.equal(pageTitle({ page_type: "dynamic", name: "Follow Questions", parameters: {} }, 0), "Follow Questions");
+    assert.equal(pageTitle({ page_type: "dynamic", name: "Keep_ThisName", parameters: {} }, 0), "Keep_ThisName");
+    assert.equal(pageTitle({ page_type: "static", name: "Introduction", text: "---\ntitle: Another title\n---\n# Other heading", path: "" }, 0), "Introduction");
+    assert.equal(pageTitle({ page_type: "static", text: "# A Markdown heading", path: "missing.md" }, 2), "Page 3");
+    assert.equal(pageTitle({
+        page_type: "mixed",
+        static_page: { page_type: "static", text: "# Other heading", path: "" },
+        dynamic_page: { page_type: "dynamic", name: "Compare Iris Splits", parameters: {} },
+    }, 0), "Compare Iris Splits");
 });
 
 test("subpage arcs only advance one ready step and replay requires every step to be completed", () => {

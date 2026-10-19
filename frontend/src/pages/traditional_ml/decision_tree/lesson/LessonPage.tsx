@@ -28,12 +28,12 @@ function FinalPrediction() {
 }
 
 export default function LessonPage({ name, onComplete }: IndexPageProps) {
-    if (name === "FinalPrediction") return <FinalPrediction />;
     switch (name) {
-        case "FollowQuestions": return <FollowQuestions onComplete={onComplete} />;
-        case "NameTreeParts": return <NameTreeParts onComplete={onComplete} />;
-        case "CompareIrisSplits": return <CompareIrisSplits onComplete={onComplete} />;
-        case "TraceTraining": return <TraceTraining onComplete={onComplete} />;
+        case "Follow Questions": return <FollowQuestions onComplete={onComplete} />;
+        case "Name Tree Parts": return <NameTreeParts onComplete={onComplete} />;
+        case "Compare Iris Splits": return <CompareIrisSplits onComplete={onComplete} />;
+        case "Trace Training": return <TraceTraining onComplete={onComplete} />;
+        case "Final Prediction": return <FinalPrediction />;
         default: return <div role="alert" className="p-4">Unknown decision tree page: {name}</div>;
     }
 }

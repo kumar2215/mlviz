@@ -17,14 +17,17 @@ export default function IndexPage({ name, subpageIndex = 0, replayKey = 0, onSub
     }, [dataset]);
     if (error) return <div role="alert" className="p-4">{error}</div>;
     if (!data) return <PageLoading label="Loading regex examples…" />;
-    if (name === "RegexPlayground") return <RegexEditor key={`play-${replayKey}`} data={data} />;
-    if (name === "RegexChallenges" && onSubpageReady) {
-        const goal = data.goals[subpageIndex];
-        if (!goal) return <div role="alert">Unknown regex objective.</div>;
-        return <RegexEditor key={`${goal.id}-${replayKey}`} data={data} goal={goal} onComplete={() => {
-            onSubpageReady();
-            if (subpageIndex === data.goals.length - 1) onComplete();
-        }} />;
+    switch (name) {
+        case "Regex Playground": return <RegexEditor key={`play-${replayKey}`} data={data} />;
+        case "Regex Challenges": {
+            if (!onSubpageReady) break;
+            const goal = data.goals[subpageIndex];
+            if (!goal) return <div role="alert">Unknown regex objective.</div>;
+            return <RegexEditor key={`${goal.id}-${replayKey}`} data={data} goal={goal} onComplete={() => {
+                onSubpageReady();
+                if (subpageIndex === data.goals.length - 1) onComplete();
+            }} />;
+        }
     }
     return <div role="alert" className="p-4">Unknown regex page: {name}</div>;
 }

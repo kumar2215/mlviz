@@ -7,14 +7,14 @@ export default function IndexPage(props: IndexPageProps) {
     let page = null;
 
     switch (name) {
-        case "DecisionTree":
+        case "Decision Tree":
             page = <DecisionTree />;
             break;
-        case "FollowQuestions":
-        case "NameTreeParts":
-        case "CompareIrisSplits":
-        case "TraceTraining":
-        case "FinalPrediction":
+        case "Follow Questions":
+        case "Name Tree Parts":
+        case "Compare Iris Splits":
+        case "Trace Training":
+        case "Final Prediction":
             page = <LessonPage {...props} />;
             break;
         default:

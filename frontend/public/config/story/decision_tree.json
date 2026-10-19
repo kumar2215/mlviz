@@ -4,7 +4,8 @@
     {
       "page_type": "static",
       "text": "",
-      "path": "md/dtree/decision_tree_01.md"
+      "path": "md/dtree/decision_tree_01.md",
+      "name": "What is a decision tree?"
     },
     {
       "page_type": "mixed",
@@ -15,7 +16,7 @@
       },
       "dynamic_page": {
         "page_type": "dynamic",
-        "name": "FollowQuestions",
+        "name": "Follow Questions",
         "category": "traditional_ml",
         "path": "decision_tree",
         "dataset": {
@@ -34,7 +35,7 @@
       },
       "dynamic_page": {
         "page_type": "dynamic",
-        "name": "NameTreeParts",
+        "name": "Name Tree Parts",
         "category": "traditional_ml",
         "path": "decision_tree",
         "parameters": {}
@@ -49,7 +50,7 @@
       },
       "dynamic_page": {
         "page_type": "dynamic",
-        "name": "CompareIrisSplits",
+        "name": "Compare Iris Splits",
         "category": "traditional_ml",
         "path": "decision_tree",
         "dataset": {
@@ -78,7 +79,7 @@
       },
       "dynamic_page": {
         "page_type": "dynamic",
-        "name": "TraceTraining",
+        "name": "Trace Training",
         "category": "traditional_ml",
         "path": "decision_tree",
         "parameters": {}
@@ -93,7 +94,7 @@
       },
       "dynamic_page": {
         "page_type": "dynamic",
-        "name": "FinalPrediction",
+        "name": "Final Prediction",
         "category": "traditional_ml",
         "path": "decision_tree",
         "parameters": {}

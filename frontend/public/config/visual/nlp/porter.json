@@ -3,7 +3,7 @@
   "pages": [
     {
       "page_type": "dynamic",
-      "name": "PorterExplore",
+      "name": "Porter Explore",
       "dataset": {
         "type": "predefined_porter",
         "name": "rules"
@@ -20,7 +20,7 @@
     },
     {
       "page_type": "dynamic",
-      "name": "PorterLab",
+      "name": "Porter Lab",
       "dataset": {
         "type": "predefined_porter",
         "name": "suffixes"
@@ -29,7 +29,7 @@
     },
     {
       "page_type": "dynamic",
-      "name": "PorterFamilies",
+      "name": "Porter Families",
       "dataset": {
         "type": "predefined_porter",
         "name": "families"

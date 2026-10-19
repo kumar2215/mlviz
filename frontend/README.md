@@ -32,6 +32,15 @@ Run `npm test` with Node.js 22.6 or newer for focused pathway/store, condition, 
 and colour-palette checks. Run `npm run build` and `npm run lint -- --quiet` for
 TypeScript, bundling, and styling validation.
 
+## Page names
+
+A page's `name` is its readable navigation label. For dynamic pages, the same value
+selects the component: `"name": "Follow Questions"` matches `case "Follow Questions"`.
+Rename both together. Static pages also define `name`; mixed pages use their
+dynamic page's name, including when that page comes from a visualisation reference.
+Navigation reads these names directly, without fetching Markdown for headings or
+converting component identifiers. Unnamed pages show `Page N`.
+
 ## Exercise completion
 
 Dynamic exercises receive `onComplete()` and call it when their success criteria

@@ -6,10 +6,10 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
     let page = null;
 
     switch (name) {
-        case "LinearRegressionStep":
+        case "Linear Regression Step":
             page = <LinearRegressionStep parameters={parameters} />;
             break;
-        case "LinearRegressionTrain":
+        case "Linear Regression Train":
             page = <LinearRegressionTrain parameters={parameters} />;
             break;
         default:
