@@ -35,17 +35,8 @@ export function getDynamicPage(page: PageUnion | undefined) {
     return null;
 }
 
-export function fallbackPageTitle(page: PageUnion, index: number): string {
-    const dynamic = getDynamicPage(page);
-    return dynamic?.name
-        ? dynamic.name.replace(/([a-z\d])([A-Z])/g, "$1 $2").replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2").replace(/[_-]/g, " ")
-        : `Page ${index + 1}`;
-}
-
-export function markdownTitle(markdown: string): string | null {
-    const frontmatter = markdown.match(/^---\s*\r?\n([\s\S]*?)\r?\n---/);
-    const title = frontmatter?.[1].match(/^title:\s*(.+)$/m)?.[1] || markdown.match(/^#\s+(.+)$/m)?.[1];
-    return title?.trim().replace(/^['"]|['"]$/g, "").replace(/\[([^\]]+)\]\([^)]*\)/g, "$1").replace(/[*_`]/g, "") || null;
+export function pageTitle(page: PageUnion, index: number): string {
+    return page.name || getDynamicPage(page)?.name || `Page ${index + 1}`;
 }
 
 export function layoutPathway(pages: PageUnion[], transitions: Transition[]): PathwayLayout {

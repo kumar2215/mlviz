@@ -1,11 +1,5 @@
 
-type ActionType =
-    | "train"
-    | "predict"
-    | "step"
-    | "manual_evaluate"
-    | "page_visit"
-    | "button_click";
+import type { ActionType } from "./history.ts";
 
 interface BaseCondition {
     condition_type: string;
@@ -29,6 +23,10 @@ interface TimeCheck extends BaseCondition {
 interface ButtonPress extends BaseCondition {
     condition_type: "Button";
     button_id: string;
+}
+
+interface CompletedCheck extends BaseCondition {
+    condition_type: "Completed";
 }
 
 interface BypassCheck extends BaseCondition {
@@ -83,6 +81,7 @@ export type Condition =
     | ParameterCheck
     | TimeCheck
     | ButtonPress
+    | CompletedCheck
     | BypassCheck
     | SlideCheck
     | Lambda

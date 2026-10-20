@@ -3,23 +3,21 @@
   "pages": [
     {
       "page_type": "dynamic",
-      "name": "BpeLab",
+      "name": "BPE Lab",
       "dataset": {
         "type": "predefined_bpe",
         "name": "practice"
       },
-      "parameters": {},
-      "completion_button_id": "bpe-training-v2"
+      "parameters": {}
     },
     {
       "page_type": "dynamic",
-      "name": "BpeApply",
+      "name": "BPE Apply",
       "dataset": {
         "type": "predefined_bpe",
         "name": "practice"
       },
-      "parameters": {},
-      "completion_button_id": "bpe-tokenization-v2"
+      "parameters": {}
     }
   ],
   "transitions": [
@@ -27,8 +25,7 @@
       "from": 0,
       "to": 1,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "bpe-training-v2",
+        "condition_type": "Completed",
         "name": "Apply your learned rules"
       }
     }

@@ -148,7 +148,6 @@ jobs:
             - name: Build frontend
               working-directory: ./frontend
               env:
-                  VITE_FAVICON: /mlviz.png
                   VITE_TITLE: mlviz
                   VITE_CONFIG_FILE: config
                   VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.backend-url }}

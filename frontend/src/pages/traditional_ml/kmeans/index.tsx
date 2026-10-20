@@ -5,7 +5,7 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
     let page = null;
 
     switch (name) {
-        case "KMeansStep":
+        case "K-Means Step":
             page = <KMeansStep parameters={parameters} />;
             break;
         default:

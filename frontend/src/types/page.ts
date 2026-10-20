@@ -3,6 +3,7 @@ import type { ActiveDataset, DatasetReference } from "@/types/dataset";
 export type Parameters = Record<string, any>;
 
 interface BasePage {
+    name?: string;
     page_type: "static" | "dynamic" | "mixed" | "reference";
     dataset?: ActiveDataset | DatasetReference | null;
     note?: string;
@@ -22,7 +23,6 @@ interface DynamicPage extends BasePage {
     page_type: "dynamic";
     parameters: Parameters;
     subpages?: string[];
-    completion_button_id?: string;
     category?: string;
     path?: string;
 }
@@ -49,6 +49,7 @@ export interface DynamicPageProps {
     subpageIndex?: number;
     replayKey?: number;
     onSubpageReady?: () => void;
+    onComplete: () => void;
 }
 
 export interface IndexPageProps {
@@ -57,5 +58,5 @@ export interface IndexPageProps {
     subpageIndex?: number;
     replayKey?: number;
     onSubpageReady?: () => void;
-    completionButtonId?: string;
+    onComplete: () => void;
 }

@@ -26,9 +26,14 @@ function parameterCheck(expected: any, actual: any, comparator: string) {
     }
 }
 
+export interface ConditionContext {
+    sourcePageId: number;
+}
+
 export function isConditionMet(
     condition: Condition,
-    state: Record<string, Parameters>
+    state: Record<string, Parameters>,
+    context?: ConditionContext,
 ): boolean {
     if (import.meta.env?.VITE_BYPASS_CONDITIONS === "true") return true;
 
@@ -81,15 +86,20 @@ export function isConditionMet(
             );
         }
 
+        case "Completed":
+            return context !== undefined && Boolean(history?.entries.some(
+                entry => entry.actionType === "page_complete" && entry.page_id === context.sourcePageId,
+            ));
+
         case "Lambda":
             // TODO: implement
             return true;
 
         case "And":
-            return condition.conditions.every((c) => isConditionMet(c, state));
+            return condition.conditions.every((c) => isConditionMet(c, state, context));
 
         case "Or":
-            return condition.conditions.some((c) => isConditionMet(c, state));
+            return condition.conditions.some((c) => isConditionMet(c, state, context));
 
         case "ActionCount": {
             const entries = history?.entries || [];
@@ -187,6 +197,9 @@ export function displayCondition(condition: Condition): string {
 
         case "Button":
             return `Click on ${condition.button_id}`;
+
+        case "Completed":
+            return "Complete the current activity to unlock this page.";
 
         case "Lambda":
             return `Satisfy ${condition.exec_str}`;

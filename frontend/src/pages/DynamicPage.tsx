@@ -19,7 +19,7 @@ const pageComponents = Object.fromEntries(
     Object.entries(pageLoaders).map(([path, loader]) => [path, lazy(loader)]),
 ) as Record<string, LazyExoticComponent<ComponentType<IndexPageProps>>>;
 
-const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation, subpageIndex, replayKey, onSubpageReady }) => {
+const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation, subpageIndex, replayKey, onSubpageReady, onComplete }) => {
     const setDataset = useDataset(state => state.setDataset);
     const config = useConfig(state => state.config);
 
@@ -48,12 +48,13 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation
         <div className="h-full min-h-0 w-full overflow-hidden bg-page">
         <Suspense fallback={<PageLoading label="Loading visualisation…" />}>
             <LazyComponent
+                key={replayKey}
                 name={page.name}
                 parameters={page.parameters}
                 subpageIndex={subpageIndex}
                 replayKey={replayKey}
                 onSubpageReady={onSubpageReady}
-                completionButtonId={page.completion_button_id}
+                onComplete={onComplete}
             />
         </Suspense>
         </div>

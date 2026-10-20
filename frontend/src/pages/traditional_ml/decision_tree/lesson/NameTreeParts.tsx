@@ -1,14 +1,12 @@
 import { useState } from "react";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { DragChip, DragSurface, DropTarget, Frame, Result, TreeEdges, TreeNode } from "./shared";
 
 const parts = ["Root", "Branch", "Split node", "Leaf"];
 const letters = ["A", "B", "C", "D"];
 
-export default function NameTreeParts({ completionButtonId }: { completionButtonId: string }) {
+export default function NameTreeParts({ onComplete }: { onComplete: () => void }) {
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [feedback, setFeedback] = useState("Match labels to the lettered parts of the tree.");
-    const { recordButtonClick } = useHistoryRecorder();
     const finished = Object.keys(answers).length === parts.length;
     const place = (id: string, index: number) => {
         if (!parts.includes(id) || answers[index] || Object.values(answers).includes(id)) return;
@@ -17,7 +15,7 @@ export default function NameTreeParts({ completionButtonId }: { completionButton
         setAnswers(next);
         if (Object.keys(next).length === parts.length) {
             setFeedback("All four labels are correct. The next page is unlocked.");
-            recordButtonClick(completionButtonId);
+            onComplete();
         } else setFeedback(`${letters[index]} is the ${id.toLowerCase()}.`);
     };
     return <Frame><DragSurface>

@@ -1,16 +1,14 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { DragChip, DragSurface, DropTarget, Frame, Result, selectedClass } from "./shared";
 
 const steps = ["Start with labelled flowers", "Compare possible splits", "Repeat within each group", "Predict at a leaf"];
 
-export default function TraceTraining({ completionButtonId }: { completionButtonId: string }) {
+export default function TraceTraining({ onComplete }: { onComplete: () => void }) {
     const [slots, setSlots] = useState<(number | null)[]>([null, null, null, null]);
     const [checked, setChecked] = useState(false);
     const [finished, setFinished] = useState(false);
     const [feedback, setFeedback] = useState("Arrange all four steps, then check the sequence.");
-    const { recordButtonClick } = useHistoryRecorder();
     const place = (id: string, target: number) => {
         const step = Number(id);
         if (!Number.isInteger(step) || step < 0 || step >= steps.length || finished) return;
@@ -27,7 +25,7 @@ export default function TraceTraining({ completionButtonId }: { completionButton
         if (slots.every((step, index) => step === index)) {
             setFinished(true);
             setFeedback("Correct sequence. The final page is unlocked.");
-            recordButtonClick(completionButtonId);
+            onComplete();
         } else setFeedback("The highlighted steps are out of order. Drag them to another position.");
     };
     return <Frame><DragSurface>

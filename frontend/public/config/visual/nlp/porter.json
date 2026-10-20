@@ -3,13 +3,12 @@
   "pages": [
     {
       "page_type": "dynamic",
-      "name": "PorterExplore",
+      "name": "Porter Explore",
       "dataset": {
         "type": "predefined_porter",
         "name": "rules"
       },
       "parameters": {},
-      "completion_button_id": "porter-rules-v1",
       "subpages": [
         "Plurals and verb endings",
         "Final y",
@@ -21,7 +20,7 @@
     },
     {
       "page_type": "dynamic",
-      "name": "PorterLab",
+      "name": "Porter Lab",
       "dataset": {
         "type": "predefined_porter",
         "name": "suffixes"
@@ -30,13 +29,12 @@
     },
     {
       "page_type": "dynamic",
-      "name": "PorterFamilies",
+      "name": "Porter Families",
       "dataset": {
         "type": "predefined_porter",
         "name": "families"
       },
-      "parameters": {},
-      "completion_button_id": "porter-families-v2"
+      "parameters": {}
     }
   ],
   "transitions": [
@@ -44,8 +42,7 @@
       "from": 0,
       "to": 1,
       "condition": {
-        "condition_type": "Button",
-        "button_id": "porter-rules-v1",
+        "condition_type": "Completed",
         "name": "Predict suffix changes"
       }
     },

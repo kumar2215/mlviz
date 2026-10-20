@@ -3,9 +3,15 @@ import type { HistoryEntry, HistoryState } from "../types/history.ts";
 import type { PageUnion, Parameters } from "../types/page.ts";
 import type { Transition } from "../types/story.ts";
 import { displayCondition, isConditionMet } from "../utils/conditions.ts";
-import { fallbackPageTitle, getDynamicPage, layoutPathway, selectSubpage, subpageControls, transitionKey, type PathwayLayout, type SubpageProgress } from "../components/navigation/pathwayModel.ts";
+import { pageTitle, getDynamicPage, layoutPathway, selectSubpage, subpageControls, transitionKey, type PathwayLayout, type SubpageProgress } from "../components/navigation/pathwayModel.ts";
 
 export interface PathwayDefinition { pages: PageUnion[]; transitions: Transition[] }
+export interface PageProgressContext {
+    pageId: number;
+    subpageIndex: number;
+    sessionId: string | null;
+    replayKey: number;
+}
 export interface PathwayHistorySource {
     getHistory: () => HistoryState;
     subscribe: (listener: (history: HistoryState) => void) => () => void;
@@ -17,7 +23,6 @@ export interface PathwayHistorySource {
 export interface PathwayState extends PathwayDefinition {
     sessionId: string | null;
     layout: PathwayLayout;
-    titles: string[];
     history: HistoryState;
     now: number;
     currentPageId: number;
@@ -29,14 +34,14 @@ export interface PathwayState extends PathwayDefinition {
     focusRequest: { pageId: number; serial: number } | null;
     setDefinition: (definition: PathwayDefinition) => void;
     openSession: (sessionId: string, definition: PathwayDefinition, source: PathwayHistorySource) => void;
-    setTitles: (pages: PageUnion[], titles: string[]) => void;
     syncHistory: (history: HistoryState) => void;
     refreshTime: () => void;
     start: () => void;
     navigatePage: (pageId: number) => void;
     navigateSubpage: (pageId: number, index: number) => void;
     replayPage: (pageId: number) => void;
-    markSubpageReady: (pageId: number, index: number, sessionId?: string) => void;
+    markSubpageReady: (pageId: number, index: number, sessionId?: string, replayKey?: number) => void;
+    completePage: (context: PageProgressContext) => void;
     moveFocus: (pageId: number, key: string) => void;
 }
 
@@ -44,9 +49,8 @@ const emptyLabels: string[] = [];
 export const pageSubpages = (state: PathwayState, pageId = state.currentPageId) => getDynamicPage(state.pages[pageId])?.subpages ?? emptyLabels;
 
 export function canAdvanceSubpage(state: PathwayState): boolean {
-    const buttonId = getDynamicPage(state.pages[state.currentPageId])?.completion_button_id;
     return Boolean(state.progressByPage[state.currentPageId]?.completed.includes(state.subpageIndex))
-        || Boolean(buttonId && state.history.entries.some(entry => entry.actionType === "button_click" && entry.button_id === buttonId));
+        || state.history.entries.some(entry => entry.actionType === "page_complete" && entry.page_id === state.currentPageId);
 }
 
 export function canExitPage(state: PathwayState): boolean {
@@ -57,7 +61,8 @@ export function canExitPage(state: PathwayState): boolean {
 
 export function transitionAvailable(state: PathwayState, transition: Transition): boolean {
     return transition.from === state.currentPageId && canExitPage(state) && isConditionMet(transition.condition,
-        { ...state.history.params, __history: state.history, __now: state.now } as unknown as Record<string, Parameters>);
+        { ...state.history.params, __history: state.history, __now: state.now } as unknown as Record<string, Parameters>,
+        { sourcePageId: transition.from });
 }
 
 export function selectPathwayNode(state: PathwayState, pageId: number) {
@@ -69,7 +74,7 @@ export function selectPathwayNode(state: PathwayState, pageId: number) {
     return {
         node: state.layout.nodes.find(node => node.id === pageId),
         state: status,
-        title: state.titles[pageId],
+        title: pageTitle(state.pages[pageId], pageId),
         reason,
         labels: pageSubpages(state, pageId),
         progress,
@@ -92,7 +97,6 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
             ...definition,
             sessionId: null,
             layout: layoutPathway(definition.pages, definition.transitions),
-            titles: definition.pages.map(fallbackPageTitle),
             history: source.getHistory(),
             now: now(),
             currentPageId: 0,
@@ -110,17 +114,13 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                     return;
                 }
                 started = false;
-                set({ ...next, sessionId, layout: layoutPathway(next.pages, next.transitions), titles: next.pages.map(fallbackPageTitle),
+                set({ ...next, sessionId, layout: layoutPathway(next.pages, next.transitions),
                     history: source.getHistory(), now: now(), currentPageId: 0, subpageIndex: 0, replayKey: get().replayKey + 1,
                     progressByPage: {}, visitedPages: new Set([0]), traversed: new Set(), focusRequest: null });
             },
             setDefinition: next => {
                 if (get().pages === next.pages && get().transitions === next.transitions) return;
-                set({ ...next, layout: layoutPathway(next.pages, next.transitions), titles: next.pages.map(fallbackPageTitle) });
-            },
-            setTitles: (pages, titles) => {
-                if (get().pages !== pages || get().titles.every((title, index) => title === titles[index]) && get().titles.length === titles.length) return;
-                set({ titles });
+                set({ ...next, layout: layoutPathway(next.pages, next.transitions) });
             },
             syncHistory: history => { if (get().history !== history) set({ history, now: now() }); },
             refreshTime: () => {
@@ -152,7 +152,8 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                 if (!next) return;
                 const changedPage = pageId !== state.currentPageId;
                 if (changedPage) source.addPageVisit(state.currentPageId);
-                set({ currentPageId: pageId, subpageIndex: index, replayKey: state.replayKey + (changedPage ? 1 : 0), progressByPage: { ...state.progressByPage, [pageId]: next } });
+                // Each presentation gets a new version, including revisiting the same subpage.
+                set({ currentPageId: pageId, subpageIndex: index, replayKey: state.replayKey + 1, progressByPage: { ...state.progressByPage, [pageId]: next } });
                 if (changedPage) recordArrival(pageId);
             },
             replayPage: pageId => {
@@ -161,13 +162,25 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                 if (pageId !== state.currentPageId) { get().navigatePage(pageId); return; }
                 set({ subpageIndex: 0, replayKey: state.replayKey + 1, progressByPage: { ...state.progressByPage, [pageId]: { index: 0, completed: [] } } });
             },
-            markSubpageReady: (pageId, index, sessionId) => {
+            markSubpageReady: (pageId, index, sessionId, replayKey) => {
                 const state = get();
                 if (sessionId !== undefined && sessionId !== state.sessionId) return;
+                if (replayKey !== undefined && replayKey !== state.replayKey) return;
                 if (pageId !== state.currentPageId || index !== state.subpageIndex || index < 0 || index >= pageSubpages(state).length) return;
                 const progress = state.progressByPage[pageId];
                 if (progress?.completed.includes(index) && progress.index === index) return;
                 set({ progressByPage: { ...state.progressByPage, [pageId]: { index, completed: [...new Set([...(progress?.completed ?? []), index])] } } });
+            },
+            completePage: ({ pageId, subpageIndex, sessionId, replayKey }) => {
+                const state = freshState();
+                if (sessionId !== state.sessionId || replayKey !== state.replayKey
+                    || pageId !== state.currentPageId || subpageIndex !== state.subpageIndex
+                    || !getDynamicPage(state.pages[pageId])) return;
+                const labels = pageSubpages(state);
+                if (labels.length > 0 && !subpageControls(labels.length, state.progressByPage[pageId], false).canReplay) return;
+                if (state.history.entries.some(entry => entry.actionType === "page_complete" && entry.page_id === pageId)) return;
+                source.recordAction({ actionType: "page_complete", page_id: pageId, timestamp: now() });
+                get().syncHistory(source.getHistory());
             },
             moveFocus: (pageId, key) => {
                 const nodes = get().layout.nodes;

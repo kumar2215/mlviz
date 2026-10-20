@@ -1,17 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { layoutPathway, markdownTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes } from "../src/components/navigation/pathwayModel.ts";
-import { isConditionMet } from "../src/utils/conditions.ts";
+import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes } from "../src/components/navigation/pathwayModel.ts";
+import { displayCondition, isConditionMet } from "../src/utils/conditions.ts";
 import { usePreviewSession } from "../src/store/usePreviewSession.ts";
 import { createColorScale, createContinuousColorScale, type PaletteName, type ContinuousSchemeName } from "../src/utils/colorUtils.ts";
 import { hsl } from "d3";
 import type { PageUnion, Parameters } from "../src/types/page.ts";
 import type { Transition } from "../src/types/story.ts";
 import type { HistoryState } from "../src/types/history.ts";
+import type { Condition } from "../src/types/condition.ts";
 
 const pages = (count: number): PageUnion[] => Array.from({ length: count }, (_, index) => ({ page_type: "static", text: `# Page ${index + 1}`, path: "" }));
 const bypass = (from: number, to: number): Transition => ({ from, to, condition: { condition_type: "Bypass" } });
-const checker = (history: HistoryState, now = Date.now()) => (transition: Transition) => isConditionMet(transition.condition, { ...history.params, __history: history, __now: now } as unknown as Record<string, Parameters>);
+const checker = (history: HistoryState, now = Date.now()) => (transition: Transition) => isConditionMet(transition.condition, { ...history.params, __history: history, __now: now } as unknown as Record<string, Parameters>, { sourcePageId: transition.from });
 const history = (): HistoryState => ({ params: {}, entries: [], path: [] });
 
 test("only configured connections exist, including parallel edges and return loops", () => {
@@ -43,6 +44,32 @@ test("real activity completion unlocks its edge; subpage exit gates still apply 
     assert.equal(nodeStates(graph, 0, new Set([0]), true, checker(state)).get(1), "available");
     assert.equal(nodeStates(graph, 0, new Set([0]), false, checker(state)).get(1), "locked");
     assert.equal(nodeStates(graph, 0, new Set([0, 2]), false, checker(state)).get(2), "visited");
+});
+
+test("Completed requires the transition's source page, including in compound conditions", () => {
+    const state = history();
+    state.entries.push({ actionType: "page_complete", page_id: 0, timestamp: 10 });
+    const params = { __history: state } as unknown as Record<string, Parameters>;
+    const completed: Condition = { condition_type: "Completed" };
+    assert.equal(isConditionMet(completed, params), false, "A missing source cannot match completion");
+    assert.equal(isConditionMet(completed, params, { sourcePageId: 0 }), true);
+    assert.equal(isConditionMet(completed, params, { sourcePageId: 1 }), false);
+    const compound: Condition = { condition_type: "And", conditions: [
+        { condition_type: "Bypass" },
+        { condition_type: "Or", conditions: [completed, { condition_type: "Button", button_id: "alternative" }] },
+    ] };
+    assert.equal(isConditionMet(compound, params, { sourcePageId: 0 }), true);
+    assert.equal(isConditionMet(compound, params, { sourcePageId: 1 }), false);
+    assert.equal(isConditionMet(compound, params), false);
+    assert.equal(isConditionMet({ condition_type: "ActionCount", action: "page_complete", min: 1 }, params), true);
+    assert.equal(isConditionMet({ condition_type: "ActionCount", action: "page_complete", min: 2 }, params), false);
+    assert.equal(displayCondition(completed), "Complete the current activity to unlock this page.");
+    const graph = layoutPathway(pages(3), [
+        { from: 0, to: 1, condition: completed },
+        { from: 1, to: 2, condition: completed },
+    ]);
+    assert.equal(nodeStates(graph, 0, new Set([0]), true, checker(state)).get(1), "available");
+    assert.equal(nodeStates(graph, 1, new Set([0, 1]), true, checker(state)).get(2), "locked");
 });
 
 test("wait gates update over time and latest-result metric gates can become unavailable again", () => {
@@ -85,10 +112,16 @@ test("a visible subpage is active, not completed; a restarted ring clears old se
     assert.equal(segmentState(0, { index: 0, completed: [] }, false), "future");
 });
 
-test("node titles support Markdown frontmatter, headings, inline formatting, and a missing title", () => {
-    assert.equal(markdownTitle('---\ntitle: "Follow a tree"\n---\n# Other heading'), "Follow a tree");
-    assert.equal(markdownTitle("# Try **two** [patterns](example)"), "Try two patterns");
-    assert.equal(markdownTitle("A plain paragraph"), null);
+test("navigation uses configured page names directly without reading or formatting Markdown", () => {
+    assert.equal(pageTitle({ page_type: "dynamic", name: "Follow Questions", parameters: {} }, 0), "Follow Questions");
+    assert.equal(pageTitle({ page_type: "dynamic", name: "Keep_ThisName", parameters: {} }, 0), "Keep_ThisName");
+    assert.equal(pageTitle({ page_type: "static", name: "Introduction", text: "---\ntitle: Another title\n---\n# Other heading", path: "" }, 0), "Introduction");
+    assert.equal(pageTitle({ page_type: "static", text: "# A Markdown heading", path: "missing.md" }, 2), "Page 3");
+    assert.equal(pageTitle({
+        page_type: "mixed",
+        static_page: { page_type: "static", text: "# Other heading", path: "" },
+        dynamic_page: { page_type: "dynamic", name: "Compare Iris Splits", parameters: {} },
+    }, 0), "Compare Iris Splits");
 });
 
 test("subpage arcs only advance one ready step and replay requires every step to be completed", () => {

@@ -6,10 +6,10 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
     let page = null;
 
     switch (name) {
-        case "KNNPredict":
+        case "KNN Predict":
             page = <KNNPredict parameters={parameters} />;
             break;
-        case "KNNTrain":
+        case "KNN Train":
             page = <KNNTrain parameters={parameters} />;
             break
         default:

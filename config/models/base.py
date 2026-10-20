@@ -17,7 +17,10 @@ class Slide(BaseModel):
 
 
 class BasePage(BaseModel):
-    name: Optional[str] = None
+    name: Optional[str] = Field(
+        None,
+        description="Readable page name used in navigation and, for dynamic pages, component selection",
+    )
     page_type: Literal["static", "dynamic"]
     note: Optional[str] = Field(
         None,

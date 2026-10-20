@@ -27,14 +27,18 @@ function VisualisationContent() {
     const visualisation = useVisualisation(state => state.currentVisualisation);
 
     const inStoryMode = userMode === "story";
-    const { pages, currentPageId, subpageIndex, replayKey, sessionId, markReady } = usePathway(useShallow(state => ({
+    const { pages, currentPageId, subpageIndex, replayKey, sessionId, markReady, completePage } = usePathway(useShallow(state => ({
         pages: state.pages, currentPageId: state.currentPageId, subpageIndex: state.subpageIndex,
         replayKey: state.replayKey, sessionId: state.sessionId, markReady: state.markSubpageReady,
+        completePage: state.completePage,
     })));
     const currentPage = pages[currentPageId];
     const markSubpageReady = useCallback(() => {
-        markReady(currentPageId, subpageIndex, sessionId ?? undefined);
-    }, [currentPageId, subpageIndex, sessionId, markReady]);
+        markReady(currentPageId, subpageIndex, sessionId ?? undefined, replayKey);
+    }, [currentPageId, subpageIndex, sessionId, replayKey, markReady]);
+    const onComplete = useCallback(() => {
+        completePage({ pageId: currentPageId, subpageIndex, sessionId, replayKey });
+    }, [currentPageId, subpageIndex, sessionId, replayKey, completePage]);
 
     if (!pages || pages.length === 0) {
         return (
@@ -73,6 +77,7 @@ function VisualisationContent() {
                 subpageIndex={subpageIndex}
                 replayKey={replayKey}
                 onSubpageReady={markSubpageReady}
+                onComplete={onComplete}
             />;
         } else if (currentPage.page_type === "mixed") {
             const { static_page, dynamic_page } = currentPage;
@@ -93,6 +98,7 @@ function VisualisationContent() {
                             subpageIndex={subpageIndex}
                             replayKey={replayKey}
                             onSubpageReady={markSubpageReady}
+                            onComplete={onComplete}
                         />
                     </div>
                 </div>

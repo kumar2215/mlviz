@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
 import { checkBpeMerge, loadBpeState, type BpePair, type BpeState } from "@/api/bpe";
 import { Button } from "@/components/ui/button";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useDataset } from "@/store/useDataset";
 import { useTokenization } from "@/store/nlp/useTextPreprocessing";
 import type { BpeDataset, CustomBpeDataset } from "@/types/dataset";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
 import BpeCorpusView from "./BpeCorpusView";
 
-export default function BpeLab({ completionButtonId }: { completionButtonId: string }) {
+export default function BpeLab({ onComplete }: { onComplete: () => void }) {
     const activeDataset = useDataset(state => state.activeDataset);
     const [source, setSource] = useState<BpeDataset | null>(null);
     const [data, setData] = useState<BpeState | null>(null);
@@ -19,7 +18,6 @@ export default function BpeLab({ completionButtonId }: { completionButtonId: str
     const [pending, setPending] = useState(false);
     const [feedback, setFeedback] = useState("Choose the most frequent pair, then merge it.");
     const saveSource = useTokenization(state => state.setBpeSource);
-    const { recordButtonClick } = useHistoryRecorder();
     useEffect(() => {
         if (activeDataset?.type !== "predefined_bpe" && activeDataset?.type !== "custom_bpe") return;
         let active = true;
@@ -52,7 +50,7 @@ export default function BpeLab({ completionButtonId }: { completionButtonId: str
             const next = round + 1;
             setRound(next); setSelected(null); saveSource(source);
             setFeedback(next === data.rounds.length ? "Training complete. Try the learned rules on new words." : "Merge applied throughout the corpus. Counts have changed; choose again.");
-            if (next === data.rounds.length) recordButtonClick(completionButtonId);
+            if (next === data.rounds.length) onComplete();
         } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not check this merge."); }
         finally { setPending(false); }
     };

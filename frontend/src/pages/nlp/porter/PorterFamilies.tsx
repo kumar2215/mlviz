@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { checkPorterPlacement } from "@/api/text_preprocessing";
 import { DragAndDrop, DragItem, DropArea } from "@/components/interaction/DragAndDrop";
-import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { LabFrame, Status } from "../shared/LabFrame";
 import WordsEditor from "../shared/WordsEditor";
 import { usePorterExamples } from "./usePorterExamples";
 
-export default function PorterFamilies({ completionButtonId }: { completionButtonId: string }) {
+export default function PorterFamilies({ onComplete }: { onComplete: () => void }) {
     const examples = usePorterExamples();
     const [placements, setPlacements] = useState<Record<string, string>>({});
     const [checking, setChecking] = useState(false);
     const [feedback, setFeedback] = useState("Group each word under its Porter stem.");
-    const { recordButtonClick } = useHistoryRecorder();
     const finished = Boolean(examples.data) && Object.keys(placements).length === examples.data?.examples.length;
     const pending = checking || examples.pending;
     const place = async (word: string, stem: string) => {
@@ -22,7 +20,7 @@ export default function PorterFamilies({ completionButtonId }: { completionButto
             setFeedback(result.message);
             if (result.correct) {
                 const next = { ...placements, [word]: stem }; setPlacements(next);
-                if (Object.keys(next).length === examples.data.examples.length) { recordButtonClick(completionButtonId); setFeedback("All words are grouped correctly."); }
+                if (Object.keys(next).length === examples.data.examples.length) { onComplete(); setFeedback("All words are grouped correctly."); }
             }
         } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not check this placement."); }
         finally { setChecking(false); }

@@ -3,7 +3,7 @@
   "pages": [
     {
       "page_type": "dynamic",
-      "name": "RegexPlayground",
+      "name": "Regex Playground",
       "dataset": {
         "type": "predefined_regex",
         "name": "punctuation"
@@ -12,13 +12,12 @@
     },
     {
       "page_type": "dynamic",
-      "name": "RegexChallenges",
+      "name": "Regex Challenges",
       "dataset": {
         "type": "predefined_regex",
         "name": "punctuation"
       },
       "parameters": {},
-      "completion_button_id": "regex-objectives-v2",
       "subpages": [
         "Contractions",
         "Decimal numbers",
