@@ -58,6 +58,31 @@ function exerciseDefinition(): PathwayDefinition {
     return config;
 }
 
+test("the Iris comparison requires both configured subpages before unlocking tree building", () => {
+    const story: Story = JSON.parse(readFileSync(new URL("../public/config/story/decision_tree.json", import.meta.url), "utf8"));
+    const { store, source } = session({
+        pages: [story.pages[3], { page_type: "static", text: "", path: "" }],
+        transitions: [{ from: 0, to: 1, condition: { condition_type: "Completed" } }],
+    });
+    assert.deepEqual(pageSubpages(store.getState()), ["Compare variables", "Compare thresholds"]);
+    store.getState().navigateSubpage(0, 1);
+    assert.equal(store.getState().subpageIndex, 0);
+    store.getState().markSubpageReady(0, 0);
+    completionCallback(store)();
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "locked");
+    store.getState().navigateSubpage(0, 1);
+    assert.equal(store.getState().subpageIndex, 1);
+    completionCallback(store)();
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "locked");
+    store.getState().markSubpageReady(0, 1);
+    completionCallback(store)();
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "available");
+    assert.equal(source.getHistory().entries.filter(entry => entry.actionType === "page_complete").length, 1);
+    store.getState().replayPage(0);
+    assert.equal(store.getState().subpageIndex, 0);
+    assert.deepEqual(store.getState().progressByPage[0].completed, []);
+});
+
 test("completion records the page once and unlocks its edge without navigating", () => {
     const { store, source } = session(exerciseDefinition());
     const complete = completionCallback(store);

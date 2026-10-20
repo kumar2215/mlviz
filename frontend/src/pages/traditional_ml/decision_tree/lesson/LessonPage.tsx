@@ -30,11 +30,11 @@ function FinalPrediction({ narration }: ActivityNarrationProps) {
     </Frame>;
 }
 
-export default function LessonPage({ name, narration, onComplete }: IndexPageProps) {
+export default function LessonPage({ name, narration, subpageIndex, onSubpageReady, onComplete }: IndexPageProps) {
     switch (name) {
         case "Follow Questions": return <FollowQuestions narration={narration} onComplete={onComplete} />;
         case "Name Tree Parts": return <NameTreeParts narration={narration} onComplete={onComplete} />;
-        case "Compare Iris Splits": return <CompareIrisSplits narration={narration} onComplete={onComplete} />;
+        case "Compare Iris Splits": return <CompareIrisSplits narration={narration} subpageIndex={subpageIndex} onSubpageReady={onSubpageReady} onComplete={onComplete} />;
         case "Trace Training": return <TraceTraining narration={narration} onComplete={onComplete} />;
         case "Final Prediction": return <FinalPrediction narration={narration} />;
         default: return <div role="alert" className="p-4">Unknown decision tree page: {name}</div>;

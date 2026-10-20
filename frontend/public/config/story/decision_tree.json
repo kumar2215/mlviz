@@ -51,6 +51,7 @@
       "dynamic_page": {
         "page_type": "dynamic",
         "name": "Compare Iris Splits",
+        "subpages": ["Compare variables", "Compare thresholds"],
         "category": "traditional_ml",
         "path": "decision_tree",
         "dataset": {
