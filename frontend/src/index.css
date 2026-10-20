@@ -13,15 +13,11 @@
 @utility pathway-subpage {
     pointer-events: stroke;
     outline: none;
-    transform-origin: 40px 40px;
-    transition: transform 150ms ease;
-    &[data-next-subpage="true"]:is(:hover, :focus-visible) { transform: scale(1.14); }
-    &:focus-visible > path:last-child { stroke-width: 6; }
-    @media (prefers-reduced-motion: reduce) { transition: none; }
+    &[data-navigable="true"]:hover > path:last-child { filter: brightness(0.85); }
+    &:focus-visible > path:last-child { filter: brightness(0.65); }
 }
 
 @utility pathway-node {
-    &:is(:hover, :focus-within) .pathway-subpage[data-navigable="true"] { transform: scale(1.14); }
     &:is(:hover, :focus-within) .pathway-review-ring { visibility: visible; opacity: 1; }
     &[data-replay="true"]:is(:hover, :focus-within) .pathway-node-number { opacity: 0; }
     &[data-replay="true"]:is(:hover, :focus-within) .pathway-node-replay { opacity: 1; }

@@ -129,14 +129,14 @@ export function selectSubpage(count: number, progress: SubpageProgress | undefin
     return { index: target, completed: completed.includes(index) ? completed : [...completed, index] };
 }
 
-export function subpageArc(index: number, count: number): string {
+export function subpageArc(index: number, count: number, radius = 29): string {
     if (count < 1 || index < 0 || index >= count) return "";
     const step = 2 * Math.PI / count;
     const gap = Math.min(0.14, step / 3);
     const start = -Math.PI / 2 + index * step + gap / 2;
     const end = start + step - gap;
-    const point = (angle: number) => `${40 + 29 * Math.cos(angle)} ${40 + 29 * Math.sin(angle)}`;
-    return `M ${point(start)} A 29 29 0 ${end - start > Math.PI ? 1 : 0} 1 ${point(end)}`;
+    const point = (angle: number) => `${40 + radius * Math.cos(angle)} ${40 + radius * Math.sin(angle)}`;
+    return `M ${point(start)} A ${radius} ${radius} 0 ${end - start > Math.PI ? 1 : 0} 1 ${point(end)}`;
 }
 
 export function edgePath(points: Point[]): string {

@@ -31,6 +31,7 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
                 const segment = segmentState(index, progress, active);
                 const completed = Boolean(progress?.completed.includes(index));
                 const current = active && index === currentIndex;
+                const arc = subpageArc(index, labels.length, current ? 34 : 29);
                 const next = index === currentIndex + 1;
                 const enabled = !locked && selectSubpage(labels.length, progress, index, canAdvance) !== null;
                 const detail = completed ? `${current ? "Current subpage · " : ""}Click to review` : next ? enabled ? "Click to continue" : "Complete the current subpage to continue" : current ? "Current subpage" : "Complete earlier subpages first";
@@ -40,8 +41,8 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
                             className="pathway-subpage" style={{ cursor: enabled ? "pointer" : next ? "not-allowed" : "default" }}
                             onClick={() => { if (enabled) onNavigateSubpage(node.id, index); }}
                             onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); if (enabled) onNavigateSubpage(node.id, index); } }}>
-                            <path d={subpageArc(index, labels.length)} fill="none" stroke="transparent" strokeWidth="14" />
-                            <path d={subpageArc(index, labels.length)} fill="none" stroke={current ? "#0284c7" : completed ? "#1d4ed8" : enabled ? "#60a5fa" : "#e2e8f0"} strokeWidth={current ? 4.5 : 3.5} strokeLinecap="round" />
+                            <path d={arc} fill="none" stroke="transparent" strokeWidth="14" />
+                            <path d={arc} fill="none" stroke={current ? "#0284c7" : completed ? "#1d4ed8" : enabled ? "#60a5fa" : "#e2e8f0"} strokeWidth="4" strokeLinecap="round" />
                         </g>
                     </TooltipTrigger>
                     <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{completed ? "✓ " : !enabled && !current ? "🔒 " : ""}{label}</p><p className="mt-1 text-xs text-slate-500">Step {index + 1} of {labels.length} · {detail}</p></TooltipContent>
