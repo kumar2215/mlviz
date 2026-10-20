@@ -1,10 +1,12 @@
 import { useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { DragChip, DragSurface, DropTarget, Frame, Result, TreeEdges, TreeNode } from "./shared";
 
 const parts = ["Root", "Branch", "Split node", "Leaf"];
 const letters = ["A", "B", "C", "D"];
 
-export default function NameTreeParts({ onComplete }: { onComplete: () => void }) {
+export default function NameTreeParts({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
     const [answers, setAnswers] = useState<Record<number, string>>({});
     const [feedback, setFeedback] = useState("Match labels to the lettered parts of the tree.");
     const finished = Object.keys(answers).length === parts.length;
@@ -19,7 +21,7 @@ export default function NameTreeParts({ onComplete }: { onComplete: () => void }
         } else setFeedback(`${letters[index]} is the ${id.toLowerCase()}.`);
     };
     return <Frame><DragSurface>
-        <div className="flex shrink-0 items-center justify-between"><h2 className="text-lg font-semibold">Label the tree</h2><span className="text-sm text-blue-800">{Object.keys(answers).length} / 4 matched</span></div>
+        <div className="flex shrink-0 items-center justify-between gap-2"><ActivityIntroduction narration={narration} className="flex-1"><h2 className="text-lg font-semibold">Label the tree</h2></ActivityIntroduction><span className="shrink-0 text-sm text-blue-800">{Object.keys(answers).length} / 4 matched</span></div>
         <div className="flex min-h-14 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg bg-blue-50 p-2">{["Leaf", "Root", "Split node", "Branch"].filter(part => !Object.values(answers).includes(part)).map(part => <DragChip key={part} id={part} label={`Label ${part}`}>{part}</DragChip>)}{finished && <span className="text-sm text-emerald-800">All labels placed.</span>}</div>
         <div className="flex min-h-0 flex-1 gap-3">
             <div className="flex w-44 shrink-0 flex-col justify-center gap-3">{letters.map((letter, index) => <DropTarget key={letter} label={`Label box ${letter}`} disabled={Boolean(answers[index])} onPlace={id => place(id, index)} className={`flex items-center gap-2 ${answers[index] ? "!border-emerald-300 !bg-emerald-50" : ""}`}><span className="lesson-part-marker">{letter}</span><span className="text-sm font-medium">{answers[index] ?? "Drop label"}</span></DropTarget>)}</div>

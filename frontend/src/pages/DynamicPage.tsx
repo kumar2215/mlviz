@@ -2,6 +2,7 @@ import { useConfig } from "@/store/useConfig";
 import { useDataset } from "@/store/useDataset";
 import type { DynamicPageProps, IndexPageProps } from "@/types/page";
 import PageLoading from "@/components/layout/PageLoading";
+import useStaticMarkdown from "@/hooks/useStaticMarkdown";
 import React, {
     useEffect,
     lazy,
@@ -19,9 +20,10 @@ const pageComponents = Object.fromEntries(
     Object.entries(pageLoaders).map(([path, loader]) => [path, lazy(loader)]),
 ) as Record<string, LazyExoticComponent<ComponentType<IndexPageProps>>>;
 
-const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation, subpageIndex, replayKey, onSubpageReady, onComplete }) => {
+const DynamicPage: React.FC<DynamicPageProps> = ({ page, narration, category, visualisation, subpageIndex, replayKey, onSubpageReady, onComplete }) => {
     const setDataset = useDataset(state => state.setDataset);
     const config = useConfig(state => state.config);
+    const narrationDocument = useStaticMarkdown(narration);
 
     if (!category || !visualisation) {
         throw new Error("Category and/or visualisation not provided for dynamic page");
@@ -46,17 +48,18 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page, category, visualisation
 
     return (
         <div className="h-full min-h-0 w-full overflow-hidden bg-page">
-        <Suspense fallback={<PageLoading label="Loading visualisation…" />}>
-            <LazyComponent
-                key={replayKey}
-                name={page.name}
-                parameters={page.parameters}
-                subpageIndex={subpageIndex}
-                replayKey={replayKey}
-                onSubpageReady={onSubpageReady}
-                onComplete={onComplete}
-            />
-        </Suspense>
+            <Suspense fallback={<PageLoading label="Loading visualisation…" />}>
+                <LazyComponent
+                    key={replayKey}
+                    name={page.name}
+                    parameters={page.parameters}
+                    narration={narration ? narrationDocument : undefined}
+                    subpageIndex={subpageIndex}
+                    replayKey={replayKey}
+                    onSubpageReady={onSubpageReady}
+                    onComplete={onComplete}
+                />
+            </Suspense>
         </div>
     );
 };

@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { checkBpeMerge, loadBpeState, type BpePair, type BpeState } from "@/api/bpe";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/store/useDataset";
@@ -7,7 +9,7 @@ import type { BpeDataset, CustomBpeDataset } from "@/types/dataset";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
 import BpeCorpusView from "./BpeCorpusView";
 
-export default function BpeLab({ onComplete }: { onComplete: () => void }) {
+export default function BpeLab({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
     const activeDataset = useDataset(state => state.activeDataset);
     const [source, setSource] = useState<BpeDataset | null>(null);
     const [data, setData] = useState<BpeState | null>(null);
@@ -59,7 +61,7 @@ export default function BpeLab({ onComplete }: { onComplete: () => void }) {
     const finalRound = data?.rounds[(data?.rounds.length ?? 0) - 1];
     const corpus = current?.before ?? finalRound?.after ?? data?.initial ?? [];
     return <LabFrame>
-        <div className="flex shrink-0 items-center justify-between"><h2 className="text-lg font-semibold">Learn BPE merges</h2><span className="text-sm text-blue-900">{finished ? "Model ready" : `Merge ${round + 1} of ${data?.rounds.length ?? "…"}`}</span></div>
+        <div className="flex shrink-0 items-center justify-between gap-2"><ActivityIntroduction narration={narration} className="flex-1"><h2 className="text-lg font-semibold">Learn BPE merges</h2></ActivityIntroduction><span className="shrink-0 text-sm text-blue-900">{finished ? "Model ready" : `Merge ${round + 1} of ${data?.rounds.length ?? "…"}`}</span></div>
         <div className="grid shrink-0 grid-cols-[1fr_auto] gap-3 rounded-lg bg-blue-50 p-2"><label className="min-w-0 text-sm font-medium">Corpus (word frequency, up to eight lines)<textarea aria-label="BPE corpus" rows={4} value={draft} disabled={pending} onChange={event => setDraft(event.target.value)} className="mt-1 w-full resize-none rounded-lg border border-blue-200 bg-white p-2 font-mono text-sm" /></label><div className="flex flex-col justify-between gap-2"><label className="text-sm">Merge budget<input aria-label="Merge budget" type="number" min="1" max="6" value={Number.isFinite(budget) ? budget : ""} disabled={pending} onChange={event => setBudget(event.target.valueAsNumber)} className="mt-1 block w-24 rounded-md border border-blue-200 bg-white px-2 py-1" /></label><Button className={actionClass} disabled={pending || !draft.trim()} onClick={useCorpus}>Use corpus</Button></div></div>
         <div className="grid min-h-0 flex-1 grid-cols-[1.15fr_0.85fr] gap-3">
             <section className="min-h-0 overflow-auto rounded-xl border border-slate-200 p-2"><h3 className="mb-2 text-sm font-semibold">Current tokens</h3><BpeCorpusView corpus={corpus} /></section>

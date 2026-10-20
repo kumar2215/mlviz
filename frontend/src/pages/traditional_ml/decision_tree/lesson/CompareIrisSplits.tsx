@@ -1,4 +1,6 @@
 import { useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { calculateNodeStats } from "@/api/dt";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/store/useDataset";
@@ -21,7 +23,7 @@ function Branch({ label, stats }: { label: string; stats?: NodeStats }) {
     </div>;
 }
 
-export default function CompareIrisSplits({ onComplete }: { onComplete: () => void }) {
+export default function CompareIrisSplits({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
     const dataset = useDataset(state => state.activeDataset);
     const [thresholds, setThresholds] = useState([2.5, 4.5]);
     const [results, setResults] = useState<(NodeResponse | null)[]>([null, null]);
@@ -71,7 +73,7 @@ export default function CompareIrisSplits({ onComplete }: { onComplete: () => vo
     };
 
     return <Frame>
-        <h2 className="shrink-0 text-lg font-semibold">Compare two petal-length questions</h2>
+        <ActivityIntroduction narration={narration}><h2 className="shrink-0 text-lg font-semibold">Compare two petal-length questions</h2></ActivityIntroduction>
         <div aria-label="Split comparisons" className="grid min-h-0 flex-1 auto-rows-max grid-cols-1 gap-3 overflow-y-auto xl:grid-cols-2">{thresholds.map((threshold, index) => {
             const stats = results[index]?.split_stats;
             return <section key={index} className="flex flex-col gap-2 rounded-xl border border-blue-200 bg-slate-50 p-3" aria-label={`Split ${index === 0 ? "A" : "B"}`}>

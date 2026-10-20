@@ -1,4 +1,6 @@
 import { useState, type ReactNode } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { Button } from "@/components/ui/button";
 import { checkRegex, previewRegex, type RegexFlag, type RegexGoal, type RegexPreview, type RegexState } from "@/api/text_preprocessing";
 import { useTokenization } from "@/store/nlp/useTextPreprocessing";
@@ -16,7 +18,7 @@ function HighlightedText({ text, preview }: { text: string; preview: RegexPrevie
     return <p className="whitespace-pre-wrap break-all font-mono text-sm leading-7">{parts}</p>;
 }
 
-export default function RegexEditor({ data, goal, onComplete }: { data: RegexState; goal?: RegexGoal; onComplete?: () => void }) {
+export default function RegexEditor({ narration, data, goal, onComplete }: ActivityNarrationProps & { data: RegexState; goal?: RegexGoal; onComplete?: () => void }) {
     const saved = useTokenization.getState().regexDraft;
     const [editor, setEditor] = useState({ text: goal?.text ?? saved?.text ?? data.text, pattern: goal ? data.options[0].pattern : saved?.pattern ?? data.options[0].pattern, flags: goal ? [] as RegexFlag[] : saved?.flags ?? [] });
     const [preview, setPreview] = useState<RegexPreview | null>(null);
@@ -52,7 +54,7 @@ export default function RegexEditor({ data, goal, onComplete }: { data: RegexSta
         finally { setPending(false); }
     };
     return <LabFrame>
-        <h2 className="shrink-0 text-lg font-semibold text-cyan-950">{goal?.title ?? "Regex playground"}</h2>
+        <ActivityIntroduction narration={narration}><h2 className="shrink-0 text-lg font-semibold text-cyan-950">{goal?.title ?? "Regex playground"}</h2></ActivityIntroduction>
         <div className="grid min-h-0 flex-1 grid-cols-[0.9fr_1.1fr] gap-3">
             <section className="flex min-h-0 flex-col gap-3 rounded-xl bg-cyan-50 p-3">
                 <label className="text-sm font-medium">Text<textarea aria-label="Regex text" rows={5} maxLength={2000} value={editor.text} disabled={pending} onChange={event => edit({ text: event.target.value })} className="mt-1 w-full resize-none rounded-lg border border-cyan-200 bg-white p-2 font-mono text-sm" /></label>

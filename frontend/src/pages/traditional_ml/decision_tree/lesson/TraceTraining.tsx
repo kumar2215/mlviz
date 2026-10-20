@@ -1,10 +1,12 @@
 import { useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { Button } from "@/components/ui/button";
 import { DragChip, DragSurface, DropTarget, Frame, Result, selectedClass } from "./shared";
 
 const steps = ["Start with labelled flowers", "Compare possible splits", "Repeat within each group", "Predict at a leaf"];
 
-export default function TraceTraining({ onComplete }: { onComplete: () => void }) {
+export default function TraceTraining({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
     const [slots, setSlots] = useState<(number | null)[]>([null, null, null, null]);
     const [checked, setChecked] = useState(false);
     const [finished, setFinished] = useState(false);
@@ -29,7 +31,7 @@ export default function TraceTraining({ onComplete }: { onComplete: () => void }
         } else setFeedback("The highlighted steps are out of order. Drag them to another position.");
     };
     return <Frame><DragSurface>
-        <h2 className="shrink-0 text-lg font-semibold">Rebuild the training sequence</h2>
+        <ActivityIntroduction narration={narration}><h2 className="shrink-0 text-lg font-semibold">Rebuild the training sequence</h2></ActivityIntroduction>
         <div className="grid min-h-0 flex-1 grid-cols-2 gap-4">
             <section className="flex min-h-0 flex-col justify-center gap-3 rounded-xl bg-blue-50 p-4"><h3 className="font-semibold text-blue-900">Steps to place</h3>{[2, 0, 3, 1].filter(step => !slots.includes(step)).map(step => <DragChip key={step} id={String(step)} label={`Training step: ${steps[step]}`}>{steps[step]}</DragChip>)}{slots.every(step => step !== null) && <p className="text-sm text-blue-800">All steps placed.</p>}</section>
             <section className="flex min-h-0 flex-col justify-center gap-2" aria-label="Training sequence">{slots.map((step, index) => <div key={index}>

@@ -89,10 +89,11 @@ function VisualisationContent() {
 
             return (
                 <div className="flex h-full min-h-0 w-full flex-col overflow-hidden bg-page">
-                    <StaticPage {...static_page} compact />
+                    {!inStoryMode && <StaticPage {...static_page} compact />}
                     <div className="min-h-0 flex-1 overflow-hidden">
                         <DynamicPage
                             page={dynamic_page}
+                            narration={inStoryMode ? static_page : undefined}
                             category={category!}
                             visualisation={name!}
                             subpageIndex={subpageIndex}

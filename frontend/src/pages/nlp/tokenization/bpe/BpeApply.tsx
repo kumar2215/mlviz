@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { applyBpePair, checkBpeTokenizations, loadBpeApplication, loadBpeState, type BpeApplication, type BpeState } from "@/api/bpe";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/store/useDataset";
@@ -7,7 +9,7 @@ import type { CustomBpeDataset } from "@/types/dataset";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
 import WordsEditor from "../../shared/WordsEditor";
 
-export default function BpeApply({ onComplete }: { onComplete: () => void }) {
+export default function BpeApply({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
     const activeDataset = useDataset(state => state.activeDataset);
     const [source, setSource] = useState<CustomBpeDataset | null>(null);
     const [model, setModel] = useState<BpeState | null>(null);
@@ -62,7 +64,7 @@ export default function BpeApply({ onComplete }: { onComplete: () => void }) {
         finally { setPending(false); }
     };
     return <LabFrame>
-        <h2 className="shrink-0 text-lg font-semibold">Apply your learned merges</h2>
+        <ActivityIntroduction narration={narration}><h2 className="shrink-0 text-lg font-semibold">Apply your learned merges</h2></ActivityIntroduction>
         <WordsEditor label="Test words (up to four)" value={draft} onChange={setDraft} onApply={useWords} pending={pending} />
         <div className="flex shrink-0 flex-wrap gap-2">{model?.rounds.map((item, index) => <span key={index} className={`rounded-lg border px-3 py-2 font-mono text-sm ${application?.rule_index === index ? "border-blue-600 bg-blue-100 text-blue-950" : "border-slate-200 bg-slate-50 text-slate-600"}`}>{index + 1}. {item.rule.left} + {item.rule.right}</span>)}</div>
         <div className="flex min-h-0 flex-1 flex-col justify-center gap-3 overflow-auto rounded-xl bg-slate-50 p-3">{application?.answers.map((answer, word) => <div key={answer.word} className="rounded-lg border border-blue-100 bg-white p-3"><h3 className="mb-2 font-mono font-semibold break-all">{answer.word}</h3><div className="flex flex-wrap gap-1">{answer.tokens.map((token, index) => <Button key={`${index}-${token}`} aria-label={`${answer.word} token ${index + 1}: ${token}`} disabled={pending || application.complete} className={`${optionClass} min-w-10 font-mono ${selected?.word === word && selected.token === index ? "ring-2 ring-blue-600" : ""}`} onClick={() => selectToken(word, index)}>{token}</Button>)}</div></div>)}</div>

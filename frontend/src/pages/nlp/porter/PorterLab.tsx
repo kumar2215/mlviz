@@ -1,11 +1,13 @@
 import { useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { checkPorterStep } from "@/api/text_preprocessing";
 import { Button } from "@/components/ui/button";
 import { LabFrame, optionClass, Status } from "../shared/LabFrame";
 import WordsEditor from "../shared/WordsEditor";
 import { usePorterExamples } from "./usePorterExamples";
 
-export default function PorterLab() {
+export default function PorterLab({ narration }: ActivityNarrationProps) {
     const examples = usePorterExamples();
     const [wordIndex, setWordIndex] = useState(0);
     const [round, setRound] = useState(0);
@@ -28,7 +30,7 @@ export default function PorterLab() {
         finally { setChecking(false); }
     };
     return <LabFrame>
-        <h2 className="shrink-0 text-lg font-semibold">Predict the suffix changes</h2>
+        <ActivityIntroduction narration={narration}><h2 className="shrink-0 text-lg font-semibold">Predict the suffix changes</h2></ActivityIntroduction>
         <WordsEditor value={examples.draft} onChange={examples.setDraft} pending={pending} onApply={async () => { if (await examples.apply()) { setWordIndex(0); setRound(0); setFeedback("New words loaded. Predict a rule result."); } }} />
         <div className="flex shrink-0 flex-wrap gap-2">{examples.data?.examples.map((item, index) => <Button key={item.word} className={optionClass} disabled={pending} aria-pressed={wordIndex === index} onClick={() => { setWordIndex(index); setRound(0); setFeedback("Predict the next changed form."); }}>{item.word}</Button>)}</div>
         <div className="grid min-h-0 flex-1 grid-cols-2 gap-3">

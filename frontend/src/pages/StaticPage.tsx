@@ -1,14 +1,11 @@
 import MarkdownWrapper from "@/components/markdown/MarkdownWrapper";
 import PageLoading from "@/components/layout/PageLoading";
 import type { StaticPageParameters } from "@/types/page";
+import useStaticMarkdown from "@/hooks/useStaticMarkdown";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ text, path, compact = false }) => {
-    const [loaded, setLoaded] = useState<{ path: string; content: string; error: string | null } | null>(null);
-    const loadedDocument = loaded?.path === path ? loaded : null;
-    const content = text || loadedDocument?.content || "";
-    const loading = !text && Boolean(path) && !loadedDocument;
-    const error = text ? null : loadedDocument?.error ?? null;
+    const { content, loading, error } = useStaticMarkdown({ text, path });
 
     const contentRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -18,32 +15,6 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
         width: 0,
         height: 0,
     });
-
-    useEffect(() => {
-        setHasOverflow(false);
-        if (!text && path) {
-            const controller = new AbortController();
-            setLoaded(null);
-            fetch(path, { signal: controller.signal })
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(
-                            `Failed to load markdown file: ${response.statusText}`,
-                        );
-                    }
-                    return response.text();
-                })
-                .then((markdownText) => {
-                    if (controller.signal.aborted) return;
-                    setLoaded({ path, content: markdownText, error: null });
-                })
-                .catch((err) => {
-                    if (controller.signal.aborted) return;
-                    setLoaded({ path, content: "", error: err instanceof Error ? err.message : "Could not load this page." });
-                });
-            return () => controller.abort();
-        }
-    }, [text, path]);
 
     useEffect(() => {
         setHasOverflow(false);

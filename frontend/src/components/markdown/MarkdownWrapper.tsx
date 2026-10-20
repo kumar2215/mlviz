@@ -8,7 +8,7 @@ import remarkMath from "remark-math";
 
 interface MarkdownWrapperProps {
     children: string;
-    variant?: "default" | "small";
+    variant?: "default" | "small" | "activity";
 }
 
 type ParagraphProps = React.ComponentProps<"p"> & ExtraProps;
@@ -331,6 +331,19 @@ const DefaultComponentMap: Components = {
     td: TableDataCell,
 };
 
+const ActivityComponentMap: Components = {
+    ...DefaultComponentMap,
+    h1: "h2",
+    h2: "h2",
+    h3: "h3",
+    h4: "h4",
+    p: "p",
+    strong: "strong",
+    ul: "ul",
+    ol: "ol",
+    li: "li",
+};
+
 const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
     children,
     variant = "default",
@@ -342,13 +355,17 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
                 [rehypeRaw, { passThrough: ["math", "inlineMath"] }],
                 rehypeMathjax,
             ]}
-            components={DefaultComponentMap}
+            components={variant === "activity" ? ActivityComponentMap : DefaultComponentMap}
         >
             {children}
         </Markdown>
     );
 
-    if (variant === "small") {
+    if (variant === "activity") {
+        return <div className="space-y-2 text-sm leading-snug text-slate-600 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-slate-950 [&_h3]:font-semibold [&_h3]:text-slate-950 [&_h4]:font-semibold [&_h4]:text-slate-950 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1">
+            {content}
+        </div>;
+    } else if (variant === "small") {
         return (
             <div className="px-2 leading-tight [&_h1]:text-[calc(0.7rem+0.7vw)] [&_h2]:text-[calc(0.65rem+0.5vw)] [&_h3]:text-[calc(0.6rem+0.45vw)] [&_h4]:text-[calc(0.55rem+0.4vw)] [&_p]:text-[calc(0.5rem+0.3vw)] [&_li]:text-[calc(0.5rem+0.3vw)] [&_p]:mb-0.5 [&_ul]:my-1 [&_ol]:my-1 [&_li]:mx-0 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-1 [&_h4]:my-1 [&_img]:my-2">
                 {content}

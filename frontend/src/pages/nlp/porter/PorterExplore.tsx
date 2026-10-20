@@ -1,17 +1,19 @@
 import { useState } from "react";
+import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
+import type { ActivityNarrationProps } from "@/types/page";
 import { checkPorterStep } from "@/api/text_preprocessing";
 import { Button } from "@/components/ui/button";
 import { actionClass, LabFrame, optionClass, Status } from "../shared/LabFrame";
 import WordsEditor from "../shared/WordsEditor";
 import { usePorterExamples } from "./usePorterExamples";
 
-interface Props {
+interface Props extends ActivityNarrationProps {
     subpageIndex: number;
     onComplete: () => void;
     onSubpageReady: () => void;
 }
 
-export default function PorterExplore({ subpageIndex, onComplete, onSubpageReady }: Props) {
+export default function PorterExplore({ narration, subpageIndex, onComplete, onSubpageReady }: Props) {
     const examples = usePorterExamples();
     const [wordIndex, setWordIndex] = useState(subpageIndex);
     const [revealed, setRevealed] = useState(false);
@@ -39,7 +41,7 @@ export default function PorterExplore({ subpageIndex, onComplete, onSubpageReady
     };
 
     return <LabFrame>
-        <h2 className="shrink-0 text-lg font-semibold">Try each rule group</h2>
+        <ActivityIntroduction narration={narration}><h2 className="shrink-0 text-lg font-semibold">Try each rule group</h2></ActivityIntroduction>
         <WordsEditor value={examples.draft} onChange={examples.setDraft} pending={pending} onApply={async () => {
             if (await examples.apply()) { setWordIndex(0); setRevealed(false); setFeedback("New words loaded. Apply the current rule group."); }
         }} />

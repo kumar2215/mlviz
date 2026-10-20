@@ -5,7 +5,7 @@ import type { IndexPageProps } from "@/types/page";
 import RegexEditor from "./RegexEditor";
 import PageLoading from "@/components/layout/PageLoading";
 
-export default function IndexPage({ name, subpageIndex = 0, replayKey = 0, onSubpageReady, onComplete }: IndexPageProps) {
+export default function IndexPage({ name, narration, subpageIndex = 0, replayKey = 0, onSubpageReady, onComplete }: IndexPageProps) {
     const dataset = useDataset(state => state.activeDataset);
     const [data, setData] = useState<RegexState | null>(null);
     const [error, setError] = useState("");
@@ -18,12 +18,12 @@ export default function IndexPage({ name, subpageIndex = 0, replayKey = 0, onSub
     if (error) return <div role="alert" className="p-4">{error}</div>;
     if (!data) return <PageLoading label="Loading regex examples…" />;
     switch (name) {
-        case "Regex Playground": return <RegexEditor key={`play-${replayKey}`} data={data} />;
+        case "Regex Playground": return <RegexEditor key={`play-${replayKey}`} narration={narration} data={data} />;
         case "Regex Challenges": {
             if (!onSubpageReady) break;
             const goal = data.goals[subpageIndex];
             if (!goal) return <div role="alert">Unknown regex objective.</div>;
-            return <RegexEditor key={`${goal.id}-${replayKey}`} data={data} goal={goal} onComplete={() => {
+            return <RegexEditor key={`${goal.id}-${replayKey}`} narration={narration} data={data} goal={goal} onComplete={() => {
                 onSubpageReady();
                 if (subpageIndex === data.goals.length - 1) onComplete();
             }} />;

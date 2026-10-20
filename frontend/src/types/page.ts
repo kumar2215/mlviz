@@ -14,6 +14,16 @@ export interface StaticPageParameters {
     path: string;
 }
 
+export interface StaticMarkdownDocument {
+    content: string;
+    loading: boolean;
+    error: string | null;
+}
+
+export interface ActivityNarrationProps {
+    narration?: StaticMarkdownDocument;
+}
+
 interface StaticPage extends BasePage, StaticPageParameters {
     page_type: "static";
 }
@@ -44,6 +54,7 @@ export type PageUnion = StaticPage | DynamicPage | MixedPage | ReferencePage;
 
 export interface DynamicPageProps {
     page: DynamicPage;
+    narration?: StaticPageParameters;
     category: string;
     visualisation: string;
     subpageIndex?: number;
@@ -52,7 +63,7 @@ export interface DynamicPageProps {
     onComplete: () => void;
 }
 
-export interface IndexPageProps {
+export interface IndexPageProps extends ActivityNarrationProps {
     name: string;
     parameters: Parameters;
     subpageIndex?: number;
