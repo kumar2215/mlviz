@@ -35,7 +35,7 @@ const CollapsibleHUD: React.FC<CollapsibleHUDProps> = ({
 
     return (
         <div
-            className={`bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 ${className}`}
+            className={`bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 ${className}`}
             style={style}
         >
             {/* Header — always visible, click to toggle */}

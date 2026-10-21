@@ -1,11 +1,18 @@
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { readFileSync } from "node:fs";
 import { defineConfig } from "vite";
+
+const mathjaxVersion = (JSON.parse(
+    readFileSync(path.resolve(__dirname, "node_modules/mathjax-full/package.json"), "utf8"),
+) as { version: string }).version;
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
     base: process.env.VITE_BASE_PATH || "/",
+    // mathjax-full reads PACKAGE_VERSION at runtime; define it for browser bundles.
+    define: { PACKAGE_VERSION: JSON.stringify(mathjaxVersion) },
     plugins: [react(), tailwindcss()],
     resolve: {
         alias: {

@@ -1,0 +1,89 @@
+rules_version = '2';
+// Private learner profiles at users/{Firebase Auth UID}.
+// displayName: required string, 1..100 characters.
+// createdAt: required server timestamp, immutable after creation.
+// updatedAt: required server timestamp on each write.
+// No credentials, email, roles, XP, or progress are stored in this profile document.
+// users/{uid}/storyProgress/{storyId}: version 1, unique allowlisted milestones,
+// checkpoint {page, step, at (client milliseconds), client (bounded ID)}, updatedAt.
+// Progress is private, client-reported learning data, unsuitable for competitive ranking.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Ownership is encoded only in the document path; there is no mutable UID field.
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['displayName', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['displayName', 'createdAt', 'updatedAt'])
+        && data.displayName is string
+        && data.displayName.size() >= 1
+        && data.displayName.size() <= 100
+        && data.displayName.matches('.*[^\\s].*')
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp
+        && data.updatedAt == request.time;
+    }
+
+    // BEGIN GENERATED STORY CATALOG
+    // Task/page IDs are the allowlist, not proof of learning. XP is private and client-reported.
+    // Keep IDs stable; retain retired tasks with xp: 0 if historic completions must still sync.
+    function isKnownStoryProgress(data, storyId) {
+      return         (storyId == 'decision_tree'
+          && data.milestones.size() <= 30
+          && data.milestones.hasOnly(["complete:build-tree","complete:compare-splits","complete:final-prediction","complete:intro","complete:sort-flowers","complete:training-sequence","complete:tree-parts","step:compare-splits:thresholds","step:compare-splits:variables","task:build-tree:accuracy-target","task:compare-splits:thresholds","task:compare-splits:variables","task:sort-flowers:child-sort","task:sort-flowers:root-sort","task:training-sequence:sequence","task:tree-parts:match-parts","unlock:build-tree","unlock:compare-splits","unlock:final-prediction","unlock:intro","unlock:sort-flowers","unlock:training-sequence","unlock:tree-parts","visit:build-tree","visit:compare-splits","visit:final-prediction","visit:intro","visit:sort-flowers","visit:training-sequence","visit:tree-parts"])
+          && data.checkpoint.page in ["intro","sort-flowers","tree-parts","compare-splits","build-tree","training-sequence","final-prediction"]
+          && data.checkpoint.step in ["","variables","thresholds"])
+        ||         (storyId == 'text_preprocessing'
+          && data.milestones.size() <= 63
+          && data.milestones.hasOnly(["complete:bpe-apply","complete:bpe-basics","complete:bpe-training","complete:debrief","complete:intro","complete:porter-explore","complete:porter-families","complete:porter-intro","complete:porter-predictions","complete:regex-basics","complete:regex-challenges","complete:regex-playground","complete:regex-review","step:porter-explore:final-e","step:porter-explore:final-y","step:porter-explore:long-suffixes","step:porter-explore:plurals","step:porter-explore:remaining-endings","step:porter-explore:short-suffixes","step:regex-challenges:contractions","step:regex-challenges:numbers","step:regex-challenges:social","task:bpe-apply:apply-rules","task:bpe-training:round-1-count","task:bpe-training:round-1-merge","task:bpe-training:round-2-count","task:bpe-training:round-2-merge","task:porter-families:group-families","task:porter-predictions:predict-caresses","task:porter-predictions:predict-hopping","task:porter-predictions:predict-ponies","task:porter-predictions:predict-relational","task:porter-predictions:predict-running","task:porter-predictions:predict-sky","task:regex-challenges:contractions","task:regex-challenges:numbers","task:regex-challenges:social","unlock:bpe-apply","unlock:bpe-basics","unlock:bpe-training","unlock:debrief","unlock:intro","unlock:porter-explore","unlock:porter-families","unlock:porter-intro","unlock:porter-predictions","unlock:regex-basics","unlock:regex-challenges","unlock:regex-playground","unlock:regex-review","visit:bpe-apply","visit:bpe-basics","visit:bpe-training","visit:debrief","visit:intro","visit:porter-explore","visit:porter-families","visit:porter-intro","visit:porter-predictions","visit:regex-basics","visit:regex-challenges","visit:regex-playground","visit:regex-review"])
+          && data.checkpoint.page in ["intro","regex-basics","regex-playground","regex-challenges","regex-review","porter-intro","porter-explore","porter-predictions","porter-families","bpe-basics","bpe-training","bpe-apply","debrief"]
+          && data.checkpoint.step in ["","contractions","numbers","social","plurals","final-y","long-suffixes","short-suffixes","remaining-endings","final-e"]);
+    }
+    // END GENERATED STORY CATALOG
+
+    function isValidStoryProgress(data, storyId) {
+      return data.keys().hasAll(['version', 'milestones', 'checkpoint', 'updatedAt'])
+        && data.keys().hasOnly(['version', 'milestones', 'checkpoint', 'updatedAt'])
+        && data.version is int && data.version == 1
+        && data.milestones is list && data.milestones.size() <= 512
+        && data.milestones.toSet().size() == data.milestones.size()
+        && data.checkpoint is map
+        && data.checkpoint.keys().hasAll(['page', 'step', 'at', 'client'])
+        && data.checkpoint.keys().hasOnly(['page', 'step', 'at', 'client'])
+        && data.checkpoint.page is string && data.checkpoint.page.size() <= 80
+        && data.checkpoint.step is string && data.checkpoint.step.size() <= 80
+        && data.checkpoint.at is int && data.checkpoint.at >= 0 && data.checkpoint.at <= 8640000000000000
+        && data.checkpoint.client is string && data.checkpoint.client.size() >= 1 && data.checkpoint.client.size() <= 80
+        && data.checkpoint.client.matches('^[a-zA-Z0-9-]+$')
+        && data.updatedAt is timestamp && data.updatedAt == request.time
+        && isKnownStoryProgress(data, storyId);
+    }
+
+    match /users/{userId}/storyProgress/{storyId} {
+      allow get, list: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && exists(/databases/$(database)/documents/users/$(userId))
+        && isValidStoryProgress(request.resource.data, storyId);
+      allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(request.resource.data)
+        && request.resource.data.createdAt == request.time;
+      allow update: if isOwner(userId) && isValidUser(request.resource.data)
+        && request.resource.data.createdAt == resource.data.createdAt;
+      allow list, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

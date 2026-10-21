@@ -139,7 +139,7 @@ const ManualTreeHUD: React.FC = () => {
             .attr("x2", thresholdX)
             .attr("y1", 0)
             .attr("y2", totalHeight)
-            .attr("stroke", "#4f46e5")
+            .attr("stroke", "#2563eb")
             .attr("stroke-width", 2)
             .attr("stroke-dasharray", "5,5");
 
@@ -148,7 +148,7 @@ const ManualTreeHUD: React.FC = () => {
             .attr("y", 10)
             .attr("text-anchor", "middle")
             .attr("font-size", "10px")
-            .attr("fill", "#4f46e5")
+            .attr("fill", "#2563eb")
             .attr("font-weight", "bold")
             .text(currentThreshold.toFixed(2));
     }, [featureStats, selectedFeature, selectedThreshold, classNames]);
@@ -252,7 +252,7 @@ const ManualTreeHUD: React.FC = () => {
                         <span className="text-xs">Split Node</span>
                     </Button>
                     <Button
-                        className="w-1/2 h-auto py-2 gap-2 bg-gradient-to-r from-red-100 to-fuchsia-100 text-black border-none hover:from-red-200 hover:to-fuchsia-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
+                        className="w-1/2 h-auto py-2 gap-2 bg-gradient-to-r from-red-100 to-sky-100 text-black border-none hover:from-red-200 hover:to-sky-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
                         onClick={markAsLeaf}
                     >
                         <Leaf className="w-4 h-4 shrink-0" />{" "}

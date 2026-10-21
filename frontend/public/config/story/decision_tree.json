@@ -1,107 +1,221 @@
 {
-    "display_name": "Decision Tree",
-    "pages": [
+  "display_name": "Decision Tree",
+  "pages": [
+    {
+      "page_type": "static",
+      "text": "",
+      "path": "md/dtree/decision_tree_01.md",
+      "name": "What is a decision tree?",
+      "id": "intro"
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/dtree/decision_tree_02.md"
+      },
+      "dynamic_page": {
+        "page_type": "dynamic",
+        "name": "Follow Questions",
+        "category": "traditional_ml",
+        "path": "decision_tree",
+        "dataset": {
+          "type": "reference",
+          "name": "decision_tree_flowers"
+        },
+        "parameters": {}
+      },
+      "id": "sort-flowers",
+      "xp_tasks": [
         {
-            "page_type": "static",
-            "note": "",
-            "text": "",
-            "path": "md/dtree/decision_tree_01.md"
+          "id": "root-sort",
+          "label": "Sort the root branches",
+          "xp": 15
         },
         {
-            "page_type": "static",
-            "note": "",
-            "text": "",
-            "path": "md/dtree/decision_tree_02.md"
-        },
-        {
-            "page_type": "static",
-            "note": "",
-            "text": "",
-            "path": "md/dtree/decision_tree_03.md"
-        },
-        {
-            "page_type": "static",
-            "note": "",
-            "text": "",
-            "path": "md/dtree/decision_tree_04.md"
-        },
-        {
-            "page_type": "reference",
-            "reference_type": "visualisation",
-            "path": "traditional_ml/decision_tree.json",
-            "pages": [0]
-        },
-        {
-            "page_type": "static",
-            "note": "",
-            "text": "",
-            "path": "md/dtree/decision_tree_05.md"
-        },
-        {
-            "page_type": "static",
-            "note": "",
-            "text": "",
-            "path": "md/dtree/decision_tree_08.md"
+          "id": "child-sort",
+          "label": "Sort the child branches",
+          "xp": 15
         }
-    ],
-    "transitions": [
+      ]
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/dtree/decision_tree_03.md"
+      },
+      "dynamic_page": {
+        "page_type": "dynamic",
+        "name": "Name Tree Parts",
+        "category": "traditional_ml",
+        "path": "decision_tree",
+        "parameters": {}
+      },
+      "id": "tree-parts",
+      "xp_tasks": [
         {
-            "from": 0,
-            "to": 1,
-            "condition": {
-                "condition_type": "Bypass",
-                "name": "Next",
-                "description": null
-            }
-        },
-        {
-            "from": 1,
-            "to": 2,
-            "condition": {
-                "condition_type": "Bypass",
-                "name": "Next",
-                "description": null
-            }
-        },
-        {
-            "from": 2,
-            "to": 3,
-            "condition": {
-                "condition_type": "Bypass",
-                "name": "Next",
-                "description": null
-            }
-        },
-        {
-            "from": 3,
-            "to": 4,
-            "condition": {
-                "condition_type": "Bypass",
-                "name": "Build a tree!",
-                "description": null
-            }
-        },
-        {
-            "from": 4,
-            "to": 5,
-            "condition": {
-                "condition_type": "Metric",
-                "name": "Reach the desired accuracy!",
-                "description": "Make it so your accuracy is at least 0.9!",
-                "metric": "train.accuracy",
-                "comparator": ">=",
-                "value": 0.9,
-                "evaluation_mode": "latest"
-            }
-        },
-        {
-            "from": 5,
-            "to": 6,
-            "condition": {
-                "condition_type": "Bypass",
-                "name": "Next",
-                "description": null
-            }
+          "id": "match-parts",
+          "label": "Match all tree-part labels",
+          "xp": 20
         }
-    ]
+      ]
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/dtree/decision_tree_04.md"
+      },
+      "dynamic_page": {
+        "page_type": "dynamic",
+        "name": "Compare Iris Splits",
+        "subpages": [
+          "Compare variables",
+          "Compare thresholds"
+        ],
+        "category": "traditional_ml",
+        "path": "decision_tree",
+        "dataset": {
+          "type": "predefined",
+          "name": "iris",
+          "test_size": 0.25,
+          "random_state": 2025
+        },
+        "parameters": {},
+        "subpage_ids": [
+          "variables",
+          "thresholds"
+        ]
+      },
+      "id": "compare-splits",
+      "xp_tasks": [
+        {
+          "id": "variables",
+          "label": "Compare variables correctly",
+          "xp": 20,
+          "subpage_id": "variables"
+        },
+        {
+          "id": "thresholds",
+          "label": "Compare thresholds correctly",
+          "xp": 20,
+          "subpage_id": "thresholds"
+        }
+      ]
+    },
+    {
+      "page_type": "reference",
+      "reference_type": "visualisation",
+      "path": "traditional_ml/decision_tree.json",
+      "pages": [
+        0
+      ],
+      "id": "build-tree",
+      "xp_tasks": [
+        {
+          "id": "accuracy-target",
+          "label": "Build a tree meeting the accuracy target",
+          "xp": 50
+        }
+      ]
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/dtree/decision_tree_05.md"
+      },
+      "dynamic_page": {
+        "page_type": "dynamic",
+        "name": "Trace Training",
+        "category": "traditional_ml",
+        "path": "decision_tree",
+        "parameters": {}
+      },
+      "id": "training-sequence",
+      "xp_tasks": [
+        {
+          "id": "sequence",
+          "label": "Arrange the training sequence",
+          "xp": 25
+        }
+      ]
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/dtree/decision_tree_08.md"
+      },
+      "dynamic_page": {
+        "page_type": "dynamic",
+        "name": "Final Prediction",
+        "category": "traditional_ml",
+        "path": "decision_tree",
+        "parameters": {}
+      },
+      "id": "final-prediction"
+    }
+  ],
+  "transitions": [
+    {
+      "from": 0,
+      "to": 1,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Follow a tree"
+      }
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "condition": {
+        "condition_type": "Completed",
+        "name": "Name the tree parts"
+      }
+    },
+    {
+      "from": 2,
+      "to": 3,
+      "condition": {
+        "condition_type": "Completed",
+        "name": "Explore Iris splits"
+      }
+    },
+    {
+      "from": 3,
+      "to": 4,
+      "condition": {
+        "condition_type": "Completed",
+        "name": "Build a tree!"
+      }
+    },
+    {
+      "from": 4,
+      "to": 5,
+      "condition": {
+        "condition_type": "Metric",
+        "name": "Reach the desired accuracy!",
+        "description": "Make it so your accuracy is at least 0.9!",
+        "metric": "train.accuracy",
+        "comparator": ">=",
+        "value": 0.9,
+        "evaluation_mode": "any"
+      }
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "condition": {
+        "condition_type": "Completed",
+        "name": "Finish the story"
+      }
+    }
+  ]
 }

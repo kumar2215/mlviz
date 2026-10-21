@@ -1,5 +1,22 @@
 {
-    "datasets": {},
+    "datasets": {
+        "decision_tree_flowers": {
+            "type": "custom",
+            "X": [
+                [1.5, 0.3],
+                [4.5, 1.4],
+                [6.0, 2.1],
+                [1.8, 0.4],
+                [5.5, 2.0],
+                [4.1, 1.3]
+            ],
+            "y": [0, 1, 2, 0, 2, 1],
+            "feature_names": ["petal length (cm)", "petal width (cm)"],
+            "target_names": ["Setosa", "Versicolor", "Virginica"],
+            "test_size": 0,
+            "random_state": 2025
+        }
+    },
     "categories": [
         {
             "name": "Traditional ML",
@@ -32,11 +49,15 @@
             "icon": "nlp_icon.png",
             "config_path": "nlp",
             "files": [
+                "regex.json",
+                "porter.json",
                 "tokenization.json"
             ]
         }
     ],
     "stories": [
-        "decision_tree"
-    ]
+        "decision_tree",
+        "text_preprocessing"
+    ],
+    "xp_per_level": 100
 }

@@ -1,0 +1,102 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { configuredStories, configuredVisualisations } from "../src/utils/catalog.ts";
+import type Config from "../src/types/config.ts";
+import type Story from "../src/types/story.ts";
+import type Visualisation from "../src/types/visualisation.ts";
+import { readFileSync } from "node:fs";
+import ts from "typescript";
+import { getDynamicPage, pageTitle } from "../src/components/navigation/pathwayModel.ts";
+import { unrollStory } from "../src/utils/storyReferences.ts";
+import type { PageUnion } from "../src/types/page.ts";
+
+const story = (name: string): Story => ({ name, display_name: name, pages: [], transitions: [] });
+const visualisation = (name: string, category = "traditional_ml"): Visualisation => ({ ...story(name), category });
+const config = (): Config => ({
+    datasets: {},
+    stories: ["decision_tree", "text_preprocessing"],
+    categories: [
+        { name: "ML", description: "", icon: "", config_path: "traditional_ml", files: ["svm.json", "decision_tree.json", "knn.json"] },
+        { name: "NLP", description: "", icon: "", config_path: "nlp", files: ["regex.json", "porter.json"] },
+    ],
+});
+
+test("story presentation follows config when responses finish in reverse order", async () => {
+    const catalog: Record<string, Story> = {};
+    const pending = new Map<string, (value: Story) => void>();
+    const loading = Promise.all(config().stories.map(name => new Promise<Story>(resolve => {
+        pending.set(name, resolve);
+    }).then(value => { catalog[name] = value; })));
+    pending.get("text_preprocessing")!(story("text_preprocessing"));
+    await Promise.resolve();
+    assert.deepEqual(configuredStories(config(), catalog).map(item => item.name), ["text_preprocessing"]);
+    pending.get("decision_tree")!(story("decision_tree"));
+    await loading;
+    assert.deepEqual(Object.keys(catalog), ["text_preprocessing", "decision_tree"]);
+    assert.deepEqual(configuredStories(config(), catalog).map(item => item.name), config().stories);
+    assert.deepEqual(configuredStories({ ...config(), stories: [...config().stories].reverse() }, catalog).map(item => item.name), ["text_preprocessing", "decision_tree"]);
+});
+
+test("visualisation presentation follows category files regardless of insertion order", () => {
+    const catalog = {
+        porter: visualisation("porter", "nlp"), knn: visualisation("knn"),
+        decision_tree: visualisation("decision_tree"), regex: visualisation("regex", "nlp"), svm: visualisation("svm"),
+    };
+    assert.deepEqual(configuredVisualisations(config(), catalog, "traditional_ml").map(item => item.name), ["svm", "decision_tree", "knn"]);
+    assert.deepEqual(configuredVisualisations(config(), catalog, "nlp").map(item => item.name), ["regex", "porter"]);
+    assert.deepEqual(Object.keys(catalog), ["porter", "knn", "decision_tree", "regex", "svm"], "Selecting a display order does not mutate the store");
+});
+
+test("lists omit unavailable and unconfigured entries and never include another category", () => {
+    assert.deepEqual(configuredStories(config(), { extra: story("extra"), decision_tree: story("decision_tree") }).map(item => item.name), ["decision_tree"]);
+    const catalog = { extra: visualisation("extra"), svm: visualisation("svm"), decision_tree: visualisation("decision_tree", "nlp") };
+    assert.deepEqual(configuredVisualisations(config(), catalog, "traditional_ml").map(item => item.name), ["svm"]);
+    assert.deepEqual(configuredStories(null, { decision_tree: story("decision_tree") }), []);
+    assert.deepEqual(configuredVisualisations(null, catalog, "traditional_ml"), []);
+    assert.deepEqual(configuredVisualisations(config(), catalog, "unknown"), []);
+    assert.deepEqual(configuredVisualisations(config(), catalog, undefined), []);
+});
+
+test("config order also applies to numeric story names", () => {
+    assert.deepEqual(configuredStories({ ...config(), stories: ["10", "2"] }, { "2": story("2"), "10": story("10") }).map(item => item.name), ["10", "2"]);
+});
+
+test("every bundled page name is readable navigation text and matches its component dispatcher", () => {
+    const readConfig = (path: string) => JSON.parse(readFileSync(new URL(`../public/config/${path}`, import.meta.url), "utf8"));
+    const root = readConfig("config.json") as Config;
+    const visualisations: Record<string, Visualisation> = {};
+    const stories: Record<string, Story> = {};
+    const dispatchers = new Map<string, Set<string>>();
+    const checkPage = (page: PageUnion, index: number, category?: string, visualisationName?: string) => {
+        const dynamic = getDynamicPage(page);
+        assert.equal(pageTitle(page, index), page.name || dynamic?.name);
+        assert.ok(pageTitle(page, index).trim().length > 0);
+        if (!dynamic) return;
+        const path = `${category ?? dynamic.category}/${visualisationName ?? dynamic.path}/index.tsx`;
+        if (!dispatchers.has(path)) {
+            const source = ts.createSourceFile(path, readFileSync(new URL(`../src/pages/${path}`, import.meta.url), "utf8"), ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+            const names = new Set<string>();
+            const visit = (node: ts.Node) => {
+                if (ts.isCaseClause(node) && ts.isStringLiteral(node.expression)) names.add(node.expression.text);
+                if (ts.isBinaryExpression(node) && node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken
+                    && ts.isIdentifier(node.left) && node.left.text === "name" && ts.isStringLiteral(node.right)) names.add(node.right.text);
+                ts.forEachChild(node, visit);
+            };
+            visit(source);
+            dispatchers.set(path, names);
+        }
+        assert.ok(dispatchers.get(path)!.has(dynamic.name), `${path} must render the configured name "${dynamic.name}"`);
+    };
+    for (const category of root.categories) {
+        for (const file of category.files) {
+            const name = file.replace(/\.json$/, "");
+            const entry: Visualisation = { ...readConfig(`visual/${category.config_path}/${file}`), name, category: category.config_path };
+            visualisations[name] = entry;
+            entry.pages.forEach((page, index) => checkPage(page, index, entry.category, name));
+        }
+    }
+    for (const name of root.stories) stories[name] = { ...readConfig(`story/${name}.json`), name };
+    for (const entry of Object.values(stories)) {
+        unrollStory(entry, { stories, visualisations }).pages.forEach((page, index) => checkPage(page, index));
+    }
+});

@@ -6,12 +6,13 @@ export type ActionType =
     | "step"
     | "manual_evaluate"
     | "page_visit"
+    | "page_complete"
     | "button_click";
 
 export interface HistoryEntry {
     actionType: ActionType;
     timestamp: number;
-    page_id?: number;    // for page_visit
+    page_id?: number;    // for page_visit / page_complete
     button_id?: string;  // for button_click
     params?: Parameters; // for train / step / predict
     metrics?: Record<string, any>; // for train / step results

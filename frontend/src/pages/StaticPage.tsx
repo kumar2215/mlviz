@@ -1,11 +1,11 @@
 import MarkdownWrapper from "@/components/markdown/MarkdownWrapper";
+import PageLoading from "@/components/layout/PageLoading";
 import type { StaticPageParameters } from "@/types/page";
+import useStaticMarkdown from "@/hooks/useStaticMarkdown";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
-const StaticPage: React.FC<StaticPageParameters> = ({ text, path }) => {
-    const [content, setContent] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
+const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ text, path, compact = false }) => {
+    const { content, loading, error } = useStaticMarkdown({ text, path });
 
     const contentRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -15,38 +15,6 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, path }) => {
         width: 0,
         height: 0,
     });
-
-    useEffect(() => {
-        // If raw text is provided, use it directly
-        if (text) {
-            setContent(text);
-            return;
-        }
-
-        // If path is provided, fetch the markdown file
-        if (path) {
-            setLoading(true);
-            setError(null);
-
-            fetch(path)
-                .then((response) => {
-                    if (!response.ok) {
-                        throw new Error(
-                            `Failed to load markdown file: ${response.statusText}`,
-                        );
-                    }
-                    return response.text();
-                })
-                .then((markdownText) => {
-                    setContent(markdownText);
-                    setLoading(false);
-                })
-                .catch((err) => {
-                    setError(err.message);
-                    setLoading(false);
-                });
-        }
-    }, [text, path]);
 
     useEffect(() => {
         setHasOverflow(false);
@@ -100,13 +68,21 @@ const StaticPage: React.FC<StaticPageParameters> = ({ text, path }) => {
         return () => observer.disconnect();
     }, []);
 
+    if (compact) {
+        return (
+            <div className="w-full shrink-0 px-4 py-2">
+                {loading ? <div className="h-24"><PageLoading label="Loading page…" /></div> : <div className="mx-auto max-w-5xl [&_h1]:!my-0 [&_h1]:!text-2xl [&_p]:!mb-0 [&_p]:!text-sm [&_p]:!leading-snug [&_div]:!p-0">
+                    {error ? <p role="alert" className="text-center text-red-600">Error: {error}</p> : <MarkdownWrapper>{content}</MarkdownWrapper>}
+                </div>}
+            </div>
+        );
+    }
+
     return (
-        <div className="flex flex-col items-center h-full w-full overflow-hidden bg-gradient-to-br from-blue-50 to-purple-50">
+        <div className="flex flex-col items-center h-full w-full overflow-hidden bg-page">
             <div ref={containerRef} className="w-7/10 flex-1 flex flex-col min-h-0 py-6 px-6 relative">
                 {loading && (
-                    <div className="text-center text-gray-600 my-auto">
-                        Loading markdown...
-                    </div>
+                    <PageLoading label="Loading page…" />
                 )}
                 {error && (
                     <div className="text-center text-red-600 my-auto">

@@ -2,14 +2,14 @@
     "display_name": "KNN",
     "pages": [
         {
-            "name": "KNNTrain",
+            "name": "KNN Train",
             "page_type": "dynamic",
             "note": null,
             "dataset": null,
             "parameters": {}
         },
         {
-            "name": "KNNPredict",
+            "name": "KNN Predict",
             "page_type": "dynamic",
             "note": null,
             "dataset": null,

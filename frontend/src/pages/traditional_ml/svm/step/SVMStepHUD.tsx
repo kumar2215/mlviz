@@ -111,7 +111,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
 
     return (
         <CollapsibleHUD
-            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-indigo-500" />}
+            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
             title="Subgradient Descent"
             style={{ width: fs(290) }}
         >
@@ -121,7 +121,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                     <span className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
                         Learning Rate
                     </span>
-                    <span className="font-mono text-indigo-600 font-bold" style={{ fontSize: fs(12) }}>
+                    <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
                         {learningRate.toFixed(4)}
                     </span>
                 </div>
@@ -132,7 +132,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                     step={0.001}
                     value={learningRate}
                     onChange={(e) => onLearningRateChange(parseFloat(e.target.value))}
-                    className="w-full accent-indigo-500"
+                    className="w-full accent-blue-500"
                 />
             </div>
 
@@ -146,7 +146,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 <label htmlFor={widthId} className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
                                     Margin Width
                                 </label>
-                                <span className="font-mono text-indigo-600 font-bold" style={{ fontSize: fs(12) }}>
+                                <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
                                     {width.toFixed(2)}
                                 </span>
                             </div>
@@ -158,7 +158,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 step={0.1}
                                 value={width}
                                 onChange={(e) => handleUpdate(currentSlope, intercept, parseFloat(e.target.value))}
-                                className="w-full accent-indigo-500"
+                                className="w-full accent-blue-500"
                             />
                         </div>
 
@@ -168,7 +168,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 <label htmlFor={interceptId} className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
                                     Intercept (b)
                                 </label>
-                                <span className="font-mono text-indigo-600 font-bold" style={{ fontSize: fs(12) }}>
+                                <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
                                     {intercept.toFixed(1)}
                                 </span>
                             </div>
@@ -180,7 +180,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 step={0.1}
                                 value={intercept}
                                 onChange={(e) => handleUpdate(currentSlope, parseFloat(e.target.value), width)}
-                                className="w-full accent-indigo-500"
+                                className="w-full accent-blue-500"
                             />
                         </div>
 
@@ -190,7 +190,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 <span className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
                                     Slope
                                 </span>
-                                <span className="font-mono text-indigo-600 font-bold" style={{ fontSize: fs(12) }}>
+                                <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
                                     {currentSlope.toFixed(2)}
                                 </span>
                             </div>
@@ -235,7 +235,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
             {/* Idle mode triggers Run Step */}
             {mode === "idle" && (
                 <Button
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md transition-all active:scale-[0.98]"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md transition-all active:scale-[0.98]"
                     style={{ height: fs(40), fontSize: fs(13), gap: fs(8) }}
                     onClick={handleRunStep}
                     disabled={isStepLoading || points.length === 0}

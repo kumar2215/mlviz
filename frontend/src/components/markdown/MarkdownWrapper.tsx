@@ -8,7 +8,7 @@ import remarkMath from "remark-math";
 
 interface MarkdownWrapperProps {
     children: string;
-    variant?: "default" | "small";
+    variant?: "default" | "small" | "activity";
 }
 
 type ParagraphProps = React.ComponentProps<"p"> & ExtraProps;
@@ -29,7 +29,7 @@ type Heading1Props = React.ComponentProps<"h1"> & ExtraProps;
 const Heading1: React.FC<Heading1Props> = ({ children, node, ...props }) => {
     return (
         <h1
-            className="text-[calc(1.25rem+1.5vw)] my-4 bg-gradient-to-br from-blue-600 to-purple-700 bg-clip-text text-transparent font-width-expanded font-bold tracking-tight"
+            className="text-[calc(1.25rem+1.5vw)] my-4 bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent font-width-expanded font-bold tracking-tight"
             {...props}
         >
             {children}
@@ -42,7 +42,7 @@ type Heading2Props = React.ComponentProps<"h2"> & ExtraProps;
 const Heading2: React.FC<Heading2Props> = ({ children, node, ...props }) => {
     return (
         <h2
-            className="text-[calc(1rem+1.2vw)] font-semibold tracking-tight bg-gradient-to-br from-purple-600 to-indigo-500 bg-clip-text text-transparent font-width-expanded my-4"
+            className="text-[calc(1rem+1.2vw)] font-semibold tracking-tight bg-gradient-to-br from-blue-600 to-blue-500 bg-clip-text text-transparent font-width-expanded my-4"
             {...props}
         >
             {children}
@@ -170,7 +170,7 @@ type TableHeadProps = React.ComponentProps<"thead"> & ExtraProps;
 const TableHead: React.FC<TableHeadProps> = ({ children, node, ...props }) => {
     return (
         <thead
-            className="bg-gradient-to-br from-blue-600 to-purple-700 bg-clip-text text-transparent !text-2xl font-width-expanded"
+            className="bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent !text-2xl font-width-expanded"
             {...props}
         >
             {children}
@@ -213,7 +213,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
 }) => {
     return (
         <th
-            className="px-6 py-3 text-left text-sm font-semibold tracking-tight bg-gradient-to-br from-blue-600 to-purple-700 bg-clip-text text-transparent hover:from-blue-600 hover:to-purple-700"
+            className="px-6 py-3 text-left text-sm font-semibold tracking-tight bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent hover:from-blue-600 hover:to-blue-700"
             {...props}
         >
             {children}
@@ -243,7 +243,7 @@ type StrongProps = React.ComponentProps<"strong"> & ExtraProps;
 const Strong: React.FC<StrongProps> = ({ children, node, ...props }) => {
     return (
         <strong
-            className="font-bold bg-gradient-to-br from-blue-800 to-purple-800 bg-clip-text text-transparent"
+            className="font-bold bg-gradient-to-br from-blue-800 to-blue-800 bg-clip-text text-transparent"
             {...props}
         >
             {children}
@@ -299,7 +299,7 @@ type LinkProps = React.ComponentProps<"a"> & ExtraProps;
 const Link: React.FC<LinkProps> = ({ children, node, ...props }) => {
     return (
         <a
-            className="bg-gradient-to-br from-blue-700 to-purple-600 bg-clip-text text-transparent underline"
+            className="bg-gradient-to-br from-blue-700 to-blue-600 bg-clip-text text-transparent underline"
             {...props}
             target="_blank"
         >
@@ -331,6 +331,19 @@ const DefaultComponentMap: Components = {
     td: TableDataCell,
 };
 
+const ActivityComponentMap: Components = {
+    ...DefaultComponentMap,
+    h1: "h2",
+    h2: "h2",
+    h3: "h3",
+    h4: "h4",
+    p: "p",
+    strong: "strong",
+    ul: "ul",
+    ol: "ol",
+    li: "li",
+};
+
 const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
     children,
     variant = "default",
@@ -342,13 +355,17 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
                 [rehypeRaw, { passThrough: ["math", "inlineMath"] }],
                 rehypeMathjax,
             ]}
-            components={DefaultComponentMap}
+            components={variant === "activity" ? ActivityComponentMap : DefaultComponentMap}
         >
             {children}
         </Markdown>
     );
 
-    if (variant === "small") {
+    if (variant === "activity") {
+        return <div className="space-y-2 text-sm leading-snug text-slate-600 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-slate-950 [&_h3]:font-semibold [&_h3]:text-slate-950 [&_h4]:font-semibold [&_h4]:text-slate-950 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1">
+            {content}
+        </div>;
+    } else if (variant === "small") {
         return (
             <div className="px-2 leading-tight [&_h1]:text-[calc(0.7rem+0.7vw)] [&_h2]:text-[calc(0.65rem+0.5vw)] [&_h3]:text-[calc(0.6rem+0.45vw)] [&_h4]:text-[calc(0.55rem+0.4vw)] [&_p]:text-[calc(0.5rem+0.3vw)] [&_li]:text-[calc(0.5rem+0.3vw)] [&_p]:mb-0.5 [&_ul]:my-1 [&_ol]:my-1 [&_li]:mx-0 [&_h1]:my-1 [&_h2]:my-1 [&_h3]:my-1 [&_h4]:my-1 [&_img]:my-2">
                 {content}

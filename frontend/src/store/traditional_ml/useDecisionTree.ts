@@ -80,6 +80,7 @@ interface DecisionTreeStore
     // DT-specific properties
     treeMode: "trained" | "manual" | null;
     manualTree: ManualTreeInterface;
+    manualEvaluationListener: ((metrics: ClassificationMetrics) => void) | null;
     // Keep existing method names for backward compatibility
     isModelLoading: boolean; // = isLoading
     modelError: string | null; // = error
@@ -434,6 +435,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
         };
 
         const splitManualNode = async () => {
+            const report = get().manualEvaluationListener;
             const { currentModelData } = get();
             const { activeDataset } = useDataset.getState();
             const treeMode = currentModelData?.treeMode || null;
@@ -527,6 +529,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
                                 : undefined,
                     });
                     // Update with metrics
+                    if (report && get().manualEvaluationListener === report) report(result.metrics);
                     setCurrentModelData({
                         ...updatedModelData,
                         metrics: result.metrics,
@@ -541,6 +544,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
         };
 
         const markNodeAsLeaf = async () => {
+            const report = get().manualEvaluationListener;
             const { currentModelData } = get();
             const { activeDataset } = useDataset.getState();
             const treeMode = currentModelData?.treeMode || null;
@@ -595,6 +599,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
                             : undefined,
                 });
                 // Update with metrics
+                if (report && get().manualEvaluationListener === report) report(result.metrics);
                 setCurrentModelData({
                     ...updatedModelData,
                     metrics: result.metrics,
@@ -618,6 +623,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
         };
 
         const evaluateManualTree = async () => {
+            const report = get().manualEvaluationListener;
             const { currentModelData } = get();
             const { activeDataset } = useDataset.getState();
             const treeMode = currentModelData?.treeMode || null;
@@ -635,6 +641,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
                             : undefined,
                 });
                 console.log("[ManualTree] Evaluation result:", result);
+                if (report && get().manualEvaluationListener === report) report(result.metrics);
                 // Update currentModelData with new metrics and preserve metadata
                 setCurrentModelData({
                     ...currentModelData,
@@ -666,6 +673,7 @@ export const useDecisionTree = createBaseModelStore<DecisionTreeModelData, Decis
         const selectedThreshold = currentModelData?.selectedThreshold ?? null;
         return {
             // BaseModelStore (inherited)
+            manualEvaluationListener: null,
             currentModelData,
             lastParams,
             setCurrentModelData,

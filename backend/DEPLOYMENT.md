@@ -42,7 +42,7 @@ REGION="asia-southeast1"  # Or your preferred region
 POOL_NAME="github-pool"
 PROVIDER_NAME="github-provider"
 SERVICE_ACCOUNT="github-actions-sa"
-REPO="your-username/your-repo"  # e.g., "mzaidanbs/mlviz"
+REPO="your-username/your-repo"  # e.g., "kumar2215/mlviz"
 
 # Create service account
 gcloud iam service-accounts create ${SERVICE_ACCOUNT} \

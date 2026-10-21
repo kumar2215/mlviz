@@ -23,24 +23,33 @@ export const DEFAULT_COLORS = [
     "#ff7f0e", // orange
     "#2ca02c", // green
     "#d62728", // red
-    "#9467bd", // purple
+    "#0891b2", // teal
     "#8c564b", // brown
-    "#e377c2", // pink
+    "#eab308", // gold
     "#7f7f7f", // gray
     "#bcbd22", // olive
-    "#17becf", // cyan
+    "#1e3a8a", // navy
 ];
+
+// Keep existing palette names compatible while removing purple-hued entries.
+function bluePalette(colors: readonly string[]): string[] {
+    return colors.map(color => {
+        const value = d3.hsl(color);
+        if (value.h >= 235 && value.h <= 345) value.h = 210;
+        return value.formatHex();
+    });
+}
 
 /**
  * Additional color palettes for different visualization needs
  */
 const COLOR_PALETTES = {
     default: DEFAULT_COLORS,
-    category10: d3.schemeCategory10,
-    dark2: d3.schemeDark2,
-    set3: d3.schemeSet3,
-    paired: d3.schemePaired,
-    pastel1: d3.schemePastel1,
+    category10: DEFAULT_COLORS,
+    dark2: bluePalette(d3.schemeDark2),
+    set3: bluePalette(d3.schemeSet3),
+    paired: bluePalette(d3.schemePaired),
+    pastel1: bluePalette(d3.schemePastel1),
 } as const;
 
 export type PaletteName = keyof typeof COLOR_PALETTES;
@@ -87,20 +96,20 @@ export function createColorScale(
  * Available continuous color schemes for regression tasks
  */
 const CONTINUOUS_COLOR_SCHEMES = {
-    viridis: d3.interpolateViridis,
-    plasma: d3.interpolatePlasma,
-    inferno: d3.interpolateInferno,
-    magma: d3.interpolateMagma,
+    viridis: d3.interpolateCividis,
+    plasma: d3.interpolateCividis,
+    inferno: d3.interpolateYlOrBr,
+    magma: d3.interpolateYlOrBr,
     cividis: d3.interpolateCividis,
     blues: d3.interpolateBlues,
     greens: d3.interpolateGreens,
     reds: d3.interpolateReds,
-    purples: d3.interpolatePurples,
+    purples: d3.interpolateBlues,
     oranges: d3.interpolateOranges,
     greys: d3.interpolateGreys,
-    turbo: d3.interpolateTurbo,
-    cool: d3.interpolateCool,
-    warm: d3.interpolateWarm,
+    turbo: d3.interpolateYlOrBr,
+    cool: d3.interpolateBlues,
+    warm: d3.interpolateOranges,
 } as const;
 
 export type ContinuousSchemeName = keyof typeof CONTINUOUS_COLOR_SCHEMES;

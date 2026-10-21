@@ -4,16 +4,16 @@ from fastapi.responses import RedirectResponse
 import uvicorn
 
 from core.config import settings
-from api import decision_tree, dataset, knn, kmeans, linear_regression, svm
+from api import bpe, decision_tree, dataset, knn, kmeans, linear_regression, svm, tokenization
 
 app = FastAPI(
     title="MLviz",
     description="API documentation including ML model training and data analysis.",
     version="1.0.0",
     contact={
-        "name": "zaidan sani",
-        "url": "https://mzaidanbs.github.io",
-        "email": "mzaidanbs@gmail.com"
+        "name": "kumar",
+        "url": "https://github.com/kumar2215",
+        "email": "kumar.kg279@gmail.com"
     },
     license_info={
         "name": "Apache 2.0",
@@ -43,6 +43,8 @@ app.include_router(linear_regression.router, prefix="/api/linear",
                    tags=["Linear Regression"])
 app.include_router(svm.router, prefix="/api/svm",
                    tags=["Support Vector Machine"])
+app.include_router(bpe.router, prefix="/api/bpe", tags=["Byte Pair Encoding"])
+app.include_router(tokenization.router, prefix="/api/tokenization", tags=["Tokenization"])
 
 
 @app.get("/", include_in_schema=False)

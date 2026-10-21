@@ -136,7 +136,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
         const logMax = Math.log1p(Math.max(0, maxLoss));
 
         const colorScale = d3
-            .scaleSequential(d3.interpolateYlOrRd)
+            .scaleSequential(d3.interpolateYlOrBr)
             .domain([logMin, logMax]);
 
         // ---- Heatmap cells ----
@@ -278,20 +278,20 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                 .attr("class", "marker-current")
                 .attr("x1", cx).attr("x2", cx)
                 .attr("y1", 0).attr("y2", innerH)
-                .attr("stroke", "#6366f1").attr("stroke-width", 1)
+                .attr("stroke", "#0284c7").attr("stroke-width", 1)
                 .attr("stroke-opacity", 0.5).attr("stroke-dasharray", "3 2");
 
             g.append("line")
                 .attr("class", "marker-current")
                 .attr("x1", 0).attr("x2", innerW)
                 .attr("y1", cy).attr("y2", cy)
-                .attr("stroke", "#6366f1").attr("stroke-width", 1)
+                .attr("stroke", "#0284c7").attr("stroke-width", 1)
                 .attr("stroke-opacity", 0.5).attr("stroke-dasharray", "3 2");
 
             g.append("circle")
                 .attr("class", "marker-current")
                 .attr("cx", cx).attr("cy", cy).attr("r", 5)
-                .attr("fill", "#6366f1")
+                .attr("fill", "#0284c7")
                 .attr("stroke", "white").attr("stroke-width", 1.5);
         }
 
@@ -320,7 +320,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
 
     return (
         <CollapsibleHUD
-            icon={<Map style={{ width: fs(15), height: fs(15) }} className="text-indigo-500" />}
+            icon={<Map style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
             title="Loss Landscape"
             defaultOpen={true}
             style={{ width: fs(290) }}
@@ -340,7 +340,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                                 onClick={() => setMode(m)}
                                 className={`flex-1 py-1 transition-colors ${
                                     mode === m
-                                        ? "bg-indigo-500 text-white font-semibold"
+                                        ? "bg-blue-500 text-white font-semibold"
                                         : "bg-white text-slate-500 hover:bg-slate-50"
                                 }`}
                             >
@@ -370,7 +370,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                         <span className="flex items-center" style={{ gap: fs(4), fontSize: fs9 }}>
                             <span style={{
                                 display: "inline-block", width: fs(8), height: fs(8),
-                                borderRadius: "50%", background: "#6366f1",
+                                borderRadius: "50%", background: "#0284c7",
                             }} />
                             <span className="text-slate-500">Current</span>
                         </span>

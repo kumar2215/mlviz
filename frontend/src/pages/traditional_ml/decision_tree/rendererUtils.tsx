@@ -530,8 +530,8 @@ export const renderExpandableLeafNode = (
         .attr("x", -nodeWidth / 2)
         .attr("y", -nodeHeight / 2)
         .attr("rx", 6 * scaleFactor)
-        .attr("fill", isSelected ? "#e0e7ff" : "#f3f4f6")
-        .attr("stroke", isSelected ? "#4f46e5" : "#d1d5db")
+        .attr("fill", isSelected ? "#dbeafe" : "#f3f4f6")
+        .attr("stroke", isSelected ? "#2563eb" : "#d1d5db")
         .attr("stroke-width", isSelected ? 2 * scaleFactor : 1 * scaleFactor);
 
     // Display class distribution
@@ -565,7 +565,7 @@ export const renderExpandableLeafNode = (
             .attr("y", nodeHeight / 4 + 5 * scaleFactor)
             .attr("text-anchor", "middle")
             .attr("font-size", `${12 * scaleFactor}px`)
-            .attr("fill", "#4f46e5")
+            .attr("fill", "#2563eb")
             .attr("font-weight", "bold")
             .text("Selected");
     } else {
@@ -721,7 +721,7 @@ export const renderInformationGainGraph = (
     const linePath = g.append('path')
         .attr('class', 'info-gain-line')
         .attr('fill', 'none')
-        .attr('stroke', '#4f46e5')
+        .attr('stroke', '#2563eb')
         .attr('stroke-width', 2.5);
     
     // Add explored points as dots
@@ -731,7 +731,7 @@ export const renderInformationGainGraph = (
     const currentPoint = g.append('circle')
         .attr('class', 'current-point')
         .attr('r', 5)
-        .attr('fill', '#4f46e5')
+        .attr('fill', '#2563eb')
         .attr('stroke', 'white')
         .attr('stroke-width', 2);
     
@@ -763,7 +763,7 @@ export const renderInformationGainGraph = (
             .attr('cx', d => xScale(d.threshold))
             .attr('cy', d => yScale(d.information_gain))
             .attr('r', 2.5)
-            .attr('fill', '#4f46e5')
+            .attr('fill', '#2563eb')
             .attr('opacity', 0.6);
         
         // Update current point position

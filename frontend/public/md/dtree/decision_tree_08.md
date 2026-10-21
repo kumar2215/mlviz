@@ -1,6 +1,6 @@
 ---
-title: Congratulations!
+title: Try one last prediction
 ---
-# Congratulations!
+# Try one last prediction
 
-You've learnt about what a decision tree does!
+Use the small tree below to predict a flower's species. Change its measurements and see how the path changes.

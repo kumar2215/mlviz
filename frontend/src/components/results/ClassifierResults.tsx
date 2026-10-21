@@ -22,7 +22,7 @@ const Results = ({ metrics, metadata }: ClassifierResultData) => {
                 <ChartColumnIncreasing className="h-4 w-4" /> Metrics
             </p>
 
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-2">
                 <MetricSection
                     title="Train Set"
                     metrics={formatClassificationMetrics(train)}
@@ -34,7 +34,7 @@ const Results = ({ metrics, metadata }: ClassifierResultData) => {
                 </MetricSection>
 
                 {test && (
-                    <div className="w-full pt-4 border-t border-slate-200">
+                    <div className="w-full pt-2 border-t border-slate-200">
                         <MetricSection
                             title="Test Set"
                             metrics={formatClassificationMetrics(test)}

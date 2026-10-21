@@ -37,7 +37,7 @@ const VisualisationControls: React.FC<VisualisationControlsProps> = ({
 
     const styleClasses = {
         overlay:
-            "z-10 bg-gradient-to-br from-blue-50 to-purple-50 backdrop-blur-sm border border-gray-200/50 rounded-lg px-2 py-1 shadow-sm",
+            "z-10 bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-sm border border-gray-200/50 rounded-lg px-2 py-1 shadow-sm",
         panel: "z-10 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-md",
         toolbar: "z-10 bg-gray-100 border-b border-gray-300 px-3 py-2",
         button: "w-8 h-8 rounded-full text-white border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-in-out !bg-gradient-to-r !from-slate-500 !to-gray-500 hover:!from-slate-700 !to-gray-700 !hover:drop-shadow-xl",

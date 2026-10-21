@@ -69,7 +69,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
 
     return (
         <CollapsibleHUD
-            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-indigo-500" />}
+            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
             title="Gradient Descent"
             style={{ width: fs(290) }}
         >
@@ -83,7 +83,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                         Learning Rate
                     </span>
                     <span
-                        className="font-mono text-indigo-600 font-bold"
+                        className="font-mono text-blue-600 font-bold"
                         style={{ fontSize: fs(12) }}
                     >
                         {learningRate.toFixed(4)}
@@ -96,7 +96,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                     step={0.0001}
                     value={learningRate}
                     onChange={(e) => onLearningRateChange(parseFloat(e.target.value))}
-                    className="w-full accent-indigo-500"
+                    className="w-full accent-blue-500"
                 />
             </div>
 
@@ -125,7 +125,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
             {/* Idle mode */}
             {mode === "idle" && (
                 <Button
-                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white border-none shadow-md transition-all active:scale-[0.98]"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md transition-all active:scale-[0.98]"
                     style={{ height: fs(40), fontSize: fs(13), gap: fs(8) }}
                     onClick={handleRunStep}
                     disabled={isStepLoading || points.length === 0}
