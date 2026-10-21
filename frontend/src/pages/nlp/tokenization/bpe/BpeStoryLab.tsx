@@ -5,14 +5,15 @@ import { Button } from "@/components/ui/button";
 import { checkBpeCounts, checkBpeMerge, loadBpeState, type BpePair, type BpeState } from "@/api/bpe";
 import { useDataset } from "@/store/useDataset";
 import type { BpeDataset } from "@/types/dataset";
-import type { ActivityNarrationProps } from "@/types/page";
+import type { IndexPageProps } from "@/types/page";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
 import BpeCorpusView from "./BpeCorpusView";
-import { advanceStoryProgress, initialStoryProgress, pairKey, readCountAnswers } from "./storyProgress";
+import { advanceStoryProgress, initialStoryProgress, pairKey, readCountAnswers, restoreStoryProgress } from "./storyProgress";
 
 const countPrompt = "Count each candidate pair across the corpus, including the word frequencies.";
 
-export default function BpeStoryLab({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
+export default function BpeStoryLab({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
+    const restored = useRef(completedTasks).current;
     const activeDataset = useDataset(state => state.activeDataset);
     const [source, setSource] = useState<BpeDataset | null>(null);
     const [data, setData] = useState<BpeState | null>(null);
@@ -32,12 +33,20 @@ export default function BpeStoryLab({ narration, onComplete }: ActivityNarration
         if (activeDataset?.type !== "predefined_bpe" && activeDataset?.type !== "custom_bpe") return;
         // Story exercises use their configured corpus, independently of playground drafts.
         loadBpeState(activeDataset).then(result => {
-            if (request === attempt.current) { setSource(activeDataset); setData(result); }
+            if (request === attempt.current) {
+                setSource(activeDataset); setData(result);
+                const checkpoint = restoreStoryProgress(restored, result.rounds.length);
+                setProgress(checkpoint);
+                if (checkpoint.stage === "merge") {
+                    setDrafts(Object.fromEntries(result.rounds[checkpoint.round].counts.map(pair => [pairKey(pair), String(pair.count)])));
+                    setFeedback("Your counts were already verified. Choose the next merge.");
+                } else if (checkpoint.stage === "complete") setFeedback("Training completed previously. Use Replay to practice again.");
+            }
         }).catch(error => {
             if (request === attempt.current) setLoadError(error instanceof Error ? error.message : "Could not load the exercise.");
         });
         return () => { attempt.current++; };
-    }, [activeDataset, retry]);
+    }, [activeDataset, retry, restored]);
 
     const current = data?.rounds[progress.round];
     const answers = readCountAnswers(current?.questions ?? [], drafts);
@@ -51,6 +60,7 @@ export default function BpeStoryLab({ narration, onComplete }: ActivityNarration
         try {
             const result = await checkBpeCounts(source, progress.round, answers);
             if (request !== attempt.current) return;
+            if (result.correct) onTaskComplete?.(`round-${progress.round + 1}-count`);
             setProgress(advanceStoryProgress(progress, { type: "counts_checked", correct: result.correct }, data.rounds.length));
             setSelected(null);
             setFeedback(result.correct ? "Counts correct. Now choose the pair with the highest count; break ties alphabetically." : "One or more counts need another look. Add every occurrence of each pair, multiplied by its word's frequency.");
@@ -71,6 +81,7 @@ export default function BpeStoryLab({ narration, onComplete }: ActivityNarration
             const next = advanceStoryProgress(progress, { type: "merge_checked", correct: result.correct }, data.rounds.length);
             setProgress(next);
             if (!result.correct) { setFeedback("That pair is not the next merge. Compare your verified counts; for a tie, choose the alphabetically first pair."); return; }
+            onTaskComplete?.(`round-${progress.round + 1}-merge`);
             setDrafts({}); setSelected(null);
             setFeedback(next.stage === "complete" ? "Training complete: you counted the pairs and chose the correct merge in every round." : "Correct merge applied throughout the corpus. The tokens have changed; count the new candidate pairs before choosing again.");
             if (next.stage === "complete") onComplete();

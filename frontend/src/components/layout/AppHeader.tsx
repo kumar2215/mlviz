@@ -2,6 +2,7 @@ import { BookOpen, FlaskConical, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuthSession } from "@/store/useAuthSession";
+import { LearnerSummary } from "./LearningProgress";
 
 export default function AppHeader() {
     const { pathname } = useLocation();
@@ -32,6 +33,7 @@ export default function AppHeader() {
                     </Link>
                 ))}
             </nav>
+            <LearnerSummary compact />
             <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
                 {status === "loading" ? <span role="status" className="text-sm text-slate-500">Loading account…</span> : user ? (
                     <>

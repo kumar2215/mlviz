@@ -6,10 +6,9 @@ import { updatedPasswordValidation } from "./fixtures/passwordPolicy.ts";
 
 test("the checklist reflects Firebase's length and character requirements and returned results", () => {
     const requirements = passwordRequirements(updatedPasswordValidation({ containsUppercaseLetter: true }));
-    assert.equal(requirements.length, 6);
-    assert.deepEqual(requirements.slice(0, 2), [
+    assert.equal(requirements.length, 5);
+    assert.deepEqual(requirements.slice(0, 1), [
         { id: "minimum", label: "At least 12 characters", met: false },
-        { id: "maximum", label: "No more than 4096 characters", met: true },
     ]);
     assert.equal(requirements.find(rule => rule.id === "containsUppercaseLetter")?.met, true);
     assert.equal(requirements.find(rule => rule.id === "containsNonAlphanumericCharacter")?.met, false);
@@ -23,11 +22,14 @@ test("a changed Firebase policy replaces old limits and omits criteria that are 
     assert.deepEqual(requirements, [{ id: "minimum", label: "At least 20 characters", met: false }]);
 });
 
-test("specific errors contain only the unsatisfied criteria, including the maximum length", () => {
+test("specific errors contain only unsatisfied displayed criteria; Firebase still determines validity", () => {
     const error = passwordRequirementError(updatedPasswordValidation({ meetsMinPasswordLength: true, meetsMaxPasswordLength: false, containsUppercaseLetter: true }));
-    assert.match(error, /No more than 4096 characters/);
     assert.match(error, /lowercase/);
     assert.doesNotMatch(error, /At least 12|uppercase/);
+    const overLimit = updatedPasswordValidation({ meetsMinPasswordLength: true, meetsMaxPasswordLength: false,
+        containsUppercaseLetter: true, containsLowercaseLetter: true, containsNumericCharacter: true, containsNonAlphanumericCharacter: true });
+    assert.equal(overLimit.isValid, false);
+    assert.match(passwordRequirementError(overLimit), /Review the password requirements/);
 });
 
 test("strength estimates recognize predictable passwords independently of policy compliance", () => {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuthSession } from "@/store/useAuthSession";
 import RegistrationPasswordField from "./RegistrationPasswordField";
+import { LearnerSummary, LearningSaveStatus } from "./LearningProgress";
 
 export default function AccountDialogs() {
     const { pathname } = useLocation();
@@ -49,6 +50,7 @@ export default function AccountDialogs() {
                         </div>
                     ) : isAccount ? (
                         <div className="mt-5 space-y-4">
+                            <LearnerSummary />
                             {user && <>
                                 <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-700"><p className="break-words font-semibold">{user.displayName || "Learner"}</p><p className="break-all">{user.email}</p><p className="mt-2">{user.emailVerified ? "Email verified" : "Email verification pending"}</p></div>
                                 {!user.emailVerified && <div className="space-y-2"><Button disabled={disabled} variant="outline" className="w-full" onClick={() => void account.sendVerification()}>Resend verification email</Button><Button disabled={disabled} variant="ghost" className="w-full" onClick={() => void account.checkVerification()}>I've verified my email — check again</Button></div>}
@@ -80,7 +82,7 @@ export default function AccountDialogs() {
                             {!isSignUp && !isReset && <Button type="button" disabled={pending} variant="ghost" className="w-full" onClick={() => openDialog("reset-password")}>Forgot password?</Button>}
                         </form>
                     )}
-                    <p className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-relaxed text-blue-900">All learning activities are available to guests. Story progress and XP are not saved or synced to your account yet.</p>
+                    <LearningSaveStatus className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-3" />
                 </Dialog.Content>
             </Dialog.Portal>
         </Dialog.Root>

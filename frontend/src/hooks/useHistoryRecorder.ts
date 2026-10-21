@@ -28,7 +28,7 @@ export default function useHistoryRecorder() {
                 record("step", { params, metrics }),
 
             /** Record that the manual tree was evaluated. */
-            recordManualEvaluate: (metrics?: Record<string, number>) => record("manual_evaluate", { metrics }),
+            recordManualEvaluate: (metrics?: HistoryEntry["metrics"], page_id?: number) => record("manual_evaluate", { metrics, page_id }),
 
             /** Record that a story page was visited. */
             recordPageVisit: (page_id: number) => record("page_visit", { page_id }),

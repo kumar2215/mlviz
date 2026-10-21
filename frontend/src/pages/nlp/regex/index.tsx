@@ -9,7 +9,7 @@ import useUserMode from "@/hooks/useUserMode";
 
 const storyPresetIds = new Set(["word", "whitespace", "words_and_punctuation", "numbers", "social"]);
 
-export default function IndexPage({ name, narration, subpageIndex = 0, replayKey = 0, onSubpageReady, onComplete }: IndexPageProps) {
+export default function IndexPage({ name, narration, subpageIndex = 0, replayKey = 0, onSubpageReady, onComplete, onTaskComplete, completedTasks }: IndexPageProps) {
     const { userMode } = useUserMode();
     const dataset = useDataset(state => state.activeDataset);
     const [data, setData] = useState<RegexState | null>(null);
@@ -31,7 +31,8 @@ export default function IndexPage({ name, narration, subpageIndex = 0, replayKey
             if (!onSubpageReady) break;
             const goal = data.goals[subpageIndex];
             if (!goal) return <div role="alert">Unknown regex objective.</div>;
-            return <RegexEditor key={`${goal.id}-${replayKey}`} narration={narration} data={editorData} goal={goal} onComplete={() => {
+            return <RegexEditor key={`${goal.id}-${replayKey}`} narration={narration} data={editorData} goal={goal} initiallyPassed={completedTasks?.includes(goal.id)} onComplete={() => {
+                onTaskComplete?.(goal.id);
                 onSubpageReady();
                 if (subpageIndex === data.goals.length - 1) onComplete();
             }} />;

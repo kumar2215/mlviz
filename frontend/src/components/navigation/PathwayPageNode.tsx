@@ -1,24 +1,28 @@
 import { RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { segmentState, selectSubpage, subpageArc, subpageControls } from "./pathwayModel";
+import { segmentState, selectSubpage, subpageArc } from "./pathwayModel";
 import { useShallow } from "zustand/react/shallow";
 import { usePathway } from "@/store/usePathway";
 import { selectPathwayNode } from "@/store/pathwayStore";
+import { useStory } from "@/store/useStory";
+import { RewardLabel } from "@/components/layout/TaskRewards";
+import { stepIds } from "@/lib/storyProgress";
 
 const tooltipClass = "max-w-56 border border-blue-100 bg-white text-slate-800 shadow-lg";
 
 export default function PathwayPageNode({ pageId }: { pageId: number }) {
-    const { node, state, title, reason, labels, progress, canAdvance, currentIndex } = usePathway(useShallow(state => selectPathwayNode(state, pageId)));
+    const storyId = useStory(state => state.currentStory?.name);
+    const page = usePathway(state => state.pages[pageId]);
+    const { node, state, title, reason, labels, progress, canAdvance, currentIndex, canReplay } = usePathway(useShallow(state => selectPathwayNode(state, pageId)));
     const { onNavigate, onNavigateSubpage, onMoveFocus, replayPage } = usePathway(useShallow(state => ({
         onNavigate: state.navigatePage, onNavigateSubpage: state.navigateSubpage, onMoveFocus: state.moveFocus, replayPage: state.replayPage,
     })));
     if (!node) return null;
     const active = state === "current";
     const locked = state === "locked";
-    const { canReplay } = subpageControls(labels.length, progress, canAdvance);
     const showRing = labels.length > 0 && !locked && (active || Boolean(progress?.completed.length));
     const prefix = locked ? "🔒 " : state === "visited" ? "✓ " : "";
-    const description = canReplay ? "Replay · restart from the first subpage. Use the arcs to review without resetting progress." : reason;
+    const description = canReplay ? "Replay · restart this activity. Earned XP is kept; repeat attempts earn no additional XP." : reason;
     const activate = () => {
         if (locked) return;
         if (!active) onNavigate(node.id);
@@ -45,7 +49,7 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
                             <path d={arc} fill="none" stroke={current ? "#0284c7" : completed ? "#1d4ed8" : enabled ? "#60a5fa" : "#e2e8f0"} strokeWidth="4" strokeLinecap="round" />
                         </g>
                     </TooltipTrigger>
-                    <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{completed ? "✓ " : !enabled && !current ? "🔒 " : ""}{label}</p><p className="mt-1 text-xs text-slate-500">Step {index + 1} of {labels.length} · {detail}</p></TooltipContent>
+                    <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{completed ? "✓ " : !enabled && !current ? "🔒 " : ""}{label}</p><p className="mt-1 text-xs text-slate-500">Step {index + 1} of {labels.length} · {detail}</p>{storyId && page && <p className="mt-1 text-xs text-amber-900"><RewardLabel storyId={storyId} page={page} step={stepIds(page)[index] ?? ""} /></p>}</TooltipContent>
                 </Tooltip>;
             })}
         </svg>}
@@ -59,7 +63,7 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
                     {canReplay && <RotateCcw aria-hidden="true" className="pathway-node-replay absolute size-[18px]" />}
                 </button>
             </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{prefix}{title}</p><p className="mt-1 text-xs text-slate-500">{active && canReplay ? "You are here · " : ""}{description}</p>{labels.length > 0 && <p className="mt-1 text-xs text-blue-700">{progress?.completed.length || 0} of {labels.length} steps passed{active ? ` · ${labels[currentIndex]}` : ""}</p>}</TooltipContent>
+            <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{prefix}{title}</p><p className="mt-1 text-xs text-slate-500">{active && canReplay ? "You are here · " : ""}{description}</p>{labels.length > 0 && <p className="mt-1 text-xs text-blue-700">{progress?.completed.length || 0} of {labels.length} steps passed{active ? ` · ${labels[currentIndex]}` : ""}</p>}{storyId && page && <p className="mt-1 text-xs text-amber-900"><RewardLabel storyId={storyId} page={page} /></p>}</TooltipContent>
         </Tooltip>
     </div>;
 }

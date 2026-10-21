@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
-import type { ActivityNarrationProps } from "@/types/page";
+import type { IndexPageProps } from "@/types/page";
+import { applyLearnedRules } from "./storyProgress";
 import { applyBpePair, checkBpeTokenizations, loadBpeApplication, loadBpeState, type BpeApplication, type BpeState } from "@/api/bpe";
 import { Button } from "@/components/ui/button";
 import { useDataset } from "@/store/useDataset";
@@ -10,7 +11,8 @@ import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFram
 import WordsEditor from "../../shared/WordsEditor";
 import useUserMode from "@/hooks/useUserMode";
 
-export default function BpeApply({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
+export default function BpeApply({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
+    const [restored] = useState(() => completedTasks.includes("apply-rules"));
     const { userMode } = useUserMode();
     const locked = userMode === "story";
     const activeDataset = useDataset(state => state.activeDataset);
@@ -20,7 +22,7 @@ export default function BpeApply({ narration, onComplete }: ActivityNarrationPro
     const [draft, setDraft] = useState("");
     const [selected, setSelected] = useState<{ word: number; token: number } | null>(null);
     const [pending, setPending] = useState(false);
-    const [completed, setCompleted] = useState(false);
+    const [completed, setCompleted] = useState(restored);
     const [feedback, setFeedback] = useState("Select a left token, then its right neighbour to apply the highlighted rule.");
     const saveSource = useTokenization(state => state.setBpeSource);
     useEffect(() => {
@@ -32,10 +34,15 @@ export default function BpeApply({ narration, onComplete }: ActivityNarrationPro
             const words = result.test_words.length ? result.test_words : result.initial.slice(0, 3).map(item => item.word);
             const custom: CustomBpeDataset = { type: "custom_bpe", words: result.initial.map(item => ({ word: item.word, frequency: item.frequency })), rounds: dataset.type === "custom_bpe" ? dataset.rounds : result.rounds.length, test_words: words, restore_word: null };
             const next = await loadBpeApplication(custom);
-            if (active) { setSource(custom); setModel(result); setApplication(next); setDraft(words.join(" ")); setSelected(null); }
+            if (active) {
+                setSource(custom); setModel(result);
+                setApplication(restored ? { ...next, answers: applyLearnedRules(words, result.rounds.map(round => round.rule)), complete: true, rule_index: result.rounds.length } : next);
+                setDraft(words.join(" ")); setSelected(null);
+                if (restored) setFeedback("These words were completed previously. Use Replay to practice again.");
+            }
         }).catch(reason => { if (active) setFeedback(reason instanceof Error ? reason.message : "Could not load learned rules."); }).finally(() => { if (active) setPending(false); });
         return () => { active = false; };
-    }, [activeDataset, locked]);
+    }, [activeDataset, locked, restored]);
     const useWords = async () => {
         if (locked || !source) return;
         const candidate = { ...source, test_words: draft.trim().split(/\s+/).filter(Boolean) };
@@ -62,7 +69,7 @@ export default function BpeApply({ narration, onComplete }: ActivityNarrationPro
         try {
             const result = await checkBpeTokenizations(source, application.answers);
             setFeedback(result.correct ? "All words use the learned rules." : "Some token boundaries still need a merge.");
-            if (result.correct) { setCompleted(true); onComplete(); }
+            if (result.correct) { setCompleted(true); onTaskComplete?.("apply-rules"); onComplete(); }
         } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not check tokens."); }
         finally { setPending(false); }
     };

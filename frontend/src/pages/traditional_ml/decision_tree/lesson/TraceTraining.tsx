@@ -1,16 +1,16 @@
 import { useState } from "react";
 import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
-import type { ActivityNarrationProps } from "@/types/page";
+import type { IndexPageProps } from "@/types/page";
 import { Button } from "@/components/ui/button";
 import { DragChip, DragSurface, DropTarget, Frame, Result, selectedClass } from "./shared";
 
 const steps = ["Start with labelled flowers", "Compare possible splits", "Repeat within each group", "Predict at a leaf"];
 
-export default function TraceTraining({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
-    const [slots, setSlots] = useState<(number | null)[]>([null, null, null, null]);
+export default function TraceTraining({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
+    const [slots, setSlots] = useState<(number | null)[]>(() => completedTasks.includes("sequence") ? [0, 1, 2, 3] : [null, null, null, null]);
     const [checked, setChecked] = useState(false);
-    const [finished, setFinished] = useState(false);
-    const [feedback, setFeedback] = useState("Arrange all four steps, then check the sequence.");
+    const [finished, setFinished] = useState(() => completedTasks.includes("sequence"));
+    const [feedback, setFeedback] = useState(() => completedTasks.includes("sequence") ? "The sequence was completed previously. Use Replay to practice again." : "Arrange all four steps, then check the sequence.");
     const place = (id: string, target: number) => {
         const step = Number(id);
         if (!Number.isInteger(step) || step < 0 || step >= steps.length || finished) return;
@@ -28,6 +28,7 @@ export default function TraceTraining({ narration, onComplete }: ActivityNarrati
             setFinished(true);
             setFeedback("Correct sequence. The final page is unlocked.");
             onComplete();
+            onTaskComplete?.("sequence");
         } else setFeedback("The highlighted steps are out of order. Drag them to another position.");
     };
     return <Frame><DragSurface>

@@ -20,7 +20,7 @@ const pageComponents = Object.fromEntries(
     Object.entries(pageLoaders).map(([path, loader]) => [path, lazy(loader)]),
 ) as Record<string, LazyExoticComponent<ComponentType<IndexPageProps>>>;
 
-const DynamicPage: React.FC<DynamicPageProps> = ({ page, narration, category, visualisation, subpageIndex, replayKey, onSubpageReady, onComplete }) => {
+const DynamicPage: React.FC<DynamicPageProps> = ({ page, narration, category, visualisation, subpageIndex, replayKey, onSubpageReady, onComplete, onTaskComplete, completedTasks }) => {
     const setDataset = useDataset(state => state.setDataset);
     const config = useConfig(state => state.config);
     const narrationDocument = useStaticMarkdown(narration);
@@ -58,6 +58,8 @@ const DynamicPage: React.FC<DynamicPageProps> = ({ page, narration, category, vi
                     replayKey={replayKey}
                     onSubpageReady={onSubpageReady}
                     onComplete={onComplete}
+                    onTaskComplete={onTaskComplete}
+                    completedTasks={completedTasks}
                 />
             </Suspense>
         </div>

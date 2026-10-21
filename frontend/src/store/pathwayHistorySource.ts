@@ -4,6 +4,7 @@ import type { PathwayHistorySource } from "./pathwayStore";
 
 export function pathwayHistorySource(mode: "story" | "visualisation"): PathwayHistorySource {
     if (mode === "story") return {
+        reset: () => useStory.setState(state => ({ currentStoryHistory: { story_id: state.currentStory?.name ?? "", params: {}, entries: [], path: [] } })),
         getHistory: () => useStory.getState().currentStoryHistory,
         subscribe: listener => useStory.subscribe((state, previous) => {
             if (state.currentStoryHistory !== previous.currentStoryHistory) listener(state.currentStoryHistory);

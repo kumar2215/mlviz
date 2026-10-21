@@ -1,6 +1,6 @@
 import { useState } from "react";
 import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
-import type { ActivityNarrationProps } from "@/types/page";
+import type { IndexPageProps } from "@/types/page";
 import { useDataset } from "@/store/useDataset";
 import { DragChip, DragSurface, DropTarget, FlowerIcon, Frame, Result, TreeEdges, TreeNode } from "./shared";
 
@@ -10,12 +10,13 @@ function FlowerGroup({ ids }: { ids: string[] }) {
     return <div className="mt-1 flex flex-wrap justify-center gap-1">{ids.map(id => <span key={id} className="flex items-center gap-1 rounded-md border border-emerald-200 bg-white px-2 py-1 text-xs"><FlowerIcon small />{id}</span>)}</div>;
 }
 
-export default function FollowQuestions({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
+export default function FollowQuestions({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
     const dataset = useDataset(state => state.activeDataset);
-    const [stage, setStage] = useState(0);
+    const [stage, setStage] = useState(() => completedTasks.includes("child-sort") ? 2 : completedTasks.includes("root-sort") ? 1 : 0);
     const [rootGroups, setRootGroups] = useState<Record<string, Side>>({});
     const [childGroups, setChildGroups] = useState<Record<string, Side>>({});
-    const [feedback, setFeedback] = useState("Sort all flowers at the root.");
+    const [feedback, setFeedback] = useState(() => completedTasks.includes("child-sort") ? "This sorting task is complete. Use Replay to practice again."
+        : completedTasks.includes("root-sort") ? "The root split was completed previously. Sort the remaining flowers by petal width." : "Sort all flowers at the root.");
     const lengthIndex = dataset?.type === "custom" ? dataset.feature_names?.indexOf("petal length (cm)") ?? -1 : -1;
     const widthIndex = dataset?.type === "custom" ? dataset.feature_names?.indexOf("petal width (cm)") ?? -1 : -1;
     if (dataset?.type !== "custom" || lengthIndex < 0 || widthIndex < 0 || !dataset.X.length
@@ -23,11 +24,15 @@ export default function FollowQuestions({ narration, onComplete }: ActivityNarra
         return <Frame><div role="alert">The flower dataset is unavailable or missing petal measurements.</div></Frame>;
     }
     const flowers = dataset.X.map((row, index) => ({ id: `F${index + 1}`, length: row[lengthIndex], width: row[widthIndex] }));
+    const roots = Object.keys(rootGroups).length || !completedTasks.includes("root-sort") ? rootGroups
+        : Object.fromEntries(flowers.map(flower => [flower.id, flower.length <= 2.5 ? "left" : "right"])) as Record<string, Side>;
+    const children = Object.keys(childGroups).length || !completedTasks.includes("child-sort") ? childGroups
+        : Object.fromEntries(flowers.filter(flower => roots[flower.id] === "right").map(flower => [flower.id, flower.width <= 1.7 ? "left" : "right"])) as Record<string, Side>;
     const finished = stage === 2;
-    const activeFlowers = flowers.filter(flower => stage === 0 ? !rootGroups[flower.id] : stage === 1 && rootGroups[flower.id] === "right" && !childGroups[flower.id]);
-    const rootLeft = flowers.filter(flower => rootGroups[flower.id] === "left").map(flower => flower.id);
-    const rootRight = flowers.filter(flower => rootGroups[flower.id] === "right").map(flower => flower.id);
-    const childIds = (side: Side) => flowers.filter(flower => childGroups[flower.id] === side).map(flower => flower.id);
+    const activeFlowers = flowers.filter(flower => stage === 0 ? !roots[flower.id] : stage === 1 && roots[flower.id] === "right" && !children[flower.id]);
+    const rootLeft = flowers.filter(flower => roots[flower.id] === "left").map(flower => flower.id);
+    const rootRight = flowers.filter(flower => roots[flower.id] === "right").map(flower => flower.id);
+    const childIds = (side: Side) => flowers.filter(flower => children[flower.id] === side).map(flower => flower.id);
 
     const place = (id: string, side: Side) => {
         const flower = activeFlowers.find(item => item.id === id);
@@ -43,15 +48,17 @@ export default function FollowQuestions({ narration, onComplete }: ActivityNarra
             const next = { ...rootGroups, [id]: side };
             setRootGroups(next);
             if (Object.keys(next).length === flowers.length) {
+                onTaskComplete?.("root-sort");
                 const remaining = Object.values(next).filter(side => side === "right").length;
                 setStage(remaining ? 1 : 2);
                 setFeedback(remaining ? `Root split complete. Sort the ${remaining} remaining flowers by petal width.` : `All ${flowers.length} flowers reached their species leaves. The next page is unlocked.`);
                 if (!remaining) onComplete();
             } else setFeedback(`${id} follows the ${side} branch. Keep sorting the root.`);
         } else {
-            const next = { ...childGroups, [id]: side };
+            const next = { ...children, [id]: side };
             setChildGroups(next);
             if (Object.keys(next).length === rootRight.length) {
+                onTaskComplete?.("child-sort");
                 setStage(2);
                 setFeedback(`All ${flowers.length} flowers reached their species leaves. The next page is unlocked.`);
                 onComplete();

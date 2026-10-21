@@ -3,6 +3,7 @@ import type { HistoryEntry, HistoryState } from "../types/history.ts";
 import type { PageUnion, Parameters } from "../types/page.ts";
 import type { Transition } from "../types/story.ts";
 import { displayCondition, isConditionMet } from "../utils/conditions.ts";
+import { stepIds, stepKey, type StoryProgress } from "../lib/storyProgress.ts";
 import { pageTitle, getDynamicPage, layoutPathway, selectSubpage, subpageControls, transitionKey, type PathwayLayout, type SubpageProgress } from "../components/navigation/pathwayModel.ts";
 
 export interface PathwayDefinition { pages: PageUnion[]; transitions: Transition[] }
@@ -13,6 +14,7 @@ export interface PageProgressContext {
     replayKey: number;
 }
 export interface PathwayHistorySource {
+    reset?: () => void;
     getHistory: () => HistoryState;
     subscribe: (listener: (history: HistoryState) => void) => () => void;
     addPageVisit: (pageId: number) => void;
@@ -29,8 +31,13 @@ export interface PathwayState extends PathwayDefinition {
     subpageIndex: number;
     replayKey: number;
     progressByPage: Record<number, SubpageProgress>;
+    resumeTasks: boolean;
     visitedPages: ReadonlySet<number>;
     traversed: ReadonlySet<string>;
+    savedUnlocked: ReadonlySet<number>;
+    restoredCompletedPages: ReadonlySet<number>;
+    restoreProgress: (progress: StoryProgress) => void;
+    mergeSavedProgress: (progress: StoryProgress) => void;
     focusRequest: { pageId: number; serial: number } | null;
     setDefinition: (definition: PathwayDefinition) => void;
     openSession: (sessionId: string, definition: PathwayDefinition, source: PathwayHistorySource) => void;
@@ -50,6 +57,7 @@ export const pageSubpages = (state: PathwayState, pageId = state.currentPageId) 
 
 export function canAdvanceSubpage(state: PathwayState): boolean {
     return Boolean(state.progressByPage[state.currentPageId]?.completed.includes(state.subpageIndex))
+        || state.restoredCompletedPages.has(state.currentPageId)
         || state.history.entries.some(entry => entry.actionType === "page_complete" && entry.page_id === state.currentPageId);
 }
 
@@ -59,16 +67,22 @@ export function canExitPage(state: PathwayState): boolean {
         || subpageControls(labels.length, state.progressByPage[state.currentPageId], false).canReplay;
 }
 
+export function canReplayPage(state: PathwayState, pageId: number): boolean {
+    const labels = pageSubpages(state, pageId);
+    if (labels.length) return subpageControls(labels.length, state.progressByPage[pageId], false).canReplay;
+    return state.restoredCompletedPages.has(pageId) || state.history.entries.some(entry => entry.actionType === "page_complete" && entry.page_id === pageId);
+}
+
 export function transitionAvailable(state: PathwayState, transition: Transition): boolean {
-    return transition.from === state.currentPageId && canExitPage(state) && isConditionMet(transition.condition,
+    return transition.from === state.currentPageId && (state.savedUnlocked.has(transition.to) || canExitPage(state) && isConditionMet(transition.condition,
         { ...state.history.params, __history: state.history, __now: state.now } as unknown as Record<string, Parameters>,
-        { sourcePageId: transition.from });
+        { sourcePageId: transition.from }));
 }
 
 export function selectPathwayNode(state: PathwayState, pageId: number) {
     const active = pageId === state.currentPageId;
     const incoming = state.layout.edges.filter(edge => edge.to === pageId && edge.from === state.currentPageId);
-    const status = active ? "current" : state.visitedPages.has(pageId) ? "visited" : incoming.some(edge => transitionAvailable(state, edge.transition)) ? "available" : "locked";
+    const status = active ? "current" : state.visitedPages.has(pageId) ? "visited" : state.savedUnlocked.has(pageId) || incoming.some(edge => transitionAvailable(state, edge.transition)) ? "available" : "locked";
     const reason = active ? "You are here" : status === "visited" ? "Visited · click to restart this page" : status === "available" ? "Available · click to continue" : incoming.length ? !canExitPage(state) ? "Finish the current page’s subpages to continue." : incoming.map(edge => edge.transition.condition.description || (edge.transition.condition.condition_type === "Button" ? "Complete the current activity to unlock this page." : displayCondition(edge.transition.condition))).join(" or ") : "Not available yet · follow the current pathway.";
     const progress = state.progressByPage[pageId];
     return {
@@ -80,6 +94,7 @@ export function selectPathwayNode(state: PathwayState, pageId: number) {
         progress,
         canAdvance: active ? canAdvanceSubpage(state) : Boolean(progress?.completed.includes(progress.index)),
         currentIndex: active ? state.subpageIndex : progress?.index ?? 0,
+        canReplay: canReplayPage(state, pageId),
     };
 }
 
@@ -102,9 +117,53 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
             currentPageId: 0,
             subpageIndex: 0,
             replayKey: 0,
+            resumeTasks: false,
             progressByPage: {},
             visitedPages: new Set([0]),
             traversed: new Set(),
+            savedUnlocked: new Set(),
+            restoredCompletedPages: new Set(),
+            restoreProgress: progress => {
+                const state = get();
+                const has = (key: string) => progress.milestones.includes(key);
+                const visited = state.pages.flatMap((page, index) => page.id && has(`visit:${page.id}`) ? [index] : []);
+                const unlocked = state.pages.flatMap((page, index) => page.id && has(`unlock:${page.id}`) ? [index] : []);
+                const completed = state.pages.flatMap((page, index) => page.id && has(`complete:${page.id}`) ? [index] : []);
+                const checkpointPage = state.pages.findIndex(page => page.id === progress.checkpoint.page);
+                const currentPageId = checkpointPage >= 0 && (visited.includes(checkpointPage) || unlocked.includes(checkpointPage)) ? checkpointPage : 0;
+                const progressByPage = Object.fromEntries(state.pages.flatMap((page, index) => {
+                    const ids = stepIds(page);
+                    if (!ids.length) return [];
+                    const passed = ids.flatMap((id, step) => has(stepKey(page.id!, id)) ? [step] : []);
+                    const checkpointStep = index === currentPageId ? ids.indexOf(progress.checkpoint.step) : -1;
+                    const firstUnfinished = ids.findIndex((_, step) => !passed.includes(step));
+                    const next = checkpointStep >= 0 ? checkpointStep : firstUnfinished < 0 ? ids.length - 1 : firstUnfinished;
+                    const safeIndex = ids.slice(0, next).every((_, step) => passed.includes(step)) ? next : Math.max(0, firstUnfinished);
+                    return [[index, { index: safeIndex, completed: passed }]];
+                }));
+                set({ currentPageId, subpageIndex: progressByPage[currentPageId]?.index ?? 0, progressByPage, resumeTasks: true,
+                    visitedPages: new Set([0, ...visited, currentPageId]), savedUnlocked: new Set(unlocked), restoredCompletedPages: new Set(completed) });
+            },
+            mergeSavedProgress: progress => {
+                const state = get();
+                const visitedPages = new Set(state.visitedPages);
+                const savedUnlocked = new Set(state.savedUnlocked);
+                const restoredCompletedPages = new Set(state.restoredCompletedPages);
+                const progressByPage = { ...state.progressByPage };
+                for (let index = 0; index < state.pages.length; index++) {
+                    const page = state.pages[index];
+                    if (!page.id) continue;
+                    if (progress.milestones.includes(`visit:${page.id}`)) visitedPages.add(index);
+                    if (progress.milestones.includes(`unlock:${page.id}`)) savedUnlocked.add(index);
+                    if (index === state.currentPageId) continue;
+                    if (progress.milestones.includes(`complete:${page.id}`)) restoredCompletedPages.add(index);
+                    const completed = stepIds(page).flatMap((step, stepIndex) => progress.milestones.includes(stepKey(page.id!, step)) ? [stepIndex] : []);
+                    if (completed.length) progressByPage[index] = { index: state.progressByPage[index]?.index ?? completed[completed.length - 1], completed: [...new Set([...(state.progressByPage[index]?.completed ?? []), ...completed])].sort((a, b) => a - b) };
+                }
+                if (visitedPages.size !== state.visitedPages.size || savedUnlocked.size !== state.savedUnlocked.size || restoredCompletedPages.size !== state.restoredCompletedPages.size || JSON.stringify(progressByPage) !== JSON.stringify(state.progressByPage)) {
+                    set({ visitedPages, savedUnlocked, restoredCompletedPages, progressByPage });
+                }
+            },
             focusRequest: null,
             openSession: (sessionId, next, nextSource) => {
                 source = nextSource;
@@ -115,8 +174,8 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                 }
                 started = false;
                 set({ ...next, sessionId, layout: layoutPathway(next.pages, next.transitions),
-                    history: source.getHistory(), now: now(), currentPageId: 0, subpageIndex: 0, replayKey: get().replayKey + 1,
-                    progressByPage: {}, visitedPages: new Set([0]), traversed: new Set(), focusRequest: null });
+                    history: source.getHistory(), now: now(), currentPageId: 0, subpageIndex: 0, replayKey: get().replayKey + 1, resumeTasks: false,
+                    progressByPage: {}, visitedPages: new Set([0]), traversed: new Set(), savedUnlocked: new Set(), restoredCompletedPages: new Set(), focusRequest: null });
             },
             setDefinition: next => {
                 if (get().pages === next.pages && get().transitions === next.transitions) return;
@@ -135,9 +194,9 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                 const state = freshState();
                 if (pageId === state.currentPageId || !state.pages[pageId]) return;
                 const available = state.transitions.flatMap((transition, index) => transition.to === pageId && transitionAvailable(state, transition) ? [transitionKey(transition, index)] : []);
-                if (!state.visitedPages.has(pageId) && available.length === 0) return;
+                if (!state.visitedPages.has(pageId) && !state.savedUnlocked.has(pageId) && available.length === 0) return;
                 source.addPageVisit(state.currentPageId);
-                set({ currentPageId: pageId, subpageIndex: 0, replayKey: state.replayKey + 1,
+                set({ currentPageId: pageId, subpageIndex: 0, replayKey: state.replayKey + 1, resumeTasks: false,
                     progressByPage: { ...state.progressByPage, [pageId]: { index: 0, completed: [] } },
                     visitedPages: new Set([...state.visitedPages, pageId]),
                     traversed: available.length ? new Set([...state.traversed, available[0]]) : state.traversed });
@@ -153,14 +212,14 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                 const changedPage = pageId !== state.currentPageId;
                 if (changedPage) source.addPageVisit(state.currentPageId);
                 // Each presentation gets a new version, including revisiting the same subpage.
-                set({ currentPageId: pageId, subpageIndex: index, replayKey: state.replayKey + 1, progressByPage: { ...state.progressByPage, [pageId]: next } });
+                set({ currentPageId: pageId, subpageIndex: index, replayKey: state.replayKey + 1, resumeTasks: false, progressByPage: { ...state.progressByPage, [pageId]: next } });
                 if (changedPage) recordArrival(pageId);
             },
             replayPage: pageId => {
                 const state = get();
-                if (!subpageControls(pageSubpages(state, pageId).length, state.progressByPage[pageId], false).canReplay) return;
+                if (!canReplayPage(state, pageId)) return;
                 if (pageId !== state.currentPageId) { get().navigatePage(pageId); return; }
-                set({ subpageIndex: 0, replayKey: state.replayKey + 1, progressByPage: { ...state.progressByPage, [pageId]: { index: 0, completed: [] } } });
+                set({ subpageIndex: 0, replayKey: state.replayKey + 1, resumeTasks: false, restoredCompletedPages: new Set([...state.restoredCompletedPages].filter(id => id !== pageId)), progressByPage: { ...state.progressByPage, [pageId]: { index: 0, completed: [] } } });
             },
             markSubpageReady: (pageId, index, sessionId, replayKey) => {
                 const state = get();

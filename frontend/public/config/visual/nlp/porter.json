@@ -16,6 +16,14 @@
         "Shorten suffixes",
         "Remove remaining endings",
         "Final e and double l"
+      ],
+      "subpage_ids": [
+        "plurals",
+        "final-y",
+        "long-suffixes",
+        "short-suffixes",
+        "remaining-endings",
+        "final-e"
       ]
     },
     {

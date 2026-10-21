@@ -27,6 +27,11 @@
         "Contractions",
         "Decimal numbers",
         "Social text"
+      ],
+      "subpage_ids": [
+        "contractions",
+        "numbers",
+        "social"
       ]
     }
   ],

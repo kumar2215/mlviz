@@ -58,5 +58,6 @@
     "stories": [
         "decision_tree",
         "text_preprocessing"
-    ]
+    ],
+    "xp_per_level": 100
 }

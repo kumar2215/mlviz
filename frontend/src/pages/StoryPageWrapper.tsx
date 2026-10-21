@@ -1,15 +1,13 @@
 import VisualisationPage from "./VisualisationPage";
 import { useStory, setCurrentStory } from "@/store/useStory";
-import { useVisualisation } from "@/store/useVisualisation";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import type Story from "@/types/story";
-import { unrollStory } from "@/utils/storyReferences";
+import { useConfig } from "@/store/useConfig";
 
 export default function StoryPageWrapper({ story }: { story: Story }) {
-    useEffect(() => {
-        const unrolledStory = unrollStory(story, { stories: useStory.getState().stories, visualisations: useVisualisation.getState().visualisations });
-        setCurrentStory(unrolledStory);
-    }, [story]);
+    const resolved = useConfig(state => state.resolvedStories[story.name]);
+    const current = useStory(state => state.currentStory);
+    useLayoutEffect(() => { if (resolved && current !== resolved) setCurrentStory(resolved); }, [resolved, current]);
 
-    return <VisualisationPage key={`story:${story.name}`} />;
+    return resolved && current === resolved ? <VisualisationPage key={`story:${story.name}`} /> : null;
 };

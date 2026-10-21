@@ -1,14 +1,14 @@
 import { useState } from "react";
 import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
-import type { ActivityNarrationProps } from "@/types/page";
+import type { IndexPageProps } from "@/types/page";
 import { DragChip, DragSurface, DropTarget, Frame, Result, TreeEdges, TreeNode } from "./shared";
 
 const parts = ["Root", "Branch", "Split node", "Leaf"];
 const letters = ["A", "B", "C", "D"];
 
-export default function NameTreeParts({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
-    const [answers, setAnswers] = useState<Record<number, string>>({});
-    const [feedback, setFeedback] = useState("Match labels to the lettered parts of the tree.");
+export default function NameTreeParts({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
+    const [answers, setAnswers] = useState<Record<number, string>>(() => completedTasks.includes("match-parts") ? Object.fromEntries(parts.map((part, index) => [index, part])) : {});
+    const [feedback, setFeedback] = useState(() => completedTasks.includes("match-parts") ? "All labels were matched previously. Use Replay to practice again." : "Match labels to the lettered parts of the tree.");
     const finished = Object.keys(answers).length === parts.length;
     const place = (id: string, index: number) => {
         if (!parts.includes(id) || answers[index] || Object.values(answers).includes(id)) return;
@@ -18,6 +18,7 @@ export default function NameTreeParts({ narration, onComplete }: ActivityNarrati
         if (Object.keys(next).length === parts.length) {
             setFeedback("All four labels are correct. The next page is unlocked.");
             onComplete();
+            onTaskComplete?.("match-parts");
         } else setFeedback(`${letters[index]} is the ${id.toLowerCase()}.`);
     };
     return <Frame><DragSurface>

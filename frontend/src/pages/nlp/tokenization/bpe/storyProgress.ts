@@ -8,6 +8,26 @@ export interface StoryProgress {
 type ProgressEvent = { type: "counts_checked" | "merge_checked"; correct: boolean } | { type: "edit_counts" };
 
 export const initialStoryProgress = (): StoryProgress => ({ round: 0, stage: "count" });
+export function restoreStoryProgress(tasks: readonly string[], rounds: number): StoryProgress {
+    for (let round = 0; round < rounds; round++) {
+        if (!tasks.includes(`round-${round + 1}-merge`)) return { round, stage: tasks.includes(`round-${round + 1}-count`) ? "merge" : "count" };
+    }
+    return { round: rounds, stage: rounds ? "complete" : "count" };
+}
+export function applyLearnedRules(words: string[], rules: BpePair[]) {
+    return words.map(word => {
+        let tokens = [...word, "</w>"];
+        for (const rule of rules) {
+            const next: string[] = [];
+            for (let index = 0; index < tokens.length; index++) {
+                if (tokens[index] === rule.left && tokens[index + 1] === rule.right) { next.push(rule.left + rule.right); index++; }
+                else next.push(tokens[index]);
+            }
+            tokens = next;
+        }
+        return { word, tokens };
+    });
+}
 export const pairKey = (pair: BpePair) => JSON.stringify([pair.left, pair.right]);
 
 export function readCountAnswers(pairs: BpePair[], drafts: Record<string, string>): BpeCountAnswer[] | null {

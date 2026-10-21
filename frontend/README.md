@@ -4,8 +4,8 @@
 
 Authentication uses Google and email/password sign-in, registration, email
 verification, password reset, and Firebase-managed local session persistence.
-All learning activities remain public. Story progress, XP, and guest migration
-are not implemented. The guest story prompt appears once per app session, after
+All learning activities remain public. Story task progress and XP persist in the
+browser and merge into signed-in accounts. The guest story prompt appears once per app session, after
 Firebase finishes restoring any existing session.
 
 1. Register a Web app in your Firebase project and enable Google and
@@ -32,11 +32,13 @@ Firebase finishes restoring any existing session.
    npx --no-install firebase deploy --config firebase.json --project YOUR_PROJECT_ID --only firestore:rules
    ```
 
-The app uses only `users/{auth.uid}` documents, containing `displayName` (1–100
+Basic profiles use `users/{auth.uid}` documents, containing `displayName` (1–100
 characters), immutable `createdAt`, and `updatedAt` server timestamps. Credentials,
 email, and verification status stay in Firebase Authentication. Profile writes
 use transactions to preserve creation timestamps and avoid duplicate documents.
-Rules permit only the owner to get/create/update their valid profile; listing,
+Rules permit only the owner to get/create/update their valid profile. Private
+story progress is stored separately under `users/{uid}/storyProgress/{storyId}`;
+owners may read/list/create/update these validated documents. Profile listing,
 deleting, other users' data, and undeclared paths/fields are denied. If a different
 database ID is used, update both the environment variable and `firebase.json`'s
 Firestore database target before deployment.
@@ -72,6 +74,65 @@ Existing passwords are submitted to Firebase without applying signup constraints
 in the sign-in form. If Firebase rejects sign-in because the configured policy
 forces an upgrade, the dialog offers password reset and carries the email into
 the reset form. The reset link uses Firebase's hosted handler to enforce policy.
+
+### Story progress, XP, and levels
+
+The Zustand progress store saves a versioned `mlviz.story-progress.v1` envelope in
+`localStorage`. It separates guest data and each Firebase UID. Only completion
+milestones and story checkpoints are stored: unfinished inputs, datasets, models,
+credentials, and raw action histories are excluded. Returning resumes the current
+task; validated stages such as BPE counts are reconstructed from the fixed
+exercise. Replay restarts the attempt and preserves earned XP.
+
+On sign-in, signup, and restored authentication, guest and account milestones are
+merged as sets. The guest batch is consumed only after the merged account copy is
+saved locally. Later guest work creates a new batch and imports into whichever
+account is entered next. Batch generations prevent older tabs from resurrecting
+consumed guest progress. Accounts remain isolated on sign-out and switching.
+
+Signed-in changes sync automatically to Firestore. Transactions union concurrent
+completions; checkpoint timestamps use a deterministic client-ID tie-breaker.
+Pending writes stay in localStorage and retry on reconnect, with backoff, or from
+the save-status Retry button. Remote updates refresh rewards and unlocked pages
+without moving an active exercise. Storage failures are visible and retain the
+current in-memory work. As with any browser storage, clearing site data removes
+unsynced local progress. Firestore sync does not make the exercise APIs available
+offline.
+
+Reward metadata lives in each story page's `xp_tasks` array:
+
+```json
+{
+  "id": "bpe-training",
+  "xp_tasks": [
+    { "id": "round-1-count", "label": "Count candidate pairs in round 1", "xp": 10 }
+  ]
+}
+```
+
+Tasks tied to navigation steps also specify `subpage_id`, matching a stable ID in
+the dynamic page's `subpage_ids` array. Keep page/task/subpage IDs stable when
+renaming or reordering content. Reference expansion preserves story overrides;
+multiple referenced pages are scoped by the reference instance ID. Rewards fire
+only through validated `onTaskComplete(taskId)` callbacks in story mode. Reading,
+revealing answers, navigating, and playground interactions earn no XP. Correct
+retries receive the full first reward; repeated completions never add more XP.
+
+Earned and available XP are derived from current configuration. Changing `xp`
+recalculates existing earnings and levels. Set retired tasks to `xp: 0` while
+retaining their IDs if historic completions must keep syncing. Configure
+`xp_per_level` in `public/config/config.json` (default 100). Level is
+`1 + floor(totalXP / xp_per_level)`. The bundled stories currently offer 165 and
+240 XP. Header/account summaries, activity badges, navigation tooltips, and story
+cards use the same resolved catalog. Leaderboards, badges, and streaks are deferred.
+
+After adding or changing IDs, run `npm run generate:progress-rules`, then
+`npm run check:progress-rules` and `npm run test:firebase`. The generated rule
+allowlist validates milestone IDs and field sizes; XP amounts need no rule update.
+Publish `firestore.rules` before deploying the frontend. These are prototype
+owner-only rules; progress is client-reported personal learning data and does not
+prove correctness for a competitive leaderboard. Existing profiles need no
+migration, and accounts without progress start empty.
 
 ### Deployment variables
 

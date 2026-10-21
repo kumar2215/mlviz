@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ActivityIntroduction from "@/components/layout/ActivityIntroduction";
-import type { ActivityNarrationProps } from "@/types/page";
+import type { IndexPageProps } from "@/types/page";
 import { checkPorterPlacement } from "@/api/text_preprocessing";
 import { DragAndDrop, DragItem, DropArea } from "@/components/interaction/DragAndDrop";
 import { LabFrame, Status } from "../shared/LabFrame";
 import WordsEditor from "../shared/WordsEditor";
 import { usePorterExamples } from "./usePorterExamples";
 
-export default function PorterFamilies({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
+export default function PorterFamilies({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
     const examples = usePorterExamples();
+    const [restored] = useState(() => completedTasks.includes("group-families"));
     const [placements, setPlacements] = useState<Record<string, string>>({});
+    useEffect(() => { if (restored && examples.data) setPlacements(Object.fromEntries(examples.data.examples.map(item => [item.word, item.stem]))); }, [restored, examples.data]);
     const [checking, setChecking] = useState(false);
-    const [feedback, setFeedback] = useState("Group each word under its Porter stem.");
+    const [feedback, setFeedback] = useState(restored ? "All words were grouped previously. Use Replay to practice again." : "Group each word under its Porter stem.");
     const finished = Boolean(examples.data) && Object.keys(placements).length === examples.data?.examples.length;
     const pending = checking || examples.pending;
     const place = async (word: string, stem: string) => {
@@ -22,7 +24,7 @@ export default function PorterFamilies({ narration, onComplete }: ActivityNarrat
             setFeedback(result.message);
             if (result.correct) {
                 const next = { ...placements, [word]: stem }; setPlacements(next);
-                if (Object.keys(next).length === examples.data.examples.length) { onComplete(); setFeedback("All words are grouped correctly."); }
+                if (Object.keys(next).length === examples.data.examples.length) { onTaskComplete?.("group-families"); onComplete(); setFeedback("All words are grouped correctly."); }
             }
         } catch (error) { setFeedback(error instanceof Error ? error.message : "Could not check this placement."); }
         finally { setChecking(false); }

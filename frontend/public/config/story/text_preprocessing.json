@@ -5,7 +5,8 @@
       "page_type": "static",
       "text": "",
       "path": "md/tokenization/brief.md",
-      "name": "Preparing text for a model"
+      "name": "Preparing text for a model",
+      "id": "intro"
     },
     {
       "page_type": "mixed",
@@ -21,7 +22,8 @@
         "pages": [
           0
         ]
-      }
+      },
+      "id": "regex-basics"
     },
     {
       "page_type": "mixed",
@@ -37,7 +39,8 @@
         "pages": [
           1
         ]
-      }
+      },
+      "id": "regex-playground"
     },
     {
       "page_type": "mixed",
@@ -53,19 +56,42 @@
         "pages": [
           2
         ]
-      }
+      },
+      "id": "regex-challenges",
+      "xp_tasks": [
+        {
+          "id": "contractions",
+          "label": "Keep contractions whole",
+          "xp": 25,
+          "subpage_id": "contractions"
+        },
+        {
+          "id": "numbers",
+          "label": "Extract decimal numbers",
+          "xp": 25,
+          "subpage_id": "numbers"
+        },
+        {
+          "id": "social",
+          "label": "Tokenize social text",
+          "xp": 25,
+          "subpage_id": "social"
+        }
+      ]
     },
     {
       "page_type": "static",
       "text": "",
       "path": "md/tokenization/regex.md",
-      "name": "Which pattern fits which text?"
+      "name": "Which pattern fits which text?",
+      "id": "regex-review"
     },
     {
       "page_type": "static",
       "text": "",
       "path": "md/tokenization/porter.md",
-      "name": "Porter's suffix rules"
+      "name": "Porter's suffix rules",
+      "id": "porter-intro"
     },
     {
       "page_type": "mixed",
@@ -81,7 +107,8 @@
         "pages": [
           0
         ]
-      }
+      },
+      "id": "porter-explore"
     },
     {
       "page_type": "mixed",
@@ -97,7 +124,40 @@
         "pages": [
           1
         ]
-      }
+      },
+      "id": "porter-predictions",
+      "xp_tasks": [
+        {
+          "id": "predict-caresses",
+          "label": "Predict the changes for caresses",
+          "xp": 10
+        },
+        {
+          "id": "predict-ponies",
+          "label": "Predict the changes for ponies",
+          "xp": 10
+        },
+        {
+          "id": "predict-running",
+          "label": "Predict the changes for running",
+          "xp": 10
+        },
+        {
+          "id": "predict-relational",
+          "label": "Predict the changes for relational",
+          "xp": 10
+        },
+        {
+          "id": "predict-hopping",
+          "label": "Predict the changes for hopping",
+          "xp": 10
+        },
+        {
+          "id": "predict-sky",
+          "label": "Predict the changes for sky",
+          "xp": 10
+        }
+      ]
     },
     {
       "page_type": "mixed",
@@ -113,7 +173,15 @@
         "pages": [
           2
         ]
-      }
+      },
+      "id": "porter-families",
+      "xp_tasks": [
+        {
+          "id": "group-families",
+          "label": "Group every word under its stem",
+          "xp": 25
+        }
+      ]
     },
     {
       "page_type": "mixed",
@@ -129,7 +197,8 @@
         "pages": [
           0
         ]
-      }
+      },
+      "id": "bpe-basics"
     },
     {
       "page_type": "mixed",
@@ -145,7 +214,30 @@
         "pages": [
           1
         ]
-      }
+      },
+      "id": "bpe-training",
+      "xp_tasks": [
+        {
+          "id": "round-1-count",
+          "label": "Count candidate pairs in round 1",
+          "xp": 15
+        },
+        {
+          "id": "round-1-merge",
+          "label": "Choose the merge in round 1",
+          "xp": 10
+        },
+        {
+          "id": "round-2-count",
+          "label": "Count candidate pairs in round 2",
+          "xp": 15
+        },
+        {
+          "id": "round-2-merge",
+          "label": "Choose the merge in round 2",
+          "xp": 10
+        }
+      ]
     },
     {
       "page_type": "mixed",
@@ -161,13 +253,22 @@
         "pages": [
           2
         ]
-      }
+      },
+      "id": "bpe-apply",
+      "xp_tasks": [
+        {
+          "id": "apply-rules",
+          "label": "Apply the learned BPE rules",
+          "xp": 30
+        }
+      ]
     },
     {
       "page_type": "static",
       "text": "",
       "path": "md/tokenization/debrief.md",
-      "name": "Three tools, three choices"
+      "name": "Three tools, three choices",
+      "id": "debrief"
     }
   ],
   "transitions": [

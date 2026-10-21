@@ -5,7 +5,8 @@
       "page_type": "static",
       "text": "",
       "path": "md/dtree/decision_tree_01.md",
-      "name": "What is a decision tree?"
+      "name": "What is a decision tree?",
+      "id": "intro"
     },
     {
       "page_type": "mixed",
@@ -24,7 +25,20 @@
           "name": "decision_tree_flowers"
         },
         "parameters": {}
-      }
+      },
+      "id": "sort-flowers",
+      "xp_tasks": [
+        {
+          "id": "root-sort",
+          "label": "Sort the root branches",
+          "xp": 15
+        },
+        {
+          "id": "child-sort",
+          "label": "Sort the child branches",
+          "xp": 15
+        }
+      ]
     },
     {
       "page_type": "mixed",
@@ -39,7 +53,15 @@
         "category": "traditional_ml",
         "path": "decision_tree",
         "parameters": {}
-      }
+      },
+      "id": "tree-parts",
+      "xp_tasks": [
+        {
+          "id": "match-parts",
+          "label": "Match all tree-part labels",
+          "xp": 20
+        }
+      ]
     },
     {
       "page_type": "mixed",
@@ -51,7 +73,10 @@
       "dynamic_page": {
         "page_type": "dynamic",
         "name": "Compare Iris Splits",
-        "subpages": ["Compare variables", "Compare thresholds"],
+        "subpages": [
+          "Compare variables",
+          "Compare thresholds"
+        ],
         "category": "traditional_ml",
         "path": "decision_tree",
         "dataset": {
@@ -60,8 +85,27 @@
           "test_size": 0.25,
           "random_state": 2025
         },
-        "parameters": {}
-      }
+        "parameters": {},
+        "subpage_ids": [
+          "variables",
+          "thresholds"
+        ]
+      },
+      "id": "compare-splits",
+      "xp_tasks": [
+        {
+          "id": "variables",
+          "label": "Compare variables correctly",
+          "xp": 20,
+          "subpage_id": "variables"
+        },
+        {
+          "id": "thresholds",
+          "label": "Compare thresholds correctly",
+          "xp": 20,
+          "subpage_id": "thresholds"
+        }
+      ]
     },
     {
       "page_type": "reference",
@@ -69,6 +113,14 @@
       "path": "traditional_ml/decision_tree.json",
       "pages": [
         0
+      ],
+      "id": "build-tree",
+      "xp_tasks": [
+        {
+          "id": "accuracy-target",
+          "label": "Build a tree meeting the accuracy target",
+          "xp": 50
+        }
       ]
     },
     {
@@ -84,7 +136,15 @@
         "category": "traditional_ml",
         "path": "decision_tree",
         "parameters": {}
-      }
+      },
+      "id": "training-sequence",
+      "xp_tasks": [
+        {
+          "id": "sequence",
+          "label": "Arrange the training sequence",
+          "xp": 25
+        }
+      ]
     },
     {
       "page_type": "mixed",
@@ -99,7 +159,8 @@
         "category": "traditional_ml",
         "path": "decision_tree",
         "parameters": {}
-      }
+      },
+      "id": "final-prediction"
     }
   ],
   "transitions": [

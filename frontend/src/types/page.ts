@@ -2,7 +2,11 @@ import type { ActiveDataset, DatasetReference } from "@/types/dataset";
 
 export type Parameters = Record<string, any>;
 
+export interface XpTask { id: string; label: string; xp: number; subpage_id?: string }
+
 interface BasePage {
+    id?: string;
+    xp_tasks?: XpTask[];
     name?: string;
     page_type: "static" | "dynamic" | "mixed" | "reference";
     dataset?: ActiveDataset | DatasetReference | null;
@@ -33,6 +37,7 @@ interface DynamicPage extends BasePage {
     page_type: "dynamic";
     parameters: Parameters;
     subpages?: string[];
+    subpage_ids?: string[];
     category?: string;
     path?: string;
 }
@@ -53,6 +58,8 @@ interface ReferencePage extends BasePage {
 export type PageUnion = StaticPage | DynamicPage | MixedPage | ReferencePage;
 
 export interface DynamicPageProps {
+    onTaskComplete?: (taskId: string) => void;
+    completedTasks?: string[];
     page: DynamicPage;
     narration?: StaticPageParameters;
     category: string;
@@ -64,6 +71,8 @@ export interface DynamicPageProps {
 }
 
 export interface IndexPageProps extends ActivityNarrationProps {
+    onTaskComplete?: (taskId: string) => void;
+    completedTasks?: string[];
     name: string;
     parameters: Parameters;
     subpageIndex?: number;

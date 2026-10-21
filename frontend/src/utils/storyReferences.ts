@@ -76,7 +76,8 @@ export function unrollStory(story: Story, catalog: StoryCatalog, activeStories: 
 
                 for (const index of referencePages) {
                     const referencePage = unrolledReferencedStory.pages[index];
-                    pages.push(referencePage);
+                    if (page.id && referencePages.length > 1 && (!referencePage?.id || page.xp_tasks)) throw new Error("Multi-page progress references need stable source page IDs and per-page rewards at the source");
+                    pages.push({ ...referencePage, id: page.id ? referencePages.length === 1 ? page.id : `${page.id}-${referencePage.id}` : referencePage.id, ...(page.xp_tasks ? { xp_tasks: page.xp_tasks } : {}) });
                 }
 
                 const pageOffset = pages.length - referencePages.length;
@@ -95,6 +96,9 @@ export function unrollStory(story: Story, catalog: StoryCatalog, activeStories: 
 
                 for (const index of referencePages) {
                     const referencePage = { ...unrolledReferenceVisualisation.pages[index] };
+                    if (page.id && referencePages.length > 1 && (!referencePage.id || page.xp_tasks)) throw new Error("Multi-page progress references need stable source page IDs and per-page rewards at the source");
+                    if (page.id) referencePage.id = referencePages.length === 1 ? page.id : `${page.id}-${referencePage.id}`;
+                    if (page.xp_tasks) referencePage.xp_tasks = page.xp_tasks;
                     if (referencePage.page_type === "dynamic") {
                         referencePage.category = visualisationCategory;
                         referencePage.path = visualisationName;

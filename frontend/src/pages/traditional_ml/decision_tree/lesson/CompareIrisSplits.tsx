@@ -59,13 +59,13 @@ function Branch({ label, stats, placeholder }: { label: string; stats?: NodeStat
     </div>;
 }
 
-type Props = Pick<IndexPageProps, "narration" | "subpageIndex" | "onSubpageReady" | "onComplete">;
+type Props = Pick<IndexPageProps, "narration" | "subpageIndex" | "onSubpageReady" | "onComplete" | "onTaskComplete" | "completedTasks">;
 
-export default function CompareIrisSplits({ narration, subpageIndex = 0, onSubpageReady, onComplete }: Props) {
+export default function CompareIrisSplits({ narration, subpageIndex = 0, onSubpageReady, onComplete, onTaskComplete, completedTasks = [] }: Props) {
     const compareVariables = subpageIndex === 0;
-    const [feedback, setFeedback] = useState("");
+    const [feedback, setFeedback] = useState(() => completedTasks.includes(compareVariables ? "variables" : "thresholds") ? "This comparison was completed previously. Use Replay to practice again." : "");
     const [selected, setSelected] = useState<number | null>(null);
-    const [finished, setFinished] = useState(false);
+    const [finished, setFinished] = useState(() => completedTasks.includes(compareVariables ? "variables" : "thresholds"));
     const splits = compareVariables ? variableSplits : thresholdSplits;
     const first = useSplitStats(splits[0].feature, splits[0].threshold);
     const second = useSplitStats(splits[1].feature, splits[1].threshold);
@@ -87,6 +87,7 @@ export default function CompareIrisSplits({ narration, subpageIndex = 0, onSubpa
                 : `Correct. Split ${index === 0 ? "A" : "B"} reduces impurity more. The next page is unlocked.`);
         if (!finished) {
             setFinished(true);
+            onTaskComplete?.(compareVariables ? "variables" : "thresholds");
             onSubpageReady?.();
             if (!compareVariables) onComplete();
         }

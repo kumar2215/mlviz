@@ -8,7 +8,7 @@ export default function IndexPage(props: IndexPageProps) {
 
     switch (name) {
         case "Decision Tree":
-            page = <DecisionTree />;
+            page = <DecisionTree {...props} />;
             break;
         case "Follow Questions":
         case "Name Tree Parts":

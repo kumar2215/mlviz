@@ -6,6 +6,8 @@ import { initializeApp, deleteApp } from "firebase/app";
 import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, deleteDoc, deleteField, doc, getDoc, getDocs, collection, getFirestore, serverTimestamp, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { createAccountService } from "../src/lib/accountService.ts";
+import { createProgressService } from "../src/lib/progressService.ts";
+import { emptyProgress } from "../src/lib/storyProgress.ts";
 
 const projectId = "demo-mlviz-auth";
 let env: RulesTestEnvironment;
@@ -67,6 +69,64 @@ test("create AND update enforce schema, size limits, required fields, ownership 
     }
 });
 
+function storyProgress() {
+    return { version: 1, milestones: ["visit:sort-flowers", "task:sort-flowers:root-sort"], checkpoint: { page: "sort-flowers", step: "", at: 1000, client: "integration-client" }, updatedAt: serverTimestamp() };
+}
+
+test("story progress is privately readable and queryable only by its owner", async () => {
+    await setDoc(userDoc("progress-owner"), profile());
+    const db = env.authenticatedContext("progress-owner").firestore();
+    const ref = doc(db, "users/progress-owner/storyProgress/decision_tree");
+    await assertSucceeds(setDoc(ref, storyProgress()));
+    await assertSucceeds(getDoc(ref));
+    await assertSucceeds(getDocs(collection(db, "users/progress-owner/storyProgress")));
+    await assertSucceeds(updateDoc(ref, { milestones: ["task:sort-flowers:root-sort", "task:sort-flowers:child-sort"], updatedAt: serverTimestamp() }));
+    for (const other of [env.unauthenticatedContext().firestore(), env.authenticatedContext("progress-attacker").firestore()]) {
+        const target = doc(other, "users/progress-owner/storyProgress/decision_tree");
+        await assertFails(getDoc(target));
+        await assertFails(setDoc(target, storyProgress()));
+        await assertFails(updateDoc(target, { milestones: [], updatedAt: serverTimestamp() }));
+        await assertFails(getDocs(collection(other, "users/progress-owner/storyProgress")));
+    }
+    await assertFails(deleteDoc(ref));
+    await assertFails(setDoc(doc(db, "users/progress-owner/storyProgress/unknown_story"), storyProgress()));
+    await assertFails(setDoc(doc(env.authenticatedContext("orphan").firestore(), "users/orphan/storyProgress/decision_tree"), storyProgress()));
+});
+
+test("progress create AND update reject malformed, oversized, forged and missing fields", async () => {
+    const invalid: Record<string, unknown>[] = [
+        { version: 2 }, { version: "1" }, { milestones: "complete" }, { milestones: [42] },
+        { milestones: ["task:sort-flowers:root-sort", "task:sort-flowers:root-sort"] },
+        { milestones: ["task:sort-flowers:made-up-task"] }, { milestones: ["x".repeat(10000)] },
+        { milestones: Array(513).fill("visit:intro") }, { xp: 999999 }, { uid: "victim" }, { role: "admin" },
+        { checkpoint: { page: "unknown", step: "", at: 1000, client: "client" } },
+        { checkpoint: { page: "sort-flowers", step: "unknown", at: 1000, client: "client" } },
+        { checkpoint: { page: "sort-flowers", step: "", at: -1, client: "client" } },
+        { checkpoint: { page: "sort-flowers", step: "", at: 1000, client: "x".repeat(81) } },
+        { checkpoint: { page: "sort-flowers", step: "", at: 1000, client: "client", extra: "hidden" } },
+        { checkpoint: { page: "sort-flowers", at: 1000, client: "client" } },
+        { updatedAt: Timestamp.fromMillis(0) },
+    ];
+    for (const [index, change] of invalid.entries()) {
+        const uid = `progress-validation-${index}`;
+        await setDoc(userDoc(uid), profile());
+        const ref = doc(env.authenticatedContext(uid).firestore(), "users", uid, "storyProgress", "decision_tree");
+        await assertFails(setDoc(ref, { ...storyProgress(), ...change }));
+        await assertSucceeds(setDoc(ref, storyProgress()));
+        await assertFails(updateDoc(ref, { updatedAt: serverTimestamp(), ...change }));
+    }
+    for (const field of ["version", "milestones", "checkpoint", "updatedAt"]) {
+        const uid = `progress-required-${field}`;
+        await setDoc(userDoc(uid), profile());
+        const ref = doc(env.authenticatedContext(uid).firestore(), "users", uid, "storyProgress", "decision_tree");
+        const missing: Record<string, unknown> = storyProgress();
+        delete missing[field];
+        await assertFails(setDoc(ref, missing));
+        await assertSucceeds(setDoc(ref, storyProgress()));
+        await assertFails(updateDoc(ref, { updatedAt: serverTimestamp(), [field]: deleteField() }));
+    }
+});
+
 test("real Auth + Firestore SDKs register, verify, sign in, persist one profile and sign out", async () => {
     const app = initializeApp({ projectId, apiKey: "fake-api-key", authDomain: `${projectId}.firebaseapp.com` }, "integration");
     const auth = getAuth(app);
@@ -81,6 +141,14 @@ test("real Auth + Firestore SDKs register, verify, sign in, persist one profile 
         assert.equal(user.displayName, "Test Learner");
         assert.equal(user.emailVerified, false);
         await service.syncProfile(user);
+        const progress = createProgressService(auth, db);
+        const first = { ...emptyProgress(), milestones: ["task:sort-flowers:root-sort"], checkpoint: { page: "sort-flowers", step: "", at: 1000, client: "device-a" } };
+        const second = { ...emptyProgress(), milestones: ["task:sort-flowers:child-sort"], checkpoint: { page: "sort-flowers", step: "", at: 2000, client: "device-b" } };
+        await Promise.all([progress.merge(user.uid, "decision_tree", first), progress.merge(user.uid, "decision_tree", second)]);
+        const savedProgress = (await getDoc(doc(db, "users", user.uid, "storyProgress", "decision_tree"))).data()!;
+        assert.deepEqual(savedProgress.milestones, ["task:sort-flowers:child-sort", "task:sort-flowers:root-sort"]);
+        assert.equal(savedProgress.checkpoint.client, "device-b");
+        await assert.rejects(progress.merge("another-account", "decision_tree", first), /Account changed/);
         const ref = doc(db, "users", user.uid);
         const original = (await getDoc(ref)).data()!;
         assert.equal(original.displayName, "Test Learner");

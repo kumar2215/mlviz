@@ -19,16 +19,17 @@ function HighlightedText({ text, preview }: { text: string; preview: RegexPrevie
     return <p className="whitespace-pre-wrap break-all font-mono text-sm leading-7">{parts}</p>;
 }
 
-export default function RegexEditor({ narration, data, goal, onComplete }: ActivityNarrationProps & { data: RegexState; goal?: RegexGoal; onComplete?: () => void }) {
+export default function RegexEditor({ narration, data, goal, onComplete, initiallyPassed = false }: ActivityNarrationProps & { data: RegexState; goal?: RegexGoal; onComplete?: () => void; initiallyPassed?: boolean }) {
     const { userMode } = useUserMode();
     const locked = userMode === "story";
     const saved = locked ? null : useTokenization.getState().regexDraft;
-    const [editor, setEditor] = useState({ text: goal?.text ?? saved?.text ?? data.text, pattern: goal ? data.options[0].pattern : saved?.pattern ?? data.options[0].pattern, flags: goal ? [] as RegexFlag[] : saved?.flags ?? [] });
+    const restoredPattern = initiallyPassed && goal ? data.options.find(option => option.id === (goal.id === "contractions" ? "words_and_punctuation" : goal.id))?.pattern : undefined;
+    const [editor, setEditor] = useState({ text: goal?.text ?? saved?.text ?? data.text, pattern: goal ? restoredPattern ?? data.options[0].pattern : saved?.pattern ?? data.options[0].pattern, flags: goal ? [] as RegexFlag[] : saved?.flags ?? [] });
     const [preview, setPreview] = useState<RegexPreview | null>(null);
     const [previewPending, setPreviewPending] = useState(true);
     const [checking, setChecking] = useState(false);
     const [feedback, setFeedback] = useState("Updating matches…");
-    const [passed, setPassed] = useState(false);
+    const [passed, setPassed] = useState(initiallyPassed);
     const setDraft = useTokenization(state => state.setRegexDraft);
     const preset = data.options.find(option => option.pattern === editor.pattern)?.id ?? "custom";
 
