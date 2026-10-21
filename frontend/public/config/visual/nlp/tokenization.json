@@ -3,6 +3,11 @@
   "pages": [
     {
       "page_type": "dynamic",
+      "name": "BPE Basics",
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
       "name": "BPE Lab",
       "dataset": {
         "type": "predefined_bpe",
@@ -24,6 +29,14 @@
     {
       "from": 0,
       "to": 1,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Open the BPE Lab"
+      }
+    },
+    {
+      "from": 1,
+      "to": 2,
       "condition": {
         "condition_type": "Completed",
         "name": "Apply your learned rules"

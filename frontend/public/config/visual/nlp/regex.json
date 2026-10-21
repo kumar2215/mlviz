@@ -3,6 +3,11 @@
   "pages": [
     {
       "page_type": "dynamic",
+      "name": "Regex Basics",
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
       "name": "Regex Playground",
       "dataset": {
         "type": "predefined_regex",
@@ -29,6 +34,14 @@
     {
       "from": 0,
       "to": 1,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Open the playground"
+      }
+    },
+    {
+      "from": 1,
+      "to": 2,
       "condition": {
         "condition_type": "Bypass",
         "name": "Try the objectives"

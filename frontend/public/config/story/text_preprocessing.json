@@ -12,7 +12,7 @@
       "static_page": {
         "page_type": "static",
         "text": "",
-        "path": "md/tokenization/regex-try.md"
+        "path": "md/tokenization/regex-basics.md"
       },
       "dynamic_page": {
         "page_type": "reference",
@@ -28,7 +28,7 @@
       "static_page": {
         "page_type": "static",
         "text": "",
-        "path": "md/tokenization/regex-challenges.md"
+        "path": "md/tokenization/regex-try.md"
       },
       "dynamic_page": {
         "page_type": "reference",
@@ -36,6 +36,22 @@
         "path": "nlp/regex.json",
         "pages": [
           1
+        ]
+      }
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/tokenization/regex-challenges.md"
+      },
+      "dynamic_page": {
+        "page_type": "reference",
+        "reference_type": "visualisation",
+        "path": "nlp/regex.json",
+        "pages": [
+          2
         ]
       }
     },
@@ -104,7 +120,7 @@
       "static_page": {
         "page_type": "static",
         "text": "",
-        "path": "md/bpe/training.md"
+        "path": "md/bpe/basics.md"
       },
       "dynamic_page": {
         "page_type": "reference",
@@ -120,7 +136,7 @@
       "static_page": {
         "page_type": "static",
         "text": "",
-        "path": "md/bpe/merge.md"
+        "path": "md/bpe/training.md"
       },
       "dynamic_page": {
         "page_type": "reference",
@@ -128,6 +144,22 @@
         "path": "nlp/tokenization.json",
         "pages": [
           1
+        ]
+      }
+    },
+    {
+      "page_type": "mixed",
+      "static_page": {
+        "page_type": "static",
+        "text": "",
+        "path": "md/bpe/merge.md"
+      },
+      "dynamic_page": {
+        "page_type": "reference",
+        "reference_type": "visualisation",
+        "path": "nlp/tokenization.json",
+        "pages": [
+          2
         ]
       }
     },
@@ -144,23 +176,15 @@
       "to": 1,
       "condition": {
         "condition_type": "Bypass",
-        "name": "Explore regex"
-      }
-    },
-    {
-      "from": 2,
-      "to": 3,
-      "condition": {
-        "condition_type": "Completed",
-        "name": "Review the patterns"
+        "name": "Learn regex basics"
       }
     },
     {
       "from": 3,
       "to": 4,
       "condition": {
-        "condition_type": "Bypass",
-        "name": "Learn stemming rules"
+        "condition_type": "Completed",
+        "name": "Review the patterns"
       }
     },
     {
@@ -168,20 +192,28 @@
       "to": 5,
       "condition": {
         "condition_type": "Bypass",
+        "name": "Learn stemming rules"
+      }
+    },
+    {
+      "from": 5,
+      "to": 6,
+      "condition": {
+        "condition_type": "Bypass",
         "name": "Try the rules"
       }
     },
     {
-      "from": 7,
-      "to": 8,
+      "from": 8,
+      "to": 9,
       "condition": {
         "condition_type": "Completed",
-        "name": "Learn BPE merges"
+        "name": "Learn BPE basics"
       }
     },
     {
-      "from": 9,
-      "to": 10,
+      "from": 11,
+      "to": 12,
       "condition": {
         "condition_type": "Completed",
         "name": "Compare the methods"

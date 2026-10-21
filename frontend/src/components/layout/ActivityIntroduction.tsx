@@ -1,12 +1,13 @@
 import type { ReactNode } from "react";
 import MarkdownWrapper from "@/components/markdown/MarkdownWrapper";
+import { PageLoadingLabel } from "./PageLoading";
 import type { ActivityNarrationProps } from "@/types/page";
 
 export default function ActivityIntroduction({ narration, children, className = "" }: ActivityNarrationProps & { children: ReactNode; className?: string }) {
     if (!narration) return <>{children}</>;
 
     if (narration.loading) {
-        return <p role="status" className={`shrink-0 text-sm text-slate-600 ${className}`}>Loading narration…</p>;
+        return <p role="status" className={`shrink-0 text-sm text-slate-600 ${className}`}><PageLoadingLabel>Loading narration…</PageLoadingLabel></p>;
     }
 
     if (narration.error) {

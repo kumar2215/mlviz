@@ -127,5 +127,5 @@ test("every bundled mixed story page renders its Markdown once in the shared int
             checked++;
         }
     }
-    assert.equal(checked, 12);
+    assert.equal(checked, 14);
 });

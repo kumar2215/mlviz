@@ -115,7 +115,7 @@ export default function App() {
         return (
             <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">
                 <div className="animate-pulse text-2xl font-mono text-sky-600">
-                    {`Loading ${itemName}...`}
+                    {pathname.startsWith("/story/") ? "Loading page…" : `Loading ${itemName}...`}
                 </div>
             </div>
         );

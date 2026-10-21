@@ -1,3 +1,3 @@
-# Learn BPE by merging
+# Count first, then choose a merge
 
-Edit the corpus: one **word frequency** per line. Select the most frequent adjacent pair and merge it throughout the corpus; frequencies weight the counts. Recount after every merge. For ties, choose the alphabetically first pair. `</w>` marks a word boundary.
+Each merge round has two parts. **First, count** the candidate pairs across the corpus, multiplying each occurrence by its word's frequency. **Then, choose** the most frequent pair using your verified counts; break ties alphabetically. Repeat with the updated tokens after each merge to complete the exercise.

@@ -13,6 +13,7 @@ import {
 import type { KMeansVisualizationData } from "@/types/traditional_ml/kmeans";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
+import { PageLoadingLabel } from "@/components/layout/PageLoading";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useKMeans } from "@/store/traditional_ml/useKMeans";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
@@ -327,7 +328,7 @@ export default function KMeansStepVisualisation() {
                 {isAutoLoading ? (
                     <>
                         <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-                        <p className="text-slate-500 text-sm">Loading visualization...</p>
+                        <p className="text-slate-500 text-sm"><PageLoadingLabel>Loading visualization...</PageLoadingLabel></p>
                     </>
                 ) : (
                     <>

@@ -9,6 +9,7 @@ import { renderKNNTraining } from "../KNNRenderer";
 import type { KNNVisualizationData } from "../../../../types/traditional_ml/knn";
 import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
+import { PageLoadingLabel } from "@/components/layout/PageLoading";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useKNN } from "@/store/traditional_ml/useKNN";
 import * as d3 from "d3";
@@ -121,7 +122,7 @@ export default function KNNTrainVisualisation() {
             <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-muted-foreground">Loading visualization...</p>
+                    <p className="text-muted-foreground"><PageLoadingLabel>Loading visualization...</PageLoadingLabel></p>
                 </div>
             </div>
         );

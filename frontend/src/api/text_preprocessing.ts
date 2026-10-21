@@ -11,15 +11,15 @@ type Check = components["schemas"]["CheckResponse"];
 export type RegexGoal = components["schemas"]["RegexGoal"];
 export type RegexFlag = NonNullable<components["schemas"]["RegexChoiceRequest"]["flags"]>[number];
 
-async function post<T>(path: string, body: object): Promise<T> {
-    return postJson<T>(`${API_BASE_URL}/api/tokenization/${path}`, body);
+async function post<T>(path: string, body: object, signal?: AbortSignal): Promise<T> {
+    return postJson<T>(`${API_BASE_URL}/api/tokenization/${path}`, body, signal);
 }
 
 export const loadRegexState = (dataset: RegexDataset) =>
     post<RegexState>("regex/state", { dataset });
 
-export const previewRegex = (dataset: RegexDataset, pattern: string, flags: RegexFlag[]) =>
-    post<RegexPreview>("regex/preview", { dataset, pattern, flags });
+export const previewRegex = (dataset: RegexDataset, pattern: string, flags: RegexFlag[], signal?: AbortSignal) =>
+    post<RegexPreview>("regex/preview", { dataset, pattern, flags }, signal);
 
 export const checkRegex = (dataset: RegexDataset, pattern: string, flags: RegexFlag[], goal_id: string) =>
     post<Check>("regex/check", { dataset, pattern, flags, goal_id });

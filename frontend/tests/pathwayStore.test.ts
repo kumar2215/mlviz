@@ -184,8 +184,12 @@ test("the expanded NLP story uses the local source page for each exercise's comp
     const visualisations = Object.fromEntries(["regex", "porter", "tokenization"].map(name => [name, visualisation(name)]));
     const expanded = unrollStory(story, { stories: {}, visualisations });
     const { store, source } = session(expanded);
-    const completionPages = new Set([2, 5, 7, 8, 9]);
-    assert.equal(expanded.pages.length, 11);
+    const completionPages = new Set([3, 6, 8, 10, 11]);
+    assert.equal(expanded.pages.length, 13);
+    assert.equal(selectPathwayNode(store.getState(), 1).title, "Regex Basics");
+    assert.equal(selectPathwayNode(store.getState(), 2).title, "Regex Playground");
+    assert.equal(selectPathwayNode(store.getState(), 9).title, "BPE Basics");
+    assert.equal(selectPathwayNode(store.getState(), 10).title, "BPE Lab");
     for (let pageId = 0; pageId < expanded.pages.length - 1; pageId++) {
         assert.equal(store.getState().currentPageId, pageId);
         const page = expanded.pages[pageId];
@@ -208,7 +212,7 @@ test("repeated mixed references to the same exercise have independent completion
     const exercise: Story["pages"][number] = {
         page_type: "mixed",
         static_page: { page_type: "static", text: "Practice", path: "" },
-        dynamic_page: { page_type: "reference", reference_type: "visualisation", path: "nlp/tokenization.json", pages: [0] },
+        dynamic_page: { page_type: "reference", reference_type: "visualisation", path: "nlp/tokenization.json", pages: [1] },
     };
     const expanded = unrollStory({
         name: "repeat", display_name: "Repeated practice",
@@ -220,10 +224,10 @@ test("repeated mixed references to the same exercise have independent completion
     }, { stories: {}, visualisations: { tokenization: bpe } });
     const { store, source } = session(expanded);
     const firstComplete = completionCallback(store);
-    assert.equal(selectPathwayNode(store.getState(), 0).title, bpe.pages[0].name);
+    assert.equal(selectPathwayNode(store.getState(), 0).title, bpe.pages[1].name);
     firstComplete();
     store.getState().navigatePage(1);
-    assert.equal(selectPathwayNode(store.getState(), 1).title, bpe.pages[0].name);
+    assert.equal(selectPathwayNode(store.getState(), 1).title, bpe.pages[1].name);
     firstComplete();
     assert.equal(selectPathwayNode(store.getState(), 2).state, "locked");
     completionCallback(store)();
@@ -237,14 +241,14 @@ test("completion conditions follow remapped transitions inside a multi-page refe
         name: "offset", display_name: "Offset practice",
         pages: [
             { page_type: "static", text: "Intro", path: "" },
-            { page_type: "reference", reference_type: "visualisation", path: "nlp/tokenization.json", pages: [0, 1] },
+            { page_type: "reference", reference_type: "visualisation", path: "nlp/tokenization.json", pages: [1, 2] },
         ],
         transitions: [{ from: 0, to: 1, condition: { condition_type: "Bypass" } }],
     }, { stories: {}, visualisations: { tokenization: bpe } });
     assert.ok(expanded.transitions.some(edge => edge.from === 1 && edge.to === 2 && edge.condition.condition_type === "Completed"));
     const { store } = session(expanded);
     store.getState().navigatePage(1);
-    assert.equal(selectPathwayNode(store.getState(), 1).title, bpe.pages[0].name);
+    assert.equal(selectPathwayNode(store.getState(), 1).title, bpe.pages[1].name);
     assert.equal(selectPathwayNode(store.getState(), 2).state, "locked");
     completionCallback(store)();
     assert.equal(selectPathwayNode(store.getState(), 2).state, "available");

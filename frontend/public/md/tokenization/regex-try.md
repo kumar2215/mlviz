@@ -1,3 +1,3 @@
 # Explore regex
 
-Regular expressions describe character patterns. Change the text, select a preset or edit the pattern, then click **Test pattern**. Compare the highlighted matches with the tokens produced. Try different ways of handling words, punctuation, numbers, and contractions.
+Regular expressions describe character patterns. Change the text, select a preset, edit the pattern, or toggle a flag: the highlighted matches and tokens update automatically after a short pause. Try different ways of handling words, punctuation, numbers, and contractions.
