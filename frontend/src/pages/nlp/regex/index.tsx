@@ -5,10 +5,12 @@ import type { IndexPageProps } from "@/types/page";
 import RegexEditor from "./RegexEditor";
 import RegexIntroduction from "./RegexIntroduction";
 import PageLoading from "@/components/layout/PageLoading";
+import useUserMode from "@/hooks/useUserMode";
 
 const storyPresetIds = new Set(["word", "whitespace", "words_and_punctuation", "numbers", "social"]);
 
 export default function IndexPage({ name, narration, subpageIndex = 0, replayKey = 0, onSubpageReady, onComplete }: IndexPageProps) {
+    const { userMode } = useUserMode();
     const dataset = useDataset(state => state.activeDataset);
     const [data, setData] = useState<RegexState | null>(null);
     const [error, setError] = useState("");
@@ -22,7 +24,7 @@ export default function IndexPage({ name, narration, subpageIndex = 0, replayKey
     if (name === "Regex Basics") return <RegexIntroduction key={replayKey} narration={narration} />;
     if (error) return <div role="alert" className="p-4">{error}</div>;
     if (!data) return <PageLoading label="Loading regex examples…" />;
-    const editorData = narration ? { ...data, options: data.options.filter(option => storyPresetIds.has(option.id)) } : data;
+    const editorData = userMode === "story" ? { ...data, options: data.options.filter(option => storyPresetIds.has(option.id)) } : data;
     switch (name) {
         case "Regex Playground": return <RegexEditor key={`play-${replayKey}`} narration={narration} data={editorData} />;
         case "Regex Challenges": {

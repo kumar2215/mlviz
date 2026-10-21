@@ -10,7 +10,7 @@
         "dev:host": "vite --host",
         "build": "tsc -b --noEmit && vite build",
         "lint": "eslint .",
-        "test": "node --experimental-strip-types --test tests/pathway.test.ts tests/pathwayStore.test.ts tests/catalog.test.ts tests/activityIntroduction.test.ts tests/bpeStoryProgress.test.ts",
+        "test": "node --experimental-strip-types --test tests/pathway.test.ts tests/pathwayStore.test.ts tests/catalog.test.ts tests/activityIntroduction.test.ts tests/bpeStoryProgress.test.ts tests/storyInputs.test.ts",
         "preview": "vite preview",
         "generate:openapi": "cd ../backend && source venv/bin/activate && python3 generate_openapi.py",
         "generate:ts": "openapi-typescript ../backend/openapi.json -o src/types/api.ts --default-non-nullable --path-params-as-types",

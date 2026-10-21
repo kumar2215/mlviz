@@ -4,7 +4,6 @@ import PageLoading from "@/components/layout/PageLoading";
 import { Button } from "@/components/ui/button";
 import { checkBpeCounts, checkBpeMerge, loadBpeState, type BpePair, type BpeState } from "@/api/bpe";
 import { useDataset } from "@/store/useDataset";
-import { useTokenization } from "@/store/nlp/useTextPreprocessing";
 import type { BpeDataset } from "@/types/dataset";
 import type { ActivityNarrationProps } from "@/types/page";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
@@ -15,7 +14,6 @@ const countPrompt = "Count each candidate pair across the corpus, including the 
 
 export default function BpeStoryLab({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
     const activeDataset = useDataset(state => state.activeDataset);
-    const saveSource = useTokenization(state => state.setBpeSource);
     const [source, setSource] = useState<BpeDataset | null>(null);
     const [data, setData] = useState<BpeState | null>(null);
     const [progress, setProgress] = useState(initialStoryProgress);
@@ -75,7 +73,7 @@ export default function BpeStoryLab({ narration, onComplete }: ActivityNarration
             if (!result.correct) { setFeedback("That pair is not the next merge. Compare your verified counts; for a tie, choose the alphabetically first pair."); return; }
             setDrafts({}); setSelected(null);
             setFeedback(next.stage === "complete" ? "Training complete: you counted the pairs and chose the correct merge in every round." : "Correct merge applied throughout the corpus. The tokens have changed; count the new candidate pairs before choosing again.");
-            if (next.stage === "complete") { saveSource(source); onComplete(); }
+            if (next.stage === "complete") onComplete();
         } catch (error) {
             if (request === attempt.current) setFeedback(error instanceof Error ? error.message : "Could not check the merge.");
         } finally {

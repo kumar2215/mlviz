@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { checkRegex, previewRegex, type RegexFlag, type RegexGoal, type RegexPreview, type RegexState } from "@/api/text_preprocessing";
 import { useTokenization } from "@/store/nlp/useTextPreprocessing";
 import { actionClass, LabFrame, Status } from "../shared/LabFrame";
+import useUserMode from "@/hooks/useUserMode";
 
 function HighlightedText({ text, preview }: { text: string; preview: RegexPreview }) {
     const parts: ReactNode[] = [];
@@ -19,7 +20,9 @@ function HighlightedText({ text, preview }: { text: string; preview: RegexPrevie
 }
 
 export default function RegexEditor({ narration, data, goal, onComplete }: ActivityNarrationProps & { data: RegexState; goal?: RegexGoal; onComplete?: () => void }) {
-    const saved = useTokenization.getState().regexDraft;
+    const { userMode } = useUserMode();
+    const locked = userMode === "story";
+    const saved = locked ? null : useTokenization.getState().regexDraft;
     const [editor, setEditor] = useState({ text: goal?.text ?? saved?.text ?? data.text, pattern: goal ? data.options[0].pattern : saved?.pattern ?? data.options[0].pattern, flags: goal ? [] as RegexFlag[] : saved?.flags ?? [] });
     const [preview, setPreview] = useState<RegexPreview | null>(null);
     const [previewPending, setPreviewPending] = useState(true);
@@ -30,10 +33,11 @@ export default function RegexEditor({ narration, data, goal, onComplete }: Activ
     const preset = data.options.find(option => option.pattern === editor.pattern)?.id ?? "custom";
 
     const edit = (update: Partial<typeof editor>) => {
+        if (locked && update.text !== undefined) return;
         const next = { ...editor, ...update };
         setEditor(next); setPreview(null); setPassed(false); setPreviewPending(true);
         setFeedback("Updating matches…");
-        if (!goal) setDraft(next);
+        if (!locked && !goal) setDraft(next);
     };
     useEffect(() => {
         if (!editor.text || !editor.pattern) {
@@ -75,7 +79,7 @@ export default function RegexEditor({ narration, data, goal, onComplete }: Activ
         </section>}
         <div className="grid min-h-0 flex-1 grid-cols-[0.9fr_1.1fr] gap-3">
             <section className="flex min-h-0 flex-col gap-3 rounded-xl bg-cyan-50 p-3">
-                <label className="text-sm font-medium">Text<textarea aria-label="Regex text" rows={5} maxLength={2000} value={editor.text} disabled={checking} onChange={event => edit({ text: event.target.value })} className="mt-1 w-full resize-none rounded-lg border border-cyan-200 bg-white p-2 font-mono text-sm" /></label>
+                <label className="text-sm font-medium">Text<textarea aria-label="Regex text" rows={5} maxLength={2000} value={editor.text} readOnly={locked} disabled={checking} onChange={event => edit({ text: event.target.value })} className="mt-1 w-full resize-none rounded-lg border border-cyan-200 bg-white p-2 font-mono text-sm" />{locked && <span className="text-xs font-normal text-slate-600">This text is fixed for this story. Try your own in visualisation mode.</span>}</label>
                 <label className="text-sm font-medium">Pattern preset<select aria-label="Pattern preset" value={preset} disabled={checking} onChange={event => edit({ pattern: data.options.find(option => option.id === event.target.value)?.pattern ?? "" })} className="mt-1 w-full rounded-lg border border-cyan-200 bg-white p-2 text-sm">{data.options.map(option => <option key={option.id} value={option.id}>{option.label}</option>)}<option value="custom">Custom pattern</option></select></label>
                 <label className="text-sm font-medium">Editable pattern<input aria-label="Regex pattern" maxLength={256} value={editor.pattern} disabled={checking} onChange={event => edit({ pattern: event.target.value })} className="mt-1 w-full rounded-lg border border-cyan-200 bg-white p-2 font-mono text-sm" /></label>
                 <div className="flex flex-wrap gap-2 text-xs">{(["IGNORECASE", "MULTILINE", "DOTALL"] as const).map(flag => <label key={flag} className="flex items-center gap-1"><input type="checkbox" checked={editor.flags.includes(flag)} disabled={checking} onChange={event => edit({ flags: event.target.checked ? [...editor.flags, flag] : editor.flags.filter(item => item !== flag) })} />{flag}</label>)}</div>

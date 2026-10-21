@@ -8,8 +8,11 @@ import { useTokenization } from "@/store/nlp/useTextPreprocessing";
 import type { CustomBpeDataset } from "@/types/dataset";
 import { actionClass, LabFrame, optionClass, Status } from "../../shared/LabFrame";
 import WordsEditor from "../../shared/WordsEditor";
+import useUserMode from "@/hooks/useUserMode";
 
 export default function BpeApply({ narration, onComplete }: ActivityNarrationProps & { onComplete: () => void }) {
+    const { userMode } = useUserMode();
+    const locked = userMode === "story";
     const activeDataset = useDataset(state => state.activeDataset);
     const [source, setSource] = useState<CustomBpeDataset | null>(null);
     const [model, setModel] = useState<BpeState | null>(null);
@@ -23,7 +26,7 @@ export default function BpeApply({ narration, onComplete }: ActivityNarrationPro
     useEffect(() => {
         if (activeDataset?.type !== "predefined_bpe" && activeDataset?.type !== "custom_bpe") return;
         let active = true;
-        const dataset = useTokenization.getState().bpeSource ?? activeDataset;
+        const dataset = locked ? activeDataset : useTokenization.getState().bpeSource ?? activeDataset;
         setPending(true);
         loadBpeState(dataset).then(async result => {
             const words = result.test_words.length ? result.test_words : result.initial.slice(0, 3).map(item => item.word);
@@ -32,9 +35,9 @@ export default function BpeApply({ narration, onComplete }: ActivityNarrationPro
             if (active) { setSource(custom); setModel(result); setApplication(next); setDraft(words.join(" ")); setSelected(null); }
         }).catch(reason => { if (active) setFeedback(reason instanceof Error ? reason.message : "Could not load learned rules."); }).finally(() => { if (active) setPending(false); });
         return () => { active = false; };
-    }, [activeDataset]);
+    }, [activeDataset, locked]);
     const useWords = async () => {
-        if (!source) return;
+        if (locked || !source) return;
         const candidate = { ...source, test_words: draft.trim().split(/\s+/).filter(Boolean) };
         setPending(true);
         try {
