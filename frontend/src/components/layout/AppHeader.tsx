@@ -1,14 +1,20 @@
-import { BookOpen, FlaskConical, LogOut, Zap } from "lucide-react";
+import { BookOpen, FlaskConical, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { usePreviewSession } from "@/store/usePreviewSession";
+import { useAuthSession } from "@/store/useAuthSession";
 
 export default function AppHeader() {
     const { pathname } = useLocation();
     const storyMode = pathname === "/stories" || pathname.startsWith("/story/");
-    const signedIn = usePreviewSession(state => state.signedIn);
-    const openDialog = usePreviewSession(state => state.openDialog);
-    const signOut = usePreviewSession(state => state.signOut);
+    const user = useAuthSession(state => state.user);
+    const status = useAuthSession(state => state.status);
+    const pending = useAuthSession(state => state.pending);
+    const profileStatus = useAuthSession(state => state.profileStatus);
+    const error = useAuthSession(state => state.error);
+    const openDialog = useAuthSession(state => state.openDialog);
+    const signOut = useAuthSession(state => state.signOut);
+    const name = user?.displayName || user?.email || "Learner";
+    const initials = name.split(/\s+/).map(part => part[0]).slice(0, 2).join("").toUpperCase();
 
     return (
         <header className="relative z-10 flex shrink-0 flex-wrap items-center gap-x-6 gap-y-3 border-b border-blue-100 bg-white/95 px-5 py-3 lg:px-8">
@@ -27,12 +33,15 @@ export default function AppHeader() {
                 ))}
             </nav>
             <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-                {signedIn ? (
+                {status === "loading" ? <span role="status" className="text-sm text-slate-500">Loading account…</span> : user ? (
                     <>
-                        <span className="flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-sm font-bold text-blue-800"><Zap className="size-4 fill-sky-200 text-sky-600" />1,250 XP</span>
-                        <span aria-label="Demo Learner avatar" className="flex size-9 items-center justify-center rounded-full bg-blue-700 text-xs font-bold text-white">DL</span>
-                        <div className="text-sm leading-tight"><span className="block font-semibold text-slate-800">Demo Learner</span><span className="text-xs text-slate-500">Preview account</span></div>
-                        <Button variant="ghost" size="sm" onClick={signOut}><LogOut className="size-4" /><span>Sign out</span></Button>
+                        <Button variant="ghost" disabled={pending} onClick={() => openDialog("account")} aria-label={`Account settings for ${name}`}>
+                            <span aria-hidden="true" className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-700 text-xs font-bold text-white">{initials}</span>
+                            <span className="max-w-48 truncate text-sm">{name}</span>
+                            {(!user.emailVerified || profileStatus === "error") && <span className="text-xs text-amber-700">Check account</span>}
+                        </Button>
+                        <Button variant="ghost" size="sm" disabled={pending} onClick={() => void signOut()}><LogOut className="size-4" /><span>Sign out</span></Button>
+                        {error && <span role="alert" className="max-w-xs text-xs text-red-700">{error}</span>}
                     </>
                 ) : (
                     <>

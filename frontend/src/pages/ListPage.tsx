@@ -2,7 +2,7 @@ import { ArrowRight, BookOpen, BrainCircuit, ChevronLeft, FlaskConical, MessageS
 import { Link, useLocation } from "react-router-dom";
 import AppHeader from "@/components/layout/AppHeader";
 import { useConfig } from "@/store/useConfig";
-import { usePreviewSession } from "@/store/usePreviewSession";
+import { useAuthSession } from "@/store/useAuthSession";
 
 export type ListItem = {
     display_name: string;
@@ -15,7 +15,7 @@ export type ListItem = {
 export default function ListPage({ listItems }: { listItems: ListItem[] }) {
     const { pathname } = useLocation();
     const categories = useConfig(state => state.config?.categories);
-    const signedIn = usePreviewSession(state => state.signedIn);
+    const signedIn = useAuthSession(state => state.user !== null);
     const storyMode = pathname === "/stories";
     const category = categories?.find(entry => pathname === `/category/${entry.config_path}`);
     const title = storyMode ? "Every discovery starts with a story." : category ? category.name : "Make machine learning click.";
@@ -31,7 +31,7 @@ export default function ListPage({ listItems }: { listItems: ListItem[] }) {
                         <h1 className="!text-4xl font-bold leading-tight tracking-tight text-slate-900 lg:!text-5xl">{title}</h1>
                         <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">{storyMode ? "Follow a story, try an idea, and discover how the pieces fit together. Choose your next journey below." : category ? category.description : "Explore interactive experiments at your own pace, or switch to Stories for a guided journey through the ideas."}</p>
                     </div>
-                    {storyMode && !signedIn && <div className="mb-6 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900"><span><strong>Exploring as a guest</strong> · Account and progress-tracking preview</span><span className="text-xs text-blue-700">Device saving and account syncing are coming later.</span></div>}
+                    {storyMode && !signedIn && <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900"><strong>Exploring as a guest</strong> · All stories are available. Story progress and XP are not saved to an account yet.</div>}
                     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                         {listItems.map(item => {
                             const Icon = storyMode ? BookOpen : item.path.includes("neural_networks") ? BrainCircuit : item.path.includes("nlp") ? MessageSquareText : item.path.startsWith("/category/") ? Network : FlaskConical;

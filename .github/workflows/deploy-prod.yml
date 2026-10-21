@@ -152,8 +152,14 @@ jobs:
                   VITE_CONFIG_FILE: config
                   VITE_API_BASE_URL: ${{ needs.deploy-backend.outputs.backend-url }}
                   VITE_BASE_PATH: ${{ steps.paths.outputs.vite_base_path }}
+                  VITE_FIREBASE_API_KEY: ${{ vars.FIREBASE_PROD_API_KEY }}
+                  VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.FIREBASE_PROD_AUTH_DOMAIN }}
+                  VITE_FIREBASE_PROJECT_ID: ${{ vars.FIREBASE_PROD_PROJECT_ID }}
+                  VITE_FIREBASE_APP_ID: ${{ vars.FIREBASE_PROD_APP_ID }}
+                  VITE_FIREBASE_DATABASE_ID: ${{ vars.FIREBASE_PROD_DATABASE_ID }}
               run: |
                   echo "Building with backend URL: $VITE_API_BASE_URL"
+                  node scripts/check-firebase-config.mjs
                   npm run build
 
             # ── Documentation ─────────────────────────────────────────────

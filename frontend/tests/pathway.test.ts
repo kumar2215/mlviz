@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes } from "../src/components/navigation/pathwayModel.ts";
 import { displayCondition, isConditionMet } from "../src/utils/conditions.ts";
-import { usePreviewSession } from "../src/store/usePreviewSession.ts";
 import { createColorScale, createContinuousColorScale, type PaletteName, type ContinuousSchemeName } from "../src/utils/colorUtils.ts";
 import { hsl } from "d3";
 import type { PageUnion, Parameters } from "../src/types/page.ts";
@@ -168,20 +167,6 @@ test("every completed page arc stays accessible and replay stays available while
         assert.strictEqual(review?.completed, completed);
     }
     assert.equal(subpageControls(3, { index: 0, completed: [] }, false).canReplay, false);
-});
-
-test("the story prompt appears once per app session and mock sign-in never creates persistent account data", () => {
-    usePreviewSession.setState(usePreviewSession.getInitialState());
-    usePreviewSession.getState().enterStories();
-    assert.equal(usePreviewSession.getState().dialog, "story-prompt");
-    usePreviewSession.getState().openDialog(null);
-    usePreviewSession.getState().enterStories();
-    assert.equal(usePreviewSession.getState().dialog, null);
-    usePreviewSession.getState().previewSignIn();
-    assert.equal(usePreviewSession.getState().signedIn, true);
-    usePreviewSession.getState().signOut();
-    assert.equal(usePreviewSession.getState().signedIn, false);
-    assert.deepEqual(Object.keys(usePreviewSession.getState()).sort(), Object.keys(usePreviewSession.getInitialState()).sort());
 });
 
 test("all categorical palettes and legacy continuous-scheme names render without purple hues", () => {
