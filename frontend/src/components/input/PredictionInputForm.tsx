@@ -83,7 +83,7 @@ const PredictionInputForm: React.FC<PredictionInputFormProps> = ({
             <div>
                 <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 font-medium rounded-md shadow-sm transition duration-100 hover:shadow-xl my-2"
+                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-100 text-gray-700 font-medium rounded-md shadow-sm transition duration-100 hover:shadow-xl my-2"
                 >
                     Predict
                 </button>

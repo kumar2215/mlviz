@@ -1,5 +1,46 @@
 {
-    "display_name": "Tokenization",
-    "pages": [],
-    "transitions": []
+  "display_name": "BPE Tokenization",
+  "pages": [
+    {
+      "page_type": "dynamic",
+      "name": "BPE Basics",
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
+      "name": "BPE Lab",
+      "dataset": {
+        "type": "predefined_bpe",
+        "name": "practice"
+      },
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
+      "name": "BPE Apply",
+      "dataset": {
+        "type": "predefined_bpe",
+        "name": "practice"
+      },
+      "parameters": {}
+    }
+  ],
+  "transitions": [
+    {
+      "from": 0,
+      "to": 1,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Open the BPE Lab"
+      }
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "condition": {
+        "condition_type": "Completed",
+        "name": "Apply your learned rules"
+      }
+    }
+  ]
 }

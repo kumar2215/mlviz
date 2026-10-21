@@ -5,7 +5,7 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
     let page = null;
 
     switch (name) {
-        case "KMeansStep":
+        case "K-Means Step":
             page = <KMeansStep parameters={parameters} />;
             break;
         default:
@@ -14,7 +14,7 @@ export default function IndexPage({ name, parameters }: IndexPageProps) {
 
     if (!page) {
         return (
-            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-fuchsia-50">
+            <div className="h-screen w-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-sky-50">
                 {`Unknown page: ${name}`}
             </div>
         );

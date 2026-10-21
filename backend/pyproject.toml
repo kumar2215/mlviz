@@ -3,7 +3,7 @@ name = "mlviz-backend"
 version = "1.0.0"
 description = "MLviz FastAPI Backend - ML model training and visualization"
 authors = [
-    { name = "zaidan sani", email = "mzaidanbs@gmail.com" }
+    { name = "kumar", email = "kumar.kg279@gmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = [

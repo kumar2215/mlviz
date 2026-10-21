@@ -1,5 +1,65 @@
 # React + TypeScript + Vite
 
+## Account and pathway previews
+
+Static, dynamic, and mixed learning pages use the `bg-page` theme colour, defined
+once as `--color-page` in `src/index.css`. Page names and categories do not determine
+backgrounds. Chart and card surfaces keep their own styling.
+
+The shared header switches between Visualisations and Stories. Sign in and Sign up
+open UI-only dialogs; **Preview signed-in layout** shows a demo learner with 1,250
+sample XP. The guest story prompt appears once per app session. Account state, XP,
+and prompt dismissal stay in memory: there are no auth requests, storage writes,
+or account syncing.
+
+Pathways use the resolved config graph, including referenced story transitions.
+Blue nodes identify the current page, visited nodes can be restarted, and dashed
+connections indicate unavailable transitions. Subpage rings reflect readiness and
+advancement within an attempt; Replay clears their presentation without clearing
+lesson condition history. Scroll to explore longer or wider graphs; at most six
+nodes are rendered in the visible window.
+
+Pathway state and navigation actions live in `src/store/pathwayStore.ts`.
+`usePathway` reads the common Zustand store directly, without React context or a
+provider. `usePathwaySession` resets the active session when entering a story or
+visualisation and cleans up history subscriptions and timers. The history adapter
+subscribes to the existing story/visualisation stores so activity completion and
+transition conditions remain live. DOM scroll measurements stay local to the graph.
+Drag selection also lives in Zustand, keyed by each surface's DOM scope so separate
+drag exercises cannot share a selection. A surface removes its state on unmount.
+
+Run `npm test` with Node.js 22.6 or newer for focused pathway/store, condition, preview,
+and colour-palette checks. Run `npm run build` and `npm run lint -- --quiet` for
+TypeScript, bundling, and styling validation.
+
+## Page names
+
+A page's `name` is its readable navigation label. For dynamic pages, the same value
+selects the component: `"name": "Follow Questions"` matches `case "Follow Questions"`.
+Rename both together. Static pages also define `name`; mixed pages use their
+dynamic page's name, including when that page comes from a visualisation reference.
+Navigation reads these names directly, without fetching Markdown for headings or
+converting component identifiers. Unnamed pages show `Page N`.
+
+## Exercise completion
+
+Dynamic exercises receive `onComplete()` and call it when their success criteria
+are met. Navigation records one `page_complete` history event for the resolved
+page and unlocks outgoing transitions with `"condition_type": "Completed"`.
+The learner selects when to continue. `Completed` always refers to the transition's
+source page, including inside `And` and `Or` conditions and expanded story references.
+
+Subpage exercises call `onSubpageReady()` for each successful step, followed by
+`onComplete()` on the final step. Every configured subpage must be ready before the
+page can complete. Callbacks from earlier presentations are ignored; review and
+Replay preserve completion history while resetting presentation progress.
+
+To migrate older configs, remove `completion_button_id` from pages and replace
+their completion-based `Button` conditions with `Completed`, removing `button_id`.
+Replace exercise calls to `recordButtonClick(completionButtonId)` with `onComplete()`.
+Generic `Button` conditions remain available for named-button interactions.
+Config-builder checks run with `python -m unittest discover -s tests -v` from `config`.
+
 ## Tailwind checks
 
 Run `npm run lint` from `frontend` to check TypeScript/React code and Tailwind

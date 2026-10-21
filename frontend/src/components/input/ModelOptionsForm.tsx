@@ -35,7 +35,7 @@ const ModelOptionsForm = ({
                 <button
                     onClick={onTrainModel}
                     disabled={isModelLoading}
-                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-violet-500 text-white font-semibold rounded-md shadow-sm transition duration-100 hover:from-violet-500 hover:to-fuchsia-500 hover:shadow-xl my-2"
+                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white font-semibold rounded-md shadow-sm transition duration-100 hover:from-sky-500 hover:to-sky-500 hover:shadow-xl my-2"
                 >
                     {isModelLoading ? "Processing..." : buttonLabel}
                 </button>

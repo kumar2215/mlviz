@@ -1,7 +1,7 @@
 from typing import List, Literal, Optional, Any, Annotated, Union
 from pydantic import BaseModel, Field
 
-ActionType = Literal["train", "predict", "step", "manual_evaluate", "page_visit", "button_click"]
+ActionType = Literal["train", "predict", "step", "manual_evaluate", "page_visit", "page_complete", "button_click"]
 
 class BaseCondition(BaseModel):
     condition_type: str
@@ -10,6 +10,10 @@ class BaseCondition(BaseModel):
 
 class BypassCheck(BaseCondition):
     condition_type: Literal["Bypass"] = "Bypass"
+
+class CompletedCheck(BaseCondition):
+    """Unlocks when the transition's source page has completed its exercise."""
+    condition_type: Literal["Completed"] = "Completed"
 
 class SlideCheck(BaseCondition):
     condition_type: Literal["Slide"] = "Slide"
@@ -65,7 +69,7 @@ class MetricCheck(BaseCondition):
 
 # Condition defined LAST, using actual classes
 Condition = Annotated[
-    Union[BypassCheck, ParameterCheck, TimeCheck,
+    Union[BypassCheck, CompletedCheck, ParameterCheck, TimeCheck,
           ButtonPress, Lambda, AndCondition, OrCondition, SlideCheck,
           ActionCountCheck, PageVisitedCheck, MetricCheck],
     Field(discriminator="condition_type")

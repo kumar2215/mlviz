@@ -134,7 +134,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                             </div>
                         ) : (
                             <Button
-                                className="w-full bg-gradient-to-r from-blue-100 to-purple-100 text-black border-none hover:from-blue-200 hover:to-purple-200 shadow-md transition-all active:scale-[0.98]"
+                                className="w-full bg-gradient-to-r from-blue-100 to-blue-100 text-black border-none hover:from-blue-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98]"
                                 style={{
                                     gap: `${8 * scaleFactor}px`,
                                     height: `${40 * scaleFactor}px`,
@@ -298,7 +298,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                 </span>
                             </Button>
                             <Button
-                                className="w-1/2 h-auto bg-gradient-to-r from-red-100 to-fuchsia-100 text-black border-none hover:from-red-200 hover:to-fuchsia-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                                className="w-1/2 h-auto bg-gradient-to-r from-red-100 to-sky-100 text-black border-none hover:from-red-200 hover:to-sky-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
                                 style={{
                                     padding: `${8 * scaleFactor}px`,
                                     gap: `${8 * scaleFactor}px`,

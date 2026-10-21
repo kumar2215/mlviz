@@ -1,0 +1,58 @@
+{
+  "display_name": "Porter Stemming",
+  "pages": [
+    {
+      "page_type": "dynamic",
+      "name": "Porter Explore",
+      "dataset": {
+        "type": "predefined_porter",
+        "name": "rules"
+      },
+      "parameters": {},
+      "subpages": [
+        "Plurals and verb endings",
+        "Final y",
+        "Replace longer suffixes",
+        "Shorten suffixes",
+        "Remove remaining endings",
+        "Final e and double l"
+      ]
+    },
+    {
+      "page_type": "dynamic",
+      "name": "Porter Lab",
+      "dataset": {
+        "type": "predefined_porter",
+        "name": "suffixes"
+      },
+      "parameters": {}
+    },
+    {
+      "page_type": "dynamic",
+      "name": "Porter Families",
+      "dataset": {
+        "type": "predefined_porter",
+        "name": "families"
+      },
+      "parameters": {}
+    }
+  ],
+  "transitions": [
+    {
+      "from": 0,
+      "to": 1,
+      "condition": {
+        "condition_type": "Completed",
+        "name": "Predict suffix changes"
+      }
+    },
+    {
+      "from": 1,
+      "to": 2,
+      "condition": {
+        "condition_type": "Bypass",
+        "name": "Group word forms"
+      }
+    }
+  ]
+}

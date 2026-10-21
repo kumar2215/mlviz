@@ -8,6 +8,7 @@ import { DEFAULT_2D_ZOOM_CONFIG } from "@/components/plots/utils/zoomConfig";
 import SVMLossMapHUD from "@/pages/traditional_ml/svm/SVMLossMapHUD";
 import { renderSVM } from "@/pages/traditional_ml/svm/SVMRenderer";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
+import { PageLoadingLabel } from "@/components/layout/PageLoading";
 import type { VisualisationRenderContext } from "@/components/visualisation/types";
 import { useSVM } from "@/store/traditional_ml/useSVM";
 import { useCallback, useEffect, useState } from "react";
@@ -127,7 +128,7 @@ export default function SVMStepVisualisation() {
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
                     <p className="text-muted-foreground">
-                        Loading classification space…
+                        <PageLoadingLabel>Loading classification space…</PageLoadingLabel>
                     </p>
                 </div>
             </div>
