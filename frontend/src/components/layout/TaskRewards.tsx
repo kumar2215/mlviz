@@ -4,6 +4,8 @@ import { pageTasks, stepIds, taskKey } from "@/lib/storyProgress";
 import { useProgress } from "@/store/useProgress";
 import { activeBucket } from "@/store/progressStore";
 import { usePathway } from "@/store/usePathway";
+import { useStory } from "@/store/useStory";
+import { getDynamicPage, pageTitle } from "@/components/navigation/pathwayModel";
 
 export function RewardLabel({ storyId, page, step }: { storyId: string; page: PageUnion; step?: string }) {
     const progress = useProgress(state => activeBucket(state).stories[storyId]);
@@ -13,16 +15,26 @@ export function RewardLabel({ storyId, page, step }: { storyId: string; page: Pa
     return <span>{total ? `${earned} / ${total} XP earned${earned === total ? " · Earned" : ""}` : "Explore · 0 XP"}</span>;
 }
 
-export default function TaskRewards({ storyId, page }: { storyId: string; page: PageUnion }) {
+export default function TaskRewards() {
+    const storyId = useStory(state => state.currentStory?.name);
+    const page = usePathway(state => state.pages[state.currentPageId]);
+    const pageIndex = usePathway(state => state.currentPageId);
     const index = usePathway(state => state.subpageIndex);
-    const progress = useProgress(state => activeBucket(state).stories[storyId]);
-    const step = stepIds(page)[index];
-    const tasks = pageTasks(page).filter(task => task.xp > 0 && (!task.subpage_id || task.subpage_id === step));
-    return <section aria-label="Activity XP rewards" className="flex max-h-32 shrink-0 flex-wrap items-center gap-2 overflow-y-auto border-b border-amber-100 bg-white/90 px-4 py-2">
-        {tasks.length ? tasks.map(task => {
-            const earned = progress?.milestones.includes(taskKey(page.id!, task.id));
+    const progress = useProgress(state => storyId ? activeBucket(state).stories[storyId] : undefined);
+    const tasks = page ? pageTasks(page) : [];
+    const steps = page ? stepIds(page) : [];
+    const labels = getDynamicPage(page)?.subpages ?? [];
+    return <section aria-label="Page tasks" className="space-y-3">
+        {page && <h2 className="text-sm font-semibold text-slate-800">{pageTitle(page, pageIndex)}</h2>}
+        {tasks.length ? <ul className="space-y-2">{tasks.map(task => {
+            const earned = Boolean(page?.id && progress?.milestones.includes(taskKey(page.id, task.id)));
             const Icon = earned ? CheckCircle2 : Sparkles;
-            return <span key={task.id} className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs ${earned ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-950"}`}><Icon aria-hidden="true" className="size-3.5" /><strong>{earned ? "Earned · " : "+"}{task.xp} XP</strong><span>{task.label}</span></span>;
-        }) : <p className="text-xs text-slate-500">Explore and learn · 0 XP for this activity</p>}
+            const stepIndex = task.subpage_id ? steps.indexOf(task.subpage_id) : -1;
+            return <li key={task.id} className={`space-y-2 rounded-xl border p-3 ${earned ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
+                <div className="flex items-center gap-1.5 text-xs"><Icon aria-hidden="true" className="size-4 shrink-0" /><strong>{earned ? "Earned · " : "+"}{task.xp} XP</strong></div>
+                <p className="text-sm font-medium leading-snug">{task.label}</p>
+                {stepIndex >= 0 && <p className="text-xs opacity-80">Step {stepIndex + 1}{labels[stepIndex] ? ` · ${labels[stepIndex]}` : ""}{stepIndex === index ? " · Current step" : ""}</p>}
+            </li>;
+        })}</ul> : <div className="rounded-xl border border-dashed border-blue-200 bg-white p-4"><p className="text-sm text-slate-500">No tasks for this page.</p></div>}
     </section>;
 }

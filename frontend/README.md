@@ -202,6 +202,51 @@ Run `npm test` with Node.js 22.6 or newer for focused pathway/store, condition, 
 and colour-palette checks. Run `npm run build` and `npm run lint -- --quiet` for
 TypeScript, bundling, and styling validation.
 
+
+### Neural network labs
+
+The Neural Networks category contains four standalone labs, in catalog order:
+Perceptron, Single Layer, Multi-Layer Perceptron, and Training. Their 17 dynamic
+pages use the existing lazy page dispatcher, config pathway navigation,
+`bg-page` theme, NLP `LabFrame`, shared topic buttons, and D3
+`BaseVisualisation` charts with image export. Each page occupies the available
+height and presents one topic at a time. Parameter groups and long tables have
+their own controls; charts resize to their panel. Navigation between
+visualizations remains in the existing catalog. They add no stories or XP tasks.
+
+All interactive lab and presentation state lives in the Zustand stores in
+`src/store/neuralNetworks.ts`. Inputs and parameters remain available when moving
+between pages within a lab. Entering a lab or replaying resets its state; Reset
+restores defaults, and Initialize generates deterministic parameters from the
+next seed. Playback stops on navigation/unmount and has a bounded run length.
+These small educational networks use typed FastAPI endpoints under
+`/api/neural_networks`. Backend services compute forward passes, text features,
+activations, gradients, updates, dropout, loss curves, and decision-region samples.
+Zustand stores handle requests, cancellation, errors, retries and replay. There is
+no frontend model-calculation fallback.
+
+Python calculations live in `backend/services/neural_network_math.py` and
+`neural_network_service.py`. Weight matrices use output-neuron rows and
+input-feature columns; batches average sample losses and gradients. Classification
+uses stable sigmoid/BCE and softmax/cross-entropy calculations. The step-perceptron
+learning rule is distinct from gradient descent. ReLU at zero and hard tanh at
+its corners use derivative zero; MAE at zero error also uses zero. Dropout uses
+inverted training scaling and no mask at inference. The mask explorer is
+independent of XOR training.
+
+Language identification is an explicitly labelled toy English/French/German
+character-frequency classifier initialized from a small bundled corpus. Users
+can inspect or edit its weights. It ignores character order and unsupported
+characters; empty inputs show no prediction, and confidence is not calibrated.
+
+`backend/tests/test_neural_networks.py` checks numerical gradients, stable losses,
+classification, dropout, API validation, and update previews. Run it with the
+backend environment: `python -m unittest tests.test_neural_networks`.
+`tests/neuralNetworks.test.ts` and `tests/neuralNetworksUI.test.ts`, included in
+`npm test`, check asynchronous Zustand state and every slide/control group. They
+use the backend virtual environment to obtain real calculation results without a
+running server. Set `PYTHON` to an alternative backend Python executable if needed.
+
 ## Page names
 
 A page's `name` is its readable navigation label. For dynamic pages, the same value

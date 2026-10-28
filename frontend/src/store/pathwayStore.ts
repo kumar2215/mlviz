@@ -7,6 +7,7 @@ import { stepIds, stepKey, type StoryProgress } from "../lib/storyProgress.ts";
 import { pageTitle, getDynamicPage, layoutPathway, selectSubpage, subpageControls, transitionKey, type PathwayLayout, type SubpageProgress } from "../components/navigation/pathwayModel.ts";
 
 export interface PathwayDefinition { pages: PageUnion[]; transitions: Transition[] }
+export type NavigationTab = "pathway" | "tasks";
 export interface PageProgressContext {
     pageId: number;
     subpageIndex: number;
@@ -23,6 +24,8 @@ export interface PathwayHistorySource {
 }
 
 export interface PathwayState extends PathwayDefinition {
+    navigationTab: NavigationTab;
+    setNavigationTab: (tab: NavigationTab) => void;
     sessionId: string | null;
     layout: PathwayLayout;
     history: HistoryState;
@@ -110,6 +113,8 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
         };
         return {
             ...definition,
+            navigationTab: "pathway",
+            setNavigationTab: navigationTab => set({ navigationTab }),
             sessionId: null,
             layout: layoutPathway(definition.pages, definition.transitions),
             history: source.getHistory(),
@@ -173,7 +178,7 @@ export function createPathwayStore(definition: PathwayDefinition, initialSource:
                     return;
                 }
                 started = false;
-                set({ ...next, sessionId, layout: layoutPathway(next.pages, next.transitions),
+                set({ ...next, sessionId, navigationTab: "pathway", layout: layoutPathway(next.pages, next.transitions),
                     history: source.getHistory(), now: now(), currentPageId: 0, subpageIndex: 0, replayKey: get().replayKey + 1, resumeTasks: false,
                     progressByPage: {}, visitedPages: new Set([0]), traversed: new Set(), savedUnlocked: new Set(), restoredCompletedPages: new Set(), focusRequest: null });
             },

@@ -18,7 +18,6 @@ import { pathwayStore } from "@/store/usePathway";
 import { useConfig } from "@/store/useConfig";
 import { pageTasks, taskKey } from "@/lib/storyProgress";
 import { createTaskCompletion } from "@/lib/taskCompletion";
-import TaskRewards from "@/components/layout/TaskRewards";
 import PageLoading from "@/components/layout/PageLoading";
 
 export default function VisualisationPage() {
@@ -147,7 +146,6 @@ function VisualisationContent() {
             <AppHeader />
             <div className="min-h-0 flex-1 flex flex-row justify-between bg-page overflow-hidden">
                 <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-                    {inStoryMode && currentPage && <TaskRewards storyId={item.name} page={currentPage} />}
                     {renderPage()}
                 </div>
                 <aside aria-label="Story and activity navigation" className="shrink-0 w-60 flex flex-col min-h-0 items-center overflow-hidden bg-slate-50 border-l border-blue-100">

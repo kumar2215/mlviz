@@ -1,0 +1,1 @@
+export const fmt = (value: number) => !Number.isFinite(value) ? "—" : Math.abs(value) > 9999 || (value !== 0 && Math.abs(value) < 0.0001) ? value.toExponential(2) : Number(value.toFixed(4)).toString();
