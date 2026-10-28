@@ -1,0 +1,7 @@
+{
+  "branch": "test-benchmark",
+  "head": "aad8991de68c25cdc5f5b568a610c2b43e331b7e",
+  "baseline": "3bee6f351a810b6d6ff847a3c29e2378a5925ca6",
+  "candidateBase": "5da4d3f1adcc42761a35531e819fdb3f1c090275",
+  "commitChanges": false
+}

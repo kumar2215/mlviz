@@ -1,0 +1,14 @@
+AssertionError [ERR_ASSERTION]: Startup errors
++ actual - expected
+
++ [
++   'No visualisation selected'
++ ]
+- []
+
+    at trial (file:///C:/Users/Kumar%20Lenovo%20PC/Desktop/Kumar/NUS/My_Mods/FYP/mlviz/benchmarks/state-migration/.cache/strict-migration/harness/suite.mjs:168:12)
+    at runNextTicks (node:internal/process/task_queues:64:5)
+    at process.processImmediate (node:internal/timers:452:9)
+    at process.callbackTrampoline (node:internal/async_hooks:130:17)
+    at async file:///C:/Users/Kumar%20Lenovo%20PC/Desktop/Kumar/NUS/My_Mods/FYP/mlviz/benchmarks/state-migration/.cache/strict-migration/harness/suite.mjs:433:36
+{"errors":["No visualisation selected"],"requests":[{"path":"/config/config.json","payload":{}},{"path":"/config/visual/traditional_ml/svm.json","payload":{}},{"path":"/config/story/stories.json","payload":{}}]}

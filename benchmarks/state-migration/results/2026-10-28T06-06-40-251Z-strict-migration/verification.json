@@ -1,0 +1,29 @@
+{
+  "valid": true,
+  "measuredTrials": 720,
+  "warmups": 108,
+  "pairedTrials": 414,
+  "metricComparisons": 91,
+  "harnessArchives": 2,
+  "matched": [
+    "initial controls",
+    "final outcomes",
+    "all measured API paths and payloads",
+    "persisted model data and parameters",
+    "native control values",
+    "primary model SVG geometry"
+  ],
+  "sourceFiles": 205,
+  "protectedFilesIdentical": 54,
+  "candidateSourceSha256": "b247e89fe07917a073a1dd515de1e028360ce4e9eb9fd2f7f06ffc00777ecf9a",
+  "statistics": "All summary statistics and paired 5000-resample seed-42 bootstrap intervals independently recomputed from raw trials.",
+  "typecheck": "Both versions report the same pre-existing TS6192 unused-import error in src/store/useVisualisation.ts. Candidate adds no TypeScript errors.",
+  "runAudit": "One pre-measurement startup failure. The interrupted SVM-step production warm-up block was restarted; completed pairs retained. Timed code is identical across both archived harness versions.",
+  "longTrial": "An unusually long SVM-predict profiling trial was retained without exclusion; no trials were removed based on their measured performance.",
+  "completePatchAppliesToNormalizedBaseline": true,
+  "archivedFixtureStatisticsCheckpointTestsPassed": 7,
+  "reconstructionVerified": true,
+  "reconstructionSourceFiles": 205,
+  "trackedApplicationChangesRemaining": 0,
+  "resultsIgnored": false
+}

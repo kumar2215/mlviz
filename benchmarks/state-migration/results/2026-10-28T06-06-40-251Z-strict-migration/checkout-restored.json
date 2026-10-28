@@ -1,0 +1,12 @@
+{
+  "branch": "test-benchmark",
+  "head": "aad8991de68c25cdc5f5b568a610c2b43e331b7e",
+  "temporaryTrackedApplicationChangesDiscarded": 41,
+  "temporaryUntrackedApplicationFilesRemoved": 4,
+  "trackedWorktreeClean": true,
+  "indexClean": true,
+  "commitCreated": false,
+  "resultsUncommitted": "benchmarks/state-migration/results/2026-10-28T06-06-40-251Z-strict-migration",
+  "lineEndingOnlyPathsRestored": 5,
+  "finalTrackedStatus": "clean"
+}
