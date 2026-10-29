@@ -35,7 +35,7 @@ export default function DecisionTreePage({ onTaskComplete, onComplete }: Pick<In
 
     return (
         <div className="grid grid-cols-10 mx-auto w-full h-full">
-            <div className="col-span-8 shadow-lg overflow-hidden min-h-0">
+            <div data-tour-surface className="relative col-span-8 shadow-lg overflow-hidden bg-white min-h-0">
                 <DecisionTree />
             </div>
 

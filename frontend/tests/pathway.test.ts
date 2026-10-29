@@ -95,13 +95,16 @@ test("branch layout is deterministic and a plain chain winds rather than becomin
     assert.ok(new Set(chain.nodes.map(node => node.x)).size > 1);
 });
 
-test("virtualisation caps visible nodes at six even for a very wide rank, and scrolling reveals the final page", () => {
+test("virtualisation includes every intersecting node and scrolling reveals the final page", () => {
     const wide = layoutPathway(pages(20), []);
-    assert.equal(visibleNodes(wide.nodes, { top: 0, left: 0, width: wide.width, height: wide.height }).length, 6);
+    assert.equal(visibleNodes(wide.nodes, { top: 0, left: 0, width: wide.width, height: wide.height }).length, 20);
     const chain = layoutPathway(pages(20), Array.from({ length: 19 }, (_, id) => bypass(id, id + 1)));
     const window = visibleNodes(chain.nodes, { top: chain.height - 240, left: 0, width: chain.width, height: 240 });
-    assert.ok(window.length <= 6);
+    assert.ok(window.length < chain.nodes.length);
     assert.ok(window.some(node => node.id === 19));
+    assert.ok(window.every(node => node.y + 32 > chain.height - 240 && node.y - 32 < chain.height));
+    assert.ok(visibleNodes(chain.nodes, { top: 0, left: 0, width: chain.width, height: chain.height }).length > 6);
+    assert.equal(visibleNodes(chain.nodes, { top: 0, left: chain.width + 64, width: 200, height: chain.height }).length, 0);
 });
 
 test("a visible subpage is active, not completed; a restarted ring clears old segments", () => {

@@ -6,6 +6,7 @@ import useHistoryRecorder from "@/hooks/useHistoryRecorder";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { Check, Move, Play, Plus, RotateCcw, Target } from "lucide-react";
 import React from "react";
+import { captureTourAction } from "@/store/tourStore";
 
 export type KMeansStepMode = "ready" | "selecting" | "preview";
 
@@ -28,6 +29,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
 
     const handleRunStep = async () => {
         if (selectedCentroids.length === 0) return;
+        const finish = captureTourAction("run-step");
         
         // Safety cast for parameters access
         const params = (lastVisualizationParams as any)?.parameters;
@@ -43,14 +45,17 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
             recordStep(lastVisualizationParams || {}, result.metrics);
         }
         
-        setMode("preview");
+        if (result) setMode("preview");
+        finish(Boolean(result));
     };
 
     const handleTrainNext = () => {
+        const finish = captureTourAction("resolve-step");
         if (stepData?.new_centroids) {
             setSelectedCentroids(stepData.new_centroids);
         }
         setMode("selecting");
+        finish(Boolean(stepData?.new_centroids));
     };
 
     const handleStartOver = async () => {
@@ -60,11 +65,12 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
 
     return (
         <CollapsibleHUD
+            tourTarget="step-controls"
             icon={<Target style={{ width: `${16 * scaleFactor}px`, height: `${16 * scaleFactor}px` }} className="text-primary" />}
             title="Step-by-Step Training"
             style={{ width: `${288 * scaleFactor}px` }}
         >
-            <div style={{ gap: `${16 * scaleFactor}px` }} className="flex flex-col">
+            <div data-tour-phase={mode} style={{ gap: `${16 * scaleFactor}px` }} className="flex flex-col">
                 {mode === "ready" && (
                     <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
                         <p
@@ -84,7 +90,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                         height: `${40 * scaleFactor}px`,
                                         fontSize: `${14 * scaleFactor}px`,
                                     }}
-                                    onClick={() => setMode("selecting")}
+                                    onClick={() => { const finish = captureTourAction("place"); setMode("selecting"); finish(); }}
                                 >
                                     <Move
                                         style={{
@@ -140,7 +146,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                     height: `${40 * scaleFactor}px`,
                                     fontSize: `${14 * scaleFactor}px`,
                                 }}
-                                onClick={() => setMode("selecting")}
+                                onClick={() => { const finish = captureTourAction("place"); setMode("selecting"); finish(); }}
                             >
                                 <Plus
                                     style={{
@@ -231,7 +237,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                 )}
 
                 {mode === "preview" && (
-                    <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
+                    <div data-tour="step-proposal" style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
                         <div
                             className="border border-primary/10 bg-white/50"
                             style={{
@@ -279,7 +285,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                     padding: `${8 * scaleFactor}px`,
                                     gap: `${8 * scaleFactor}px`,
                                 }}
-                                onClick={() => setMode("selecting")}
+                                onClick={() => { const finish = captureTourAction("resolve-step"); setMode("selecting"); finish(Boolean(stepData)); }}
                             >
                                 <Check
                                     className="shrink-0"

@@ -320,6 +320,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
 
     return (
         <CollapsibleHUD
+            tourTarget="loss-map"
             icon={<Map style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
             title="Loss Landscape"
             defaultOpen={true}

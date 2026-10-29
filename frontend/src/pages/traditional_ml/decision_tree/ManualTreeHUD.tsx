@@ -20,10 +20,12 @@ import { GitBranch, Leaf, Split } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { renderInformationGainGraph } from "./rendererUtils";
+import { captureTourAction } from "@/store/tourStore";
 
 const EMPTY_NAMES: string[] = [];
 
 const ManualTreeHUD: React.FC = () => {
+    const thresholdChange = useRef<ReturnType<typeof captureTourAction> | null>(null);
     const selectedNodePath = useDecisionTree(state => state.manualTree.selectedNodePath);
     const featureStats = useDecisionTree(state => state.manualTree.featureStats);
     const selectedFeature = useDecisionTree(state => state.manualTree.selectedFeature);
@@ -157,6 +159,7 @@ const ManualTreeHUD: React.FC = () => {
 
     return (
         <CollapsibleHUD
+            tourTarget="tree-split"
             icon={<GitBranch className="w-4 h-4 text-primary" />}
             title="Split Node"
         >
@@ -167,9 +170,15 @@ const ManualTreeHUD: React.FC = () => {
                     </Label>
                     <Select
                         value={selectedFeature || ""}
-                        onValueChange={loadFeatureStats}
+                        onValueChange={async feature => {
+                            const finish = captureTourAction("feature");
+                            const previous = useDecisionTree.getState().manualTree.featureStats;
+                            await loadFeatureStats(feature);
+                            const state = useDecisionTree.getState().manualTree;
+                            finish(state.selectedFeature === feature && Boolean(state.featureStats) && state.featureStats !== previous);
+                        }}
                     >
-                        <SelectTrigger className="w-full bg-white border-slate-200 shadow-sm transition-all hover:border-slate-300">
+                        <SelectTrigger data-tour="tree-feature" className="w-full bg-white border-slate-200 shadow-sm transition-all hover:border-slate-300">
                             <SelectValue placeholder="Select feature..." />
                         </SelectTrigger>
                         <SelectContent className="bg-white border-slate-200">
@@ -188,7 +197,7 @@ const ManualTreeHUD: React.FC = () => {
 
                 {featureStats && selectedFeature ? (
                     <>
-                        <div className="space-y-2">
+                        <div data-tour="tree-threshold" className="space-y-2">
                             <div className="flex justify-between items-end">
                                 <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                                     Threshold
@@ -203,6 +212,7 @@ const ManualTreeHUD: React.FC = () => {
                                 </span>
                             </div>
                             <Slider
+                                aria-label="Split threshold"
                                 value={[
                                     selectedThreshold ||
                                         (featureStats.thresholds.length > 0
@@ -217,9 +227,11 @@ const ManualTreeHUD: React.FC = () => {
                                         featureStats.feature_range[0]) /
                                     100
                                 }
-                                onValueChange={(vals: number[]) =>
-                                    updateThreshold(vals[0])
-                                }
+                                onValueChange={(vals: number[]) => {
+                                    thresholdChange.current = captureTourAction("threshold");
+                                    updateThreshold(vals[0]);
+                                }}
+                                onValueCommit={() => { thresholdChange.current?.(); thresholdChange.current = null; }}
                                 className="py-2"
                             />
                         </div>
@@ -246,7 +258,12 @@ const ManualTreeHUD: React.FC = () => {
                         disabled={
                             !selectedFeature || selectedThreshold === null
                         }
-                        onClick={splitNode}
+                        onClick={async () => {
+                            const finish = captureTourAction("split");
+                            const previous = useDecisionTree.getState().manualTree.tree;
+                            await splitNode();
+                            finish(useDecisionTree.getState().manualTree.tree !== previous);
+                        }}
                     >
                         <Split className="w-4 h-4 shrink-0" />{" "}
                         <span className="text-xs">Split Node</span>

@@ -4,7 +4,6 @@
         {
             "name": "K-Means Step",
             "page_type": "dynamic",
-            "note": "Use the top-right HUD to simulate the algorithm! Feel free to intervene and choose your centroids at any time.",
             "dataset": null,
             "parameters": {
                 "visualisation_features": [0, 1],

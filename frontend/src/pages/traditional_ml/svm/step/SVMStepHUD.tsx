@@ -5,6 +5,7 @@ import { useSVM } from "@/store/traditional_ml/useSVM";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { ArrowRight, Check, Play, RefreshCw, X } from "lucide-react";
 import React, { useId } from "react";
+import { captureTourAction } from "@/store/tourStore";
 
 export type SVMStepMode = "idle" | "preview";
 
@@ -73,6 +74,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
 
     const handleRunStep = async () => {
         if (points.length === 0) return;
+        const finish = captureTourAction("run-step");
         
         // SVMStepRequest requires parameters
         const request = {
@@ -85,11 +87,13 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
         };
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        await performStep(request as any);
-        setMode("preview");
+        const result = await performStep(request as any);
+        if (result) setMode("preview");
+        finish(Boolean(result));
     };
 
     const handleAccept = () => {
+        const finish = captureTourAction("resolve-step");
         if (stepData) {
             setManualWeights(stepData.new_w1, stepData.new_w2, stepData.new_b);
             makePrediction({
@@ -100,10 +104,13 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
             });
         }
         setMode("idle");
+        finish(Boolean(stepData));
     };
 
     const handleReject = () => {
+        const finish = captureTourAction("resolve-step");
         setMode("idle");
+        finish(Boolean(stepData));
     };
 
     const lossClass = (v: number) =>
@@ -111,6 +118,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
 
     return (
         <CollapsibleHUD
+            tourTarget="step-controls"
             icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
             title="Subgradient Descent"
             style={{ width: fs(290) }}
@@ -247,7 +255,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
 
             {/* Preview mode shows proposal */}
             {mode === "preview" && stepData && (
-                <div className="flex flex-col" style={{ gap: fs(8) }}>
+                <div data-tour="step-proposal" className="flex flex-col" style={{ gap: fs(8) }}>
                     <div className="rounded-xl bg-white/70 border border-emerald-100" style={{ padding: fs(10) }}>
                         <span className="uppercase tracking-widest text-slate-400 font-semibold block mb-1" style={{ fontSize: fs(9) }}>
                             Proposed Update

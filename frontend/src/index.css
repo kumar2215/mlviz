@@ -147,6 +147,15 @@ h1 {
     --font-serif: "IBM Plex Serif", serif;
 }
 
+.tour-highlight {
+    outline: 3px solid #2563eb;
+    outline-offset: 4px;
+}
+
+[data-tour-surface]:has([data-tour-help]) [data-tour-corner] {
+    right: 5rem;
+}
+
 @layer base {
     html {
         @apply text-base;

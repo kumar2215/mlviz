@@ -2,7 +2,7 @@ import NavigationBar from "@/components/navigation/NavigationBar";
 import DynamicPage from "@/pages/DynamicPage";
 import StaticPage from "@/pages/StaticPage";
 import { Button } from "@/components/ui/button";
-import { Sidenote } from "@/components/Sidenote";
+import GuidedTour from "@/components/tours/GuidedTour";
 import { useVisualisation } from "@/store/useVisualisation";
 import useUserMode from "@/hooks/useUserMode";
 import { useMemo, useCallback, useId } from "react";
@@ -145,12 +145,12 @@ function VisualisationContent() {
         <div className="w-screen h-screen flex flex-col overflow-hidden">
             <AppHeader />
             <div className="min-h-0 flex-1 flex flex-row justify-between bg-page overflow-hidden">
-                <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
-                    {renderPage()}
+                <div data-tour-page className="relative flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden">
+                    <div data-tour-content className="min-h-0 flex-1">{renderPage()}</div>
+                    <GuidedTour />
                 </div>
                 <aside aria-label="Story and activity navigation" className="shrink-0 w-60 flex flex-col min-h-0 items-center overflow-hidden bg-slate-50 border-l border-blue-100">
                     <NavigationBar />
-                    {currentPage?.note && <Sidenote note={currentPage.note} />}
                 </aside>
             </div>
         </div>

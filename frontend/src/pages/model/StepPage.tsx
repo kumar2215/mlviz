@@ -21,7 +21,7 @@ export default function StepPage({ useModel, parameters, StepVisualizationCompon
             </div>
 
             {/* Main Interactive Step Area */}
-            <div className="col-span-8 shadow-lg overflow-hidden relative bg-white min-h-0">
+            <div data-tour-surface className="col-span-8 shadow-lg overflow-hidden relative bg-white min-h-0">
                 <StepVisualizationComponent />
             </div>
         </div>

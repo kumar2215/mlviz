@@ -28,11 +28,11 @@ export default function TrainPage({ useModel, parameters, TrainVisualizationComp
                 />
             </div>
 
-            <div className="flex-1 shadow-lg overflow-hidden bg-white">
+            <div data-tour-surface className="relative flex-1 shadow-lg overflow-hidden bg-white">
                 <TrainVisualizationComponent />
             </div>
 
-            <div className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-blue-50 border-l border-gray-300 overflow-auto">
+            <div data-tour="training-results" className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-blue-50 border-l border-gray-300 overflow-auto">
                 <ResultsComponent />
             </div>
         </div>

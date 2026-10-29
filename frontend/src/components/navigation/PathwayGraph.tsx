@@ -56,9 +56,9 @@ export default function PathwayGraph() {
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-            <div className="flex items-center justify-between gap-2 text-xs text-slate-500"><span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span><button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-blue-700 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600"><LocateFixed className="size-4" /></button></div>
-            <div className="relative flex min-h-32 max-h-96 flex-1 flex-col">
-            <div ref={scrollRef} onScroll={measure} role="region" aria-label="Page pathway" tabIndex={0} className="pathway-scroll min-h-0 flex-1 overflow-auto rounded-2xl border border-blue-100 bg-white focus-visible:outline-2 focus-visible:outline-blue-600" data-pathway-viewport>
+            <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2 text-xs text-slate-500"><span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span><button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-blue-700 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600"><LocateFixed className="size-4" /></button></div>
+            <div className="relative flex min-h-0 flex-1 flex-col">
+            <div ref={scrollRef} onScroll={measure} role="region" aria-label="Page pathway" tabIndex={0} className="pathway-scroll min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-blue-600" data-pathway-viewport>
                 <div className="relative" style={{ width: layout.width, minWidth: "100%", height: layout.height }}>
                     <svg width={layout.width} height={layout.height} className="absolute left-0 top-0" aria-hidden="true">
                         <defs><marker id={markerId} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" /></marker></defs>

@@ -375,6 +375,16 @@ export const renderDecisionTree = ({
         .attr("transform", (d) => `translate(${d.x},${d.y})`);
 
     renderMode.applyNodeStyles(node, currentStep, context);
+    if (mode === "manual") {
+        node.attr("tabindex", 0).attr("role", "button")
+            .attr("aria-label", d => `Select ${d.data.type === "leaf" ? "leaf" : "split"} node at depth ${d.depth}`)
+            .on("keydown.tour", function (event: KeyboardEvent) {
+                if (event.target === this && (event.key === "Enter" || event.key === " ")) {
+                    event.preventDefault();
+                    this?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+                }
+            });
+    }
 
     const leafNodes = node.filter((d) => d.data.type === "leaf");
     const splitNodes = node.filter((d) => d.data.type === "split");

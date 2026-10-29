@@ -21,6 +21,8 @@ import { UNASSIGNED_COLOR } from "@/utils/colorUtils";
 import * as d3 from "d3";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import KMeansStepHUD, { type KMeansStepMode } from "./KMeansStepHUD";
+import { captureTourAction } from "@/store/tourStore";
+import type { PlotPoint } from "@/components/plots/types";
 
 export default function KMeansStepVisualisation() {
     const kmeansData = useKMeans(state => state.visualizationData);
@@ -149,6 +151,7 @@ export default function KMeansStepVisualisation() {
             }
 
             if (nearestPoint && minDist < 0.5) {
+                const finish = captureTourAction("centroids");
                 // Snapping threshold
                 setSelectedCentroids((prev) => {
                     const isSelected = prev.some(
@@ -167,6 +170,7 @@ export default function KMeansStepVisualisation() {
                     }
                     return [...prev, nearestPoint!];
                 });
+                finish(useKMeans.getState().selectedCentroids.length > 0);
             }
         },
         [mode, kmeansData, setSelectedCentroids],
@@ -191,6 +195,20 @@ export default function KMeansStepVisualisation() {
                     legendPosition: "bottom-right",
                 },
             });
+
+            container.selectAll<SVGCircleElement, PlotPoint>(".data-points circle")
+                .attr("tabindex", mode === "selecting" ? 0 : -1)
+                .attr("role", "button")
+                .attr("aria-label", (_point, index) => `Toggle data point ${index + 1} as a centroid`)
+                .on("keydown.centroids", (event: KeyboardEvent, point) => {
+                    if (mode !== "selecting" || (event.key !== "Enter" && event.key !== " ")) return;
+                    event.preventDefault();
+                    const coordinates = point.coordinates;
+                    const finish = captureTourAction("centroids");
+                    setSelectedCentroids(previous => previous.some(value => value[0] === coordinates[0] && value[1] === coordinates[1])
+                        ? previous.filter(value => value[0] !== coordinates[0] || value[1] !== coordinates[1]) : [...previous, coordinates]);
+                    finish(useKMeans.getState().selectedCentroids.length > 0);
+                });
 
             if (result?.xScale && result?.yScale) {
                 scalesRef.current = {
@@ -293,6 +311,7 @@ export default function KMeansStepVisualisation() {
             scaleFactor,
             handlePointClick,
             centroidHistory,
+            setSelectedCentroids,
         ],
     );
 
@@ -341,9 +360,9 @@ export default function KMeansStepVisualisation() {
     }
 
     return (
-        <div className="relative h-full w-full">
+        <div data-tour="centroid-canvas" data-tour-ready="true" data-tour-centroids={selectedCentroids.length ? "selected" : "empty"} className="relative h-full w-full">
             {/* Control HUD */}
-            <div className="absolute top-6 right-6 z-20 flex flex-col gap-4">
+            <div data-tour-corner className="absolute top-6 right-6 z-20 flex flex-col gap-4">
                 <KMeansStepHUD
                     mode={mode}
                     setMode={setMode}

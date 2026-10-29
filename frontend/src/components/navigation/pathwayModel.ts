@@ -3,7 +3,6 @@ import type { PageUnion } from "../../types/page.ts";
 import type { Transition } from "../../types/story.ts";
 
 export const NODE_SIZE = 44;
-export const MAX_VISIBLE_NODES = 6;
 const NODE_MARGIN = 34;
 
 export interface Point { x: number; y: number }
@@ -101,9 +100,7 @@ export function nodeStates(layout: PathwayLayout, current: number, visited: Read
 export function visibleNodes(nodes: PathwayNode[], viewport: Viewport): PathwayNode[] {
     const radius = 32;
     const candidates = nodes.filter(node => node.x + radius > viewport.left && node.x - radius < viewport.left + viewport.width && node.y + radius > viewport.top && node.y - radius < viewport.top + viewport.height);
-    const centre = { x: viewport.left + viewport.width / 2, y: viewport.top + viewport.height / 2 };
-    const selected = candidates.sort((a, b) => Math.hypot(a.x - centre.x, a.y - centre.y) - Math.hypot(b.x - centre.x, b.y - centre.y)).slice(0, MAX_VISIBLE_NODES);
-    return selected.sort((a, b) => a.y - b.y || a.x - b.x || a.id - b.id);
+    return candidates.sort((a, b) => a.y - b.y || a.x - b.x || a.id - b.id);
 }
 
 export function segmentState(index: number, progress: SubpageProgress | undefined, active: boolean): "completed" | "active" | "future" {

@@ -9,6 +9,7 @@ import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression"
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { ArrowRight, Check, Play, X } from "lucide-react";
 import React from "react";
+import { captureTourAction } from "@/store/tourStore";
 
 export type GDStepMode = "idle" | "preview";
 
@@ -40,25 +41,31 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
 
     const handleRunStep = async () => {
         if (points.length === 0) return;
-        await performStep({
+        const finish = captureTourAction("run-step");
+        const result = await performStep({
             slope: currentSlope,
             intercept: currentIntercept,
             learning_rate: learningRate,
             fit_intercept: true,
             points,
         });
-        setMode("preview");
+        if (result) setMode("preview");
+        finish(Boolean(result));
     };
 
     const handleAccept = () => {
+        const finish = captureTourAction("resolve-step");
         if (stepData) {
             setCurrentLine(stepData.new_slope, stepData.new_intercept);
         }
         setMode("idle");
+        finish(Boolean(stepData));
     };
 
     const handleReject = () => {
+        const finish = captureTourAction("resolve-step");
         setMode("idle");
+        finish(Boolean(stepData));
     };
 
     const r2Before = stepData ? computeR2(stepData.slope, stepData.intercept) : computeR2(currentSlope, currentIntercept);
@@ -69,6 +76,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
 
     return (
         <CollapsibleHUD
+            tourTarget="step-controls"
             icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
             title="Gradient Descent"
             style={{ width: fs(290) }}
@@ -137,7 +145,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
 
             {/* Preview mode */}
             {mode === "preview" && stepData && (
-                <div className="flex flex-col" style={{ gap: fs(8) }}>
+                <div data-tour="step-proposal" className="flex flex-col" style={{ gap: fs(8) }}>
                     <div
                         className="rounded-xl bg-white/70 border border-emerald-100"
                         style={{ padding: fs(10) }}
