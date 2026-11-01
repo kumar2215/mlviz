@@ -1,5 +1,17 @@
 {
     "display_name": "Training",
-    "pages": [],
-    "transitions": []
+    "pages": [
+        { "name": "Loss Functions", "page_type": "dynamic", "parameters": {} },
+        { "name": "Chain Rule", "page_type": "dynamic", "parameters": {} },
+        { "name": "Backward Propagation", "page_type": "dynamic", "parameters": {} },
+        { "name": "Gradient Descent Updates", "page_type": "dynamic", "parameters": {} }
+    ],
+    "transitions": [
+        { "from": 0, "to": 1, "condition": { "condition_type": "Bypass", "name": "Chain rule" } },
+        { "from": 1, "to": 0, "condition": { "condition_type": "Bypass", "name": "Loss functions" } },
+        { "from": 1, "to": 2, "condition": { "condition_type": "Bypass", "name": "Backward propagation" } },
+        { "from": 2, "to": 1, "condition": { "condition_type": "Bypass", "name": "Chain rule" } },
+        { "from": 2, "to": 3, "condition": { "condition_type": "Bypass", "name": "Gradient updates" } },
+        { "from": 3, "to": 2, "condition": { "condition_type": "Bypass", "name": "Backward propagation" } }
+    ]
 }

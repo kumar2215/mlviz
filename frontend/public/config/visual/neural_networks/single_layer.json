@@ -1,5 +1,17 @@
 {
     "display_name": "Single Layer",
-    "pages": [],
-    "transitions": []
+    "pages": [
+        { "name": "Single Layer Computation", "page_type": "dynamic", "parameters": {} },
+        { "name": "Scores and Probabilities", "page_type": "dynamic", "parameters": {} },
+        { "name": "Language Identification", "page_type": "dynamic", "parameters": {} },
+        { "name": "Feature Contributions", "page_type": "dynamic", "parameters": {} }
+    ],
+    "transitions": [
+        { "from": 0, "to": 1, "condition": { "condition_type": "Bypass", "name": "Scores and probabilities" } },
+        { "from": 1, "to": 0, "condition": { "condition_type": "Bypass", "name": "Layer computation" } },
+        { "from": 1, "to": 2, "condition": { "condition_type": "Bypass", "name": "Language identification" } },
+        { "from": 2, "to": 1, "condition": { "condition_type": "Bypass", "name": "Scores and probabilities" } },
+        { "from": 2, "to": 3, "condition": { "condition_type": "Bypass", "name": "Feature contributions" } },
+        { "from": 3, "to": 2, "condition": { "condition_type": "Bypass", "name": "Language identification" } }
+    ]
 }

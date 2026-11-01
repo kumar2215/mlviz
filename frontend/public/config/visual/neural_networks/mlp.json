@@ -1,5 +1,20 @@
 {
     "display_name": "Multi-Layer Perceptron",
-    "pages": [],
-    "transitions": []
+    "pages": [
+        { "name": "Why Nonlinearity", "page_type": "dynamic", "parameters": {} },
+        { "name": "Activation Functions", "page_type": "dynamic", "parameters": {} },
+        { "name": "Forward Computation", "page_type": "dynamic", "parameters": {} },
+        { "name": "Dropout Masks", "page_type": "dynamic", "parameters": {} },
+        { "name": "Dropout Variants", "page_type": "dynamic", "parameters": {} }
+    ],
+    "transitions": [
+        { "from": 0, "to": 1, "condition": { "condition_type": "Bypass", "name": "Activation functions" } },
+        { "from": 1, "to": 0, "condition": { "condition_type": "Bypass", "name": "XOR and nonlinearity" } },
+        { "from": 1, "to": 2, "condition": { "condition_type": "Bypass", "name": "Forward computation" } },
+        { "from": 2, "to": 1, "condition": { "condition_type": "Bypass", "name": "Activation functions" } },
+        { "from": 2, "to": 3, "condition": { "condition_type": "Bypass", "name": "Dropout masks" } },
+        { "from": 3, "to": 2, "condition": { "condition_type": "Bypass", "name": "Forward computation" } },
+        { "from": 3, "to": 4, "condition": { "condition_type": "Bypass", "name": "Dropout variants" } },
+        { "from": 4, "to": 3, "condition": { "condition_type": "Bypass", "name": "Dropout masks" } }
+    ]
 }

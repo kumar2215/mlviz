@@ -1847,6 +1847,170 @@
         }
       }
     },
+    "/api/neural_networks/perceptron": {
+      "post": {
+        "tags": [
+          "Neural Networks"
+        ],
+        "summary": "Perceptron",
+        "operationId": "perceptron_api_neural_networks_perceptron_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerceptronRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerceptronResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neural_networks/single_layer": {
+      "post": {
+        "tags": [
+          "Neural Networks"
+        ],
+        "summary": "Single Layer",
+        "operationId": "single_layer_api_neural_networks_single_layer_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SingleLayerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleLayerResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neural_networks/mlp": {
+      "post": {
+        "tags": [
+          "Neural Networks"
+        ],
+        "summary": "Mlp",
+        "operationId": "mlp_api_neural_networks_mlp_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MlpRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MlpResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/neural_networks/training": {
+      "post": {
+        "tags": [
+          "Neural Networks"
+        ],
+        "summary": "Training",
+        "operationId": "training_api_neural_networks_training_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrainingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrainingResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health Check",
@@ -1867,6 +2031,38 @@
   },
   "components": {
     "schemas": {
+      "ActivationValue": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "enum": [
+              "linear",
+              "sigmoid",
+              "tanh",
+              "hard tanh",
+              "ReLU",
+              "softmax"
+            ],
+            "title": "Name"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "derivative": {
+            "type": "number",
+            "title": "Derivative"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "value",
+          "derivative"
+        ],
+        "title": "ActivationValue"
+      },
       "AnyParameterInfo": {
         "properties": {
           "name": {
@@ -5609,6 +5805,341 @@
         "title": "ManualTreeEvaluateResponse",
         "description": "Response containing evaluation metrics for a manual tree."
       },
+      "MlpComputation": {
+        "properties": {
+          "network": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Network"
+          },
+          "trace": {
+            "$ref": "#/components/schemas/NeuralTrace"
+          },
+          "selected": {
+            "$ref": "#/components/schemas/ParameterSelection"
+          },
+          "z": {
+            "type": "number",
+            "title": "Z"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/NeuralGrid"
+          },
+          "predictions": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralPrediction"
+            },
+            "type": "array",
+            "title": "Predictions"
+          },
+          "correct": {
+            "type": "integer",
+            "title": "Correct"
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss"
+          },
+          "curves": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralCurve"
+            },
+            "type": "array",
+            "title": "Curves"
+          },
+          "layerCurves": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralCurve"
+            },
+            "type": "array",
+            "title": "Layercurves"
+          },
+          "activations": {
+            "items": {
+              "$ref": "#/components/schemas/ActivationValue"
+            },
+            "type": "array",
+            "title": "Activations"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "network",
+          "trace",
+          "selected",
+          "z",
+          "boundary",
+          "predictions",
+          "correct",
+          "loss",
+          "curves",
+          "layerCurves",
+          "activations"
+        ],
+        "title": "MlpComputation"
+      },
+      "MlpData": {
+        "properties": {
+          "network": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Network"
+          },
+          "input": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Input"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed"
+          },
+          "hidden": {
+            "items": {
+              "type": "integer",
+              "maximum": 4.0,
+              "minimum": 2.0
+            },
+            "type": "array",
+            "maxItems": 3,
+            "minItems": 1,
+            "title": "Hidden"
+          },
+          "activation": {
+            "type": "string",
+            "enum": [
+              "linear",
+              "sigmoid",
+              "tanh",
+              "hard tanh",
+              "ReLU",
+              "softmax"
+            ],
+            "title": "Activation"
+          },
+          "selected": {
+            "$ref": "#/components/schemas/ParameterSelection"
+          },
+          "forwardPhase": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Forwardphase"
+          },
+          "xorMode": {
+            "type": "string",
+            "enum": [
+              "single",
+              "linear",
+              "nonlinear"
+            ],
+            "title": "Xormode"
+          },
+          "single": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Single"
+          },
+          "rate": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": 0.001,
+            "title": "Rate"
+          },
+          "history": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 1000,
+            "title": "History"
+          },
+          "playing": {
+            "type": "boolean",
+            "title": "Playing"
+          },
+          "dropoutP": {
+            "type": "number",
+            "maximum": 0.9,
+            "minimum": 0.0,
+            "title": "Dropoutp"
+          },
+          "mask": {
+            "items": {
+              "items": {
+                "type": "number",
+                "maximum": 100000000.0,
+                "minimum": -100000000.0
+              },
+              "type": "array",
+              "maxItems": 40,
+              "minItems": 1
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Mask"
+          },
+          "dropoutValues": {
+            "items": {
+              "items": {
+                "type": "number",
+                "maximum": 100000000.0,
+                "minimum": -100000000.0
+              },
+              "type": "array",
+              "maxItems": 40,
+              "minItems": 1
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Dropoutvalues"
+          },
+          "dropoutVariant": {
+            "type": "string",
+            "enum": [
+              "element",
+              "feature"
+            ],
+            "title": "Dropoutvariant"
+          },
+          "training": {
+            "type": "boolean",
+            "title": "Training"
+          },
+          "maskSeed": {
+            "type": "integer",
+            "title": "Maskseed"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "network",
+          "input",
+          "seed",
+          "hidden",
+          "activation",
+          "selected",
+          "forwardPhase",
+          "xorMode",
+          "single",
+          "rate",
+          "history",
+          "playing",
+          "dropoutP",
+          "mask",
+          "dropoutValues",
+          "dropoutVariant",
+          "training",
+          "maskSeed",
+          "message"
+        ],
+        "title": "MlpData"
+      },
+      "MlpRequest": {
+        "properties": {
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MlpData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "$ref": "#/components/schemas/NeuralCommand"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "MlpRequest"
+      },
+      "MlpResponse": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/MlpData"
+          },
+          "result": {
+            "$ref": "#/components/schemas/MlpResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "result"
+        ],
+        "title": "MlpResponse"
+      },
+      "MlpResult": {
+        "properties": {
+          "single": {
+            "$ref": "#/components/schemas/MlpComputation"
+          },
+          "multi": {
+            "$ref": "#/components/schemas/MlpComputation"
+          },
+          "dropped": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Dropped"
+          },
+          "scale": {
+            "type": "number",
+            "title": "Scale"
+          },
+          "keep": {
+            "type": "number",
+            "title": "Keep"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "single",
+          "multi",
+          "dropped",
+          "scale",
+          "keep"
+        ],
+        "title": "MlpResult"
+      },
       "NeighborInfo": {
         "properties": {
           "index": {
@@ -5644,6 +6175,390 @@
         ],
         "title": "NeighborInfo",
         "description": "Information about a single neighbor."
+      },
+      "NeuralAnalysis": {
+        "properties": {
+          "a": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "A"
+          },
+          "z": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Z"
+          },
+          "loss": {
+            "type": "number",
+            "title": "Loss"
+          },
+          "gradients": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralGradient"
+            },
+            "type": "array",
+            "title": "Gradients"
+          },
+          "deltas": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Deltas"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "a",
+          "z",
+          "loss",
+          "gradients",
+          "deltas"
+        ],
+        "title": "NeuralAnalysis"
+      },
+      "NeuralCommand": {
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "evaluate",
+              "reset",
+              "initialize",
+              "learn",
+              "train",
+              "apply",
+              "architecture",
+              "solution",
+              "mask",
+              "toggle",
+              "parameter",
+              "sample",
+              "score",
+              "shift"
+            ],
+            "title": "Action",
+            "default": "evaluate"
+          },
+          "selection": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParameterSelection"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "value": {
+            "type": "number",
+            "maximum": 100000000.0,
+            "minimum": -100000000.0,
+            "title": "Value",
+            "default": 0
+          },
+          "index": {
+            "type": "integer",
+            "maximum": 39.0,
+            "minimum": 0.0,
+            "title": "Index",
+            "default": 0
+          },
+          "language": {
+            "type": "boolean",
+            "title": "Language",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "NeuralCommand"
+      },
+      "NeuralCurve": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "points": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Points"
+          },
+          "marker": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Marker"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "points"
+        ],
+        "title": "NeuralCurve"
+      },
+      "NeuralGradient": {
+        "properties": {
+          "weights": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Weights"
+          },
+          "biases": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Biases"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "weights",
+          "biases"
+        ],
+        "title": "NeuralGradient"
+      },
+      "NeuralGrid": {
+        "properties": {
+          "values": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Values"
+          },
+          "oldValues": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldvalues"
+          },
+          "n": {
+            "type": "integer",
+            "title": "N"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "values",
+          "n"
+        ],
+        "title": "NeuralGrid"
+      },
+      "NeuralLayer": {
+        "properties": {
+          "weights": {
+            "items": {
+              "items": {
+                "type": "number",
+                "maximum": 100000000.0,
+                "minimum": -100000000.0
+              },
+              "type": "array",
+              "maxItems": 40,
+              "minItems": 1
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Weights"
+          },
+          "biases": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Biases"
+          },
+          "activation": {
+            "type": "string",
+            "enum": [
+              "linear",
+              "sigmoid",
+              "tanh",
+              "hard tanh",
+              "ReLU",
+              "softmax"
+            ],
+            "title": "Activation"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "weights",
+          "biases",
+          "activation"
+        ],
+        "title": "NeuralLayer"
+      },
+      "NeuralObjective": {
+        "properties": {
+          "loss": {
+            "type": "number",
+            "title": "Loss"
+          },
+          "gradients": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralGradient"
+            },
+            "type": "array",
+            "title": "Gradients"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "loss",
+          "gradients"
+        ],
+        "title": "NeuralObjective"
+      },
+      "NeuralPrediction": {
+        "properties": {
+          "x": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X"
+          },
+          "y": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y"
+          },
+          "output": {
+            "type": "number",
+            "title": "Output"
+          },
+          "prediction": {
+            "type": "integer",
+            "title": "Prediction"
+          },
+          "correct": {
+            "type": "boolean",
+            "title": "Correct"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "x",
+          "y",
+          "output",
+          "prediction",
+          "correct"
+        ],
+        "title": "NeuralPrediction"
+      },
+      "NeuralSample": {
+        "properties": {
+          "x": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X"
+          },
+          "y": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Y"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "x",
+          "y"
+        ],
+        "title": "NeuralSample"
+      },
+      "NeuralTrace": {
+        "properties": {
+          "a": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "A"
+          },
+          "z": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Z"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "a",
+          "z"
+        ],
+        "title": "NeuralTrace"
       },
       "NodeStatistics": {
         "properties": {
@@ -5741,6 +6656,345 @@
         ],
         "title": "NumberParameterInfo",
         "description": "Number parameter with optional range and step."
+      },
+      "ParameterSelection": {
+        "properties": {
+          "layer": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Layer"
+          },
+          "row": {
+            "type": "integer",
+            "maximum": 39.0,
+            "minimum": 0.0,
+            "title": "Row"
+          },
+          "column": {
+            "type": "integer",
+            "maximum": 39.0,
+            "minimum": -1.0,
+            "title": "Column"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "layer",
+          "row",
+          "column"
+        ],
+        "title": "ParameterSelection"
+      },
+      "ParameterUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "grad": {
+            "type": "number",
+            "title": "Grad"
+          },
+          "change": {
+            "type": "number",
+            "title": "Change"
+          },
+          "proposed": {
+            "type": "number",
+            "title": "Proposed"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "value",
+          "grad",
+          "change",
+          "proposed"
+        ],
+        "title": "ParameterUpdate"
+      },
+      "PerceptronData": {
+        "properties": {
+          "network": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Network"
+          },
+          "input": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Input"
+          },
+          "target": {
+            "type": "number",
+            "maximum": 100000000.0,
+            "minimum": -100000000.0,
+            "title": "Target"
+          },
+          "output": {
+            "type": "string",
+            "enum": [
+              "step",
+              "sigmoid"
+            ],
+            "title": "Output"
+          },
+          "threshold": {
+            "type": "number",
+            "exclusiveMaximum": 1.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Threshold"
+          },
+          "phase": {
+            "type": "integer",
+            "maximum": 4.0,
+            "minimum": 0.0,
+            "title": "Phase"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed"
+          },
+          "rate": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": 0.001,
+            "title": "Rate"
+          },
+          "gate": {
+            "type": "string",
+            "enum": [
+              "AND",
+              "OR",
+              "XOR"
+            ],
+            "title": "Gate"
+          },
+          "sample": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Sample"
+          },
+          "custom": {
+            "type": "boolean",
+            "title": "Custom"
+          },
+          "playing": {
+            "type": "boolean",
+            "title": "Playing"
+          },
+          "history": {
+            "items": {
+              "$ref": "#/components/schemas/PerceptronUpdate"
+            },
+            "type": "array",
+            "maxItems": 1000,
+            "title": "History"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "network",
+          "input",
+          "target",
+          "output",
+          "threshold",
+          "phase",
+          "seed",
+          "rate",
+          "gate",
+          "sample",
+          "custom",
+          "playing",
+          "history"
+        ],
+        "title": "PerceptronData"
+      },
+      "PerceptronRequest": {
+        "properties": {
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PerceptronData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "$ref": "#/components/schemas/NeuralCommand"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "PerceptronRequest"
+      },
+      "PerceptronResponse": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/PerceptronData"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PerceptronResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "result"
+        ],
+        "title": "PerceptronResponse"
+      },
+      "PerceptronResult": {
+        "properties": {
+          "z": {
+            "type": "number",
+            "title": "Z"
+          },
+          "output": {
+            "type": "number",
+            "title": "Output"
+          },
+          "prediction": {
+            "type": "integer",
+            "title": "Prediction"
+          },
+          "step": {
+            "type": "integer",
+            "title": "Step"
+          },
+          "sigmoid": {
+            "type": "number",
+            "title": "Sigmoid"
+          },
+          "equations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Equations"
+          },
+          "samples": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralSample"
+            },
+            "type": "array",
+            "title": "Samples"
+          },
+          "correct": {
+            "type": "integer",
+            "title": "Correct"
+          },
+          "boundary": {
+            "$ref": "#/components/schemas/NeuralGrid"
+          },
+          "hardBoundary": {
+            "$ref": "#/components/schemas/NeuralGrid"
+          },
+          "curves": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralCurve"
+            },
+            "type": "array",
+            "title": "Curves"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "z",
+          "output",
+          "prediction",
+          "step",
+          "sigmoid",
+          "equations",
+          "samples",
+          "correct",
+          "boundary",
+          "hardBoundary",
+          "curves"
+        ],
+        "title": "PerceptronResult"
+      },
+      "PerceptronUpdate": {
+        "properties": {
+          "iteration": {
+            "type": "integer",
+            "title": "Iteration"
+          },
+          "x": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "X"
+          },
+          "target": {
+            "type": "number",
+            "title": "Target"
+          },
+          "prediction": {
+            "type": "integer",
+            "title": "Prediction"
+          },
+          "error": {
+            "type": "number",
+            "title": "Error"
+          },
+          "before": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Before"
+          },
+          "after": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "After"
+          },
+          "rate": {
+            "type": "number",
+            "title": "Rate"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "iteration",
+          "x",
+          "target",
+          "prediction",
+          "error",
+          "before",
+          "after",
+          "rate"
+        ],
+        "title": "PerceptronUpdate"
       },
       "PorterAnswer": {
         "properties": {
@@ -7356,6 +8610,264 @@
         "title": "SelectParameterInfo",
         "description": "Select parameter with predefined options."
       },
+      "SingleComputation": {
+        "properties": {
+          "input": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Input"
+          },
+          "trace": {
+            "$ref": "#/components/schemas/NeuralTrace"
+          },
+          "scores": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Scores"
+          },
+          "probabilities": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Probabilities"
+          },
+          "labels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Labels"
+          },
+          "row": {
+            "type": "integer",
+            "title": "Row"
+          },
+          "winner": {
+            "type": "integer",
+            "title": "Winner"
+          },
+          "sums": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Sums"
+          },
+          "contributions": {
+            "items": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
+            },
+            "type": "array",
+            "title": "Contributions"
+          },
+          "shifted": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Shifted"
+          },
+          "exponentials": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Exponentials"
+          },
+          "difference": {
+            "type": "number",
+            "title": "Difference"
+          },
+          "binaryOutput": {
+            "type": "number",
+            "title": "Binaryoutput"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "input",
+          "trace",
+          "scores",
+          "probabilities",
+          "labels",
+          "row",
+          "winner",
+          "sums",
+          "contributions",
+          "shifted",
+          "exponentials",
+          "difference",
+          "binaryOutput"
+        ],
+        "title": "SingleComputation"
+      },
+      "SingleLayerData": {
+        "properties": {
+          "network": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Network"
+          },
+          "languageNetwork": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Languagenetwork"
+          },
+          "input": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Input"
+          },
+          "row": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Row"
+          },
+          "phase": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Phase"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 10000,
+            "title": "Text"
+          },
+          "languageMode": {
+            "type": "string",
+            "enum": [
+              "binary",
+              "multi"
+            ],
+            "title": "Languagemode"
+          },
+          "decision": {
+            "type": "string",
+            "enum": [
+              "step",
+              "sigmoid"
+            ],
+            "title": "Decision"
+          },
+          "feature": {
+            "type": "integer",
+            "maximum": 34.0,
+            "minimum": 0.0,
+            "title": "Feature"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "network",
+          "languageNetwork",
+          "input",
+          "row",
+          "phase",
+          "seed",
+          "text",
+          "languageMode",
+          "decision",
+          "feature"
+        ],
+        "title": "SingleLayerData"
+      },
+      "SingleLayerRequest": {
+        "properties": {
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SingleLayerData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "$ref": "#/components/schemas/NeuralCommand"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SingleLayerRequest"
+      },
+      "SingleLayerResponse": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/SingleLayerData"
+          },
+          "result": {
+            "$ref": "#/components/schemas/SingleLayerResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "result"
+        ],
+        "title": "SingleLayerResponse"
+      },
+      "SingleLayerResult": {
+        "properties": {
+          "numeric": {
+            "$ref": "#/components/schemas/SingleComputation"
+          },
+          "language": {
+            "$ref": "#/components/schemas/SingleComputation"
+          },
+          "counts": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Counts"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "numeric",
+          "language",
+          "counts",
+          "total"
+        ],
+        "title": "SingleLayerResult"
+      },
       "SplitNode-Input": {
         "properties": {
           "samples": {
@@ -7693,6 +9205,314 @@
         ],
         "title": "ThresholdStatistics",
         "description": "Statistics for a single threshold value."
+      },
+      "TrainingData": {
+        "properties": {
+          "network": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Network"
+          },
+          "seed": {
+            "type": "integer",
+            "title": "Seed"
+          },
+          "input": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Input"
+          },
+          "target": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Target"
+          },
+          "loss": {
+            "type": "string",
+            "enum": [
+              "MSE",
+              "MAE",
+              "Binary cross-entropy"
+            ],
+            "title": "Loss"
+          },
+          "rate": {
+            "type": "number",
+            "maximum": 3.0,
+            "minimum": 0.001,
+            "title": "Rate"
+          },
+          "phase": {
+            "type": "integer",
+            "maximum": 3.0,
+            "minimum": 0.0,
+            "title": "Phase"
+          },
+          "selected": {
+            "$ref": "#/components/schemas/ParameterSelection"
+          },
+          "batch": {
+            "type": "boolean",
+            "title": "Batch"
+          },
+          "history": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 1001,
+            "title": "History"
+          },
+          "playing": {
+            "type": "boolean",
+            "title": "Playing"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "explorerLoss": {
+            "type": "string",
+            "enum": [
+              "MSE",
+              "MAE",
+              "Binary cross-entropy",
+              "Categorical cross-entropy"
+            ],
+            "title": "Explorerloss"
+          },
+          "lossPrediction": {
+            "type": "number",
+            "maximum": 100000000.0,
+            "minimum": -100000000.0,
+            "title": "Lossprediction"
+          },
+          "lossTarget": {
+            "type": "number",
+            "maximum": 100000000.0,
+            "minimum": -100000000.0,
+            "title": "Losstarget"
+          },
+          "lossClass": {
+            "type": "integer",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Lossclass"
+          },
+          "lossScores": {
+            "items": {
+              "type": "number",
+              "maximum": 100000000.0,
+              "minimum": -100000000.0
+            },
+            "type": "array",
+            "maxItems": 40,
+            "minItems": 1,
+            "title": "Lossscores"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "network",
+          "seed",
+          "input",
+          "target",
+          "loss",
+          "rate",
+          "phase",
+          "selected",
+          "batch",
+          "history",
+          "playing",
+          "message",
+          "explorerLoss",
+          "lossPrediction",
+          "lossTarget",
+          "lossClass",
+          "lossScores"
+        ],
+        "title": "TrainingData"
+      },
+      "TrainingRequest": {
+        "properties": {
+          "state": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TrainingData"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "command": {
+            "$ref": "#/components/schemas/NeuralCommand"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "TrainingRequest"
+      },
+      "TrainingResponse": {
+        "properties": {
+          "state": {
+            "$ref": "#/components/schemas/TrainingData"
+          },
+          "result": {
+            "$ref": "#/components/schemas/TrainingResult"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "state",
+          "result"
+        ],
+        "title": "TrainingResponse"
+      },
+      "TrainingResult": {
+        "properties": {
+          "analysis": {
+            "$ref": "#/components/schemas/NeuralAnalysis"
+          },
+          "batch": {
+            "$ref": "#/components/schemas/NeuralObjective"
+          },
+          "proposed": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralLayer"
+            },
+            "type": "array",
+            "maxItems": 4,
+            "minItems": 1,
+            "title": "Proposed"
+          },
+          "afterLoss": {
+            "type": "number",
+            "title": "Afterloss"
+          },
+          "value": {
+            "type": "number",
+            "title": "Value"
+          },
+          "grad": {
+            "type": "number",
+            "title": "Grad"
+          },
+          "sampleGrad": {
+            "type": "number",
+            "title": "Samplegrad"
+          },
+          "incoming": {
+            "type": "number",
+            "title": "Incoming"
+          },
+          "delta": {
+            "type": "number",
+            "title": "Delta"
+          },
+          "derivative": {
+            "type": "number",
+            "title": "Derivative"
+          },
+          "paths": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Paths"
+          },
+          "updatedValue": {
+            "type": "number",
+            "title": "Updatedvalue"
+          },
+          "updates": {
+            "items": {
+              "$ref": "#/components/schemas/ParameterUpdate"
+            },
+            "type": "array",
+            "title": "Updates"
+          },
+          "probabilities": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Probabilities"
+          },
+          "target": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Target"
+          },
+          "contributions": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Contributions"
+          },
+          "explorerValue": {
+            "type": "number",
+            "title": "Explorervalue"
+          },
+          "formula": {
+            "type": "string",
+            "title": "Formula"
+          },
+          "curves": {
+            "items": {
+              "$ref": "#/components/schemas/NeuralCurve"
+            },
+            "type": "array",
+            "title": "Curves"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "analysis",
+          "batch",
+          "proposed",
+          "afterLoss",
+          "value",
+          "grad",
+          "sampleGrad",
+          "incoming",
+          "delta",
+          "derivative",
+          "paths",
+          "updatedValue",
+          "updates",
+          "probabilities",
+          "target",
+          "contributions",
+          "explorerValue",
+          "formula",
+          "curves"
+        ],
+        "title": "TrainingResult"
       },
       "ValidationError": {
         "properties": {

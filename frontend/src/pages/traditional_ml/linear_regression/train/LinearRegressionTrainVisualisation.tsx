@@ -108,9 +108,9 @@ export default function LinearRegressionTrainVisualisation() {
     }
     
     return (
-        <div className="relative h-full w-full">
+        <div data-tour-ready="true" className="relative h-full w-full">
             {/* Line control HUD */}
-            <div className="absolute top-6 right-6 z-20">
+            <div data-tour-corner className="absolute top-6 right-6 z-20">
                 <LineControlHUD />
             </div>
 

@@ -7,6 +7,7 @@ import { filterParameters } from "@/utils/conditions";
 import type { ModelSelectorHook } from "@/types/modelStore";
 import { useShallow } from "zustand/react/shallow";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { captureTourAction } from "@/store/tourStore";
 
 export default function useTrain(useModel: ModelSelectorHook, setShowAlert: (show: boolean) => void, parameters: Parameters) {
     const isLoading = useModel(state => state.isLoading);
@@ -74,7 +75,9 @@ export default function useTrain(useModel: ModelSelectorHook, setShowAlert: (sho
 
 
     const handleTrainModel = async () => {
+        const finishTourAction = captureTourAction("train");
         const result = await train(trainingParams);
+        finishTourAction(Boolean(result));
         updateParams({ trainParams: trainingParams });
         recordTrain(trainingParams, (result as any)?.metrics);
         setShowAlert(true);

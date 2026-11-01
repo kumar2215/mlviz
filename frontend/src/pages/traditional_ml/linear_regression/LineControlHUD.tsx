@@ -8,7 +8,8 @@ import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
 import { useLinearRegression } from "@/store/traditional_ml/useLinearRegression";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import { TrendingUp } from "lucide-react";
-import React, { useId } from "react";
+import React, { useId, useRef } from "react";
+import { captureTourAction } from "@/store/tourStore";
 
 interface LineControlHUDProps {
     /** Override intercept slider range (defaults to data-derived) */
@@ -48,9 +49,20 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
     const iStep = (iMax - iMin) / 1000;
 
     const fs = (n: number) => `${n * scaleFactor}px`;
+    const lineChange = useRef<ReturnType<typeof captureTourAction> | null>(null);
+    const changeLine = (slope: number, intercept: number) => {
+        if (slope !== currentSlope || intercept !== currentIntercept) lineChange.current = captureTourAction("line");
+        setCurrentLine(slope, intercept);
+    };
+    const commitLine = (slope: number, intercept: number) => {
+        evaluateLine(slope, intercept);
+        lineChange.current?.();
+        lineChange.current = null;
+    };
 
     return (
         <CollapsibleHUD
+            tourTarget="line-controls"
             icon={
                 <TrendingUp
                     style={{ width: fs(14), height: fs(14) }}
@@ -88,14 +100,15 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                     step={iStep}
                     value={currentIntercept}
                     onChange={(e) =>
-                        setCurrentLine(currentSlope, parseFloat(e.target.value))
+                        changeLine(currentSlope, parseFloat(e.target.value))
                     }
                     onMouseUp={() =>
-                        evaluateLine(currentSlope, currentIntercept)
+                        commitLine(currentSlope, currentIntercept)
                     }
                     onTouchEnd={() =>
-                        evaluateLine(currentSlope, currentIntercept)
+                        commitLine(currentSlope, currentIntercept)
                     }
+                    onKeyUp={() => commitLine(currentSlope, currentIntercept)}
                     className="w-full accent-blue-500"
                 />
             </div>
@@ -124,8 +137,8 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                 </div>
                 <RadialSlopeSlider
                     slope={currentSlope}
-                    onSlopeChange={(s) => setCurrentLine(s, currentIntercept)}
-                    onSlopeChangeEnd={(s) => evaluateLine(s, currentIntercept)}
+                    onSlopeChange={(s) => changeLine(s, currentIntercept)}
+                    onSlopeChangeEnd={(s) => commitLine(s, currentIntercept)}
                     xSpan={xSpan}
                     ySpan={ySpan}
                     size={Math.round(230 * scaleFactor)}

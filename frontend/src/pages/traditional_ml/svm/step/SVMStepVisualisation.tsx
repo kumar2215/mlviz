@@ -163,7 +163,7 @@ export default function SVMStepVisualisation() {
     }
 
     return (
-        <div className="relative h-full w-full">
+        <div data-tour-ready="true" className="relative h-full w-full">
             {/* SVM step control — right side */}
             <div className="absolute top-18 left-6 z-20">
                 <SVMStepHUD

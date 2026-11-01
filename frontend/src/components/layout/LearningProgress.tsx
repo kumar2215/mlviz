@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useProgress } from "@/store/useProgress";
-import { activeBucket } from "@/store/progressStore";
 import useLearningSummary from "@/hooks/useLearningSummary";
 
 export function LearnerSummary({ compact = false }: { compact?: boolean }) {
@@ -17,15 +16,14 @@ export function LearnerSummary({ compact = false }: { compact?: boolean }) {
 export function LearningSaveStatus({ className = "" }: { className?: string }) {
     const storageError = useProgress(state => state.storageError);
     const syncError = useProgress(state => state.syncError);
-    const syncing = useProgress(state => state.syncing);
     const remoteReady = useProgress(state => state.remoteReady);
     const owner = useProgress(state => state.owner);
-    const pending = useProgress(state => activeBucket(state).pending.length);
     const retry = useProgress(state => state.retry);
     const error = storageError || syncError;
-    if (!owner && !error) return null;
+    const message = error || (owner && !remoteReady ? "Restoring account progress…" : null);
+    if (!message) return null;
     return <div className={`space-y-2 text-xs leading-relaxed ${className}`}>
-        <p role={error ? "alert" : undefined} className={error ? "text-amber-900" : "text-blue-900"}>{error || (!remoteReady ? "Restoring account progress…" : syncing || pending ? "Saved on this device · syncing with your account…" : "Progress saved on this device and synced with your account.")}</p>
+        <p role={error ? "alert" : undefined} className={error ? "text-amber-900" : "text-blue-900"}>{message}</p>
         {error && <Button type="button" variant="outline" size="sm" onClick={retry}>Retry saving progress</Button>}
     </div>;
 }
@@ -39,6 +37,6 @@ export function RewardNotice() {
         return () => clearTimeout(timer);
     }, [notice, dismiss]);
     return <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed bottom-5 left-1/2 z-50 max-w-[90vw] -translate-x-1/2">
-        {notice && <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-950 shadow-lg"><Sparkles aria-hidden="true" className="size-5 shrink-0" /><span>{notice.text}</span><button type="button" onClick={dismiss} aria-label="Dismiss XP reward" className="rounded p-1 focus-visible:outline-2"><X className="size-4" /></button></div>}
+        {notice && notice.level === undefined && <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-950 shadow-lg"><Sparkles aria-hidden="true" className="size-5 shrink-0" /><span>{notice.text}</span><button type="button" onClick={dismiss} aria-label="Dismiss XP reward" className="rounded p-1 focus-visible:outline-2"><X className="size-4" /></button></div>}
     </div>;
 }

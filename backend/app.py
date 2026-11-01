@@ -4,7 +4,7 @@ from fastapi.responses import RedirectResponse
 import uvicorn
 
 from core.config import settings
-from api import bpe, decision_tree, dataset, knn, kmeans, linear_regression, svm, tokenization
+from api import bpe, decision_tree, dataset, knn, kmeans, linear_regression, svm, tokenization, neural_networks
 
 app = FastAPI(
     title="MLviz",
@@ -45,6 +45,7 @@ app.include_router(svm.router, prefix="/api/svm",
                    tags=["Support Vector Machine"])
 app.include_router(bpe.router, prefix="/api/bpe", tags=["Byte Pair Encoding"])
 app.include_router(tokenization.router, prefix="/api/tokenization", tags=["Tokenization"])
+app.include_router(neural_networks.router, prefix="/api/neural_networks", tags=["Neural Networks"])
 
 
 @app.get("/", include_in_schema=False)

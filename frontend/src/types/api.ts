@@ -1075,6 +1075,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/neural_networks/perceptron": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Perceptron */
+        post: operations["perceptron_api_neural_networks_perceptron_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neural_networks/single_layer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Single Layer */
+        post: operations["single_layer_api_neural_networks_single_layer_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neural_networks/mlp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Mlp */
+        post: operations["mlp_api_neural_networks_mlp_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/neural_networks/training": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Training */
+        post: operations["training_api_neural_networks_training_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -1099,6 +1167,18 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** ActivationValue */
+        ActivationValue: {
+            /**
+             * Name
+             * @enum {string}
+             */
+            name: "linear" | "sigmoid" | "tanh" | "hard tanh" | "ReLU" | "softmax";
+            /** Value */
+            value: number;
+            /** Derivative */
+            derivative: number;
+        };
         /**
          * AnyParameterInfo
          * @description Any type parameter.
@@ -2724,6 +2804,98 @@ export interface components {
             /** @description Classifier metadata including feature and class information */
             metadata: components["schemas"]["ClassificationMetadata"];
         };
+        /** MlpComputation */
+        MlpComputation: {
+            /** Network */
+            network: components["schemas"]["NeuralLayer"][];
+            trace: components["schemas"]["NeuralTrace"];
+            selected: components["schemas"]["ParameterSelection"];
+            /** Z */
+            z: number;
+            boundary: components["schemas"]["NeuralGrid"];
+            /** Predictions */
+            predictions: components["schemas"]["NeuralPrediction"][];
+            /** Correct */
+            correct: number;
+            /** Loss */
+            loss: number;
+            /** Curves */
+            curves: components["schemas"]["NeuralCurve"][];
+            /** Layercurves */
+            layerCurves: components["schemas"]["NeuralCurve"][];
+            /** Activations */
+            activations: components["schemas"]["ActivationValue"][];
+        };
+        /** MlpData */
+        MlpData: {
+            /** Network */
+            network: components["schemas"]["NeuralLayer"][];
+            /** Input */
+            input: number[];
+            /** Seed */
+            seed: number;
+            /** Hidden */
+            hidden: number[];
+            /**
+             * Activation
+             * @enum {string}
+             */
+            activation: "linear" | "sigmoid" | "tanh" | "hard tanh" | "ReLU" | "softmax";
+            selected: components["schemas"]["ParameterSelection"];
+            /** Forwardphase */
+            forwardPhase: number;
+            /**
+             * Xormode
+             * @enum {string}
+             */
+            xorMode: "single" | "linear" | "nonlinear";
+            /** Single */
+            single: number[];
+            /** Rate */
+            rate: number;
+            /** History */
+            history: number[];
+            /** Playing */
+            playing: boolean;
+            /** Dropoutp */
+            dropoutP: number;
+            /** Mask */
+            mask: number[][];
+            /** Dropoutvalues */
+            dropoutValues: number[][];
+            /**
+             * Dropoutvariant
+             * @enum {string}
+             */
+            dropoutVariant: "element" | "feature";
+            /** Training */
+            training: boolean;
+            /** Maskseed */
+            maskSeed: number;
+            /** Message */
+            message: string;
+        };
+        /** MlpRequest */
+        MlpRequest: {
+            state?: components["schemas"]["MlpData"] | null;
+            command?: components["schemas"]["NeuralCommand"];
+        };
+        /** MlpResponse */
+        MlpResponse: {
+            state: components["schemas"]["MlpData"];
+            result: components["schemas"]["MlpResult"];
+        };
+        /** MlpResult */
+        MlpResult: {
+            single: components["schemas"]["MlpComputation"];
+            multi: components["schemas"]["MlpComputation"];
+            /** Dropped */
+            dropped: number[][];
+            /** Scale */
+            scale: number;
+            /** Keep */
+            keep: number;
+        };
         /**
          * NeighborInfo
          * @description Information about a single neighbor.
@@ -2749,6 +2921,115 @@ export interface components {
              * @description Feature values
              */
             coordinates: number[];
+        };
+        /** NeuralAnalysis */
+        NeuralAnalysis: {
+            /** A */
+            a: number[][];
+            /** Z */
+            z: number[][];
+            /** Loss */
+            loss: number;
+            /** Gradients */
+            gradients: components["schemas"]["NeuralGradient"][];
+            /** Deltas */
+            deltas: number[][];
+        };
+        /** NeuralCommand */
+        NeuralCommand: {
+            /**
+             * Action
+             * @default evaluate
+             * @enum {string}
+             */
+            action: "evaluate" | "reset" | "initialize" | "learn" | "train" | "apply" | "architecture" | "solution" | "mask" | "toggle" | "parameter" | "sample" | "score" | "shift";
+            selection?: components["schemas"]["ParameterSelection"] | null;
+            /**
+             * Value
+             * @default 0
+             */
+            value: number;
+            /**
+             * Index
+             * @default 0
+             */
+            index: number;
+            /**
+             * Language
+             * @default false
+             */
+            language: boolean;
+        };
+        /** NeuralCurve */
+        NeuralCurve: {
+            /** Name */
+            name: string;
+            /** Points */
+            points: number[][];
+            /** Marker */
+            marker?: number[] | null;
+        };
+        /** NeuralGradient */
+        NeuralGradient: {
+            /** Weights */
+            weights: number[][];
+            /** Biases */
+            biases: number[];
+        };
+        /** NeuralGrid */
+        NeuralGrid: {
+            /** Values */
+            values: number[];
+            /** Oldvalues */
+            oldValues?: number[] | null;
+            /** N */
+            n: number;
+        };
+        /** NeuralLayer */
+        NeuralLayer: {
+            /** Weights */
+            weights: number[][];
+            /** Biases */
+            biases: number[];
+            /**
+             * Activation
+             * @enum {string}
+             */
+            activation: "linear" | "sigmoid" | "tanh" | "hard tanh" | "ReLU" | "softmax";
+        };
+        /** NeuralObjective */
+        NeuralObjective: {
+            /** Loss */
+            loss: number;
+            /** Gradients */
+            gradients: components["schemas"]["NeuralGradient"][];
+        };
+        /** NeuralPrediction */
+        NeuralPrediction: {
+            /** X */
+            x: number[];
+            /** Y */
+            y: number[];
+            /** Output */
+            output: number;
+            /** Prediction */
+            prediction: number;
+            /** Correct */
+            correct: boolean;
+        };
+        /** NeuralSample */
+        NeuralSample: {
+            /** X */
+            x: number[];
+            /** Y */
+            y: number[];
+        };
+        /** NeuralTrace */
+        NeuralTrace: {
+            /** A */
+            a: number[][];
+            /** Z */
+            z: number[][];
         };
         /**
          * NodeStatistics
@@ -2790,6 +3071,115 @@ export interface components {
             max?: number | null;
             /** Step */
             step?: number | null;
+        };
+        /** ParameterSelection */
+        ParameterSelection: {
+            /** Layer */
+            layer: number;
+            /** Row */
+            row: number;
+            /** Column */
+            column: number;
+        };
+        /** ParameterUpdate */
+        ParameterUpdate: {
+            /** Name */
+            name: string;
+            /** Value */
+            value: number;
+            /** Grad */
+            grad: number;
+            /** Change */
+            change: number;
+            /** Proposed */
+            proposed: number;
+        };
+        /** PerceptronData */
+        PerceptronData: {
+            /** Network */
+            network: components["schemas"]["NeuralLayer"][];
+            /** Input */
+            input: number[];
+            /** Target */
+            target: number;
+            /**
+             * Output
+             * @enum {string}
+             */
+            output: "step" | "sigmoid";
+            /** Threshold */
+            threshold: number;
+            /** Phase */
+            phase: number;
+            /** Seed */
+            seed: number;
+            /** Rate */
+            rate: number;
+            /**
+             * Gate
+             * @enum {string}
+             */
+            gate: "AND" | "OR" | "XOR";
+            /** Sample */
+            sample: number;
+            /** Custom */
+            custom: boolean;
+            /** Playing */
+            playing: boolean;
+            /** History */
+            history: components["schemas"]["PerceptronUpdate"][];
+        };
+        /** PerceptronRequest */
+        PerceptronRequest: {
+            state?: components["schemas"]["PerceptronData"] | null;
+            command?: components["schemas"]["NeuralCommand"];
+        };
+        /** PerceptronResponse */
+        PerceptronResponse: {
+            state: components["schemas"]["PerceptronData"];
+            result: components["schemas"]["PerceptronResult"];
+        };
+        /** PerceptronResult */
+        PerceptronResult: {
+            /** Z */
+            z: number;
+            /** Output */
+            output: number;
+            /** Prediction */
+            prediction: number;
+            /** Step */
+            step: number;
+            /** Sigmoid */
+            sigmoid: number;
+            /** Equations */
+            equations: string[];
+            /** Samples */
+            samples: components["schemas"]["NeuralSample"][];
+            /** Correct */
+            correct: number;
+            boundary: components["schemas"]["NeuralGrid"];
+            hardBoundary: components["schemas"]["NeuralGrid"];
+            /** Curves */
+            curves: components["schemas"]["NeuralCurve"][];
+        };
+        /** PerceptronUpdate */
+        PerceptronUpdate: {
+            /** Iteration */
+            iteration: number;
+            /** X */
+            x: number[];
+            /** Target */
+            target: number;
+            /** Prediction */
+            prediction: number;
+            /** Error */
+            error: number;
+            /** Before */
+            before: number[];
+            /** After */
+            after: number[];
+            /** Rate */
+            rate: number;
         };
         /** PorterAnswer */
         PorterAnswer: {
@@ -3515,6 +3905,82 @@ export interface components {
             /** Options */
             options: unknown[] | string;
         };
+        /** SingleComputation */
+        SingleComputation: {
+            /** Input */
+            input: number[];
+            trace: components["schemas"]["NeuralTrace"];
+            /** Scores */
+            scores: number[];
+            /** Probabilities */
+            probabilities: number[];
+            /** Labels */
+            labels: string[];
+            /** Row */
+            row: number;
+            /** Winner */
+            winner: number;
+            /** Sums */
+            sums: number[];
+            /** Contributions */
+            contributions: number[][];
+            /** Shifted */
+            shifted: number[];
+            /** Exponentials */
+            exponentials: number[];
+            /** Difference */
+            difference: number;
+            /** Binaryoutput */
+            binaryOutput: number;
+        };
+        /** SingleLayerData */
+        SingleLayerData: {
+            /** Network */
+            network: components["schemas"]["NeuralLayer"][];
+            /** Languagenetwork */
+            languageNetwork: components["schemas"]["NeuralLayer"][];
+            /** Input */
+            input: number[];
+            /** Row */
+            row: number;
+            /** Phase */
+            phase: number;
+            /** Seed */
+            seed: number;
+            /** Text */
+            text: string;
+            /**
+             * Languagemode
+             * @enum {string}
+             */
+            languageMode: "binary" | "multi";
+            /**
+             * Decision
+             * @enum {string}
+             */
+            decision: "step" | "sigmoid";
+            /** Feature */
+            feature: number;
+        };
+        /** SingleLayerRequest */
+        SingleLayerRequest: {
+            state?: components["schemas"]["SingleLayerData"] | null;
+            command?: components["schemas"]["NeuralCommand"];
+        };
+        /** SingleLayerResponse */
+        SingleLayerResponse: {
+            state: components["schemas"]["SingleLayerData"];
+            result: components["schemas"]["SingleLayerResult"];
+        };
+        /** SingleLayerResult */
+        SingleLayerResult: {
+            numeric: components["schemas"]["SingleComputation"];
+            language: components["schemas"]["SingleComputation"];
+            /** Counts */
+            counts: number[];
+            /** Total */
+            total: number;
+        };
         /**
          * SplitNode
          * @description Binary split node in a decision tree.
@@ -3630,6 +4096,97 @@ export interface components {
              * @description Indices of samples that go to right child (> threshold)
              */
             right_samples_mask: number[];
+        };
+        /** TrainingData */
+        TrainingData: {
+            /** Network */
+            network: components["schemas"]["NeuralLayer"][];
+            /** Seed */
+            seed: number;
+            /** Input */
+            input: number[];
+            /** Target */
+            target: number[];
+            /**
+             * Loss
+             * @enum {string}
+             */
+            loss: "MSE" | "MAE" | "Binary cross-entropy";
+            /** Rate */
+            rate: number;
+            /** Phase */
+            phase: number;
+            selected: components["schemas"]["ParameterSelection"];
+            /** Batch */
+            batch: boolean;
+            /** History */
+            history: number[];
+            /** Playing */
+            playing: boolean;
+            /** Message */
+            message: string;
+            /**
+             * Explorerloss
+             * @enum {string}
+             */
+            explorerLoss: "MSE" | "MAE" | "Binary cross-entropy" | "Categorical cross-entropy";
+            /** Lossprediction */
+            lossPrediction: number;
+            /** Losstarget */
+            lossTarget: number;
+            /** Lossclass */
+            lossClass: number;
+            /** Lossscores */
+            lossScores: number[];
+        };
+        /** TrainingRequest */
+        TrainingRequest: {
+            state?: components["schemas"]["TrainingData"] | null;
+            command?: components["schemas"]["NeuralCommand"];
+        };
+        /** TrainingResponse */
+        TrainingResponse: {
+            state: components["schemas"]["TrainingData"];
+            result: components["schemas"]["TrainingResult"];
+        };
+        /** TrainingResult */
+        TrainingResult: {
+            analysis: components["schemas"]["NeuralAnalysis"];
+            batch: components["schemas"]["NeuralObjective"];
+            /** Proposed */
+            proposed: components["schemas"]["NeuralLayer"][];
+            /** Afterloss */
+            afterLoss: number;
+            /** Value */
+            value: number;
+            /** Grad */
+            grad: number;
+            /** Samplegrad */
+            sampleGrad: number;
+            /** Incoming */
+            incoming: number;
+            /** Delta */
+            delta: number;
+            /** Derivative */
+            derivative: number;
+            /** Paths */
+            paths: number[];
+            /** Updatedvalue */
+            updatedValue: number;
+            /** Updates */
+            updates: components["schemas"]["ParameterUpdate"][];
+            /** Probabilities */
+            probabilities: number[];
+            /** Target */
+            target: number[];
+            /** Contributions */
+            contributions: number[];
+            /** Explorervalue */
+            explorerValue: number;
+            /** Formula */
+            formula: string;
+            /** Curves */
+            curves: components["schemas"]["NeuralCurve"][];
         };
         /** ValidationError */
         ValidationError: {
@@ -4958,6 +5515,138 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CheckResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    perceptron_api_neural_networks_perceptron_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PerceptronRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PerceptronResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    single_layer_api_neural_networks_single_layer_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SingleLayerRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SingleLayerResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    mlp_api_neural_networks_mlp_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MlpRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MlpResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    training_api_neural_networks_training_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TrainingRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TrainingResponse"];
                 };
             };
             /** @description Validation Error */

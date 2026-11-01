@@ -6,8 +6,10 @@
  */
 import { ChevronDown, ChevronUp } from "lucide-react";
 import React, { useState } from "react";
+import { useTour } from "@/store/tourStore";
 
 interface CollapsibleHUDProps {
+    tourTarget?: string;
     /** Icon shown in the header (e.g. <Target className="text-primary" />) */
     icon: React.ReactNode;
     title: string;
@@ -30,17 +32,23 @@ const CollapsibleHUD: React.FC<CollapsibleHUDProps> = ({
     className = "",
     style,
     contentClassName = "",
+    tourTarget,
 }) => {
     const [open, setOpen] = useState(defaultOpen);
+    const tourOpen = useTour(state => Boolean(tourTarget && state.running && state.tour?.steps[state.step]?.hud === tourTarget));
+    const expanded = open || tourOpen;
 
     return (
         <div
+            data-tour={tourTarget}
             className={`bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 ${className}`}
             style={style}
         >
             {/* Header — always visible, click to toggle */}
             <button
                 type="button"
+                aria-expanded={expanded}
+                disabled={tourOpen}
                 onClick={() => setOpen((v) => !v)}
                 className="w-full flex items-center justify-between px-5 py-4 cursor-pointer select-none"
             >
@@ -48,7 +56,7 @@ const CollapsibleHUD: React.FC<CollapsibleHUDProps> = ({
                     {icon}
                     {title}
                 </span>
-                {open ? (
+                {expanded ? (
                     <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
                 ) : (
                     <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
@@ -56,7 +64,7 @@ const CollapsibleHUD: React.FC<CollapsibleHUDProps> = ({
             </button>
 
             {/* Collapsible content */}
-            {open && (
+            {expanded && (
                 <div className={`px-5 pb-5 ${contentClassName}`}>
                     {children}
                 </div>

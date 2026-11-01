@@ -7,6 +7,7 @@ import { DEFAULT_COLORS } from "@/utils/colorUtils";
 import { useCallback, useEffect, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import ManualTreeHUD from "./ManualTreeHUD";
+import { captureTourAction } from "@/store/tourStore";
 
 const capabilities: VisualisationCapabilities = {
     zoomable: {
@@ -41,7 +42,9 @@ export default function DecisionTreeVisualization() {
     }, [manualTree]);
     
     const handleNodeClick = useCallback((path: number[]) => {
+        const finish = captureTourAction("node");
         manualTree.selectNode(path);
+        finish(useDecisionTree.getState().manualTree.selectedNodePath !== null);
     }, [manualTree]);
     
     // Define transformTreeData before early return (hooks must be called in same order)
@@ -123,9 +126,9 @@ export default function DecisionTreeVisualization() {
     }
     
     return (
-        <div className="relative h-full w-full">
+        <div data-tour="tree-canvas" data-tour-ready="true" className="relative h-full w-full">
             {/* Control HUD */}
-            <div className="absolute top-6 right-6 z-20 flex flex-col gap-4 w-96">
+            <div data-tour-corner className="absolute top-6 right-6 z-20 flex flex-col gap-4 w-96">
                 <ManualTreeHUD />
             </div>
 

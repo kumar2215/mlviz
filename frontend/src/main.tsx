@@ -7,6 +7,8 @@ import AccountDialogs from "./components/layout/AccountDialogs";
 import { authSession } from "./store/useAuthSession";
 import { startLearningProgress } from "./store/useProgress";
 import { RewardNotice } from "./components/layout/LearningProgress";
+import LevelUpCelebration from "./components/layout/LevelUpCelebration";
+import XpTransferAnimation from "./components/layout/XpTransferAnimation";
 
 const stopAuth = authSession.getState().start();
 const stopProgress = startLearningProgress();
@@ -24,6 +26,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
             <App />
             <AccountDialogs />
             <RewardNotice />
+            <XpTransferAnimation />
+            <LevelUpCelebration />
         </HashRouter>
     </React.StrictMode>,
 );

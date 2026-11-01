@@ -6,6 +6,7 @@ import { filterParameters } from "@/utils/conditions";
 import type { ModelSelectorHook } from "@/types/modelStore";
 import { useShallow } from "zustand/react/shallow";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { captureTourAction } from "@/store/tourStore";
 
 export default function useStep(useModel: ModelSelectorHook, parameters: Parameters) {
     const isLoading = useModel(state => state.isLoading);
@@ -64,6 +65,7 @@ export default function useStep(useModel: ModelSelectorHook, parameters: Paramet
     }, []); // eslint-disable-line react-hooks/exhaustive-deps -- intentionally runs once on mount
 
     const handleApplyParams = async () => {
+        const finishTourAction = captureTourAction("parameters");
         // Applying parameters in Step mode resets the model and starts fresh
         resetModelData();
         // Zustand resets synchronously, so training reads the cleared state.
@@ -72,6 +74,7 @@ export default function useStep(useModel: ModelSelectorHook, parameters: Paramet
             dataset: (stepParams as any)?.dataset
         };
         const result = await train(trainParams);
+        finishTourAction(Boolean(result));
         updateParams({ trainParams: stepParams });
         recordStep(stepParams, (result as any)?.metrics);
     };

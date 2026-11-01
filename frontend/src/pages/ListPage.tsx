@@ -37,7 +37,7 @@ export default function ListPage({ listItems }: { listItems: ListItem[] }) {
                         <h1 className="!text-4xl font-bold leading-tight tracking-tight text-slate-900 lg:!text-5xl">{title}</h1>
                         <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-600">{storyMode ? "Follow a story, try an idea, and discover how the pieces fit together. Choose your next journey below." : category ? category.description : "Explore interactive experiments at your own pace, or switch to Stories for a guided journey through the ideas."}</p>
                     </div>
-                    {storyMode && <div className="mb-6 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900">{!signedIn && <p className="mb-1 font-semibold">Exploring as a guest · All stories are available</p>}<LearningSaveStatus /></div>}
+                    {storyMode && <>{!signedIn && <p className="mb-6 text-sm font-semibold text-blue-900">Exploring as a guest · All stories are available</p>}<LearningSaveStatus className="mb-6" /></>}
                     <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 2xl:grid-cols-3">
                         {listItems.map(item => {
                             const Icon = storyMode ? BookOpen : item.path.includes("neural_networks") ? BrainCircuit : item.path.includes("nlp") ? MessageSquareText : item.path.startsWith("/category/") ? Network : FlaskConical;

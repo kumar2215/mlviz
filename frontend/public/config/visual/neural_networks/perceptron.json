@@ -1,5 +1,17 @@
 {
     "display_name": "Perceptron",
-    "pages": [],
-    "transitions": []
+    "pages": [
+        { "name": "Inside a Perceptron", "page_type": "dynamic", "parameters": {} },
+        { "name": "Matrix Calculation", "page_type": "dynamic", "parameters": {} },
+        { "name": "Step and Sigmoid", "page_type": "dynamic", "parameters": {} },
+        { "name": "Weight Updates", "page_type": "dynamic", "parameters": {} }
+    ],
+    "transitions": [
+        { "from": 0, "to": 1, "condition": { "condition_type": "Bypass", "name": "Matrix calculation" } },
+        { "from": 1, "to": 0, "condition": { "condition_type": "Bypass", "name": "Inside a neuron" } },
+        { "from": 1, "to": 2, "condition": { "condition_type": "Bypass", "name": "Output functions" } },
+        { "from": 2, "to": 1, "condition": { "condition_type": "Bypass", "name": "Matrix calculation" } },
+        { "from": 2, "to": 3, "condition": { "condition_type": "Bypass", "name": "Weight updates" } },
+        { "from": 3, "to": 2, "condition": { "condition_type": "Bypass", "name": "Output functions" } }
+    ]
 }

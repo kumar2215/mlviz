@@ -147,6 +147,9 @@ test("navigation readiness and visits award no XP; task callbacks reject duplica
     handler("root-sort"); handler("root-sort");
     assert.equal(storyXp(tree, activeBucket(store.getState()).stories.decision_tree).earned, 15);
     assert.equal(store.getState().notice?.text, "+15 XP · Sort the root branches");
+    assert.equal(store.getState().xpTransfers.length, 1, "A duplicated callback cannot launch another XP flight");
+    assert.deepEqual(store.getState().xpTransfers[0], { id: store.getState().notice!.id, phase: "flight", storyId: tree.name, pageId: "sort-flowers", taskId: "root-sort", xp: 15, before: 0, after: 15, perLevel: 100 });
+    assert.equal(store.getState().levelUp, null, "Ordinary XP rewards do not start a celebration");
     path.setState({ replayKey: path.getState().replayKey + 1 });
     handler("child-sort");
     assert.equal(storyXp(tree, activeBucket(store.getState()).stories.decision_tree).earned, 15);
@@ -154,6 +157,8 @@ test("navigation readiness and visits award no XP; task callbacks reject duplica
     handler("child-sort");
     assert.equal(storyXp(tree, activeBucket(store.getState()).stories.decision_tree).earned, 15);
     assert.equal(store.getState().notice, null); // Imports and hydration never announce rewards.
+    assert.equal(store.getState().levelUp, null);
+    assert.deepEqual(store.getState().xpTransfers, [], "Changing account cancels the old account's XP animations");
 });
 
 test("changing account alone invalidates a task result, even when the story attempt is unchanged", () => {
@@ -187,11 +192,82 @@ test("subpage task IDs cannot earn XP from another step, and level-up feedback i
     exercise.getState().restoreProgress(sample(["visit:sort-flowers"]));
     const current = exercise.getState();
     const award = createTaskCompletion(exercise, fresh, scored, { pageId: 1, subpageIndex: 0, sessionId: current.sessionId, replayKey: current.replayKey }, 0, { [tree.name]: scored });
-    award("root-sort"); award("child-sort");
+    award("root-sort");
+    assert.equal(fresh.getState().levelUp, null);
+    award("child-sort");
     assert.match(fresh.getState().notice!.text, /Level 2 reached/);
+    assert.equal(fresh.getState().notice!.level, 2);
+    assert.deepEqual(fresh.getState().levelUp, { id: fresh.getState().notice!.id, level: 2, previousLevel: 1, xp: 20 });
+    assert.equal(fresh.getState().xpTransfers[1].id, fresh.getState().levelUp!.id, "Level celebrations can wait for the matching flight to finish");
     const notice = fresh.getState().notice;
+    const celebration = fresh.getState().levelUp;
     award("child-sort");
     assert.equal(fresh.getState().notice, notice);
+    assert.equal(fresh.getState().levelUp, celebration, "Replaying an earned task does not restart the animation");
+});
+
+test("a single task crossing multiple thresholds celebrates the highest earned level", () => {
+    const { store, storage } = setup();
+    const scored = structuredClone(tree);
+    scored.pages[1].xp_tasks![0].xp = 250;
+    const path = pathway(scored);
+    path.getState().restoreProgress(sample(["visit:sort-flowers"]));
+    const current = path.getState();
+    const award = createTaskCompletion(path, store, scored, { pageId: 1, subpageIndex: 0, sessionId: current.sessionId, replayKey: current.replayKey }, 0, { [tree.name]: scored });
+    award("root-sort");
+    assert.equal(store.getState().levelUp?.level, 3);
+    assert.equal(store.getState().levelUp?.previousLevel, 1);
+    assert.equal(store.getState().levelUp?.xp, 250);
+    const restored = createProgressStore(storage);
+    assert.equal(storyXp(scored, activeBucket(restored.getState()).stories[tree.name]).earned, 250);
+    assert.equal(restored.getState().levelUp, null, "Reloading saved XP does not replay the celebration");
+    assert.deepEqual(restored.getState().xpTransfers, [], "Reloaded XP does not replay flights");
+    restored.getState().setOwner("alice");
+    assert.equal(restored.getState().levelUp, null, "Importing guest XP does not celebrate again");
+    restored.getState().receive(tree.name, sample([taskKey("sort-flowers", "child-sort")]), restored.getState().epoch);
+    assert.equal(restored.getState().levelUp, null, "Remote progress updates do not announce levels");
+    assert.deepEqual(restored.getState().xpTransfers, [], "Remote XP does not fly from an unrelated local task");
+});
+
+test("rapid XP rewards queue in order and old animation callbacks cannot consume a newer reward", () => {
+    const { store } = setup();
+    const reward = { storyId: tree.name, pageId: "sort-flowers", taskId: "root-sort", xp: 15, before: 0, after: 15, perLevel: 100 };
+    store.getState().announce("+15 XP", undefined, reward);
+    store.getState().announce("+15 XP", undefined, { ...reward, taskId: "child-sort", before: 15, after: 30 });
+    const [first, second] = store.getState().xpTransfers;
+    store.getState().startXpFill(second.id);
+    store.getState().finishXpTransfer(second.id);
+    assert.equal(store.getState().xpTransfers[0], first);
+    store.getState().startXpFill(first.id);
+    assert.equal(store.getState().xpTransfers[0].phase, "fill");
+    store.getState().finishXpTransfer(first.id);
+    assert.equal(store.getState().xpTransfers[0], second);
+    store.getState().finishXpTransfer(first.id);
+    assert.equal(store.getState().xpTransfers[0], second);
+    store.getState().startXpFill(second.id);
+    store.getState().finishXpTransfer(second.id);
+    assert.deepEqual(store.getState().xpTransfers, []);
+});
+
+test("level-up celebrations survive ordinary rewards and stale dismissals cannot close a newer celebration", () => {
+    const { store } = setup();
+    store.getState().announce("Level 2 reached!", { previousLevel: 1, level: 2, xp: 20 });
+    const first = store.getState().levelUp!;
+    store.getState().announce("+15 XP");
+    assert.equal(store.getState().levelUp, first);
+    assert.equal(store.getState().notice?.level, undefined);
+    store.getState().dismissNotice();
+    assert.equal(store.getState().levelUp, first);
+    store.getState().announce("Level 3 reached!", { previousLevel: 2, level: 3, xp: 50 });
+    const next = store.getState().levelUp!;
+    assert.ok(next.id > first.id);
+    store.getState().dismissLevelUp(first.id);
+    assert.equal(store.getState().levelUp, next);
+    store.getState().dismissLevelUp(next.id);
+    assert.equal(store.getState().levelUp, null);
+    store.getState().announce("Level 4 reached!", { previousLevel: 3, level: 4, xp: 100 });
+    store.getState().setOwner("alice");
+    assert.equal(store.getState().levelUp, null, "Changing account clears the active celebration");
 });
 
 test("checkpoint IDs survive page reordering; remote completion merges never move the active exercise", () => {
