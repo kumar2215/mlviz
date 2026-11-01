@@ -3,7 +3,10 @@ import type { PageUnion } from "../../types/page.ts";
 import type { Transition } from "../../types/story.ts";
 
 export const NODE_SIZE = 44;
-const NODE_MARGIN = 34;
+export const PATHWAY_MARKER_SIZE = 32;
+const MARKER_DISTANCE = 50;
+export const PATHWAY_NODE_EXTENT = MARKER_DISTANCE + PATHWAY_MARKER_SIZE / 2;
+const NODE_MARGIN = PATHWAY_NODE_EXTENT + 4;
 
 export interface Point { x: number; y: number }
 export interface PathwayNode extends Point { id: number }
@@ -40,7 +43,7 @@ export function pageTitle(page: PageUnion, index: number): string {
 
 export function layoutPathway(pages: PageUnion[], transitions: Transition[]): PathwayLayout {
     const graph = new dagre.graphlib.Graph({ directed: true, multigraph: true });
-    graph.setGraph({ rankdir: "TB", nodesep: 32, ranksep: 42, edgesep: 16, marginx: NODE_MARGIN, marginy: NODE_MARGIN });
+    graph.setGraph({ rankdir: "TB", nodesep: 44, ranksep: 42, edgesep: 16, marginx: NODE_MARGIN, marginy: NODE_MARGIN });
     graph.setDefaultEdgeLabel(() => ({}));
     pages.forEach((_, id) => graph.setNode(String(id), { width: 62, height: 62 }));
     const valid = transitions.flatMap((transition, index) => {
@@ -98,7 +101,7 @@ export function nodeStates(layout: PathwayLayout, current: number, visited: Read
 }
 
 export function visibleNodes(nodes: PathwayNode[], viewport: Viewport): PathwayNode[] {
-    const radius = 32;
+    const radius = PATHWAY_NODE_EXTENT;
     const candidates = nodes.filter(node => node.x + radius > viewport.left && node.x - radius < viewport.left + viewport.width && node.y + radius > viewport.top && node.y - radius < viewport.top + viewport.height);
     return candidates.sort((a, b) => a.y - b.y || a.x - b.x || a.id - b.id);
 }
@@ -134,6 +137,12 @@ export function subpageArc(index: number, count: number, radius = 29): string {
     const end = start + step - gap;
     const point = (angle: number) => `${40 + radius * Math.cos(angle)} ${40 + radius * Math.sin(angle)}`;
     return `M ${point(start)} A ${radius} ${radius} 0 ${end - start > Math.PI ? 1 : 0} 1 ${point(end)}`;
+}
+
+/** Place the mascot just outside the current arc's midpoint, or beside a plain page node. */
+export function pathwayMarkerPosition(index: number, count: number): Point {
+    const angle = count > 0 ? -Math.PI / 2 + (index + 0.5) * 2 * Math.PI / count : 0;
+    return { x: 40 + MARKER_DISTANCE * Math.cos(angle), y: 40 + MARKER_DISTANCE * Math.sin(angle) };
 }
 
 export function edgePath(points: Point[]): string {

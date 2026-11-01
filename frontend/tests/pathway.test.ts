@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes } from "../src/components/navigation/pathwayModel.ts";
+import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes, pathwayMarkerPosition, PATHWAY_MARKER_SIZE, PATHWAY_NODE_EXTENT } from "../src/components/navigation/pathwayModel.ts";
 import { displayCondition, isConditionMet } from "../src/utils/conditions.ts";
 import { createColorScale, createContinuousColorScale, type PaletteName, type ContinuousSchemeName } from "../src/utils/colorUtils.ts";
 import { hsl } from "d3";
@@ -102,7 +102,7 @@ test("virtualisation includes every intersecting node and scrolling reveals the 
     const window = visibleNodes(chain.nodes, { top: chain.height - 240, left: 0, width: chain.width, height: 240 });
     assert.ok(window.length < chain.nodes.length);
     assert.ok(window.some(node => node.id === 19));
-    assert.ok(window.every(node => node.y + 32 > chain.height - 240 && node.y - 32 < chain.height));
+    assert.ok(window.every(node => node.y + PATHWAY_NODE_EXTENT > chain.height - 240 && node.y - PATHWAY_NODE_EXTENT < chain.height));
     assert.ok(visibleNodes(chain.nodes, { top: 0, left: 0, width: chain.width, height: chain.height }).length > 6);
     assert.equal(visibleNodes(chain.nodes, { top: 0, left: chain.width + 64, width: 200, height: chain.height }).length, 0);
 });
@@ -144,6 +144,35 @@ test("subpage hit targets have distinct arcs, including a single subpage", () =>
         assert.ok(arcs.every(arc => arc.startsWith("M ") && arc.includes("A 29 29") && !arc.includes("NaN")));
     }
     assert.equal(subpageArc(0, 0), "");
+});
+
+test("the current-position mascot follows arc midpoints without overlapping the ring", () => {
+    assert.deepEqual(pathwayMarkerPosition(0, 0), { x: 90, y: 40 });
+    for (const count of [1, 2, 3, 6, 20]) {
+        for (let index = 0; index < count; index++) {
+            const point = pathwayMarkerPosition(index, count);
+            const angle = -Math.PI / 2 + (index + 0.5) * 2 * Math.PI / count;
+            assert.ok(Math.abs(point.x - (40 + 50 * Math.cos(angle))) < 0.001);
+            assert.ok(Math.abs(point.y - (40 + 50 * Math.sin(angle))) < 0.001);
+            assert.ok(Math.hypot(point.x - 40, point.y - 40) - PATHWAY_MARKER_SIZE / 2 > 31);
+        }
+    }
+});
+
+test("graph padding and viewport culling leave room for the position mascot", () => {
+    const graph = layoutPathway(pages(3), [bypass(0, 1), bypass(1, 2)]);
+    for (const node of graph.nodes) {
+        for (const count of [0, 1, 2, 6]) {
+            for (let index = 0; index < Math.max(count, 1); index++) {
+                const point = pathwayMarkerPosition(index, count);
+                const x = node.x - 40 + point.x;
+                const y = node.y - 40 + point.y;
+                assert.ok(x - PATHWAY_MARKER_SIZE / 2 >= 0 && x + PATHWAY_MARKER_SIZE / 2 <= graph.width);
+                assert.ok(y - PATHWAY_MARKER_SIZE / 2 >= 0 && y + PATHWAY_MARKER_SIZE / 2 <= graph.height);
+            }
+        }
+    }
+    assert.equal(visibleNodes([{ id: 0, x: 100, y: 100 }], { left: 150, top: 90, width: 10, height: 20 }).length, 1, "Keep the node mounted while its mascot intersects the viewport");
 });
 
 test("completed subpages can be reviewed before the page is finished without clearing progress", () => {

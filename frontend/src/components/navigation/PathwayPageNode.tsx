@@ -1,6 +1,6 @@
 import { RotateCcw } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { segmentState, selectSubpage, subpageArc } from "./pathwayModel";
+import { segmentState, selectSubpage, subpageArc, pathwayMarkerPosition, PATHWAY_MARKER_SIZE } from "./pathwayModel";
 import { useShallow } from "zustand/react/shallow";
 import { usePathway } from "@/store/usePathway";
 import { selectPathwayNode } from "@/store/pathwayStore";
@@ -21,6 +21,7 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
     const active = state === "current";
     const locked = state === "locked";
     const showRing = labels.length > 0 && !locked && (active || Boolean(progress?.completed.length));
+    const marker = pathwayMarkerPosition(currentIndex, labels.length);
     const prefix = locked ? "🔒 " : state === "visited" ? "✓ " : "";
     const description = canReplay ? "Replay · restart this activity. Earned XP is kept; repeat attempts earn no additional XP." : reason;
     const activate = () => {
@@ -35,7 +36,7 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
                 const segment = segmentState(index, progress, active);
                 const completed = Boolean(progress?.completed.includes(index));
                 const current = active && index === currentIndex;
-                const arc = subpageArc(index, labels.length, current ? 34 : 29);
+                const arc = subpageArc(index, labels.length);
                 const next = index === currentIndex + 1;
                 const enabled = !locked && selectSubpage(labels.length, progress, index, canAdvance) !== null;
                 const detail = completed ? `${current ? "Current subpage · " : ""}Click to review` : next ? enabled ? "Click to continue" : "Complete the current subpage to continue" : current ? "Current subpage" : "Complete earlier subpages first";
@@ -46,7 +47,7 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
                             onClick={() => { if (enabled) onNavigateSubpage(node.id, index); }}
                             onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); if (enabled) onNavigateSubpage(node.id, index); } }}>
                             <path d={arc} fill="none" stroke="transparent" strokeWidth="14" />
-                            <path d={arc} fill="none" stroke={current ? "#0284c7" : completed ? "#1d4ed8" : enabled ? "#60a5fa" : "#e2e8f0"} strokeWidth="4" strokeLinecap="round" />
+                            <path d={arc} fill="none" stroke={current ? "#1d4ed8" : completed ? "#7dd3fc" : enabled ? "#93c5fd" : "#dbeafe"} strokeWidth="4" strokeLinecap="round" />
                         </g>
                     </TooltipTrigger>
                     <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{completed ? "✓ " : !enabled && !current ? "🔒 " : ""}{label}</p><p className="mt-1 text-xs text-slate-500">Step {index + 1} of {labels.length} · {detail}</p>{storyId && page && <p className="mt-1 text-xs text-amber-900"><RewardLabel storyId={storyId} page={page} step={stepIds(page)[index] ?? ""} /></p>}</TooltipContent>
@@ -65,5 +66,9 @@ export default function PathwayPageNode({ pageId }: { pageId: number }) {
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={12} className={tooltipClass}><p className="text-sm font-semibold">{prefix}{title}</p><p className="mt-1 text-xs text-slate-500">{active && canReplay ? "You are here · " : ""}{description}</p>{labels.length > 0 && <p className="mt-1 text-xs text-blue-700">{progress?.completed.length || 0} of {labels.length} steps passed{active ? ` · ${labels[currentIndex]}` : ""}</p>}{storyId && page && <p className="mt-1 text-xs text-amber-900"><RewardLabel storyId={storyId} page={page} /></p>}</TooltipContent>
         </Tooltip>
+        {active && <img src={`${import.meta.env.BASE_URL}images/soccat-marker.svg`} alt="" aria-hidden="true" data-pathway-marker
+            className="pointer-events-none absolute z-20 select-none" draggable={false}
+            width={PATHWAY_MARKER_SIZE} height={PATHWAY_MARKER_SIZE}
+            style={{ left: marker.x - PATHWAY_MARKER_SIZE / 2, top: marker.y - PATHWAY_MARKER_SIZE / 2 }} />}
     </div>;
 }
