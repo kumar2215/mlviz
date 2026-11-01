@@ -37,6 +37,6 @@ export function RewardNotice() {
         return () => clearTimeout(timer);
     }, [notice, dismiss]);
     return <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed bottom-5 left-1/2 z-50 max-w-[90vw] -translate-x-1/2">
-        {notice && <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-950 shadow-lg"><Sparkles aria-hidden="true" className="size-5 shrink-0" /><span>{notice.text}</span><button type="button" onClick={dismiss} aria-label="Dismiss XP reward" className="rounded p-1 focus-visible:outline-2"><X className="size-4" /></button></div>}
+        {notice && notice.level === undefined && <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-950 shadow-lg"><Sparkles aria-hidden="true" className="size-5 shrink-0" /><span>{notice.text}</span><button type="button" onClick={dismiss} aria-label="Dismiss XP reward" className="rounded p-1 focus-visible:outline-2"><X className="size-4" /></button></div>}
     </div>;
 }

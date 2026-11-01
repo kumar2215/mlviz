@@ -31,7 +31,7 @@ export default function TaskRewards() {
             const Icon = earned ? CheckCircle2 : Sparkles;
             const stepIndex = task.subpage_id ? steps.indexOf(task.subpage_id) : -1;
             return <li key={task.id} className={`space-y-2 rounded-xl border p-3 ${earned ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
-                <div className="flex items-center gap-1.5 text-xs"><Icon aria-hidden="true" className="size-4 shrink-0" /><strong>{earned ? "Earned · " : "+"}{task.xp} XP</strong></div>
+                <div className="flex items-center gap-1.5 text-xs"><Icon aria-hidden="true" className="size-4 shrink-0" /><strong data-xp-story={storyId} data-xp-task={page?.id ? taskKey(page.id, task.id) : undefined}>{earned ? "Earned · " : "+"}{task.xp} XP</strong></div>
                 <p className="text-sm font-medium leading-snug">{task.label}</p>
                 {stepIndex >= 0 && <p className="text-xs opacity-80">Step {stepIndex + 1}{labels[stepIndex] ? ` · ${labels[stepIndex]}` : ""}{stepIndex === index ? " · Current step" : ""}</p>}
             </li>;

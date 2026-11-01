@@ -2,6 +2,9 @@ import { createStore } from "zustand/vanilla";
 import { emptyBucket, emptyProgress, mergeProgress, readProgress, sameProgress, stableId, type ProgressBucket, type StoryProgress } from "../lib/storyProgress.ts";
 
 export interface ProgressData { version: 1; clientId: string; guestGeneration: number; imports: Record<string, string>; guest: ProgressBucket; accounts: Record<string, ProgressBucket> }
+export interface LevelUpReward { id: number; level: number; previousLevel: number; xp: number }
+export interface TaskXpReward { storyId: string; pageId: string; taskId: string; xp: number; before: number; after: number; perLevel: number }
+export interface XpTransfer extends TaskXpReward { id: number; phase: "flight" | "fill" }
 interface Storage { getItem: (key: string) => string | null; setItem: (key: string, value: string) => void }
 export const PROGRESS_STORAGE_KEY = "mlviz.story-progress.v1";
 const uidValid = (uid: string) => uid.length > 0 && uid.length <= 128 && !["__proto__", "constructor", "prototype"].includes(uid) && !uid.includes("/");
@@ -45,6 +48,7 @@ export function mergeBucket(a: ProgressBucket, b: ProgressBucket, queue = true):
 }
 
 export function createProgressStore(storage: Storage | null, { clientId = "client", now = () => Date.now() } = {}) {
+    let rewardSequence = 0;
     let initial: ProgressData = { version: 1, clientId, guestGeneration: 0, imports: {}, guest: emptyBucket(), accounts: {} };
     let initialError: string | null = null;
     try { const raw = storage?.getItem(PROGRESS_STORAGE_KEY); if (raw) initial = readData(raw, clientId); }
@@ -53,14 +57,19 @@ export function createProgressStore(storage: Storage | null, { clientId = "clien
 
     return createStore<{
         data: ProgressData; owner: string | null; epoch: number; storageError: string | null; syncError: string | null;
-        syncing: boolean; remoteReady: boolean; retryVersion: number; notice: { id: number; text: string } | null;
+        syncing: boolean; remoteReady: boolean; retryVersion: number; notice: { id: number; text: string; level?: number } | null;
+        levelUp: LevelUpReward | null;
+        xpTransfers: XpTransfer[];
         setOwner: (uid: string | null) => void;
         update: (storyId: string, milestones: string[], page: string, step: string, epoch: number) => boolean;
         receive: (storyId: string, remote: StoryProgress, epoch: number) => void;
         reconcileStorage: (raw: string | null) => void;
         retry: () => void;
-        announce: (text: string) => void;
+        announce: (text: string, levelUp?: Omit<LevelUpReward, "id">, taskReward?: TaskXpReward) => void;
         dismissNotice: () => void;
+        dismissLevelUp: (id: number) => void;
+        startXpFill: (id: number) => void;
+        finishXpTransfer: (id: number) => void;
         setSyncState: (state: { syncing?: boolean; remoteReady?: boolean; syncError?: string | null }) => void;
     }>((set, get) => {
         const write = (data: ProgressData): boolean => {
@@ -76,7 +85,7 @@ export function createProgressStore(storage: Storage | null, { clientId = "clien
         };
         const commit = (data: ProgressData) => { write(data); set({ data }); };
         return {
-            data: initial, owner: null, epoch: 0, storageError: initialError, syncError: null, syncing: false, remoteReady: true, retryVersion: 0, notice: null,
+            data: initial, owner: null, epoch: 0, storageError: initialError, syncError: null, syncing: false, remoteReady: true, retryVersion: 0, notice: null, levelUp: null, xpTransfers: [],
             setOwner: uid => {
                 if (uid !== null && !uidValid(uid)) return;
                 const state = get();
@@ -87,7 +96,7 @@ export function createProgressStore(storage: Storage | null, { clientId = "clien
                     // A single durable envelope write transfers ownership before consuming guest data.
                     if (write(next)) data = next;
                 }
-                set({ data, owner: uid, ...(uid !== state.owner ? { epoch: state.epoch + 1, notice: null, syncing: false, remoteReady: uid === null, syncError: null } : {}) });
+                set({ data, owner: uid, ...(uid !== state.owner ? { epoch: state.epoch + 1, notice: null, levelUp: null, xpTransfers: [], syncing: false, remoteReady: uid === null, syncError: null } : {}) });
             },
             update: (storyId, milestones, page, step, epoch) => {
                 const state = get();
@@ -131,8 +140,19 @@ export function createProgressStore(storage: Storage | null, { clientId = "clien
                 } catch { set({ storageError: "Progress from another tab couldn't be read. Your current progress is still available." }); }
             },
             retry: () => { get().setOwner(get().owner); write(get().data); set({ retryVersion: get().retryVersion + 1, syncError: null }); },
-            announce: text => set({ notice: { id: (get().notice?.id ?? 0) + 1, text } }),
+            announce: (text, levelUp, taskReward) => {
+                const id = ++rewardSequence;
+                const celebration = levelUp && levelUp.level > levelUp.previousLevel ? { ...levelUp, id } : null;
+                set({ notice: { id, text, ...(celebration ? { level: celebration.level } : {}) }, ...(celebration ? { levelUp: celebration } : {}),
+                    ...(taskReward ? { xpTransfers: [...get().xpTransfers, { ...taskReward, id, phase: "flight" as const }] } : {}) });
+            },
             dismissNotice: () => set({ notice: null }),
+            dismissLevelUp: id => { if (get().levelUp?.id === id) set({ levelUp: null }); },
+            startXpFill: id => {
+                const [first, ...rest] = get().xpTransfers;
+                if (first?.id === id && first.phase === "flight") set({ xpTransfers: [{ ...first, phase: "fill" }, ...rest] });
+            },
+            finishXpTransfer: id => { if (get().xpTransfers[0]?.id === id) set({ xpTransfers: get().xpTransfers.slice(1) }); },
             setSyncState: state => set(state),
         };
     });

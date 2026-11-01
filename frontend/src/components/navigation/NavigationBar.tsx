@@ -27,7 +27,7 @@ export default function NavigationBar() {
     return (
         <div className="flex min-h-0 w-full flex-1 flex-col">
             <div role="tablist" aria-label="Activity navigation" className="grid w-full shrink-0 grid-cols-2 border-b border-blue-100 bg-blue-50">
-                {tabs.map(({ id: tab, label, Icon }, index) => <button key={tab} ref={element => { tabRefs.current[tab] = element; }} type="button" role="tab" id={`${id}-${tab}-tab`} aria-controls={`${id}-${tab}-panel`} aria-selected={activeTab === tab} tabIndex={activeTab === tab ? 0 : -1}
+                {tabs.map(({ id: tab, label, Icon }, index) => <button key={tab} ref={element => { tabRefs.current[tab] = element; }} type="button" role="tab" data-xp-tasks-tab={tab === "tasks" ? "" : undefined} id={`${id}-${tab}-tab`} aria-controls={`${id}-${tab}-panel`} aria-selected={activeTab === tab} tabIndex={activeTab === tab ? 0 : -1}
                     onClick={() => setTab(tab)}
                     onKeyDown={event => {
                         if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;

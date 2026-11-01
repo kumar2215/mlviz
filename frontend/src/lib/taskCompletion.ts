@@ -20,7 +20,9 @@ export function createTaskCompletion(pathway: PathwayStore, progress: ProgressSt
         if (task.xp > 0) {
             const previous = levelProgress(before, perLevel).level;
             const next = levelProgress(before + task.xp, perLevel).level;
-            learner.announce(`+${task.xp} XP · ${task.label}${next > previous ? ` · Level ${next} reached!` : ""}`);
+            learner.announce(`+${task.xp} XP · ${task.label}${next > previous ? ` · Level ${next} reached!` : ""}`,
+                next > previous ? { level: next, previousLevel: previous, xp: task.xp } : undefined,
+                { storyId: story.name, pageId: page.id, taskId: task.id, xp: task.xp, before, after: before + task.xp, perLevel: levelProgress(before, perLevel).required });
         }
     };
 }
