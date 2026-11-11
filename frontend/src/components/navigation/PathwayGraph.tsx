@@ -7,6 +7,7 @@ import PathwayPageNode from "./PathwayPageNode";
 import { useShallow } from "zustand/react/shallow";
 import { usePathway } from "@/store/usePathway";
 import { transitionAvailable } from "@/store/pathwayStore";
+import GuidedTourButton from "@/components/tours/GuidedTourButton";
 
 export default function PathwayGraph() {
     const { pages, layout, currentPageId, traversed, focusRequest } = usePathway(useShallow(state => ({
@@ -59,7 +60,13 @@ export default function PathwayGraph() {
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-            <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2 text-xs text-muted-foreground"><span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span><button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-selection-foreground hover:bg-surface-tint focus-visible:outline-2 focus-visible:outline-ring"><LocateFixed className="size-4" /></button></div>
+            <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2 text-xs text-muted-foreground">
+                <span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span>
+                <div className="flex items-center gap-1">
+                    <GuidedTourButton />
+                    <button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-selection-foreground hover:bg-surface-tint focus-visible:outline-2 focus-visible:outline-ring"><LocateFixed className="size-4" /></button>
+                </div>
+            </div>
             <div className="relative flex min-h-0 flex-1 flex-col">
             <div ref={scrollRef} onScroll={measure} role="region" aria-label="Page pathway" tabIndex={0} className="pathway-scroll min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-ring" data-pathway-viewport>
                 <div className="relative mx-auto" style={{ width: layout.width, height: layout.height }}>

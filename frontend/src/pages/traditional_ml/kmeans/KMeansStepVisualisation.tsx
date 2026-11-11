@@ -362,7 +362,7 @@ export default function KMeansStepVisualisation() {
     return (
         <div data-tour="centroid-canvas" data-tour-ready="true" data-tour-centroids={selectedCentroids.length ? "selected" : "empty"} className="relative h-full w-full">
             {/* Control HUD */}
-            <div data-tour-corner className="absolute top-6 right-6 z-20 flex flex-col gap-4">
+            <div className="absolute top-6 right-6 z-20 flex flex-col gap-4">
                 <KMeansStepHUD
                     mode={mode}
                     setMode={setMode}

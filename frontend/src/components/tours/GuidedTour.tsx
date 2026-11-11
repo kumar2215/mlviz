@@ -7,7 +7,6 @@ import { usePathway } from "@/store/usePathway";
 import useUserMode from "@/hooks/useUserMode";
 import { getDynamicPage } from "@/components/navigation/pathwayModel";
 import { findTour } from "./tourDefinitions";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { tourFloatingOptions } from "./tourPositioning";
 
 function TourTooltip({ index, size, step, tooltipProps, closeProps, backProps, primaryProps, skipProps }: TooltipRenderProps) {
@@ -45,7 +44,6 @@ export default function GuidedTour() {
     const revision = useTour(state => state.revision);
     const run = useTour(state => state.run);
     const message = useTour(state => state.message);
-    const buttonRef = useRef<HTMLButtonElement>(null);
     const hostRef = useRef<HTMLSpanElement>(null);
     const [surface, setSurface] = useState<HTMLElement | null>(null);
     const [targetState, setTargetState] = useState({ revision: -1, ready: false });
@@ -67,12 +65,6 @@ export default function GuidedTour() {
         observer.observe(root, { childList: true, subtree: true });
         return () => observer.disconnect();
     }, [scope, tour]);
-
-    useEffect(() => useTour.subscribe((state, previous) => {
-        if (previous.running && !state.running && state.scope === scope) {
-            requestAnimationFrame(() => { if (useTour.getState().scope === scope && !useTour.getState().running) buttonRef.current?.focus({ preventScroll: true }); });
-        }
-    }), [scope]);
 
     useEffect(() => {
         if (!active || !current) return;
@@ -131,9 +123,6 @@ export default function GuidedTour() {
     return <>
         <span ref={hostRef} hidden />
         {surface && createPortal(<>
-        <div data-tour-help className="absolute right-3 top-3 z-30">
-            <Tooltip><TooltipTrigger asChild><button ref={buttonRef} type="button" aria-label="Start guided tour" onClick={() => useTour.getState().start()} className="flex size-11 items-center justify-center rounded-full border border-info-border bg-surface text-xl font-bold text-selection-foreground shadow-sm hover:bg-surface-tint focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">?</button></TooltipTrigger><TooltipContent side="left">Guided tour</TooltipContent></Tooltip>
-        </div>
         {active && !targetReady && <p role="status" className="absolute right-3 top-16 z-30 max-w-64 rounded-xl border border-info-border bg-surface p-3 text-sm text-selection-foreground shadow-sm">Waiting for “{current?.title}”… If its panel is closed, reopen it; for the tree, select a node. <button type="button" onClick={() => useTour.getState().stop()} className="font-semibold underline">Skip tour</button></p>}
         {!active && message && <p role="status" className="absolute right-3 top-16 z-30 max-w-64 rounded-xl border border-info-border bg-surface p-3 text-sm text-foreground shadow-sm">{message}</p>}
         </>, surface)}

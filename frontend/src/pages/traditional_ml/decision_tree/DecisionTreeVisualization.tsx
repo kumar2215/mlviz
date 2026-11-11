@@ -129,7 +129,7 @@ export default function DecisionTreeVisualization() {
     return (
         <div data-tour="tree-canvas" data-tour-ready="true" className="relative h-full w-full">
             {/* Control HUD */}
-            <div data-tour-corner className="absolute top-6 right-6 z-20 flex flex-col gap-4 w-96">
+            <div className="absolute top-6 right-6 z-20 flex flex-col gap-4 w-96">
                 <ManualTreeHUD />
             </div>
 

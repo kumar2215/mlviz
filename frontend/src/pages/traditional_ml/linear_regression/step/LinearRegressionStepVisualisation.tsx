@@ -142,7 +142,7 @@ export default function LinearRegressionStepVisualisation() {
             </div>
 
             {/* GD step control — right side */}
-            <div data-tour-corner className="absolute top-6 right-6 z-20">
+            <div className="absolute top-6 right-6 z-20">
                 <GDStepHUD
                     mode={mode}
                     setMode={setMode}
