@@ -184,7 +184,7 @@ test("the expanded NLP story uses the local source page for each exercise's comp
     const visualisations = Object.fromEntries(["regex", "porter", "tokenization"].map(name => [name, visualisation(name)]));
     const expanded = unrollStory(story, { stories: {}, visualisations });
     const { store, source } = session(expanded);
-    const completionPages = new Set([3, 6, 8, 10, 11]);
+    const completionPages = new Set([1, 3, 6, 8, 10, 11]);
     assert.equal(expanded.pages.length, 13);
     assert.equal(selectPathwayNode(store.getState(), 1).title, "Regex Basics");
     assert.equal(selectPathwayNode(store.getState(), 2).title, "Regex Playground");
@@ -195,6 +195,7 @@ test("the expanded NLP story uses the local source page for each exercise's comp
         const page = expanded.pages[pageId];
         const namedPage = page.page_type === "mixed" ? page.dynamic_page : page;
         assert.equal(selectPathwayNode(store.getState(), pageId).title, namedPage.name);
+        if (pageId === 1) assert.deepEqual(pageSubpages(store.getState()), ["Text & tokens", "Pattern symbols", "Flags"]);
         if (completionPages.has(pageId)) {
             assert.equal(selectPathwayNode(store.getState(), pageId + 1).state, "locked");
             completeSubpages(store);
@@ -205,6 +206,28 @@ test("the expanded NLP story uses the local source page for each exercise's comp
         store.getState().navigatePage(pageId + 1);
     }
     assert.deepEqual(source.getHistory().entries.filter(entry => entry.actionType === "page_complete").map(entry => entry.page_id), [...completionPages]);
+});
+
+test("regex basics topics use pathway gates and reviewing a read topic preserves progress", () => {
+    const { pages, transitions } = visualisation("regex");
+    const { store } = session({ pages, transitions });
+    store.getState().navigateSubpage(0, 1);
+    assert.equal(store.getState().subpageIndex, 0, "An unread topic cannot be skipped");
+    store.getState().markSubpageReady(0, 0);
+    store.getState().navigateSubpage(0, 1);
+    assert.equal(store.getState().subpageIndex, 1);
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "locked");
+    store.getState().markSubpageReady(0, 1);
+    store.getState().navigateSubpage(0, 0);
+    assert.deepEqual(store.getState().progressByPage[0].completed, [0, 1]);
+    store.getState().navigateSubpage(0, 1);
+    store.getState().navigateSubpage(0, 2);
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "locked", "Viewing Flags does not finish the page");
+    store.getState().markSubpageReady(0, 2);
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "locked");
+    completionCallback(store)();
+    assert.equal(selectPathwayNode(store.getState(), 0).canReplay, true);
+    assert.equal(selectPathwayNode(store.getState(), 1).state, "available");
 });
 
 test("repeated mixed references to the same exercise have independent completion", () => {

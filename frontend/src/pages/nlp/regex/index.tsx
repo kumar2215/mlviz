@@ -21,7 +21,7 @@ export default function IndexPage({ name, narration, subpageIndex = 0, replayKey
         loadRegexState(dataset).then(result => { if (active) { setData(result); setError(""); } }).catch(reason => { if (active) setError(reason instanceof Error ? reason.message : "Could not load regex examples."); });
         return () => { active = false; };
     }, [dataset, name]);
-    if (name === "Regex Basics") return <RegexIntroduction key={replayKey} narration={narration} />;
+    if (name === "Regex Basics") return <RegexIntroduction key={`${subpageIndex}-${replayKey}`} narration={narration} subpageIndex={subpageIndex} onSubpageReady={onSubpageReady} onComplete={onComplete} />;
     if (error) return <div role="alert" className="p-4">{error}</div>;
     if (!data) return <PageLoading label="Loading regex examples…" />;
     const editorData = userMode === "story" ? { ...data, options: data.options.filter(option => storyPresetIds.has(option.id)) } : data;

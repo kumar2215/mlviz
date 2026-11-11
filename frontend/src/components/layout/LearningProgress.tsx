@@ -15,11 +15,10 @@ export function LearnerSummary({ compact = false }: { compact?: boolean }) {
 
 export function LearningSaveStatus({ className = "" }: { className?: string }) {
     const storageError = useProgress(state => state.storageError);
-    const syncError = useProgress(state => state.syncError);
     const remoteReady = useProgress(state => state.remoteReady);
     const owner = useProgress(state => state.owner);
     const retry = useProgress(state => state.retry);
-    const error = storageError || syncError;
+    const error = storageError;
     const message = error || (owner && !remoteReady ? "Restoring account progress…" : null);
     if (!message) return null;
     return <div className={`space-y-2 text-xs leading-relaxed ${className}`}>
