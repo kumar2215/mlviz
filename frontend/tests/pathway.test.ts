@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes, pathwayMarkerPosition, PATHWAY_MARKER_SIZE, PATHWAY_NODE_EXTENT } from "../src/components/navigation/pathwayModel.ts";
+import { layoutPathway, pageTitle, nodeStates, segmentState, selectSubpage, subpageArc, subpageControls, visibleNodes, pathwayCanvasOffset, pathwayMarkerPosition, PATHWAY_MARKER_SIZE, PATHWAY_NODE_EXTENT } from "../src/components/navigation/pathwayModel.ts";
 import { displayCondition, isConditionMet } from "../src/utils/conditions.ts";
 import { createColorScale, createContinuousColorScale, type PaletteName, type ContinuousSchemeName } from "../src/utils/colorUtils.ts";
 import { hsl } from "d3";
@@ -93,6 +93,38 @@ test("branch layout is deterministic and a plain chain winds rather than becomin
     assert.notEqual(graph.nodes.find(node => node.id === 1)?.x, graph.nodes.find(node => node.id === 2)?.x);
     const chain = layoutPathway(pages(4), [bypass(0, 1), bypass(1, 2), bypass(2, 3)]);
     assert.ok(new Set(chain.nodes.map(node => node.x)).size > 1);
+});
+
+test("chain positions vary across both sides with their mean at the panel center", () => {
+    for (const count of [1, 2, 3, 7, 13, 40]) {
+        const transitions = Array.from({ length: count - 1 }, (_, id) => bypass(id, id + 1));
+        const graph = layoutPathway(pages(count), transitions);
+        assert.deepEqual(graph, layoutPathway(pages(count), transitions), "Repeated layouts keep identical coordinates");
+        const mean = graph.nodes.reduce((sum, node) => sum + node.x, 0) / count;
+        assert.ok(Math.abs(mean - graph.width / 2) < 1e-9);
+        if (count > 1) {
+            assert.ok(graph.nodes.some(node => node.x < mean - 10));
+            assert.ok(graph.nodes.some(node => node.x > mean + 10));
+        }
+        for (const viewportWidth of [240, 284, 360]) {
+            assert.ok(graph.width <= viewportWidth, "A plain chain fits the sidebar with mascot clearance");
+            const offset = pathwayCanvasOffset(graph.width, viewportWidth);
+            assert.ok(Math.abs(mean + offset - viewportWidth / 2) < 1e-9);
+            assert.equal(visibleNodes(graph.nodes, { left: -offset, top: 0, width: viewportWidth, height: graph.height }).length, count);
+        }
+    }
+    const graph = layoutPathway(pages(13), Array.from({ length: 12 }, (_, id) => bypass(id, id + 1)));
+    assert.ok(new Set(graph.nodes.map(node => Math.round(node.x))).size > 8, "The path has more variety than a repeating four-position pattern");
+});
+
+test("wide branch layouts keep their lanes and horizontal scrolling", () => {
+    const transitions = Array.from({ length: 6 }, (_, id) => bypass(0, id + 1));
+    const graph = layoutPathway(pages(7), transitions);
+    assert.ok(graph.width > 284);
+    assert.equal(pathwayCanvasOffset(graph.width, 284), 0);
+    const branches = graph.nodes.filter(node => node.id !== 0).sort((a, b) => a.x - b.x);
+    for (let index = 1; index < branches.length; index++) assert.ok(branches[index].x - branches[index - 1].x >= 100);
+    assert.ok(visibleNodes(graph.nodes, { left: graph.width - 284, top: 0, width: 284, height: graph.height }).some(node => node.id === branches.at(-1)!.id));
 });
 
 test("virtualisation includes every intersecting node and scrolling reveals the final page", () => {

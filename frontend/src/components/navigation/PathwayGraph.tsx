@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, LocateFixed } from "lucide-react";
 import { displayCondition } from "@/utils/conditions";
-import { edgePath, pageTitle, visibleNodes, type Viewport } from "./pathwayModel";
+import { edgePath, pageTitle, pathwayCanvasOffset, visibleNodes, type Viewport } from "./pathwayModel";
 import PathwayPageNode from "./PathwayPageNode";
 import { useShallow } from "zustand/react/shallow";
 import { usePathway } from "@/store/usePathway";
@@ -26,7 +26,8 @@ export default function PathwayGraph() {
         const node = layout.nodes.find(node => node.id === id);
         const element = scrollRef.current;
         if (!node || !element) return;
-        element.scrollTo({ top: Math.max(0, node.y - element.clientHeight / 2), left: Math.max(0, node.x - element.clientWidth / 2), behavior: "instant" });
+        const offset = pathwayCanvasOffset(layout.width, element.clientWidth);
+        element.scrollTo({ top: Math.max(0, node.y - element.clientHeight / 2), left: Math.max(0, node.x + offset - element.clientWidth / 2), behavior: "instant" });
         measure();
     }, [layout, measure]);
 
@@ -38,7 +39,8 @@ export default function PathwayGraph() {
     }, [measure]);
     useEffect(() => { reveal(currentPageId); }, [currentPageId, reveal, viewport.width, viewport.height]);
 
-    const windowNodes = visibleNodes(layout.nodes, viewport);
+    const canvasOffset = pathwayCanvasOffset(layout.width, viewport.width);
+    const windowNodes = visibleNodes(layout.nodes, { ...viewport, left: viewport.left - canvasOffset });
     const windowIds = new Set(windowNodes.map(node => node.id));
     const edges = layout.edges.filter(edge => windowIds.has(edge.from) || windowIds.has(edge.to));
     const scroll = (horizontal: number, vertical: number) => {
@@ -59,7 +61,7 @@ export default function PathwayGraph() {
             <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2 text-xs text-slate-500"><span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span><button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-blue-700 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600"><LocateFixed className="size-4" /></button></div>
             <div className="relative flex min-h-0 flex-1 flex-col">
             <div ref={scrollRef} onScroll={measure} role="region" aria-label="Page pathway" tabIndex={0} className="pathway-scroll min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-blue-600" data-pathway-viewport>
-                <div className="relative" style={{ width: layout.width, minWidth: "100%", height: layout.height }}>
+                <div className="relative mx-auto" style={{ width: layout.width, height: layout.height }}>
                     <svg width={layout.width} height={layout.height} className="absolute left-0 top-0" aria-hidden="true">
                         <defs><marker id={markerId} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" /></marker></defs>
                         {edges.map(edge => {

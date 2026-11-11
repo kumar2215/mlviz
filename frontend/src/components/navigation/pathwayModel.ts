@@ -60,18 +60,30 @@ export function layoutPathway(pages: PageUnion[], transitions: Transition[]): Pa
         const rank = Math.round(node.y);
         ranks.set(rank, [...(ranks.get(rank) || []), node]);
     }
-    // A chain still feels like a path; branch ranks keep their Dagre lanes.
-    [...ranks.values()].sort((a, b) => a[0].y - b[0].y).forEach((rank, index) => {
-        if (rank.length === 1 && pages.length > 1) rank[0].x += [-22, 22, 8, -16][index % 4];
+    // Seeded offsets give chains variety without moving nodes when progress changes.
+    // Balance their mean before applying them; branch ranks keep their Dagre lanes.
+    const singleRanks = [...ranks.values()].filter(rank => rank.length === 1).sort((a, b) => a[0].y - b[0].y);
+    let seed = 0x6d2b79f5;
+    const offsets = singleRanks.map(() => {
+        seed ^= seed << 13;
+        seed ^= seed >>> 17;
+        seed ^= seed << 5;
+        return (seed >>> 0) / 0x100000000 * 2 - 1;
     });
+    const meanOffset = offsets.reduce((sum, offset) => sum + offset, 0) / (offsets.length || 1);
+    const centeredOffsets = offsets.map(offset => offset - meanOffset);
+    const spread = Math.max(...centeredOffsets.map(Math.abs), 1e-9);
+    singleRanks.forEach((rank, index) => { rank[0].x += centeredOffsets[index] / spread * 38; });
     const edges: PathwayEdge[] = valid.map(({ id, transition }) => {
         const points: Point[] = graph.edge({ v: String(transition.from), w: String(transition.to), name: id }).points.map((point: Point) => ({ ...point }));
         const from = nodes[transition.from];
         const to = nodes[transition.to];
         const originalFrom = graph.node(String(transition.from));
         const originalTo = graph.node(String(transition.to));
-        points[0].x += from.x - originalFrom.x;
-        points[points.length - 1].x += to.x - originalTo.x;
+        points.forEach((point, index) => {
+            const fraction = index / (points.length - 1);
+            point.x += (from.x - originalFrom.x) * (1 - fraction) + (to.x - originalTo.x) * fraction;
+        });
         // End at the circular outline rather than Dagre's rectangular node box.
         for (const [index, node, next] of [[0, from, points[1]], [points.length - 1, to, points[points.length - 2]]] as const) {
             const dx = next.x - node.x;
@@ -82,17 +94,19 @@ export function layoutPathway(pages: PageUnion[], transitions: Transition[]): Pa
         return { id, from: transition.from, to: transition.to, transition, points };
     });
     const allPoints = [...nodes, ...edges.flatMap(edge => edge.points)];
-    const shiftX = Math.max(0, NODE_MARGIN - Math.min(...allPoints.map(point => point.x)));
+    const centerX = nodes.reduce((sum, node) => sum + node.x, 0) / nodes.length;
+    const halfWidth = Math.max(100, Math.max(...allPoints.map(point => Math.abs(point.x - centerX))) + NODE_MARGIN);
+    const width = Math.ceil(halfWidth * 2);
+    const shiftX = width / 2 - centerX;
     nodes.forEach(node => { node.x += shiftX; });
     edges.forEach(edge => edge.points.forEach(point => { point.x += shiftX; }));
-    const width = Math.max(200, Math.max(...allPoints.map(point => point.x)) + NODE_MARGIN);
     const height = Math.max(...allPoints.map(point => point.y)) + NODE_MARGIN;
-    if (width === 200) {
-        const offset = (200 - (Math.max(...nodes.map(node => node.x)) + Math.min(...nodes.map(node => node.x)))) / 2;
-        nodes.forEach(node => { node.x += offset; });
-        edges.forEach(edge => edge.points.forEach(point => { point.x += offset; }));
-    }
     return { nodes: nodes.sort((a, b) => a.y - b.y || a.x - b.x || a.id - b.id), edges, width, height };
+}
+
+/** Center a fitting canvas; wider branch layouts retain horizontal scrolling. */
+export function pathwayCanvasOffset(canvasWidth: number, viewportWidth: number): number {
+    return Math.max(0, (viewportWidth - canvasWidth) / 2);
 }
 
 export function nodeStates(layout: PathwayLayout, current: number, visited: ReadonlySet<number>, canExit: boolean, eligible: (transition: Transition) => boolean): Map<number, NodeState> {
