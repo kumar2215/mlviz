@@ -184,7 +184,7 @@ test("the expanded NLP story uses the local source page for each exercise's comp
     const visualisations = Object.fromEntries(["regex", "porter", "tokenization"].map(name => [name, visualisation(name)]));
     const expanded = unrollStory(story, { stories: {}, visualisations });
     const { store, source } = session(expanded);
-    const completionPages = new Set([1, 3, 6, 8, 10, 11]);
+    const completionPages = new Set([1, 3, 6, 8, 9, 10, 11]);
     assert.equal(expanded.pages.length, 13);
     assert.equal(selectPathwayNode(store.getState(), 1).title, "Regex Basics");
     assert.equal(selectPathwayNode(store.getState(), 2).title, "Regex Playground");
@@ -196,6 +196,7 @@ test("the expanded NLP story uses the local source page for each exercise's comp
         const namedPage = page.page_type === "mixed" ? page.dynamic_page : page;
         assert.equal(selectPathwayNode(store.getState(), pageId).title, namedPage.name);
         if (pageId === 1) assert.deepEqual(pageSubpages(store.getState()), ["Text & tokens", "Pattern symbols", "Flags"]);
+        if (pageId === 9) assert.deepEqual(pageSubpages(store.getState()), ["BPE & terms", "A merge example", "Training & tokenizing"]);
         if (completionPages.has(pageId)) {
             assert.equal(selectPathwayNode(store.getState(), pageId + 1).state, "locked");
             completeSubpages(store);

@@ -148,6 +148,23 @@ test("regex basics subpages can sync only to their owner's story progress", asyn
     await assertFails(updateDoc(doc(other, "users", "regex-reader", "storyProgress", "text_preprocessing"), { updatedAt: serverTimestamp() }));
 });
 
+test("BPE basics subpages accept their new checkpoint IDs and reject unknown ones", async () => {
+    await setDoc(userDoc("bpe-reader"), profile());
+    const db = env.authenticatedContext("bpe-reader").firestore();
+    const ref = doc(db, "users", "bpe-reader", "storyProgress", "text_preprocessing");
+    const topics = ["bpe-terms", "merge-example", "training-tokenizing"];
+    for (let index = 0; index < topics.length; index++) {
+        await assertSucceeds(setDoc(ref, {
+            version: 1,
+            milestones: ["visit:bpe-basics", ...topics.slice(0, index + 1).map(topic => `step:bpe-basics:${topic}`)],
+            checkpoint: { page: "bpe-basics", step: topics[index], at: 1000 + index, client: "bpe-reader" },
+            updatedAt: serverTimestamp(),
+        }));
+    }
+    await assertFails(updateDoc(ref, { milestones: ["step:bpe-basics:unknown-topic"], updatedAt: serverTimestamp() }));
+    await assertFails(updateDoc(ref, { checkpoint: { page: "bpe-basics", step: "unknown-topic", at: 2000, client: "bpe-reader" }, updatedAt: serverTimestamp() }));
+});
+
 test("real Auth + Firestore SDKs register, verify, sign in, persist one profile and sign out", async () => {
     const app = initializeApp({ projectId, apiKey: "fake-api-key", authDomain: `${projectId}.firebaseapp.com` }, "integration");
     const auth = getAuth(app);

@@ -4,7 +4,17 @@
     {
       "page_type": "dynamic",
       "name": "BPE Basics",
-      "parameters": {}
+      "parameters": {},
+      "subpages": [
+        "BPE & terms",
+        "A merge example",
+        "Training & tokenizing"
+      ],
+      "subpage_ids": [
+        "bpe-terms",
+        "merge-example",
+        "training-tokenizing"
+      ]
     },
     {
       "page_type": "dynamic",
@@ -30,7 +40,7 @@
       "from": 0,
       "to": 1,
       "condition": {
-        "condition_type": "Bypass",
+        "condition_type": "Completed",
         "name": "Open the BPE Lab"
       }
     },

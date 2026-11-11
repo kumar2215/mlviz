@@ -150,3 +150,33 @@ test("regex basics renders one pathway topic at a time with only three introduct
         }
     }
 });
+
+test("BPE basics shows its three topics as individual pathway subpages in both modes", () => {
+    const topics = ["BPE &amp; terms", "A merge example", "Training &amp; tokenizing"];
+    const content = readFileSync(new URL("../public/md/bpe/basics.md", import.meta.url), "utf8");
+    for (const mode of ["story", "visualisation"] as const) {
+        setMode(mode);
+        for (let subpageIndex = 0; subpageIndex < topics.length; subpageIndex++) {
+            const html = renderToStaticMarkup(createElement(BpeIndex, {
+                name: "BPE Basics", parameters: {}, subpageIndex,
+                narration: mode === "story" ? { content, loading: false, error: null } : undefined,
+                onComplete() {}, onSubpageReady() {},
+            }));
+            assert.match(html, new RegExp(`aria-label="${topics[subpageIndex]}"`));
+            assert.match(html, new RegExp(`<h2[^>]*>${topics[subpageIndex]}<\\/h2>`));
+            assert.doesNotMatch(html, /<nav|BPE basics topics|Mark as read|\d of 3/);
+            if (subpageIndex === 0) {
+                assert.match(html, /Why learn pieces of words\?/);
+                assert.doesNotMatch(html, /Weighted pair counts|Next merge|Next: train your own/);
+            } else if (subpageIndex === 1) {
+                assert.match(html, /Weighted pair counts|Current tokens/);
+                assert.match(html, /Next merge/);
+                assert.doesNotMatch(html, /<dl|Learn rules first|Next: train your own|Learn how frequent neighboring/);
+            } else {
+                assert.match(html, /Learn rules first, then reuse them/);
+                assert.match(html, /Next: train your own/);
+                assert.doesNotMatch(html, /<dl|Next merge|Weighted pair counts|Learn how frequent neighboring/);
+            }
+        }
+    }
+});
