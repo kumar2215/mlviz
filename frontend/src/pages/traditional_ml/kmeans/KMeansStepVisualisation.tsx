@@ -347,12 +347,12 @@ export default function KMeansStepVisualisation() {
                 {isAutoLoading ? (
                     <>
                         <div className="w-8 h-8 rounded-full border-4 border-primary border-t-transparent animate-spin" />
-                        <p className="text-slate-500 text-sm"><PageLoadingLabel>Loading visualization...</PageLoadingLabel></p>
+                        <p className="text-muted-foreground text-sm"><PageLoadingLabel>Loading visualization...</PageLoadingLabel></p>
                     </>
                 ) : (
                     <>
-                        <p className="text-slate-600 font-medium">No data loaded yet</p>
-                        <p className="text-slate-400 text-sm">Apply parameters in the sidebar to begin.</p>
+                        <p className="text-text-secondary font-medium">No data loaded yet</p>
+                        <p className="text-muted-foreground text-sm">Apply parameters in the sidebar to begin.</p>
                     </>
                 )}
             </div>
@@ -362,7 +362,7 @@ export default function KMeansStepVisualisation() {
     return (
         <div data-tour="centroid-canvas" data-tour-ready="true" data-tour-centroids={selectedCentroids.length ? "selected" : "empty"} className="relative h-full w-full">
             {/* Control HUD */}
-            <div data-tour-corner className="absolute top-6 right-6 z-20 flex flex-col gap-4">
+            <div className="absolute top-6 right-6 z-20 flex flex-col gap-4">
                 <KMeansStepHUD
                     mode={mode}
                     setMode={setMode}

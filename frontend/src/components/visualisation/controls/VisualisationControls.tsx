@@ -37,10 +37,10 @@ const VisualisationControls: React.FC<VisualisationControlsProps> = ({
 
     const styleClasses = {
         overlay:
-            "z-10 bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-sm border border-gray-200/50 rounded-lg px-2 py-1 shadow-sm",
-        panel: "z-10 bg-white border border-gray-300 rounded-lg px-3 py-2 shadow-md",
-        toolbar: "z-10 bg-gray-100 border-b border-gray-300 px-3 py-2",
-        button: "w-8 h-8 rounded-full text-white border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-in-out !bg-gradient-to-r !from-slate-500 !to-gray-500 hover:!from-slate-700 !to-gray-700 !hover:drop-shadow-xl",
+            "z-10 bg-surface-tint   backdrop-blur-sm border border-border rounded-lg px-2 py-1 shadow-sm",
+        panel: "z-10 bg-surface border border-border rounded-lg px-3 py-2 shadow-md",
+        toolbar: "z-10 bg-surface-recessed border-b border-border px-3 py-2",
+        button: "w-8 h-8 rounded-full text-primary-foreground border-none cursor-pointer flex items-center justify-center transition-all duration-200 ease-in-out bg-primary hover:bg-primary-hover active:bg-primary-pressed hover:shadow-xl",
     };
 
     const containerClasses = `
@@ -63,7 +63,7 @@ const VisualisationControls: React.FC<VisualisationControlsProps> = ({
 
             {/* Separator between play and zoom controls */}
             {hasPlayControls && hasZoomControls && (
-                <div className="w-px h-4 bg-gray-300" />
+                <div className="w-px h-4 bg-disabled" />
             )}
 
             {/* Zoom Controls */}
@@ -80,7 +80,7 @@ const VisualisationControls: React.FC<VisualisationControlsProps> = ({
 
             {/* Separator before export controls */}
             {(hasPlayControls || hasZoomControls) && hasExportControls && (
-                <div className="w-px h-4 bg-gray-300" />
+                <div className="w-px h-4 bg-disabled" />
             )}
 
             {hasExportControls && (

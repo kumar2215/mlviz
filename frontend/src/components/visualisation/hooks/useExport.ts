@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 import { fontUrlMapping } from "@/components/visualisation/config/fonts";
 import type { PlayControlState } from "@/components/visualisation/types";
 import * as opentype from "opentype.js";
@@ -106,7 +107,7 @@ export const useExport = ({
                     const fill =
                         computedStyle.fill ||
                         textEl.getAttribute("fill") ||
-                        "black";
+                        uiColors.foreground;
 
                     // Get position attributes
                     const x = parseFloat(textEl.getAttribute("x") || "0");
@@ -296,7 +297,7 @@ export const useExport = ({
                                 ctx.imageSmoothingQuality = "high";
 
                                 // Fill with white background
-                                ctx.fillStyle = "#ffffff";
+                                ctx.fillStyle = uiColors.surface;
                                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                                 // Draw SVG image to canvas
@@ -594,7 +595,7 @@ export const useExport = ({
                         const ctx = canvas.getContext("2d");
                         if (ctx) {
                             ctx.clearRect(0, 0, canvas.width, canvas.height);
-                            ctx.fillStyle = "#ffffff";
+                            ctx.fillStyle = uiColors.surface;
                             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                             // Calculate scaling and centering to maintain aspect ratio

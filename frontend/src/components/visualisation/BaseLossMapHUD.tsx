@@ -1,3 +1,5 @@
+import { lossGradient, lossInterpolator } from "../../theme/recipes";
+import { chartColors, uiColors } from "../../theme/colors";
 import CollapsibleHUD from "@/components/visualisation/CollapsibleHUD";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
 import * as d3 from "d3";
@@ -114,7 +116,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
             .attr("orient", "auto-start-reverse")
             .append("path")
             .attr("d", "M 0 0 L 10 5 L 0 10 z")
-            .attr("fill", "#f97316");
+            .attr("fill", chartColors.proposal);
 
         const g = svg
             .append("g")
@@ -136,7 +138,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
         const logMax = Math.log1p(Math.max(0, maxLoss));
 
         const colorScale = d3
-            .scaleSequential(d3.interpolateYlOrBr)
+            .scaleSequential(lossInterpolator)
             .domain([logMin, logMax]);
 
         // ---- Heatmap cells ----
@@ -218,8 +220,8 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                     .tickFormat((v) => (v as number).toFixed(1))
             )
             .call((ax) => {
-                ax.selectAll("text").style("font-size", "9px").style("fill", "#94a3b8");
-                ax.selectAll("line, path").style("stroke", "#e2e8f0");
+                ax.selectAll("text").style("font-size", "9px").style("fill", uiColors.mutedForeground);
+                ax.selectAll("line, path").style("stroke", chartColors.grid);
             });
 
         g.append("g")
@@ -228,8 +230,8 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                     .tickFormat((v) => (v as number).toFixed(0))
             )
             .call((ax) => {
-                ax.selectAll("text").style("font-size", "9px").style("fill", "#94a3b8");
-                ax.selectAll("line, path").style("stroke", "#e2e8f0");
+                ax.selectAll("text").style("font-size", "9px").style("fill", uiColors.mutedForeground);
+                ax.selectAll("line, path").style("stroke", chartColors.grid);
             });
 
         g.append("text")
@@ -237,7 +239,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
             .attr("y", innerH + 30)
             .attr("text-anchor", "middle")
             .style("font-size", "9px")
-            .style("fill", "#94a3b8")
+            .style("fill", uiColors.mutedForeground)
             .text(xLabel);
 
         g.append("text")
@@ -246,7 +248,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
             .attr("y", -32)
             .attr("text-anchor", "middle")
             .style("font-size", "9px")
-            .style("fill", "#94a3b8")
+            .style("fill", uiColors.mutedForeground)
             .text(yLabel);
 
         // ---- Marker layer (updated by separate effect) ----
@@ -278,21 +280,21 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                 .attr("class", "marker-current")
                 .attr("x1", cx).attr("x2", cx)
                 .attr("y1", 0).attr("y2", innerH)
-                .attr("stroke", "#0284c7").attr("stroke-width", 1)
+                .attr("stroke", chartColors.current).attr("stroke-width", 1)
                 .attr("stroke-opacity", 0.5).attr("stroke-dasharray", "3 2");
 
             g.append("line")
                 .attr("class", "marker-current")
                 .attr("x1", 0).attr("x2", innerW)
                 .attr("y1", cy).attr("y2", cy)
-                .attr("stroke", "#0284c7").attr("stroke-width", 1)
+                .attr("stroke", chartColors.current).attr("stroke-width", 1)
                 .attr("stroke-opacity", 0.5).attr("stroke-dasharray", "3 2");
 
             g.append("circle")
                 .attr("class", "marker-current")
                 .attr("cx", cx).attr("cy", cy).attr("r", 5)
-                .attr("fill", "#0284c7")
-                .attr("stroke", "white").attr("stroke-width", 1.5);
+                .attr("fill", chartColors.current)
+                .attr("stroke", uiColors.surface).attr("stroke-width", 1.5);
         }
 
         g.selectAll(".marker-proposed").remove();
@@ -304,14 +306,14 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                     .attr("class", "marker-proposed")
                     .attr("x1", cx).attr("y1", cy)
                     .attr("x2", px).attr("y2", py)
-                    .attr("stroke", "#f97316").attr("stroke-width", 1.5)
+                    .attr("stroke", chartColors.proposal).attr("stroke-width", 1.5)
                     .attr("marker-end", "url(#arrow-proposed)");
 
                 g.append("circle")
                     .attr("class", "marker-proposed")
                     .attr("cx", px).attr("cy", py).attr("r", 4)
-                    .attr("fill", "#f97316")
-                    .attr("stroke", "white").attr("stroke-width", 1.5);
+                    .attr("fill", chartColors.proposal)
+                    .attr("stroke", uiColors.surface).attr("stroke-width", 1.5);
             }
         }
     }, [currentX, currentY, proposedX, proposedY, lossGrid, innerW, innerH]);
@@ -321,19 +323,19 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
     return (
         <CollapsibleHUD
             tourTarget="loss-map"
-            icon={<Map style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
+            icon={<Map style={{ width: fs(15), height: fs(15) }} className="text-primary" />}
             title="Loss Landscape"
             defaultOpen={true}
             style={{ width: fs(290) }}
         >
             {!lossGrid ? (
-                <p className="text-slate-400 text-center" style={{ fontSize: fs9 }}>
+                <p className="text-text-secondary text-center" style={{ fontSize: fs9 }}>
                     Computing loss map...
                 </p>
             ) : (
                 <>
                     {/* Mode toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-slate-200 mb-3" style={{ fontSize: fs9 }}>
+                    <div className="flex rounded-lg overflow-hidden border border-border mb-3" style={{ fontSize: fs9 }}>
                         {ALL_MODES.map((m) => (
                             <button
                                 key={m}
@@ -341,8 +343,8 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                                 onClick={() => setMode(m)}
                                 className={`flex-1 py-1 transition-colors ${
                                     mode === m
-                                        ? "bg-blue-500 text-white font-semibold"
-                                        : "bg-white text-slate-500 hover:bg-slate-50"
+                                        ? "bg-primary text-primary-foreground font-semibold"
+                                        : "bg-surface text-text-secondary hover:bg-surface-subtle"
                                 }`}
                             >
                                 {MODE_LABELS[m]}
@@ -352,7 +354,7 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
 
                     {extraInfo && (
                         <div 
-                            className="mt-1 text-center font-medium text-slate-800 italic"
+                            className="mt-1 text-center font-medium text-foreground italic"
                             style={{ fontSize: fs(9) }}
                         >
                             {extraInfo}
@@ -371,29 +373,29 @@ const BaseLossMapHUD: React.FC<BaseLossMapHUDProps> = ({
                         <span className="flex items-center" style={{ gap: fs(4), fontSize: fs9 }}>
                             <span style={{
                                 display: "inline-block", width: fs(8), height: fs(8),
-                                borderRadius: "50%", background: "#0284c7",
+                                borderRadius: "50%", background: chartColors.current,
                             }} />
-                            <span className="text-slate-500">Current</span>
+                            <span className="text-text-secondary">Current</span>
                         </span>
                         <span className="flex items-center" style={{ gap: fs(4), fontSize: fs9 }}>
                             <span style={{
                                 display: "inline-block", width: fs(8), height: fs(8),
-                                borderRadius: "50%", background: "#f97316",
+                                borderRadius: "50%", background: chartColors.proposal,
                             }} />
-                            <span className="text-slate-500">Proposed</span>
+                            <span className="text-text-secondary">Proposed</span>
                         </span>
                         <span className="flex items-center" style={{ gap: fs(4), fontSize: fs9 }}>
                             <span style={{
                                 display: "inline-block", width: fs(16), height: fs(6),
-                                background: "linear-gradient(to right, #ffffb2, #fd8d3c, #bd0026)",
+                                background: lossGradient(),
                                 borderRadius: fs(2),
                             }} />
-                            <span className="text-slate-500">Loss</span>
+                            <span className="text-text-secondary">Loss</span>
                         </span>
                     </div>
 
                     <div
-                        className="mt-2 rounded-lg bg-white/70 border border-slate-100 text-center font-mono text-slate-600"
+                        className="mt-2 rounded-lg bg-surface-hover-translucent border border-border text-center font-mono text-text-secondary"
                         style={{ padding: `${fs(4)} ${fs(8)}`, fontSize: fs(11) }}
                     >
                         Loss = {computeLoss(currentX, currentY).toFixed(4)}

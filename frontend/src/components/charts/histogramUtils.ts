@@ -1,3 +1,4 @@
+import { uiColors } from "../../theme/colors";
 // Shared histogram rendering utilities
 
 import type { HistogramData } from "@/types/model";
@@ -108,7 +109,7 @@ export function renderHistogramBars(
             .attr("x2", margin.left + xScale(data.threshold))
             .attr("y1", margin.top)
             .attr("y2", margin.top + innerHeight)
-            .attr("stroke", "#000000ff")
+            .attr("stroke", uiColors.foreground)
             .attr("stroke-width", 2)
             .attr("stroke-dasharray", "4,4");
     }

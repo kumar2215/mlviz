@@ -1,3 +1,3 @@
-# Regex basics
+# Text & tokens
 
-Before writing a pattern, learn what the editor's terms mean. Explore **Text & tokens**, **Pattern symbols**, and **Flags**, then continue to the playground.
+See how a pattern finds text and turns each match into a token.

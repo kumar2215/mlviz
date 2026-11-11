@@ -1,3 +1,5 @@
+import { colourRecipes } from "../../../theme/recipes";
+import { uiColors, chartColors } from "../../../theme/colors";
 /**
  * KMeans Renderer
  * D3-based rendering functions for K-Means clustering visualization
@@ -408,7 +410,7 @@ function renderCentroids2D(
             .attr("cy", cy)
             .attr("r", centroidSize)
             .attr("fill", color)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 3 * scaleFactor)
             .attr("opacity", opacity);
 
@@ -424,7 +426,7 @@ function renderCentroids2D(
             .attr("y1", cy)
             .attr("x2", cx + markerSize)
             .attr("y2", cy)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
@@ -434,7 +436,7 @@ function renderCentroids2D(
             .attr("y1", cy - markerSize)
             .attr("x2", cx)
             .attr("y2", cy + markerSize)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
@@ -451,8 +453,8 @@ function renderCentroids2D(
 
         // Tooltip
         const tooltipContent = `
-            <div class="font-semibold text-gray-900 mb-1">${clusterName}${tooltipSuffix}</div>
-            <div class="text-sm text-gray-700">Position: [${centroid.map((v) => v.toFixed(2)).join(", ")}]</div>
+            <div class="font-semibold text-foreground mb-1">${clusterName}${tooltipSuffix}</div>
+            <div class="text-sm text-foreground">Position: [${centroid.map((v) => v.toFixed(2)).join(", ")}]</div>
         `;
 
         hoverTarget
@@ -538,7 +540,7 @@ function renderCentroids1D(
             .attr("cy", stripCenter)
             .attr("r", centroidSize)
             .attr("fill", color)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 3 * scaleFactor)
             .attr("opacity", opacity);
 
@@ -554,7 +556,7 @@ function renderCentroids1D(
             .attr("y1", stripCenter)
             .attr("x2", cx + markerSize)
             .attr("y2", stripCenter)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
@@ -564,7 +566,7 @@ function renderCentroids1D(
             .attr("y1", stripCenter - markerSize)
             .attr("x2", cx)
             .attr("y2", stripCenter + markerSize)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor)
             .attr("opacity", opacity);
 
@@ -581,8 +583,8 @@ function renderCentroids1D(
 
         // Tooltip
         const tooltipContent = `
-            <div class="font-semibold text-gray-900 mb-1">${clusterName}${tooltipSuffix}</div>
-            <div class="text-sm text-gray-700">Position: ${centroid[0].toFixed(2)}</div>
+            <div class="font-semibold text-foreground mb-1">${clusterName}${tooltipSuffix}</div>
+            <div class="text-sm text-foreground">Position: ${centroid[0].toFixed(2)}</div>
         `;
 
         hoverTarget
@@ -844,7 +846,7 @@ export function renderCentroidTrail2D(
                 .attr("cy", cy)
                 .attr("r", radius)
                 .attr("fill", color)
-                .attr("stroke", "white")
+                .attr("stroke", uiColors.surface)
                 .attr("stroke-width", 1.5 * scaleFactor)
                 .attr("opacity", opacity);
 
@@ -946,7 +948,7 @@ export function renderSelectedCentroidMarkers(
             .attr("cy", cy)
             .attr("r", centroidSize)
             .attr("fill", color)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 3 * scaleFactor)
             .attr("opacity", 0.9);
 
@@ -958,7 +960,7 @@ export function renderSelectedCentroidMarkers(
             .attr("y1", cy)
             .attr("x2", cx + markerSize)
             .attr("y2", cy)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor);
 
         group
@@ -967,7 +969,7 @@ export function renderSelectedCentroidMarkers(
             .attr("y1", cy - markerSize)
             .attr("x2", cx)
             .attr("y2", cy + markerSize)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor);
 
         // Label above
@@ -979,7 +981,7 @@ export function renderSelectedCentroidMarkers(
             .attr("font-size", `${11 * scaleFactor}px`)
             .attr("font-weight", "bold")
             .attr("fill", color)
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 3 * scaleFactor)
             .attr("paint-order", "stroke")
             .text(`C${index}`);
@@ -1046,7 +1048,8 @@ export function renderProposedCentroidMarkers(
             .attr("cy", cy)
             .attr("r", centroidSize)
             .attr("fill", color)
-            .attr("stroke", "#fff")
+            .attr("stroke", chartColors.proposal)
+            .attr("stroke-dasharray", "3 2")
             .attr("stroke-width", 1 * scaleFactor);
 
         // Label below
@@ -1056,7 +1059,7 @@ export function renderProposedCentroidMarkers(
             .attr("y", cy + centroidSize + 12 * scaleFactor)
             .attr("text-anchor", "middle")
             .attr("font-size", `${9 * scaleFactor}px`)
-            .attr("fill", "#666")
+            .attr("fill", chartColors.proposal)
             .text("Proposed");
     });
 }
@@ -1081,15 +1084,15 @@ function setupCentroidTooltip(): d3.Selection<
             .append("div")
             .attr("class", "kmeans-centroid-tooltip")
             .style("position", "absolute")
-            .style("background-color", "white")
-            .style("border", "1px solid #ddd")
+            .style("background-color", uiColors.surface)
+            .style("border", `1px solid ${uiColors.border}`)
             .style("border-radius", "4px")
             .style("padding", "8px 12px")
             .style("font-size", "12px")
             .style("pointer-events", "none")
             .style("opacity", 0)
             .style("z-index", "1000")
-            .style("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
+            .style("box-shadow", colourRecipes.tooltipShadow);
     }
 
     return tooltip;

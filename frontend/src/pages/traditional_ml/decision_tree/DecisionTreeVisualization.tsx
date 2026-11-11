@@ -1,3 +1,4 @@
+import { chartColors } from "../../../theme/colors";
 import BaseVisualisation from "@/components/visualisation/BaseVisualisation";
 import type { VisualisationCapabilities, VisualisationDataConfig } from "@/components/visualisation/types";
 import { renderDecisionTree } from "@/pages/traditional_ml/decision_tree/DecisionTreeRenderer";
@@ -83,13 +84,13 @@ export default function DecisionTreeVisualization() {
         const classColors = new Map<string, string>();
 
         (classes || []).forEach((className: string, index: number) => {
-            const color = DEFAULT_COLORS[index] || '#cccccc';
+            const color = DEFAULT_COLORS[index] || chartColors.unassigned;
             classColors.set(className, color);
             // Histograms use class indices instead of names.
             classColors.set(index.toString(), color);
         });
 
-        return (className: string) => classColors.get(className) || '#cccccc';
+        return (className: string) => classColors.get(className) || chartColors.unassigned;
     }, [classes]);
 
     const renderManualDecisionTree = useCallback<VisualisationDataConfig["renderContent"]>(
@@ -128,7 +129,7 @@ export default function DecisionTreeVisualization() {
     return (
         <div data-tour="tree-canvas" data-tour-ready="true" className="relative h-full w-full">
             {/* Control HUD */}
-            <div data-tour-corner className="absolute top-6 right-6 z-20 flex flex-col gap-4 w-96">
+            <div className="absolute top-6 right-6 z-20 flex flex-col gap-4 w-96">
                 <ManualTreeHUD />
             </div>
 

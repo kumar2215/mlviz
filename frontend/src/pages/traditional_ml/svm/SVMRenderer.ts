@@ -1,3 +1,5 @@
+import { colourRecipes } from "../../../theme/recipes";
+import { chartColors, uiColors } from "../../../theme/colors";
 /**
  * SVM Classification D3 Renderer
  * Draws a scatter plot colored by class, with the decision boundary heatmap.
@@ -133,7 +135,7 @@ export function renderSVM({
     if (!existingLegendDiv.empty()) {
         existingLegendDiv.append("xhtml:div")
             .style("height", "1px")
-            .style("background-color", "#e2e8f0")
+            .style("background-color", chartColors.grid)
             .style("margin", `${6 * scaleFactor}px 0 ${4 * scaleFactor}px 0`);
         
         const svRow = existingLegendDiv.append("xhtml:div")
@@ -147,11 +149,11 @@ export function renderSVM({
             .attr("class", "rounded-full flex-shrink-0")
             .style("width", `${10 * scaleFactor}px`)
             .style("height", `${10 * scaleFactor}px`)
-            .style("border", "1.5px solid #27272a")
-            .style("background-color", "#cbd5e1");
+            .style("border", `1.5px solid ${uiColors.foreground}`)
+            .style("background-color", uiColors.border);
 
         svRow.append("xhtml:span")
-            .attr("class", "font-medium text-slate-700")
+            .attr("class", "font-medium text-foreground")
             .style("font-size", `${10 * scaleFactor}px`)
             .text("Support Vector");
 
@@ -167,15 +169,15 @@ export function renderSVM({
                 .attr("class", "rounded-full flex flex-shrink-0 items-center justify-center")
                 .style("width", `${10 * scaleFactor}px`)
                 .style("height", `${10 * scaleFactor}px`)
-                .style("border", "1.5px solid #27272a")
-                .style("background-color", "#475569")
+                .style("border", `1.5px solid ${uiColors.foreground}`)
+                .style("background-color", uiColors.textSecondary)
                 .style("font-size", `${7 * scaleFactor}px`)
                 .style("font-weight", "900")
-                .style("color", "white")
+                .style("color", uiColors.surface)
                 .text("ϟ");
 
             optRow.append("xhtml:span")
-                .attr("class", "font-medium text-slate-700")
+                .attr("class", "font-medium text-foreground")
                 .style("font-size", `${10 * scaleFactor}px`)
                 .text("Optimised (KKT)");
         }
@@ -200,17 +202,17 @@ export function renderSVM({
             .attr("id", "svm-tooltip")
             .style("position", "absolute")
             .style("visibility", "hidden")
-            .style("background", "rgba(255, 255, 255, 0.95)")
+            .style("background", uiColors.surfaceTranslucent)
             .style("backdrop-filter", "blur(4px)")
-            .style("border", "1px solid #e2e8f0")
+            .style("border", `1px solid ${chartColors.grid}`)
             .style("border-radius", "8px")
             .style("padding", "8px 12px")
             .style("font-size", "12px")
             .style("font-family", "inherit")
-            .style("box-shadow", "0 4px 12px rgba(0, 0, 0, 0.1)")
+            .style("box-shadow", colourRecipes.tooltipShadow)
             .style("pointer-events", "none")
             .style("z-index", "1000")
-            .style("color", "#1e293b");
+            .style("color", uiColors.foreground);
     }
 
     const updateTooltip = (i: number) => {
@@ -220,10 +222,10 @@ export function renderSVM({
             alphaVal > 1e-7;
         const isOptimised = optimisedPoints && optimisedPoints.includes(i);
         const optBadge = isOptimised
-            ? `<div style="display: inline-block; background: #eab308; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Optimised</div>`
+            ? `<div style="display: inline-block; background: ${uiColors.warningStrong}; color: ${uiColors.primaryForeground}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; margin-left: 4px; text-transform: uppercase; letter-spacing: 0.05em;">Optimised</div>`
             : "";
         const statusBadge = isSV
-            ? `<div style="display: inline-block; background: #3b82f6; color: white; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Support Vector</div>`
+            ? `<div style="display: inline-block; background: ${chartColors.current}; color: ${uiColors.primaryForeground}; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Support Vector</div>`
             : "";
 
         let reason = "";
@@ -251,23 +253,23 @@ export function renderSVM({
         }
 
         const explanation = (isSV || isOptimised)
-            ? `<div style="margin-top: 6px; font-style: italic; color: #64748b; font-size: 10.5px; line-height: 1.3;">${reason}</div>`
+            ? `<div style="margin-top: 6px; font-style: italic; color: ${uiColors.mutedForeground}; font-size: 10.5px; line-height: 1.3;">${reason}</div>`
             : "";
 
         const alphaStr =
             alphas && alphas[i] !== undefined
-                ? `<div style="margin-top: 4px; border-top: 1px solid #e2e8f0; padding-top: 4px; font-weight: 600; color: #3b82f6;">Alpha: ${alphaVal.toFixed(6)}</div>`
+                ? `<div style="margin-top: 4px; border-top: 1px solid ${chartColors.grid}; padding-top: 4px; font-weight: 600; color: ${chartColors.current};">Alpha: ${alphaVal.toFixed(6)}</div>`
                 : "";
 
         const devInfo =
             import.meta.env.VITE_SHOW_DEV_INFO === "true"
-                ? `<div style="margin-top: 4px; color: #94a3b8; font-size: 9px; font-family: monospace;">Index: ${i}</div>`
+                ? `<div style="margin-top: 4px; color: ${uiColors.disabledForeground}; font-size: 9px; font-family: monospace;">Index: ${i}</div>`
                 : "";
 
         tooltip.style("visibility", "visible").html(`
             ${statusBadge}${optBadge}
             <div style="font-weight: 600; margin-bottom: 2px;">${classNames[labels[i]] ?? labels[i]}</div>
-            <div style="color: #64748b; font-size: 11px;">
+            <div style="color: ${uiColors.mutedForeground}; font-size: 11px;">
                 ${xLabel}: ${points[i][0].toFixed(2)}<br/>
                 ${yLabel}: ${points[i][1].toFixed(2)}
             </div>
@@ -295,7 +297,7 @@ export function renderSVM({
         })
         .attr("stroke", (_, i) => {
             const isSV = supportVectorIndices && supportVectorIndices.includes(i as number);
-            return isSV ? "#27272a" : "white";
+            return isSV ? uiColors.foreground : uiColors.surface;
         })
         .attr("stroke-width", (_, i) => {
             const isSV = supportVectorIndices && supportVectorIndices.includes(i as number);
@@ -335,7 +337,7 @@ export function renderSVM({
                     .attr("y", yScale(pt[1]) + 0.5)
                     .attr("text-anchor", "middle")
                     .attr("dominant-baseline", "central")
-                    .attr("fill", "white")
+                    .attr("fill", uiColors.surface)
                     .style("font-size", `${7 * scaleFactor}px`)
                     .style("font-weight", "900")
                     .style("pointer-events", "none")
@@ -360,12 +362,12 @@ export function renderSVM({
                         proposedBias,
                         xScale,
                         yScale,
-                        "#10b981", // Emerald 500
+                        chartColors.proposal, // Pending proposal
                         3,
                         "4 4",
                         0.8,
-                        `<div style="font-weight:600;margin-bottom:4px;color:#10b981;">Proposed Update</div>
-                         <div style="color:#64748b;font-size:11px;line-height:1.5;">
+                        `<div style="font-weight:600;margin-bottom:4px;color:${chartColors.proposal};">Proposed Update</div>
+                         <div style="color:${uiColors.mutedForeground};font-size:11px;line-height:1.5;">
                            This is the new decision boundary after the subgradient step.
                          </div>`
                     );
@@ -379,7 +381,7 @@ export function renderSVM({
                 bias,
                 xScale,
                 yScale,
-                "#1e293b",
+                chartColors.current,
                 2.5,
             );
             drawMarginBand(linesLayer, w1, w2, bias, xScale, yScale);
@@ -390,12 +392,12 @@ export function renderSVM({
                 bias - 1,
                 xScale,
                 yScale,
-                "#64748b",
+                uiColors.mutedForeground,
                 2,
                 "5 3",
                 0.85,
                 `<div style="font-weight:600;margin-bottom:4px;">Margin boundary (+1)</div>
-                 <div style="color:#64748b;font-size:11px;line-height:1.5;">
+                 <div style="color:${uiColors.mutedForeground};font-size:11px;line-height:1.5;">
                    <b>w·x + b = +1</b><br/><br/>
                    Support vectors of the positive class sit on or<br/>
                    inside this line. Points between the margins have<br/>
@@ -409,12 +411,12 @@ export function renderSVM({
                 bias + 1,
                 xScale,
                 yScale,
-                "#64748b",
+                uiColors.mutedForeground,
                 2,
                 "5 3",
                 0.85,
                 `<div style="font-weight:600;margin-bottom:4px;">Margin boundary (−1)</div>
-                 <div style="color:#64748b;font-size:11px;line-height:1.5;">
+                 <div style="color:${uiColors.mutedForeground};font-size:11px;line-height:1.5;">
                    <b>w·x + b = −1</b><br/><br/>
                    Support vectors of the negative class sit on or<br/>
                    inside this line. Points between the margins have<br/>
@@ -433,7 +435,7 @@ export function renderSVM({
         const colorScale = createColorScale(classNames, "default");
         const pointColor = predictedClassIndex !== undefined 
             ? colorScale(classNames[predictedClassIndex] ?? String(predictedClassIndex))
-            : "#14b8a6";
+            : chartColors.current;
 
         const gPredict = contentGroup.append("g")
             .attr("class", "svm-prediction-point")
@@ -466,7 +468,7 @@ export function renderSVM({
         gPredict.append("circle")
             .attr("r", 6 * scaleFactor)
             .attr("fill", pointColor)
-            .attr("stroke", "#1e293b")
+            .attr("stroke", uiColors.foreground)
             .attr("stroke-width", 1.5 * scaleFactor)
             .attr("class", "animate-pulse"); 
 
@@ -476,7 +478,7 @@ export function renderSVM({
             .attr("dy", "0.35em")
             .style("font-size", `${10 * scaleFactor}px`)
             .style("font-weight", "800")
-            .style("fill", "white")
+            .style("fill", uiColors.surface)
             .style("pointer-events", "none")
             .text("?");
 
@@ -490,7 +492,7 @@ export function renderSVM({
                 tooltip.style("visibility", "visible")
                     .html(`
                         <div style="font-weight:700; color:${pointColor}; margin-bottom:4px;">Predicted Point</div>
-                        <div style="font-size:11px; color:#64748b;">
+                        <div style="font-size:11px; color:${uiColors.mutedForeground};">
                             Class: <b>${predictedClassIndex !== undefined ? classNames[predictedClassIndex] : "Unknown"}</b><br/>
                             X: ${px.toFixed(3)}<br/>
                             Y: ${py.toFixed(3)}
@@ -680,7 +682,7 @@ function drawMarginBand(
             "points",
             polygon.map((p) => `${xScale(p[0])},${yScale(p[1])}`).join(" "),
         )
-        .attr("fill", "#64748b")
+        .attr("fill", uiColors.mutedForeground)
         .attr("fill-opacity", 0.08)
         .attr("stroke", "none")
         .style("pointer-events", "none");

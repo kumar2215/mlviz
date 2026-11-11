@@ -4,7 +4,17 @@
     {
       "page_type": "dynamic",
       "name": "Regex Basics",
-      "parameters": {}
+      "parameters": {},
+      "subpages": [
+        "Text & tokens",
+        "Pattern symbols",
+        "Flags"
+      ],
+      "subpage_ids": [
+        "text-tokens",
+        "pattern-symbols",
+        "flags"
+      ]
     },
     {
       "page_type": "dynamic",
@@ -40,7 +50,7 @@
       "from": 0,
       "to": 1,
       "condition": {
-        "condition_type": "Bypass",
+        "condition_type": "Completed",
         "name": "Open the playground"
       }
     },

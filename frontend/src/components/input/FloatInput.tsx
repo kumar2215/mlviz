@@ -39,7 +39,7 @@ const FloatInput = ({
             min={option.min ?? undefined}
             max={option.max ?? undefined}
             step={option.step || "0.01"}
-            className="bg-gray-50 font-mono"
+            className="bg-surface-subtle font-mono"
         />
     );
 };

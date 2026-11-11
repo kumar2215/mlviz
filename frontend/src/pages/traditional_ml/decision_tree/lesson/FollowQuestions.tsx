@@ -7,7 +7,7 @@ import { DragChip, DragSurface, DropTarget, FlowerIcon, Frame, Result, TreeEdges
 type Side = "left" | "right";
 
 function FlowerGroup({ ids }: { ids: string[] }) {
-    return <div className="mt-1 flex flex-wrap justify-center gap-1">{ids.map(id => <span key={id} className="flex items-center gap-1 rounded-md border border-emerald-200 bg-white px-2 py-1 text-xs"><FlowerIcon small />{id}</span>)}</div>;
+    return <div className="mt-1 flex flex-wrap justify-center gap-1">{ids.map(id => <span key={id} className="flex items-center gap-1 rounded-md border border-success-border bg-surface px-2 py-1 text-xs"><FlowerIcon small />{id}</span>)}</div>;
 }
 
 export default function FollowQuestions({ narration, onComplete, onTaskComplete, completedTasks = [] }: Pick<IndexPageProps, "narration" | "onComplete" | "onTaskComplete" | "completedTasks">) {
@@ -67,10 +67,10 @@ export default function FollowQuestions({ narration, onComplete, onTaskComplete,
     };
 
     return <Frame><DragSurface>
-        <div className="flex shrink-0 items-center justify-between gap-2"><ActivityIntroduction narration={narration} className="flex-1"><h2 className="text-lg font-semibold">Sort the flowers</h2></ActivityIntroduction><span className="shrink-0 text-sm font-medium text-blue-800">{finished ? `${flowers.length} / ${flowers.length} at leaves` : stage === 0 ? "Root split" : "Petal-width split"}</span></div>
-        <div className="flex min-h-20 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg border border-blue-100 bg-blue-50 p-2" aria-label="Flowers to sort">
+        <div className="flex shrink-0 items-center justify-between gap-2"><ActivityIntroduction narration={narration} className="flex-1"><h2 className="text-lg font-semibold">Sort the flowers</h2></ActivityIntroduction><span className="shrink-0 text-sm font-medium text-selection-foreground">{finished ? `${flowers.length} / ${flowers.length} at leaves` : stage === 0 ? "Root split" : "Petal-width split"}</span></div>
+        <div className="flex min-h-20 shrink-0 flex-wrap items-center justify-center gap-2 rounded-lg border border-info-border bg-surface-tint p-2" aria-label="Flowers to sort">
             {activeFlowers.map(flower => <DragChip key={flower.id} id={flower.id} label={`Flower ${flower.id}: length ${flower.length}, width ${flower.width}`}><FlowerIcon /><span className="text-left"><strong>{flower.id}</strong><span className="block text-xs">L {flower.length.toFixed(1)} · W {flower.width.toFixed(1)} cm</span></span></DragChip>)}
-            {finished && <span className="text-sm font-medium text-emerald-800">Every flower is in a leaf below.</span>}
+            {finished && <span className="text-sm font-medium text-success-foreground">Every flower is in a leaf below.</span>}
         </div>
         <div className="lesson-tree" aria-label="Flower classification tree">
             <TreeEdges expanded={stage > 0} />

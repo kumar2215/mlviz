@@ -25,16 +25,16 @@ export default function TaskRewards() {
     const steps = page ? stepIds(page) : [];
     const labels = getDynamicPage(page)?.subpages ?? [];
     return <section aria-label="Page tasks" className="space-y-3">
-        {page && <h2 className="text-sm font-semibold text-slate-800">{pageTitle(page, pageIndex)}</h2>}
+        {page && <h2 className="text-sm font-semibold text-foreground">{pageTitle(page, pageIndex)}</h2>}
         {tasks.length ? <ul className="space-y-2">{tasks.map(task => {
             const earned = Boolean(page?.id && progress?.milestones.includes(taskKey(page.id, task.id)));
             const Icon = earned ? CheckCircle2 : Sparkles;
             const stepIndex = task.subpage_id ? steps.indexOf(task.subpage_id) : -1;
-            return <li key={task.id} className={`space-y-2 rounded-xl border p-3 ${earned ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-amber-200 bg-amber-50 text-amber-950"}`}>
+            return <li key={task.id} className={`space-y-2 rounded-xl border p-3 ${earned ? "border-success-border bg-success text-success-foreground" : "border-reward-border bg-reward text-reward-foreground"}`}>
                 <div className="flex items-center gap-1.5 text-xs"><Icon aria-hidden="true" className="size-4 shrink-0" /><strong data-xp-story={storyId} data-xp-task={page?.id ? taskKey(page.id, task.id) : undefined}>{earned ? "Earned · " : "+"}{task.xp} XP</strong></div>
                 <p className="text-sm font-medium leading-snug">{task.label}</p>
-                {stepIndex >= 0 && <p className="text-xs opacity-80">Step {stepIndex + 1}{labels[stepIndex] ? ` · ${labels[stepIndex]}` : ""}{stepIndex === index ? " · Current step" : ""}</p>}
+                {stepIndex >= 0 && <p className="text-xs opacity-secondary">Step {stepIndex + 1}{labels[stepIndex] ? ` · ${labels[stepIndex]}` : ""}{stepIndex === index ? " · Current step" : ""}</p>}
             </li>;
-        })}</ul> : <div className="rounded-xl border border-dashed border-blue-200 bg-white p-4"><p className="text-sm text-slate-500">No tasks for this page.</p></div>}
+        })}</ul> : <div className="rounded-xl border border-dashed border-info-border bg-surface p-4"><p className="text-sm text-muted-foreground">No tasks for this page.</p></div>}
     </section>;
 }

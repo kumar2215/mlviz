@@ -44,12 +44,12 @@ registerHooks({
         return nextLoad(url, context);
     },
 });
-
 const { useStory } = await import("../src/store/useStory.ts");
 const { useVisualisation } = await import("../src/store/useVisualisation.ts");
 const { useTokenization } = await import("../src/store/nlp/useTextPreprocessing.ts");
 const { default: WordsEditor } = await import("../src/pages/nlp/shared/WordsEditor.tsx");
 const { default: RegexEditor } = await import("../src/pages/nlp/regex/RegexEditor.tsx");
+const { default: RegexIndex } = await import("../src/pages/nlp/regex/index.tsx");
 const { default: BpeIndex } = await import("../src/pages/nlp/tokenization/index.tsx");
 
 function setMode(mode: "story" | "visualisation") {
@@ -113,4 +113,70 @@ test("BPE uses the fixed story exercise even without narration", () => {
     assert.match(viz, /aria-label="BPE corpus"/);
     assert.match(viz, /aria-label="Merge budget"/);
     assert.match(viz, /Use corpus/);
+});
+
+test("regex basics renders one pathway topic at a time with only three introductory terms", () => {
+    const topics = ["Text &amp; tokens", "Pattern symbols", "Flags"];
+    for (const mode of ["story", "visualisation"] as const) {
+        setMode(mode);
+        for (let subpageIndex = 0; subpageIndex < topics.length; subpageIndex++) {
+            const html = renderToStaticMarkup(createElement(RegexIndex, {
+                name: "Regex Basics", parameters: {}, subpageIndex,
+                narration: mode === "story" ? {
+                    content: readFileSync(new URL("../public/md/tokenization/regex-basics.md", import.meta.url), "utf8"),
+                    loading: false, error: null,
+                } : undefined,
+                onComplete() {}, onSubpageReady() {},
+            }));
+            assert.match(html, new RegExp(`aria-label="${topics[subpageIndex]}"`));
+            assert.match(html, new RegExp(`<h2[^>]*>${topics[subpageIndex]}<\\/h2>`));
+            assert.doesNotMatch(html, /<nav|Regex basics topics|Loading regex examples|\d of 3|Mark as read|Marked as read|Choose the next arc/);
+            if (subpageIndex === 0) {
+                assert.equal(html.match(/<dt[ >]/g)?.length, 3);
+                for (const term of ["Pattern", "Match", "Token"]) assert.match(html, new RegExp(`<dt[^>]*>${term}<\\/dt>`));
+                assert.match(html, /The cat naps\./);
+                assert.doesNotMatch(html, /Unicode|Signed decimal|Contraction|Whitespace|<table|type="checkbox"/);
+            } else if (subpageIndex === 1) {
+                assert.match(html, /Common regex symbols and their meanings/);
+                assert.doesNotMatch(html, /See how a pattern finds text/);
+                assert.doesNotMatch(html, /<dl|type="checkbox"/);
+            } else {
+                assert.match(html, /type="checkbox"/);
+                assert.match(html, /Flag examples/);
+                assert.match(html, /sample pattern and text stay fixed/);
+                assert.doesNotMatch(html, /See how a pattern finds text|playground&#x27;s pattern field|without Python quotes|<textarea/);
+                assert.doesNotMatch(html, /<dl|<table/);
+            }
+        }
+    }
+});
+
+test("BPE basics shows its three topics as individual pathway subpages in both modes", () => {
+    const topics = ["BPE &amp; terms", "A merge example", "Training &amp; tokenizing"];
+    const content = readFileSync(new URL("../public/md/bpe/basics.md", import.meta.url), "utf8");
+    for (const mode of ["story", "visualisation"] as const) {
+        setMode(mode);
+        for (let subpageIndex = 0; subpageIndex < topics.length; subpageIndex++) {
+            const html = renderToStaticMarkup(createElement(BpeIndex, {
+                name: "BPE Basics", parameters: {}, subpageIndex,
+                narration: mode === "story" ? { content, loading: false, error: null } : undefined,
+                onComplete() {}, onSubpageReady() {},
+            }));
+            assert.match(html, new RegExp(`aria-label="${topics[subpageIndex]}"`));
+            assert.match(html, new RegExp(`<h2[^>]*>${topics[subpageIndex]}<\\/h2>`));
+            assert.doesNotMatch(html, /<nav|BPE basics topics|Mark as read|\d of 3/);
+            if (subpageIndex === 0) {
+                assert.match(html, /Why learn pieces of words\?/);
+                assert.doesNotMatch(html, /Weighted pair counts|Next merge|Next: train your own/);
+            } else if (subpageIndex === 1) {
+                assert.match(html, /Weighted pair counts|Current tokens/);
+                assert.match(html, /Next merge/);
+                assert.doesNotMatch(html, /<dl|Learn rules first|Next: train your own|Learn how frequent neighboring/);
+            } else {
+                assert.match(html, /Learn rules first, then reuse them/);
+                assert.match(html, /Next: train your own/);
+                assert.doesNotMatch(html, /<dl|Next merge|Weighted pair counts|Learn how frequent neighboring/);
+            }
+        }
+    }
 });

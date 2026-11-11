@@ -65,9 +65,9 @@ const ExportControls: React.FC<ExportControlsProps> = ({
             case "processing":
                 return <Loader className="w-4 h-4 animate-spin" />;
             case "complete":
-                return <Check className="w-4 h-4 text-green-600" />;
+                return <Check className="w-4 h-4 text-success-foreground" />;
             case "error":
-                return <AlertCircle className="w-4 h-4 text-red-600" />;
+                return <AlertCircle className="w-4 h-4 text-danger-foreground" />;
             default:
                 return <Download className="w-4 h-4" />;
         }
@@ -91,20 +91,20 @@ const ExportControls: React.FC<ExportControlsProps> = ({
     if (exportStatus === "processing" || exportStatus === "capturing") {
         return (
             <div className={`relative ${className}`}>
-                <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-3">
+                <div className="bg-surface border border-border rounded-lg shadow-sm p-3">
                     <div className="flex items-center gap-2 mb-2">
                         {getStatusIcon(exportStatus)}
                         <span className="text-sm font-medium">
                             {getStatusText(exportStatus)}
                         </span>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div className="w-full bg-surface-hover rounded-full h-2">
                         <div
-                            className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                            className="bg-primary h-2 rounded-full transition-all duration-300"
                             style={{ width: `${exportProgress}%` }}
                         />
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                         {exportProgress}%
                     </div>
                 </div>
@@ -123,10 +123,10 @@ const ExportControls: React.FC<ExportControlsProps> = ({
             </button>
 
             {showOptions && (
-                <div className="absolute top-full mt-1 right-0 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[280px]">
+                <div className="absolute top-full mt-1 right-0 bg-surface border border-border rounded-lg shadow-lg z-50 min-w-[280px]">
                     <div className="p-4">
                         <div className="mb-4">
-                            <h3 className="text-sm font-semibold text-gray-800 mb-2">
+                            <h3 className="text-sm font-semibold text-foreground mb-2">
                                 Export Format
                             </h3>
                             <div className="space-y-2">
@@ -141,9 +141,9 @@ const ExportControls: React.FC<ExportControlsProps> = ({
                                                 e.target.value as ExportFormat
                                             )
                                         }
-                                        className="text-blue-600"
+                                        className="text-primary"
                                     />
-                                    <Image className="w-4 h-4 text-gray-500" />
+                                    <Image className="w-4 h-4 text-muted-foreground" />
                                     <span className="text-sm">
                                         PNG (High Quality)
                                     </span>
@@ -159,9 +159,9 @@ const ExportControls: React.FC<ExportControlsProps> = ({
                                                 e.target.value as ExportFormat
                                             )
                                         }
-                                        className="text-blue-600"
+                                        className="text-primary"
                                     />
-                                    <Image className="w-4 h-4 text-gray-500" />
+                                    <Image className="w-4 h-4 text-muted-foreground" />
                                     <span className="text-sm">
                                         SVG (Vector Graphics)
                                     </span>
@@ -179,9 +179,9 @@ const ExportControls: React.FC<ExportControlsProps> = ({
                                                         .value as ExportFormat
                                                 )
                                             }
-                                            className="text-blue-600"
+                                            className="text-primary"
                                         />
-                                        <Video className="w-4 h-4 text-gray-500" />
+                                        <Video className="w-4 h-4 text-muted-foreground" />
                                         <span className="text-sm">
                                             WebM (Animation Video)
                                         </span>
@@ -190,16 +190,16 @@ const ExportControls: React.FC<ExportControlsProps> = ({
                             </div>
                         </div>
 
-                        <div className="flex gap-2 pt-3 border-t border-gray-200">
+                        <div className="flex gap-2 pt-3 border-t border-border">
                             <button
                                 onClick={handleExport}
-                                className="flex-1 !bg-blue-600 !text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                                className="flex-1 !bg-primary !text-primary-foreground px-3 py-2 rounded-md text-sm font-medium hover:bg-primary-hover transition-colors"
                             >
                                 Export {selectedFormat.toUpperCase()}
                             </button>
                             <button
                                 onClick={() => setShowOptions(false)}
-                                className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                className="px-3 py-2 border border-border rounded-md text-sm font-medium text-foreground hover:bg-surface-subtle transition-colors"
                             >
                                 Cancel
                             </button>

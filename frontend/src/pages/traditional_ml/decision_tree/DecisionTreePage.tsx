@@ -35,11 +35,11 @@ export default function DecisionTreePage({ onTaskComplete, onComplete }: Pick<In
 
     return (
         <div className="grid grid-cols-10 mx-auto w-full h-full">
-            <div data-tour-surface className="relative col-span-8 shadow-lg overflow-hidden bg-white min-h-0">
+            <div data-tour-surface className="relative col-span-8 shadow-lg overflow-hidden bg-surface min-h-0">
                 <DecisionTree />
             </div>
 
-            <div className="col-span-2 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-blue-50 min-h-0">
+            <div className="col-span-2 p-4 shadow-lg bg-surface-tint   min-h-0">
                 {currentModelData && (
                     <ClassifierResults
                         metrics={currentModelData.metrics}

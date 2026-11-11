@@ -72,12 +72,12 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
     const r2After = stepData ? computeR2(stepData.new_slope, stepData.new_intercept) : null;
 
     const r2Class = (v: number) =>
-        v >= 0.9 ? "text-emerald-600" : v >= 0.7 ? "text-blue-600" : v >= 0.5 ? "text-amber-600" : "text-red-500";
+        v >= 0.9 ? "text-success-foreground" : v >= 0.7 ? "text-primary" : v >= 0.5 ? "text-warning-foreground" : "text-danger-foreground";
 
     return (
         <CollapsibleHUD
             tourTarget="step-controls"
-            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
+            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-primary" />}
             title="Gradient Descent"
             style={{ width: fs(290) }}
         >
@@ -85,13 +85,13 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
             <div className="flex flex-col mb-4" style={{ gap: fs(4) }}>
                 <div className="flex justify-between">
                     <span
-                        className="text-slate-500 font-medium"
+                        className="text-text-secondary font-medium"
                         style={{ fontSize: fs(12) }}
                     >
                         Learning Rate
                     </span>
                     <span
-                        className="font-mono text-blue-600 font-bold"
+                        className="font-mono text-primary font-bold"
                         style={{ fontSize: fs(12) }}
                     >
                         {learningRate.toFixed(4)}
@@ -104,23 +104,23 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                     step={0.0001}
                     value={learningRate}
                     onChange={(e) => onLearningRateChange(parseFloat(e.target.value))}
-                    className="w-full accent-blue-500"
+                    className="w-full accent-primary"
                 />
             </div>
 
             {/* Current line info */}
             <div
-                className="rounded-xl bg-white/70 border border-slate-100 mb-4"
+                className="rounded-xl bg-surface-hover-translucent border border-border mb-4"
                 style={{ padding: fs(10), gap: fs(4) }}
             >
                 <div className="flex flex-col" style={{ gap: fs(3) }}>
                     <span
-                        className="uppercase tracking-widest text-slate-400 font-semibold"
+                        className="uppercase tracking-widest text-text-secondary font-semibold"
                         style={{ fontSize: fs(9) }}
                     >
                         Current Line
                     </span>
-                    <span style={{ fontSize: fs(11) }} className="font-mono text-slate-700">
+                    <span style={{ fontSize: fs(11) }} className="font-mono text-foreground">
                         y = {currentSlope.toFixed(4)}x{" "}
                         {currentIntercept >= 0 ? "+" : ""}{currentIntercept.toFixed(2)}
                     </span>
@@ -133,7 +133,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
             {/* Idle mode */}
             {mode === "idle" && (
                 <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md transition-all active:scale-[0.98]"
+                    className="w-full bg-primary hover:bg-primary-hover text-primary-foreground border-none shadow-md transition-all active:scale-[0.98]"
                     style={{ height: fs(40), fontSize: fs(13), gap: fs(8) }}
                     onClick={handleRunStep}
                     disabled={isStepLoading || points.length === 0}
@@ -147,16 +147,16 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
             {mode === "preview" && stepData && (
                 <div data-tour="step-proposal" className="flex flex-col" style={{ gap: fs(8) }}>
                     <div
-                        className="rounded-xl bg-white/70 border border-emerald-100"
+                        className="rounded-xl bg-surface border border-chart-proposal"
                         style={{ padding: fs(10) }}
                     >
                         <span
-                            className="uppercase tracking-widest text-slate-400 font-semibold block mb-1"
+                            className="uppercase tracking-widest text-text-secondary font-semibold block mb-1"
                             style={{ fontSize: fs(9) }}
                         >
                             Proposed Update
                         </span>
-                        <span style={{ fontSize: fs(11) }} className="font-mono text-slate-700 block">
+                        <span style={{ fontSize: fs(11) }} className="font-mono text-foreground block">
                             y = {stepData.new_slope.toFixed(4)}x{" "}
                             {stepData.new_intercept >= 0 ? "+" : ""}{stepData.new_intercept.toFixed(2)}
                         </span>
@@ -166,7 +166,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                             </span>
                         )}
                         <div
-                            className="flex justify-between mt-2 text-slate-400"
+                            className="flex justify-between mt-2 text-text-secondary"
                             style={{ fontSize: fs(10) }}
                         >
                             <span>∇slope: {stepData.grad_slope.toFixed(4)}</span>
@@ -175,7 +175,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                     </div>
 
                     <p
-                        className="text-slate-500 text-center"
+                        className="text-text-secondary text-center"
                         style={{ fontSize: fs(11) }}
                     >
                         Accept the proposed update?
@@ -183,7 +183,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
 
                     <div className="flex" style={{ gap: fs(8) }}>
                         <Button
-                            className="flex-1 bg-gradient-to-r from-emerald-100 to-teal-100 text-black border-none hover:from-emerald-200 hover:to-teal-200 shadow-md transition-all active:scale-[0.98]"
+                            className="flex-1 bg-success   text-success-foreground border-none   shadow-md transition-all active:scale-[0.98] hover:bg-success-hover "
                             style={{ height: fs(38), gap: fs(6), fontSize: fs(12) }}
                             onClick={handleAccept}
                         >
@@ -191,7 +191,7 @@ const GDStepHUD: React.FC<GDStepHUDProps> = ({
                             Accept
                         </Button>
                         <Button
-                            className="flex-1 bg-gradient-to-r from-red-100 to-rose-100 text-black border-none hover:from-red-200 hover:to-rose-200 shadow-md transition-all active:scale-[0.98]"
+                            className="flex-1 bg-danger   text-danger-foreground border-none   shadow-md transition-all active:scale-[0.98] hover:bg-danger-hover "
                             style={{ height: fs(38), gap: fs(6), fontSize: fs(12) }}
                             onClick={handleReject}
                         >

@@ -1,3 +1,4 @@
+import { uiColors, chartColors } from "../../../theme/colors";
 /**
  * Legend helper for SVG plots
  * Uses foreignObject to embed HTML legend with glassmorphism styling
@@ -99,7 +100,7 @@ export function renderLegend(
         .append("xhtml:div")
         .attr(
             "class",
-            "bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-sm font-sans",
+            "bg-surface-tint   backdrop-blur-sm border border-border rounded-lg shadow-sm font-sans",
         )
         .style("padding", `${8 * scaleFactor}px ${12 * scaleFactor}px`);
 
@@ -115,12 +116,12 @@ export function renderLegend(
             row.select(".legend-swatch")
                 .style(
                     "background-color",
-                    isActive ? colorScale(name) : "#d1d5db",
+                    isActive ? colorScale(name) : uiColors.border,
                 )
                 .style("transition", "background-color 0.2s ease");
 
             row.select(".legend-label")
-                .style("color", isActive ? "#334155" : "#9ca3af")
+                .style("color", isActive ? chartColors.ink : uiColors.disabledForeground)
                 .style("transition", "color 0.2s ease");
 
             row.style("opacity", isActive ? "1" : "0.5").style(
@@ -156,7 +157,7 @@ export function renderLegend(
         row.append("xhtml:span")
             .attr(
                 "class",
-                "font-medium text-slate-700 select-none legend-label",
+                "font-medium text-foreground select-none legend-label",
             )
             .style("font-size", `${10 * scaleFactor}px`)
             .text(name);
@@ -263,7 +264,7 @@ export function renderManualLegend(
         .append("xhtml:div")
         .attr(
             "class",
-            "bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-sm border border-gray-200/50 rounded-lg shadow-sm font-sans",
+            "bg-surface-tint   backdrop-blur-sm border border-border rounded-lg shadow-sm font-sans",
         )
         .style("padding", `${8 * scaleFactor}px ${12 * scaleFactor}px`);
 
@@ -311,7 +312,7 @@ export function renderManualLegend(
         }
 
         row.append("xhtml:span")
-            .attr("class", "font-medium text-slate-700")
+            .attr("class", "font-medium text-foreground")
             .style("font-size", `${10 * scaleFactor}px`)
             .text(item.label);
 

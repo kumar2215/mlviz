@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 import type { RenderVisualisationProps, TransformedNode } from "@/types/traditional_ml/decision_tree";
 import { applyFont } from "@/components/visualisation/config/fonts";
 import {
@@ -249,8 +250,8 @@ export const renderDecisionTree = ({
     const {
         transformTreeData,
         getTooltipContent,
-        pathLineColor = "#cbcbcbff",
-        onPathColor = "#1b1b1bff",
+        pathLineColor = uiColors.border,
+        onPathColor = uiColors.foreground,
         colorScale: externalColorScale,
     } = props;
 

@@ -1,3 +1,4 @@
+import { uiColors } from "../../theme/colors";
 import { Joyride, EVENTS, type TooltipRenderProps } from "react-joyride";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -6,23 +7,22 @@ import { usePathway } from "@/store/usePathway";
 import useUserMode from "@/hooks/useUserMode";
 import { getDynamicPage } from "@/components/navigation/pathwayModel";
 import { findTour } from "./tourDefinitions";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { tourFloatingOptions } from "./tourPositioning";
 
 function TourTooltip({ index, size, step, tooltipProps, closeProps, backProps, primaryProps, skipProps }: TooltipRenderProps) {
     const action = useTour(state => state.tour?.steps[state.step]?.action);
     const canContinue = useTour(state => state.canContinue);
     const message = useTour(state => state.message);
-    const button = "rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600";
-    return <div {...tooltipProps} aria-modal={!action} aria-label="Guided tour" className="max-h-[calc(100dvh-40px)] w-80 max-w-[calc(100vw-40px)] space-y-3 overflow-y-auto rounded-2xl border border-blue-200 bg-white p-4 text-slate-800 shadow-xl">
-        <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-blue-700">Guided tour · {index + 1} / {size}</span><button {...closeProps} type="button" onClick={() => useTour.getState().stop()} className={button} aria-label="Close guided tour">×</button></div>
+    const button = "rounded-lg px-3 py-2 text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+    return <div {...tooltipProps} aria-modal={!action} aria-label="Guided tour" className="max-h-[calc(100dvh-40px)] w-80 max-w-[calc(100vw-40px)] space-y-3 overflow-y-auto rounded-2xl border border-info-border bg-surface p-4 text-foreground shadow-xl">
+        <div className="flex items-center justify-between gap-3"><span className="text-xs font-semibold text-selection-foreground">Guided tour · {index + 1} / {size}</span><button {...closeProps} type="button" onClick={() => useTour.getState().stop()} className={button} aria-label="Close guided tour">×</button></div>
         <h2 className="text-base font-semibold">{step.title}</h2>
         <div className="text-sm leading-relaxed">{step.content}</div>
-        {action && <p className="text-xs font-medium text-blue-700">{canContinue ? "This setup is already ready. Next continues without changing it." : "Try the highlighted controls to continue."}</p>}
-        {message && <p role="status" className="text-sm text-amber-900">{message}</p>}
-        <div className="flex flex-wrap items-center justify-between gap-1"><button {...skipProps} type="button" onClick={() => useTour.getState().stop()} className={`${button} text-slate-500 hover:bg-slate-50`}>Skip tour</button><div className="flex gap-1">
-            {index > 0 && <button {...backProps} type="button" onClick={() => useTour.getState().back()} className={`${button} text-blue-700 hover:bg-blue-50`}>Back</button>}
-            {(!action || canContinue) && <button {...primaryProps} type="button" onClick={() => useTour.getState().next()} className={`${button} bg-blue-600 text-white hover:bg-blue-700`}>{index === size - 1 ? "Done" : "Next"}</button>}
+        {action && <p className="text-xs font-medium text-selection-foreground">{canContinue ? "This setup is already ready. Next continues without changing it." : "Try the highlighted controls to continue."}</p>}
+        {message && <p role="status" className="text-sm text-warning-foreground">{message}</p>}
+        <div className="flex flex-wrap items-center justify-between gap-1"><button {...skipProps} type="button" onClick={() => useTour.getState().stop()} className={`${button} text-muted-foreground hover:bg-surface-subtle`}>Skip tour</button><div className="flex gap-1">
+            {index > 0 && <button {...backProps} type="button" onClick={() => useTour.getState().back()} className={`${button} text-selection-foreground hover:bg-surface-tint`}>Back</button>}
+            {(!action || canContinue) && <button {...primaryProps} type="button" onClick={() => useTour.getState().next()} className={`${button} bg-primary text-primary-foreground hover:bg-primary-hover`}>{index === size - 1 ? "Done" : "Next"}</button>}
         </div></div>
     </div>;
 }
@@ -44,7 +44,6 @@ export default function GuidedTour() {
     const revision = useTour(state => state.revision);
     const run = useTour(state => state.run);
     const message = useTour(state => state.message);
-    const buttonRef = useRef<HTMLButtonElement>(null);
     const hostRef = useRef<HTMLSpanElement>(null);
     const [surface, setSurface] = useState<HTMLElement | null>(null);
     const [targetState, setTargetState] = useState({ revision: -1, ready: false });
@@ -66,12 +65,6 @@ export default function GuidedTour() {
         observer.observe(root, { childList: true, subtree: true });
         return () => observer.disconnect();
     }, [scope, tour]);
-
-    useEffect(() => useTour.subscribe((state, previous) => {
-        if (previous.running && !state.running && state.scope === scope) {
-            requestAnimationFrame(() => { if (useTour.getState().scope === scope && !useTour.getState().running) buttonRef.current?.focus({ preventScroll: true }); });
-        }
-    }), [scope]);
 
     useEffect(() => {
         if (!active || !current) return;
@@ -130,15 +123,12 @@ export default function GuidedTour() {
     return <>
         <span ref={hostRef} hidden />
         {surface && createPortal(<>
-        <div data-tour-help className="absolute right-3 top-3 z-30">
-            <Tooltip><TooltipTrigger asChild><button ref={buttonRef} type="button" aria-label="Start guided tour" onClick={() => useTour.getState().start()} className="flex size-11 items-center justify-center rounded-full border border-blue-200 bg-white text-xl font-bold text-blue-700 shadow-sm hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600">?</button></TooltipTrigger><TooltipContent side="left">Guided tour</TooltipContent></Tooltip>
-        </div>
-        {active && !targetReady && <p role="status" className="absolute right-3 top-16 z-30 max-w-64 rounded-xl border border-blue-200 bg-white p-3 text-sm text-blue-800 shadow-sm">Waiting for “{current?.title}”… If its panel is closed, reopen it; for the tree, select a node. <button type="button" onClick={() => useTour.getState().stop()} className="font-semibold underline">Skip tour</button></p>}
-        {!active && message && <p role="status" className="absolute right-3 top-16 z-30 max-w-64 rounded-xl border border-blue-200 bg-white p-3 text-sm text-slate-700 shadow-sm">{message}</p>}
+        {active && !targetReady && <p role="status" className="absolute right-3 top-16 z-30 max-w-64 rounded-xl border border-info-border bg-surface p-3 text-sm text-selection-foreground shadow-sm">Waiting for “{current?.title}”… If its panel is closed, reopen it; for the tree, select a node. <button type="button" onClick={() => useTour.getState().stop()} className="font-semibold underline">Skip tour</button></p>}
+        {!active && message && <p role="status" className="absolute right-3 top-16 z-30 max-w-64 rounded-xl border border-info-border bg-surface p-3 text-sm text-foreground shadow-sm">{message}</p>}
         </>, surface)}
         {active && targetReady && <Joyride key={`${run}:${revision}`} run continuous stepIndex={stepIndex} steps={steps} tooltipComponent={TourTooltip}
             floatingOptions={tourFloatingOptions}
-            options={{ primaryColor: "#2563eb", textColor: "#1e293b", width: 320, zIndex: 45, arrowSize: 10, arrowBase: 20, spotlightRadius: 12, blockTargetInteraction: false, overlayClickAction: false, dismissKeyAction: false, closeButtonAction: "skip", scrollDuration: 0, skipScroll: true, targetWaitTimeout: 15000 }}
+            options={{ primaryColor: uiColors.primary, textColor: uiColors.foreground, backgroundColor: uiColors.surface, arrowColor: uiColors.surface, overlayColor: uiColors.overlay, width: 320, zIndex: 45, arrowSize: 10, arrowBase: 20, spotlightRadius: 12, blockTargetInteraction: false, overlayClickAction: false, dismissKeyAction: false, closeButtonAction: "skip", scrollDuration: 0, skipScroll: true, targetWaitTimeout: 15000 }}
             onEvent={event => {
                 const state = useTour.getState();
                 if (state.scope !== scope || state.revision !== revision) return;

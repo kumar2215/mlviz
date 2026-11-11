@@ -42,7 +42,7 @@ const NumberInput = ({
             min={option.min ?? undefined}
             max={option.max ?? undefined}
             step={option.step || "any"}
-            className="bg-gray-50 font-mono"
+            className="bg-surface-subtle font-mono"
         />
     );
 };

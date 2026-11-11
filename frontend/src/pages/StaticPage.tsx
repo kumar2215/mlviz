@@ -72,7 +72,7 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
         return (
             <div className="w-full shrink-0 px-4 py-2">
                 {loading ? <div className="h-24"><PageLoading label="Loading page…" /></div> : <div className="mx-auto max-w-5xl [&_h1]:!my-0 [&_h1]:!text-2xl [&_p]:!mb-0 [&_p]:!text-sm [&_p]:!leading-snug [&_div]:!p-0">
-                    {error ? <p role="alert" className="text-center text-red-600">Error: {error}</p> : <MarkdownWrapper>{content}</MarkdownWrapper>}
+                    {error ? <p role="alert" className="text-center text-danger-foreground">Error: {error}</p> : <MarkdownWrapper>{content}</MarkdownWrapper>}
                 </div>}
             </div>
         );
@@ -85,17 +85,17 @@ const StaticPage: React.FC<StaticPageParameters & { compact?: boolean }> = ({ te
                     <PageLoading label="Loading page…" />
                 )}
                 {error && (
-                    <div className="text-center text-red-600 my-auto">
+                    <div className="text-center text-danger-foreground my-auto">
                         Error: {error}
                     </div>
                 )}
                 {!loading && !error && hasOverflow && (
-                    <div className="text-center text-red-600 my-auto">
+                    <div className="text-center text-danger-foreground my-auto">
                         Error: Content overflows vertically
                     </div>
                 )}
                 {!loading && !error && !hasOverflow && !content && (
-                    <div className="text-center text-gray-500 my-auto">
+                    <div className="text-center text-text-secondary my-auto">
                         No content provided
                     </div>
                 )}

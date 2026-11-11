@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 /**
  * 1D Scatter Plot Renderer
  * Renders strip plots with jittered points and optional decision boundaries
@@ -88,8 +89,8 @@ export function renderScatter1D(
         .attr("y", stripCenter - stripHeight / 2)
         .attr("width", innerWidth)
         .attr("height", stripHeight)
-        .attr("fill", "#f9fafb")
-        .attr("stroke", "#e5e7eb")
+        .attr("fill", uiColors.surfaceSubtle)
+        .attr("stroke", uiColors.border)
         .attr("stroke-width", 1 * scaleFactor)
         .attr("rx", 4 * scaleFactor);
 
@@ -139,7 +140,7 @@ export function renderScatter1D(
                     .attr("fill", (d) => {
                         if (focusedNames === null) return colorScale(d);
                         const label = d.type === "classification" ? d.label : "";
-                        return focusedNames.has(label) ? colorScale(d) : "#d1d5db";
+                        return focusedNames.has(label) ? colorScale(d) : uiColors.border;
                     })
                     .attr("opacity", (d) => {
                         if (focusedNames === null) return pointOpacity;
@@ -158,7 +159,7 @@ export function renderScatter1D(
                         .attr("fill", function () {
                             const prediction = d3.select(this).attr("data-prediction");
                             if (focusedNames === null) return getColor(prediction);
-                            return focusedNames.has(prediction) ? getColor(prediction) : "#e5e7eb";
+                            return focusedNames.has(prediction) ? getColor(prediction) : uiColors.border;
                         });
                 }
             });
@@ -244,7 +245,7 @@ function renderGrid1D(
         .call((g) =>
             g
                 .selectAll(".tick line")
-                .attr("stroke", "#d1d5db")
+                .attr("stroke", uiColors.border)
                 .attr("stroke-opacity", 0.5)
         );
 }
@@ -269,7 +270,7 @@ function renderAxes1D(
         .append("text")
         .attr("x", width / 2)
         .attr("y", 35 * scaleFactor)
-        .attr("fill", "#374151")
+        .attr("fill", uiColors.textSecondary)
         .attr("font-size", `${12 * scaleFactor}px`)
         .attr("font-weight", "500")
         .attr("text-anchor", "middle")
@@ -277,15 +278,15 @@ function renderAxes1D(
 
     // Style axis
     g.selectAll(".x-axis path")
-        .attr("stroke", "#9ca3af")
+        .attr("stroke", uiColors.mutedForeground)
         .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis line")
-        .attr("stroke", "#9ca3af")
+        .attr("stroke", uiColors.mutedForeground)
         .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis text")
-        .attr("fill", "#6b7280")
+        .attr("fill", uiColors.mutedForeground)
         .attr("font-size", `${10 * scaleFactor}px`);
 }
 
@@ -378,7 +379,7 @@ function renderDataPoints1D(
         .attr("r", pointRadius)
         .attr("fill", (d) => colorScale(d))
         .attr("opacity", opacity)
-        .attr("stroke", "#fff")
+        .attr("stroke", uiColors.surface)
         .attr("stroke-width", 1.5 * scaleFactor)
         .attr("cursor", onPointClick ? "pointer" : "default")
         .raise();

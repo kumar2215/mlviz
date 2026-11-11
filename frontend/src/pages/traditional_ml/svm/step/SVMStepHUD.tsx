@@ -114,22 +114,22 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
     };
 
     const lossClass = (v: number) =>
-        v <= 0.1 ? "text-emerald-600" : v <= 0.3 ? "text-blue-600" : v <= 0.8 ? "text-amber-600" : "text-red-500";
+        v <= 0.1 ? "text-success-foreground" : v <= 0.3 ? "text-primary" : v <= 0.8 ? "text-warning-foreground" : "text-danger-foreground";
 
     return (
         <CollapsibleHUD
             tourTarget="step-controls"
-            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-blue-500" />}
+            icon={<ArrowRight style={{ width: fs(15), height: fs(15) }} className="text-primary" />}
             title="Subgradient Descent"
             style={{ width: fs(290) }}
         >
             {/* Learning Rate */}
             <div className="flex flex-col mb-4" style={{ gap: fs(4) }}>
                 <div className="flex justify-between">
-                    <span className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
+                    <span className="text-text-secondary font-medium" style={{ fontSize: fs(12) }}>
                         Learning Rate
                     </span>
-                    <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
+                    <span className="font-mono text-primary font-bold" style={{ fontSize: fs(12) }}>
                         {learningRate.toFixed(4)}
                     </span>
                 </div>
@@ -140,21 +140,21 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                     step={0.001}
                     value={learningRate}
                     onChange={(e) => onLearningRateChange(parseFloat(e.target.value))}
-                    className="w-full accent-blue-500"
+                    className="w-full accent-primary"
                 />
             </div>
 
             {/* Geometry Controls (Idle Mode Only) */}
             {mode === "idle" && (
                 <>
-                    <div className="rounded-xl bg-white/70 border border-slate-100 mb-4" style={{ padding: fs(10), gap: fs(4) }}>
+                    <div className="rounded-xl bg-surface-hover-translucent border border-border mb-4" style={{ padding: fs(10), gap: fs(4) }}>
                         {/* Margin Width */}
                         <div className="flex flex-col mb-4" style={{ gap: fs(4) }}>
                             <div className="flex justify-between">
-                                <label htmlFor={widthId} className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
+                                <label htmlFor={widthId} className="text-text-secondary font-medium" style={{ fontSize: fs(12) }}>
                                     Margin Width
                                 </label>
-                                <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
+                                <span className="font-mono text-primary font-bold" style={{ fontSize: fs(12) }}>
                                     {width.toFixed(2)}
                                 </span>
                             </div>
@@ -166,17 +166,17 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 step={0.1}
                                 value={width}
                                 onChange={(e) => handleUpdate(currentSlope, intercept, parseFloat(e.target.value))}
-                                className="w-full accent-blue-500"
+                                className="w-full accent-primary"
                             />
                         </div>
 
                         {/* Intercept */}
                         <div className="flex flex-col mb-4" style={{ gap: fs(4) }}>
                             <div className="flex justify-between">
-                                <label htmlFor={interceptId} className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
+                                <label htmlFor={interceptId} className="text-text-secondary font-medium" style={{ fontSize: fs(12) }}>
                                     Intercept (b)
                                 </label>
-                                <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
+                                <span className="font-mono text-primary font-bold" style={{ fontSize: fs(12) }}>
                                     {intercept.toFixed(1)}
                                 </span>
                             </div>
@@ -188,17 +188,17 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                                 step={0.1}
                                 value={intercept}
                                 onChange={(e) => handleUpdate(currentSlope, parseFloat(e.target.value), width)}
-                                className="w-full accent-blue-500"
+                                className="w-full accent-primary"
                             />
                         </div>
 
                         {/* Radial Slope */}
                         <div className="flex flex-col items-center mb-2" style={{ gap: fs(2) }}>
                             <div className="flex justify-between w-full" style={{ marginBottom: fs(2) }}>
-                                <span className="text-slate-500 font-medium" style={{ fontSize: fs(12) }}>
+                                <span className="text-text-secondary font-medium" style={{ fontSize: fs(12) }}>
                                     Slope
                                 </span>
-                                <span className="font-mono text-blue-600 font-bold" style={{ fontSize: fs(12) }}>
+                                <span className="font-mono text-primary font-bold" style={{ fontSize: fs(12) }}>
                                     {currentSlope.toFixed(2)}
                                 </span>
                             </div>
@@ -226,12 +226,12 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
             )}
 
             {/* Current State Indicator */}
-            <div className="rounded-xl bg-white/70 border border-slate-100 mb-4 flex justify-between items-center" style={{ padding: fs(10) }}>
+            <div className="rounded-xl bg-surface-hover-translucent border border-border mb-4 flex justify-between items-center" style={{ padding: fs(10) }}>
                 <div className="flex flex-col" style={{ gap: fs(3) }}>
-                    <span className="uppercase tracking-widest text-slate-400 font-semibold" style={{ fontSize: fs(9) }}>
+                    <span className="uppercase tracking-widest text-text-secondary font-semibold" style={{ fontSize: fs(9) }}>
                         Current Model
                     </span>
-                    <span style={{ fontSize: fs(11) }} className="font-mono text-slate-700">
+                    <span style={{ fontSize: fs(11) }} className="font-mono text-foreground">
                         w = [{currentW1.toFixed(2)}, {currentW2.toFixed(2)}]
                     </span>
                     <span style={{ fontSize: fs(11) }} className={`font-mono font-bold ${lossClass(lossBefore)}`}>
@@ -243,7 +243,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
             {/* Idle mode triggers Run Step */}
             {mode === "idle" && (
                 <Button
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white border-none shadow-md transition-all active:scale-[0.98]"
+                    className="w-full bg-primary hover:bg-primary-hover text-primary-foreground border-none shadow-md transition-all active:scale-[0.98]"
                     style={{ height: fs(40), fontSize: fs(13), gap: fs(8) }}
                     onClick={handleRunStep}
                     disabled={isStepLoading || points.length === 0}
@@ -256,14 +256,14 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
             {/* Preview mode shows proposal */}
             {mode === "preview" && stepData && (
                 <div data-tour="step-proposal" className="flex flex-col" style={{ gap: fs(8) }}>
-                    <div className="rounded-xl bg-white/70 border border-emerald-100" style={{ padding: fs(10) }}>
-                        <span className="uppercase tracking-widest text-slate-400 font-semibold block mb-1" style={{ fontSize: fs(9) }}>
+                    <div className="rounded-xl bg-surface border border-chart-proposal" style={{ padding: fs(10) }}>
+                        <span className="uppercase tracking-widest text-text-secondary font-semibold block mb-1" style={{ fontSize: fs(9) }}>
                             Proposed Update
                         </span>
-                        <span style={{ fontSize: fs(11) }} className="font-mono text-slate-700 block mt-2">
+                        <span style={{ fontSize: fs(11) }} className="font-mono text-foreground block mt-2">
                             w = [{stepData.new_w1.toFixed(2)}, {stepData.new_w2.toFixed(2)}]
                         </span>
-                        <div className="flex justify-between mt-1 text-slate-400 font-mono" style={{ fontSize: fs(10) }}>
+                        <div className="flex justify-between mt-1 text-text-secondary font-mono" style={{ fontSize: fs(10) }}>
                             <span>∇ = [{(currentW1 - stepData.new_w1).toFixed(3)}, {(currentW2 - stepData.new_w2).toFixed(3)}]</span>
                         </div>
                         {lossAfter !== null && (
@@ -273,13 +273,13 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                         )}
                     </div>
 
-                    <p className="text-slate-500 text-center" style={{ fontSize: fs(11) }}>
+                    <p className="text-text-secondary text-center" style={{ fontSize: fs(11) }}>
                         Accept the proposed update?
                     </p>
 
                     <div className="flex" style={{ gap: fs(8) }}>
                         <Button
-                            className="flex-1 bg-gradient-to-r from-emerald-100 to-teal-100 text-black border-none hover:from-emerald-200 hover:to-teal-200 shadow-md transition-all active:scale-[0.98]"
+                            className="flex-1 bg-success   text-success-foreground border-none   shadow-md transition-all active:scale-[0.98] hover:bg-success-hover "
                             style={{ height: fs(38), gap: fs(6), fontSize: fs(12) }}
                             onClick={handleAccept}
                         >
@@ -287,7 +287,7 @@ const SVMStepHUD: React.FC<SVMStepHUDProps> = ({
                             Accept
                         </Button>
                         <Button
-                            className="flex-1 bg-gradient-to-r from-red-100 to-rose-100 text-black border-none hover:from-red-200 hover:to-rose-200 shadow-md transition-all active:scale-[0.98]"
+                            className="flex-1 bg-danger   text-danger-foreground border-none   shadow-md transition-all active:scale-[0.98] hover:bg-danger-hover "
                             style={{ height: fs(38), gap: fs(6), fontSize: fs(12) }}
                             onClick={handleReject}
                         >

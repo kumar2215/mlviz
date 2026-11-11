@@ -18,7 +18,7 @@ const Results = ({ metrics, metadata }: ClassifierResultData) => {
 
     return (
         <div className="h-full flex flex-col justify-start overflow-auto">
-            <p className="text-xl text-slate-800 flex items-center gap-2 mb-4">
+            <p className="text-xl text-foreground flex items-center gap-2 mb-4">
                 <ChartColumnIncreasing className="h-4 w-4" /> Metrics
             </p>
 
@@ -34,7 +34,7 @@ const Results = ({ metrics, metadata }: ClassifierResultData) => {
                 </MetricSection>
 
                 {test && (
-                    <div className="w-full pt-2 border-t border-slate-200">
+                    <div className="w-full pt-2 border-t border-border">
                         <MetricSection
                             title="Test Set"
                             metrics={formatClassificationMetrics(test)}

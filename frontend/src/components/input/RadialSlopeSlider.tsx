@@ -1,3 +1,5 @@
+import { colourRecipes } from "../../theme/recipes";
+import { chartColors, uiColors } from "../../theme/colors";
 /**
  * RadialSlopeSlider — flatter U-shape (smiley) arc dial.
  *
@@ -64,7 +66,7 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
 
     const angle = slopeToAngle(slope, xSpan, ySpan);
     const hp    = arcPt(angle, cx, cy, r);
-    const color = angle >= 0 ? "#0284c7" : "#f97316";
+    const color = angle >= 0 ? chartColors.positive : chartColors.negative;
 
     // Indicator line sits inside the arc curve (higher than the peak)
     const previewY   = cy + r * 0.6;
@@ -114,11 +116,11 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
         >
             {/* Background trough */}
             <path d={arcPath(cx, cy, r, ANGLE_MIN, ANGLE_MAX, 0)}
-                fill="none" stroke="#f1f5f9" strokeWidth={12} strokeLinecap="round" />
+                fill="none" stroke={uiColors.surfaceRecessed} strokeWidth={12} strokeLinecap="round" />
 
             {/* Main Track (Smiley needs sweep=0) */}
             <path d={arcPath(cx, cy, r, ANGLE_MIN, ANGLE_MAX, 0)}
-                fill="none" stroke="#cbd5e1" strokeWidth={8} strokeLinecap="round" />
+                fill="none" stroke={uiColors.border} strokeWidth={8} strokeLinecap="round" />
 
             {/* Filled highlight arc (smiles CCW) */}
             {Math.abs(angle) > 0.5 && (
@@ -138,7 +140,7 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
                 return (
                     <line key={td}
                         x1={inn.x} y1={inn.y} x2={out.x} y2={out.y}
-                        stroke={td === 0 ? "#94a3b8" : "#cbd5e1"}
+                        stroke={td === 0 ? uiColors.disabledForeground : uiColors.border}
                         strokeWidth={td === 0 ? 2 : 1} />
                 );
             })}
@@ -147,7 +149,7 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
             <line
                 x1={cx - previewLen} y1={previewY}
                 x2={cx + previewLen} y2={previewY}
-                stroke={Math.abs(angle) < 1 ? "#94a3b8" : color}
+                stroke={Math.abs(angle) < 1 ? uiColors.disabledForeground : color}
                 strokeWidth={2} strokeLinecap="round" opacity={0.8}
                 transform={`rotate(${-angle}, ${cx}, ${previewY})`}
             />
@@ -160,7 +162,7 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
                     <text key={side}
                         x={pt.x} y={pt.y}
                         textAnchor={side === "left" ? "end" : "start"}
-                        fontSize={12} fill="#94a3b8" dominantBaseline="middle" fontWeight="bold">
+                        fontSize={12} fill={uiColors.disabledForeground} dominantBaseline="middle" fontWeight="bold">
                         {side === "left" ? "−" : "+"}
                     </text>
                 );
@@ -168,8 +170,8 @@ const RadialSlopeSlider: React.FC<RadialSlopeSliderProps> = ({
 
             {/* Handle */}
             <circle cx={hp.x} cy={hp.y} r={HR}
-                fill="white" stroke={color} strokeWidth={2.5}
-                style={{ cursor: "grab", filter: "drop-shadow(0 2px 4px rgba(0,0,0,0.2))" }}
+                fill={uiColors.surface} stroke={color} strokeWidth={2.5}
+                style={{ cursor: "grab", filter: colourRecipes.controlShadow }}
                 onPointerDown={e => {
                     e.currentTarget.setPointerCapture(e.pointerId);
                     dragging.current = true;

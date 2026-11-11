@@ -21,18 +21,18 @@ export default function TrainPage({ useModel, parameters, TrainVisualizationComp
                 <SuccessAlert description="Model trained successfully." />
             )}
 
-            <div className="shrink-0 w-40 shadow-lg overflow-auto p-4 bg-gradient-to-br from-blue-50 to-blue-50 border-r border-gray-300">
+            <div className="shrink-0 w-40 shadow-lg overflow-auto p-4 bg-surface-tint   border-r border-border">
                 <ModelOptionsForm
                     {...useTrain(useModel, setShowAlert, parameters)}
                     buttonLabel="Train Model"
                 />
             </div>
 
-            <div data-tour-surface className="relative flex-1 shadow-lg overflow-hidden bg-white">
+            <div data-tour-surface className="relative flex-1 shadow-lg overflow-hidden bg-surface">
                 <TrainVisualizationComponent />
             </div>
 
-            <div data-tour="training-results" className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-gradient-to-br from-blue-50 to-blue-50 border-l border-gray-300 overflow-auto">
+            <div data-tour="training-results" className="shrink-0 h-full min-h-0 p-4 shadow-lg bg-surface-tint   border-l border-border overflow-auto">
                 <ResultsComponent />
             </div>
         </div>

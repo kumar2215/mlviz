@@ -1,3 +1,4 @@
+import { playbackGradient } from "@/theme/recipes";
 // Reusable play/pause/step controls component
 
 import { Button } from "@/components/ui/button";
@@ -58,9 +59,9 @@ const PlayControls: React.FC<PlayControlsProps> = ({
                 }
                 className={
                     isPlaying
-                        ? `${buttonStyle} !bg-gradient-to-r !from-teal-500 !to-emerald-600`
+                        ? `${buttonStyle} bg-primary-pressed`
                         : currentStep >= maxSteps
-                        ? `${buttonStyle} !bg-gradient-to-r !from-red-500 !to-orange-600`
+                        ? `${buttonStyle} bg-primary`
                         : `${buttonStyle}`
                 }
             >
@@ -84,21 +85,13 @@ const PlayControls: React.FC<PlayControlsProps> = ({
                         onChange={(e) =>
                             handleSliderChange(parseInt(e.target.value))
                         }
-                        className="w-full h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer hover:bg-gray-300
+                        className="w-full h-1 bg-surface-hover rounded-lg appearance-none cursor-pointer hover:bg-disabled
                                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 
-                                   [&::-webkit-slider-thumb]:bg-emerald-700 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
-                                   [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-blue-500 
+                                   [&::-webkit-slider-thumb]:bg-success-strong [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
+                                   [&::-moz-range-thumb]:w-3 [&::-moz-range-thumb]:h-3 [&::-moz-range-thumb]:bg-primary
                                    [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-none"
                         style={{
-                            background: `linear-gradient(to right, oklch(69.6% 0.17 162.48) 0%, oklch(50.8% 0.118 165.612) ${
-                                maxSteps > 0
-                                    ? (currentStep / maxSteps) * 100
-                                    : 0
-                            }%, oklch(70.7% 0.022 261.325) ${
-                                maxSteps > 0
-                                    ? (currentStep / maxSteps) * 100
-                                    : 0
-                            }%, oklch(55.1% 0.027 264.364) 100%)`,
+                            background: playbackGradient(maxSteps > 0 ? currentStep / maxSteps * 100 : 0),
                         }}
                         title={`Step: ${currentStep}/${maxSteps}`}
                     />
@@ -107,7 +100,7 @@ const PlayControls: React.FC<PlayControlsProps> = ({
 
             {/* Step Display */}
             {compact || (
-                <span className="text-xs font-medium text-gray-600 min-w-0">
+                <span className="text-xs font-medium text-text-secondary min-w-0">
                     {currentStep}/{maxSteps}
                 </span>
             )}
