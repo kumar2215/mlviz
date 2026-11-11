@@ -53,7 +53,7 @@ const PredictionInputForm: React.FC<PredictionInputFormProps> = ({
         >
             <div className="space-y-3">
                 {features.length === 0 && (
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-text-secondary text-sm">
                         No features available for prediction inputs.
                     </p>
                 )}
@@ -64,7 +64,7 @@ const PredictionInputForm: React.FC<PredictionInputFormProps> = ({
                     >
                         <label
                             htmlFor={`input-${featureName}`}
-                            className="text-xs font-medium text-gray-600 mb-1"
+                            className="text-xs font-medium text-text-secondary mb-1"
                         >
                             {featureName}
                         </label>
@@ -74,7 +74,7 @@ const PredictionInputForm: React.FC<PredictionInputFormProps> = ({
                             name={featureName}
                             value={formPoints[featureName] ?? ""}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-300 bg-gray-50 font-mono rounded-md text-sm focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full p-2 border border-control-border bg-surface-subtle font-mono rounded-md text-sm focus:ring-ring focus:border-primary"
                             step="any"
                         />
                     </div>
@@ -83,7 +83,7 @@ const PredictionInputForm: React.FC<PredictionInputFormProps> = ({
             <div>
                 <button
                     type="submit"
-                    className="w-full px-4 py-2 bg-gradient-to-r from-blue-100 to-blue-100 text-gray-700 font-medium rounded-md shadow-sm transition duration-100 hover:shadow-xl my-2"
+                    className="w-full px-4 py-2 bg-surface-tint   text-foreground font-medium rounded-md shadow-sm transition duration-100 hover:shadow-xl my-2 hover:bg-selection-hover "
                 >
                     Predict
                 </button>

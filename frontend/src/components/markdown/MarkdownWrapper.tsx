@@ -16,7 +16,7 @@ type ParagraphProps = React.ComponentProps<"p"> & ExtraProps;
 const Paragraph: React.FC<ParagraphProps> = ({ children, node, ...props }) => {
     return (
         <p
-            className="text-[calc(0.625rem+0.5vw)] text-gray-800 mb-2 leading-relaxed"
+            className="text-[calc(0.625rem+0.5vw)] text-foreground mb-2 leading-relaxed"
             {...props}
         >
             {children}
@@ -29,7 +29,7 @@ type Heading1Props = React.ComponentProps<"h1"> & ExtraProps;
 const Heading1: React.FC<Heading1Props> = ({ children, node, ...props }) => {
     return (
         <h1
-            className="text-[calc(1.25rem+1.5vw)] my-4 bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent font-width-expanded font-bold tracking-tight"
+            className="text-[calc(1.25rem+1.5vw)] my-4 text-primary     font-width-expanded font-bold tracking-tight"
             {...props}
         >
             {children}
@@ -42,7 +42,7 @@ type Heading2Props = React.ComponentProps<"h2"> & ExtraProps;
 const Heading2: React.FC<Heading2Props> = ({ children, node, ...props }) => {
     return (
         <h2
-            className="text-[calc(1rem+1.2vw)] font-semibold tracking-tight bg-gradient-to-br from-blue-600 to-blue-500 bg-clip-text text-transparent font-width-expanded my-4"
+            className="text-[calc(1rem+1.2vw)] font-semibold tracking-tight text-primary     font-width-expanded my-4"
             {...props}
         >
             {children}
@@ -55,7 +55,7 @@ type Heading3Props = React.ComponentProps<"h3"> & ExtraProps;
 const Heading3: React.FC<Heading3Props> = ({ children, node, ...props }) => {
     return (
         <h3
-            className="font-bold text-[calc(0.875rem+0.9vw)] my-4 tracking-tight bg-gradient-to-br from-gray-500 to-slate-400 bg-clip-text text-transparent font-width-expanded"
+            className="font-bold text-[calc(0.875rem+0.9vw)] my-4 tracking-tight text-primary     font-width-expanded"
             {...props}
         >
             {children}
@@ -68,7 +68,7 @@ type Heading4Props = React.ComponentProps<"h4"> & ExtraProps;
 const Heading4: React.FC<Heading4Props> = ({ children, node, ...props }) => {
     return (
         <h4
-            className="font-bold text-[calc(0.75rem+0.7vw)] my-4 tracking-tight bg-gradient-to-br from-gray-400 to-slate-300 bg-clip-text text-transparent font-width-expanded"
+            className="font-bold text-[calc(0.75rem+0.7vw)] my-4 tracking-tight text-primary     font-width-expanded"
             {...props}
         >
             {children}
@@ -115,7 +115,7 @@ type ListItemProps = React.ComponentProps<"li"> & ExtraProps;
 const ListItem: React.FC<ListItemProps> = ({ children, node, ...props }) => {
     return (
         <li
-            className="text-[calc(0.625rem+0.5vw)] text-gray-800 tracking-tight font-light mx-1 leading-normal"
+            className="text-[calc(0.625rem+0.5vw)] text-foreground tracking-tight font-light mx-1 leading-normal"
             {...props}
         >
             {children}
@@ -131,7 +131,7 @@ const TaskCheckbox: React.FC<InputProps> = ({ node, checked, ...props }) => {
             type="checkbox"
             checked={checked}
             readOnly
-            className="appearance-none w-[1em] h-[1em] border border-gray-500 rounded-sm inline-block align-middle mr-2 relative top-[-0.05em] checked:bg-gray-500"
+            className="appearance-none w-[1em] h-[1em] border border-control-border rounded-sm inline-block align-middle mr-2 relative top-[-0.05em] checked:bg-primary"
             {...props}
         />
     );
@@ -156,7 +156,7 @@ const Table: React.FC<TableProps> = ({ children, node, ...props }) => {
     return (
         <div className="overflow-x-auto my-6">
             <table
-                className="min-w-full border-collapse border border-gray-300 shadow-md rounded-lg"
+                className="min-w-full border-collapse border border-border shadow-md rounded-lg"
                 {...props}
             >
                 {children}
@@ -170,7 +170,7 @@ type TableHeadProps = React.ComponentProps<"thead"> & ExtraProps;
 const TableHead: React.FC<TableHeadProps> = ({ children, node, ...props }) => {
     return (
         <thead
-            className="bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent !text-2xl font-width-expanded"
+            className="text-primary     !text-2xl font-width-expanded"
             {...props}
         >
             {children}
@@ -183,7 +183,7 @@ type TableBodyProps = React.ComponentProps<"tbody"> & ExtraProps;
 const TableBody: React.FC<TableBodyProps> = ({ children, node, ...props }) => {
     return (
         <tbody
-            className="bg-white"
+            className="bg-surface"
             {...props}
         >
             {children}
@@ -196,7 +196,7 @@ type TableRowProps = React.ComponentProps<"tr"> & ExtraProps;
 const TableRow: React.FC<TableRowProps> = ({ children, node, ...props }) => {
     return (
         <tr
-            className="border-b border-gray-200 hover:bg-gray-50 transition-colors"
+            className="border-b border-border hover:bg-surface-subtle transition-colors"
             {...props}
         >
             {children}
@@ -213,7 +213,7 @@ const TableHeaderCell: React.FC<TableHeaderCellProps> = ({
 }) => {
     return (
         <th
-            className="px-6 py-3 text-left text-sm font-semibold tracking-tight bg-gradient-to-br from-blue-600 to-blue-700 bg-clip-text text-transparent hover:from-blue-600 hover:to-blue-700"
+            className="px-6 py-3 text-left text-sm font-semibold tracking-tight text-primary      "
             {...props}
         >
             {children}
@@ -230,7 +230,7 @@ const TableDataCell: React.FC<TableDataCellProps> = ({
 }) => {
     return (
         <td
-            className="px-6 py-4 text-sm text-gray-700 tracking-tight"
+            className="px-6 py-4 text-sm text-foreground tracking-tight"
             {...props}
         >
             {children}
@@ -243,7 +243,7 @@ type StrongProps = React.ComponentProps<"strong"> & ExtraProps;
 const Strong: React.FC<StrongProps> = ({ children, node, ...props }) => {
     return (
         <strong
-            className="font-bold bg-gradient-to-br from-blue-800 to-blue-800 bg-clip-text text-transparent"
+            className="font-bold text-primary    "
             {...props}
         >
             {children}
@@ -299,7 +299,7 @@ type LinkProps = React.ComponentProps<"a"> & ExtraProps;
 const Link: React.FC<LinkProps> = ({ children, node, ...props }) => {
     return (
         <a
-            className="bg-gradient-to-br from-blue-700 to-blue-600 bg-clip-text text-transparent underline"
+            className="text-primary     underline"
             {...props}
             target="_blank"
         >
@@ -362,7 +362,7 @@ const MarkdownWrapper: React.FC<MarkdownWrapperProps> = ({
     );
 
     if (variant === "activity") {
-        return <div className="space-y-2 text-sm leading-snug text-slate-600 [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-slate-950 [&_h3]:font-semibold [&_h3]:text-slate-950 [&_h4]:font-semibold [&_h4]:text-slate-950 [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1">
+        return <div className="space-y-2 text-sm leading-snug text-text-secondary [&_h2]:text-lg [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:font-semibold [&_h3]:text-foreground [&_h4]:font-semibold [&_h4]:text-foreground [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_li]:my-1">
             {content}
         </div>;
     } else if (variant === "small") {

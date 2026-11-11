@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 import {
     prepareHistogramData,
     renderHistogramBars,
@@ -141,7 +142,7 @@ const ManualTreeHUD: React.FC = () => {
             .attr("x2", thresholdX)
             .attr("y1", 0)
             .attr("y2", totalHeight)
-            .attr("stroke", "#2563eb")
+            .attr("stroke", uiColors.primary)
             .attr("stroke-width", 2)
             .attr("stroke-dasharray", "5,5");
 
@@ -150,7 +151,7 @@ const ManualTreeHUD: React.FC = () => {
             .attr("y", 10)
             .attr("text-anchor", "middle")
             .attr("font-size", "10px")
-            .attr("fill", "#2563eb")
+            .attr("fill", uiColors.primary)
             .attr("font-weight", "bold")
             .text(currentThreshold.toFixed(2));
     }, [featureStats, selectedFeature, selectedThreshold, classNames]);
@@ -165,7 +166,7 @@ const ManualTreeHUD: React.FC = () => {
         >
             <div className="space-y-4">
                 <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    <Label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
                         Feature
                     </Label>
                     <Select
@@ -178,15 +179,15 @@ const ManualTreeHUD: React.FC = () => {
                             finish(state.selectedFeature === feature && Boolean(state.featureStats) && state.featureStats !== previous);
                         }}
                     >
-                        <SelectTrigger data-tour="tree-feature" className="w-full bg-white border-slate-200 shadow-sm transition-all hover:border-slate-300">
+                        <SelectTrigger data-tour="tree-feature" className="w-full bg-surface border-border shadow-sm transition-all hover:border-border">
                             <SelectValue placeholder="Select feature..." />
                         </SelectTrigger>
-                        <SelectContent className="bg-white border-slate-200">
+                        <SelectContent className="bg-surface border-border">
                             {featureNames.map((name) => (
                                 <SelectItem
                                     key={name}
                                     value={name}
-                                    className="hover:bg-slate-50"
+                                    className="hover:bg-surface-subtle"
                                 >
                                     {name}
                                 </SelectItem>
@@ -199,7 +200,7 @@ const ManualTreeHUD: React.FC = () => {
                     <>
                         <div data-tour="tree-threshold" className="space-y-2">
                             <div className="flex justify-between items-end">
-                                <Label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                <Label className="text-[10px] font-bold uppercase tracking-wider text-text-secondary">
                                     Threshold
                                 </Label>
                                 <span className="text-sm font-mono font-bold text-primary">
@@ -235,7 +236,7 @@ const ManualTreeHUD: React.FC = () => {
                                 className="py-2"
                             />
                         </div>
-                        <div className="bg-white rounded-xl p-2 border border-slate-100 shadow-inner overflow-hidden">
+                        <div className="bg-surface rounded-xl p-2 border border-border shadow-inner overflow-hidden">
                             <svg
                                 ref={vizRef}
                                 width="100%"
@@ -245,8 +246,8 @@ const ManualTreeHUD: React.FC = () => {
                         </div>
                     </>
                 ) : (
-                    <div className="h-[250px] flex items-center justify-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-                        <p className="text-xs text-slate-400 italic">
+                    <div className="h-[250px] flex items-center justify-center border-2 border-dashed border-border rounded-xl bg-surface-subtle">
+                        <p className="text-xs text-text-secondary italic">
                             Select a feature to begin splitting
                         </p>
                     </div>
@@ -254,7 +255,7 @@ const ManualTreeHUD: React.FC = () => {
 
                 <div className="flex flex-row gap-2 pt-2">
                     <Button
-                        className="w-1/2 h-auto py-2 gap-2 bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
+                        className="w-1/2 h-auto py-2 gap-2 bg-success   text-success-foreground border-none   shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2 hover:bg-success-hover "
                         disabled={
                             !selectedFeature || selectedThreshold === null
                         }
@@ -269,7 +270,7 @@ const ManualTreeHUD: React.FC = () => {
                         <span className="text-xs">Split Node</span>
                     </Button>
                     <Button
-                        className="w-1/2 h-auto py-2 gap-2 bg-gradient-to-r from-red-100 to-sky-100 text-black border-none hover:from-red-200 hover:to-sky-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2"
+                        className="w-1/2 h-auto py-2 gap-2 bg-danger   text-danger-foreground border-none   shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center px-2 hover:bg-danger-hover "
                         onClick={markAsLeaf}
                     >
                         <Leaf className="w-4 h-4 shrink-0" />{" "}

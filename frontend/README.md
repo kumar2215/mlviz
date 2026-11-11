@@ -1,5 +1,9 @@
 # React + TypeScript + Vite
 
+## Frontend colour guide
+
+Follow [STYLE_GUIDE.md](./STYLE_GUIDE.md) for all UI and chart colours. Edit the shared palette, then run `npm run colors:generate` when approved roles change. `npm run check:colors` enforces the guide and runs before production builds. The development-only `#/style-guide` page shows live swatches and component states.
+
 ## Firebase accounts
 
 Authentication uses Google and email/password sign-in, registration, email

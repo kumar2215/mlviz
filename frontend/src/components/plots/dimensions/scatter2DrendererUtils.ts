@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 /**
  * 2D Scatter Plot Renderer
  * Renders 2D scatter plots with decision boundary heatmaps
@@ -190,7 +191,7 @@ export function renderScatter2D(
                     .attr("fill", (d) => {
                         if (focusedNames === null) return colorScale(d);
                         const label = d.type === "classification" ? d.label : "";
-                        return focusedNames.has(label) ? colorScale(d) : "#d1d5db";
+                        return focusedNames.has(label) ? colorScale(d) : uiColors.border;
                     })
                     .attr("opacity", (d) => {
                         if (focusedNames === null) return pointOpacity;
@@ -219,7 +220,7 @@ export function renderScatter2D(
                         .attr("fill", function () {
                             const prediction = d3.select(this).attr("data-prediction");
                             if (focusedNames === null) return categoricalScale(prediction);
-                            return focusedNames.has(prediction) ? categoricalScale(prediction) : "#e5e7eb";
+                            return focusedNames.has(prediction) ? categoricalScale(prediction) : uiColors.border;
                         })
                         .attr("opacity", function () {
                             if (focusedNames === null) return 0.3;
@@ -371,7 +372,7 @@ function renderGrid2D(
         .call((g) =>
             g
                 .selectAll(".tick line")
-                .attr("stroke", "#e5e7eb")
+                .attr("stroke", uiColors.border)
                 .attr("stroke-opacity", 0.7),
         );
 
@@ -389,7 +390,7 @@ function renderGrid2D(
         .call((g) =>
             g
                 .selectAll(".tick line")
-                .attr("stroke", "#e5e7eb")
+                .attr("stroke", uiColors.border)
                 .attr("stroke-opacity", 0.7),
         );
 }
@@ -422,7 +423,7 @@ function renderAxes2D(
         .attr("y", height - 1)
         .attr("width", width + leftCoverage + rightCoverage)
         .attr("height", bottomCoverage)
-        .attr("fill", "white")
+        .attr("fill", uiColors.surface)
         .attr("opacity", 1);
 
     // Add white background for Y-axis (left)
@@ -432,7 +433,7 @@ function renderAxes2D(
         .attr("y", -10)
         .attr("width", leftCoverage)
         .attr("height", height + 20)
-        .attr("fill", "white")
+        .attr("fill", uiColors.surface)
         .attr("opacity", 1);
 
     // Add white background for top edge (extended to cover corners)
@@ -442,7 +443,7 @@ function renderAxes2D(
         .attr("y", -topCoverage)
         .attr("width", width + leftCoverage + rightCoverage)
         .attr("height", topCoverage)
-        .attr("fill", "white")
+        .attr("fill", uiColors.surface)
         .attr("opacity", 1);
 
     // Add white background for right edge
@@ -452,7 +453,7 @@ function renderAxes2D(
         .attr("y", -10)
         .attr("width", rightCoverage)
         .attr("height", height + 20)
-        .attr("fill", "white")
+        .attr("fill", uiColors.surface)
         .attr("opacity", 1);
 
     // X-axis
@@ -469,7 +470,7 @@ function renderAxes2D(
         .append("text")
         .attr("x", width / 2)
         .attr("y", 40 * scaleFactor)
-        .attr("fill", "#374151")
+        .attr("fill", uiColors.textSecondary)
         .attr("font-size", `${12 * scaleFactor}px`)
         .attr("font-weight", "500")
         .attr("text-anchor", "middle")
@@ -489,7 +490,7 @@ function renderAxes2D(
         .attr("transform", "rotate(-90)")
         .attr("x", -height / 2)
         .attr("y", -45 * scaleFactor)
-        .attr("fill", "#374151")
+        .attr("fill", uiColors.textSecondary)
         .attr("font-size", `${12 * scaleFactor}px`)
         .attr("font-weight", "500")
         .attr("text-anchor", "middle")
@@ -497,15 +498,15 @@ function renderAxes2D(
 
     // Style axis lines and ticks
     g.selectAll(".x-axis path, .y-axis path")
-        .attr("stroke", "#9ca3af")
+        .attr("stroke", uiColors.mutedForeground)
         .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis line, .y-axis line")
-        .attr("stroke", "#9ca3af")
+        .attr("stroke", uiColors.mutedForeground)
         .attr("stroke-width", 1 * scaleFactor);
 
     g.selectAll(".x-axis text, .y-axis text")
-        .attr("fill", "#6b7280")
+        .attr("fill", uiColors.mutedForeground)
         .attr("font-size", `${10 * scaleFactor}px`);
 }
 
@@ -549,7 +550,7 @@ function renderDataPoints2D(
         .attr("r", pointRadius)
         .attr("fill", (d) => colorScale(d))
         .attr("opacity", opacity)
-        .attr("stroke", "#fff")
+        .attr("stroke", uiColors.surface)
         .attr("stroke-width", 1.5 * scaleFactor)
         .attr("cursor", onPointClick ? "pointer" : "default")
         .raise();

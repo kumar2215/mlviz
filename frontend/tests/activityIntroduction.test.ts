@@ -71,7 +71,7 @@ test("inline story narration takes precedence over a file and replaces only the 
     const html = renderToStaticMarkup(createElement(TreeFromSource, {
         source: { text, path: "unused.md" },
     }));
-    assert.match(html, /<section[^>]*bg-white/);
+    assert.match(html, /<section[^>]*bg-surface/);
     assert.match(html, /<h2>Parts of a tree<\/h2>/);
     assert.equal(html.match(/Parts of a tree/g)?.length, 1);
     assert.doesNotMatch(html, /Label the tree|Loading narration|title: Parts of a tree/);

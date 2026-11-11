@@ -74,7 +74,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                 {mode === "ready" && (
                     <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
                         <p
-                            className="text-slate-500 leading-relaxed"
+                            className="text-text-secondary leading-relaxed"
                             style={{ fontSize: `${14 * scaleFactor}px` }}
                         >
                             {selectedCentroids.length > 0
@@ -84,7 +84,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                         {selectedCentroids.length > 0 ? (
                             <div style={{ gap: `${8 * scaleFactor}px` }} className="flex flex-col">
                                 <Button
-                                    className="w-full bg-slate-900 text-white border-none hover:bg-slate-700 shadow-md transition-all active:scale-[0.98]"
+                                    className="w-full bg-surface-strong text-primary-foreground border-none hover:bg-surface-strong shadow-md transition-all active:scale-[0.98]"
                                     style={{
                                         gap: `${8 * scaleFactor}px`,
                                         height: `${40 * scaleFactor}px`,
@@ -121,7 +121,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                 </Button>
                                 <Button
                                     variant="ghost"
-                                    className="w-full text-slate-400 hover:text-slate-600"
+                                    className="w-full text-text-secondary hover:text-text-secondary"
                                     style={{
                                         fontSize: `${12 * scaleFactor}px`,
                                         height: `${32 * scaleFactor}px`,
@@ -140,7 +140,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                             </div>
                         ) : (
                             <Button
-                                className="w-full bg-gradient-to-r from-blue-100 to-blue-100 text-black border-none hover:from-blue-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98]"
+                                className="w-full bg-surface-tint   text-foreground border-none   shadow-md transition-all active:scale-[0.98] hover:bg-selection-hover "
                                 style={{
                                     gap: `${8 * scaleFactor}px`,
                                     height: `${40 * scaleFactor}px`,
@@ -164,7 +164,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                     <div style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
                         <div className="flex justify-between items-end">
                             <Label
-                                className="font-bold uppercase tracking-wider text-slate-400"
+                                className="font-bold uppercase tracking-wider text-text-secondary"
                                 style={{ fontSize: `${10 * scaleFactor}px` }}
                             >
                                 Centroids Placed
@@ -177,13 +177,13 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                             </span>
                         </div>
                         <p
-                            className="text-slate-500 italic"
+                            className="text-text-secondary italic"
                             style={{ fontSize: `${12 * scaleFactor}px` }}
                         >
                             Click data points to select/deselect them.
                         </p>
                         <Button
-                            className="w-full h-auto bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                            className="w-full h-auto bg-success   text-success-foreground border-none   shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center hover:bg-success-hover "
                             style={{
                                 padding: `${8 * scaleFactor}px`,
                                 gap: `${8 * scaleFactor}px`,
@@ -217,7 +217,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                         </Button>
                         <Button
                             variant="ghost"
-                            className="w-full text-slate-400 hover:text-slate-600"
+                            className="w-full text-text-secondary hover:text-text-secondary"
                             style={{
                                 fontSize: `${12 * scaleFactor}px`,
                                 height: `${32 * scaleFactor}px`,
@@ -239,7 +239,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                 {mode === "preview" && (
                     <div data-tour="step-proposal" style={{ gap: `${12 * scaleFactor}px` }} className="flex flex-col">
                         <div
-                            className="border border-primary/10 bg-white/50"
+                            className="border border-primary bg-surface-hover-translucent"
                             style={{
                                 padding: `${12 * scaleFactor}px`,
                                 borderRadius: `${12 * scaleFactor}px`,
@@ -262,7 +262,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                 Step Complete
                             </p>
                             <p
-                                className="text-slate-500 mt-1"
+                                className="text-text-secondary mt-1"
                                 style={{ fontSize: `${11 * scaleFactor}px` }}
                             >
                                 The algorithm has proposed new centers based on the current
@@ -270,7 +270,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                             </p>
                         </div>
                         <div
-                            className="text-slate-500 px-1"
+                            className="text-text-secondary px-1"
                             style={{ fontSize: `${12 * scaleFactor}px` }}
                         >
                             Would you like to keep the centroids suggested?
@@ -280,7 +280,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                             style={{ gap: `${8 * scaleFactor}px` }}
                         >
                             <Button
-                                className="w-1/2 h-auto bg-gradient-to-r from-green-100 to-blue-100 text-black border-none hover:from-green-200 hover:to-blue-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                                className="w-1/2 h-auto bg-success   text-success-foreground border-none   shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center hover:bg-success-hover "
                                 style={{
                                     padding: `${8 * scaleFactor}px`,
                                     gap: `${8 * scaleFactor}px`,
@@ -304,7 +304,7 @@ const KMeansStepHUD: React.FC<KMeansStepHUDProps> = ({ mode, setMode }) => {
                                 </span>
                             </Button>
                             <Button
-                                className="w-1/2 h-auto bg-gradient-to-r from-red-100 to-sky-100 text-black border-none hover:from-red-200 hover:to-sky-200 shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center"
+                                className="w-1/2 h-auto bg-danger   text-danger-foreground border-none   shadow-md transition-all active:scale-[0.98] whitespace-normal text-center flex items-center justify-center hover:bg-danger-hover "
                                 style={{
                                     padding: `${8 * scaleFactor}px`,
                                     gap: `${8 * scaleFactor}px`,

@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 /**
  * Shared utilities for scatter plot rendering
  * Common functions used across 1D, 2D, and 3D scatter renderers
@@ -82,7 +83,7 @@ export function createScatterColorScale(
             config.colorScheme || "viridis"
         );
         return (point: PlotPoint) =>
-            point.type === "regression" ? continuousScale(point.value) : "#000";
+            point.type === "regression" ? continuousScale(point.value) : uiColors.foreground;
     }
 }
 

@@ -1,3 +1,4 @@
+import { uiColors } from "../../../theme/colors";
 // Reusable hook for zoom and pan controls
 
 import * as d3 from "d3";
@@ -350,7 +351,7 @@ export const useZoomControls = ({
                                             // Preserve grid styling
                                             gridX.select(".domain").remove();
                                             gridX.selectAll(".tick line")
-                                                .attr("stroke", "#e5e7eb")
+                                                .attr("stroke", uiColors.border)
                                                 .attr("stroke-opacity", 0.7);
                                         }
 
@@ -366,7 +367,7 @@ export const useZoomControls = ({
                                             // Preserve grid styling
                                             gridY.select(".domain").remove();
                                             gridY.selectAll(".tick line")
-                                                .attr("stroke", "#e5e7eb")
+                                                .attr("stroke", uiColors.border)
                                                 .attr("stroke-opacity", 0.7);
                                         }
                                     }

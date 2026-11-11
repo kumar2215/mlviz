@@ -7,13 +7,13 @@ export default function ActivityIntroduction({ narration, children, className = 
     if (!narration) return <>{children}</>;
 
     if (narration.loading) {
-        return <p role="status" className={`shrink-0 text-sm text-slate-600 ${className}`}><PageLoadingLabel>Loading narration…</PageLoadingLabel></p>;
+        return <p role="status" className={`shrink-0 text-sm text-text-secondary ${className}`}><PageLoadingLabel>Loading narration…</PageLoadingLabel></p>;
     }
 
     if (narration.error) {
         return <div className={`min-w-0 shrink-0 ${className}`}>
             {children}
-            <p role="alert" className="shrink-0 text-sm text-red-600">Could not load story narration: {narration.error}</p>
+            <p role="alert" className="shrink-0 text-sm text-danger-foreground">Could not load story narration: {narration.error}</p>
         </div>;
     }
 

@@ -1,7 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { HashRouter } from "react-router-dom";
-import App from "./App.tsx";
+import Workspace from "./components/layout/Workspace";
 import "./index.css";
 import AccountDialogs from "./components/layout/AccountDialogs";
 import { authSession } from "./store/useAuthSession";
@@ -23,7 +23,7 @@ if (import.meta.env.VITE_SHOW_DEV_INFO !== "true") {
 ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
         <HashRouter>
-            <App />
+            <Workspace />
             <AccountDialogs />
             <RewardNotice />
             <XpTransferAnimation />

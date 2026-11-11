@@ -20,12 +20,12 @@ const Results = ({ metrics, metadata }: RegressionResultData) => {
 
     return (
         <div
-            className={`h-full flex flex-col justify-start overflow-auto transition-opacity duration-200 ${isEvaluating ? "opacity-50" : "opacity-100"}`}
+            className={`h-full flex flex-col justify-start overflow-auto transition-opacity duration-200 ${isEvaluating ? "opacity-disabled" : "opacity-100"}`}
         >
-            <p className="text-xl text-slate-800 flex items-center gap-2 mb-4">
+            <p className="text-xl text-foreground flex items-center gap-2 mb-4">
                 <ChartColumnIncreasing className="h-4 w-4" /> Metrics
                 {isEvaluating && (
-                    <span className="text-[10px] text-slate-400 animate-pulse uppercase tracking-widest ml-auto">
+                    <span className="text-[10px] text-muted-foreground animate-pulse uppercase tracking-widest ml-auto">
                         Evaluating…
                     </span>
                 )}
@@ -35,7 +35,7 @@ const Results = ({ metrics, metadata }: RegressionResultData) => {
                 <MetricSection title="Train Set" metrics={formatRegressionMetrics(train)} />
 
                 {test && (
-                    <div className="w-full pt-4 border-t border-slate-200">
+                    <div className="w-full pt-4 border-t border-border">
                         <MetricSection title="Test Set" metrics={formatRegressionMetrics(test)} />
                     </div>
                 )}

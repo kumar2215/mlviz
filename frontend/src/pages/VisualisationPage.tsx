@@ -70,12 +70,12 @@ function VisualisationContent() {
 
     if (!pages || pages.length === 0) {
         return (
-            <div className="flex h-screen w-screen flex-col bg-slate-50">
+            <div className="flex h-screen w-screen flex-col bg-surface-subtle">
                 <AppHeader />
                 <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-                    <p className="text-sm font-semibold uppercase tracking-widest text-blue-600">Coming soon</p>
-                    <h1 className="!text-3xl text-slate-900">{item.display_name}</h1>
-                    <p className="text-slate-500">{`${inStoryMode ? "This story" : "This visualisation"} is under construction. Explore the other activities while it takes shape.`}</p>
+                    <p className="text-sm font-semibold uppercase tracking-widest text-primary">Coming soon</p>
+                    <h1 className="!text-3xl text-foreground">{item.display_name}</h1>
+                    <p className="text-muted-foreground">{`${inStoryMode ? "This story" : "This visualisation"} is under construction. Explore the other activities while it takes shape.`}</p>
                     <Button asChild><Link to={inStoryMode ? "/stories" : "/"}>Explore other activities</Link></Button>
                 </div>
             </div>
@@ -149,7 +149,7 @@ function VisualisationContent() {
                     <div data-tour-content className="min-h-0 flex-1">{renderPage()}</div>
                     <GuidedTour />
                 </div>
-                <aside aria-label="Story and activity navigation" className="shrink-0 w-60 flex flex-col min-h-0 items-center overflow-hidden bg-slate-50 border-l border-blue-100">
+                <aside aria-label="Story and activity navigation" className="shrink-0 w-60 flex flex-col min-h-0 items-center overflow-hidden bg-surface-subtle border-l border-info-border">
                     <NavigationBar />
                 </aside>
             </div>

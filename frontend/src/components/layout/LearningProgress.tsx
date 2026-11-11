@@ -6,9 +6,9 @@ import useLearningSummary from "@/hooks/useLearningSummary";
 
 export function LearnerSummary({ compact = false }: { compact?: boolean }) {
     const { xp, level, current, required } = useLearningSummary();
-    return <div className={`rounded-xl border border-amber-200 bg-amber-50 text-amber-950 ${compact ? "min-w-36 px-3 py-1.5" : "space-y-2 p-4"}`} aria-label={`Level ${level}, ${xp} XP`}>
+    return <div className={`rounded-xl border border-reward-border bg-reward text-reward-foreground ${compact ? "min-w-36 px-3 py-1.5" : "space-y-2 p-4"}`} aria-label={`Level ${level}, ${xp} XP`}>
         <div className="flex items-center justify-between gap-3 text-sm"><span className="flex items-center gap-1.5 font-semibold"><Sparkles aria-hidden="true" className="size-4" />{xp} XP</span><span>Level {level}</span></div>
-        <div role="progressbar" aria-label="Progress to next level" aria-valuemin={0} aria-valuemax={required} aria-valuenow={current} className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-amber-200"><div className="h-full rounded-full bg-amber-600" style={{ width: `${current / required * 100}%` }} /></div>
+        <div role="progressbar" aria-label="Progress to next level" aria-valuemin={0} aria-valuemax={required} aria-valuenow={current} className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-reward-track"><div className="h-full rounded-full reward-meter" style={{ width: `${current / required * 100}%` }} /></div>
         {!compact && <p className="text-xs">{current} / {required} XP toward Level {level + 1}</p>}
     </div>;
 }
@@ -22,7 +22,7 @@ export function LearningSaveStatus({ className = "" }: { className?: string }) {
     const message = error || (owner && !remoteReady ? "Restoring account progress…" : null);
     if (!message) return null;
     return <div className={`space-y-2 text-xs leading-relaxed ${className}`}>
-        <p role={error ? "alert" : undefined} className={error ? "text-amber-900" : "text-blue-900"}>{message}</p>
+        <p role={error ? "alert" : undefined} className={error ? "text-reward-foreground" : "text-info-foreground"}>{message}</p>
         {error && <Button type="button" variant="outline" size="sm" onClick={retry}>Retry saving progress</Button>}
     </div>;
 }
@@ -36,6 +36,6 @@ export function RewardNotice() {
         return () => clearTimeout(timer);
     }, [notice, dismiss]);
     return <div aria-live="polite" aria-atomic="true" className="pointer-events-none fixed bottom-5 left-1/2 z-50 max-w-[90vw] -translate-x-1/2">
-        {notice && notice.level === undefined && <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-amber-300 bg-amber-50 px-5 py-3 text-sm font-semibold text-amber-950 shadow-lg"><Sparkles aria-hidden="true" className="size-5 shrink-0" /><span>{notice.text}</span><button type="button" onClick={dismiss} aria-label="Dismiss XP reward" className="rounded p-1 focus-visible:outline-2"><X className="size-4" /></button></div>}
+        {notice && notice.level === undefined && <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-reward-border bg-reward px-5 py-3 text-sm font-semibold text-reward-foreground shadow-lg"><Sparkles aria-hidden="true" className="size-5 shrink-0" /><span>{notice.text}</span><button type="button" onClick={dismiss} aria-label="Dismiss XP reward" className="rounded p-1 focus-visible:outline-2"><X className="size-4" /></button></div>}
     </div>;
 }

@@ -68,21 +68,21 @@ export default function RegexIntroduction({ narration, subpageIndex = 0, onSubpa
 
     return <LabFrame>
         <ActivityIntroduction narration={activeNarration}>
-            <div className="shrink-0"><h2 className="text-lg font-semibold text-cyan-950">{section}</h2><p className="text-sm text-slate-600">{introductions[subpageIndex]}</p></div>
+            <div className="shrink-0"><h2 className="text-lg font-semibold text-info-foreground">{section}</h2><p className="text-sm text-text-secondary">{introductions[subpageIndex]}</p></div>
         </ActivityIntroduction>
-        <section aria-label={section} tabIndex={0} className="min-h-0 flex-1 overflow-auto rounded-xl border border-cyan-100 p-4 text-sm leading-relaxed text-slate-700">
+        <section aria-label={section} tabIndex={0} className="min-h-0 flex-1 overflow-auto rounded-xl border border-info-border p-4 text-sm leading-relaxed text-foreground">
             {section === "Text & tokens" && <>
-                <h3 className="mb-3 text-base font-semibold text-cyan-950">What are we trying to keep?</h3>
-                <div className="mb-4 rounded-lg bg-cyan-50 p-3">
+                <h3 className="mb-3 text-base font-semibold text-info-foreground">What are we trying to keep?</h3>
+                <div className="mb-4 rounded-lg bg-surface-tint p-3">
                     <p><strong>Text:</strong> <code>The cat naps.</code></p>
                     <p><strong>Pattern:</strong> <code>cat</code></p>
                     <p><strong>Token kept:</strong> <code>cat</code></p>
                 </div>
-                <dl className="grid gap-3 md:grid-cols-2">{terms.map(([term, meaning]) => <div key={term} className="rounded-lg bg-slate-50 p-3"><dt className="mb-1 font-semibold text-cyan-950">{term}</dt><dd>{meaning}</dd></div>)}</dl>
+                <dl className="grid gap-3 md:grid-cols-2">{terms.map(([term, meaning]) => <div key={term} className="rounded-lg bg-surface-subtle p-3"><dt className="mb-1 font-semibold text-info-foreground">{term}</dt><dd>{meaning}</dd></div>)}</dl>
                 <p className="mt-4">Changing the pattern changes which pieces you keep. Next, learn the symbols that let a pattern find more than one exact word.</p>
             </>}
             {section === "Pattern symbols" && <>
-                <h3 className="mb-2 text-base font-semibold text-cyan-950">Read a pattern one piece at a time</h3>
+                <h3 className="mb-2 text-base font-semibold text-info-foreground">Read a pattern one piece at a time</h3>
                 <p className="mb-3">For example, <code>{"[A-Za-z]+(?:['’][A-Za-z]+)*"}</code> keeps English words and contractions whole:</p>
                 <ol className="mb-4 list-decimal space-y-1 pl-5">
                     <li><code>[A-Za-z]+</code> takes one or more English letters.</li>
@@ -91,33 +91,33 @@ export default function RegexIntroduction({ narration, subpageIndex = 0, onSubpa
                 </ol>
                 <div className="overflow-x-auto"><table className="w-full border-collapse text-left">
                     <caption className="sr-only">Common regex symbols and their meanings</caption>
-                    <thead className="bg-cyan-50 text-cyan-950"><tr><th scope="col" className="p-2">Term</th><th scope="col" className="p-2">Symbol / example</th><th scope="col" className="p-2">Meaning</th></tr></thead>
-                    <tbody>{symbols.map(([term, symbol, meaning]) => <tr key={term} className="border-b border-slate-100"><th scope="row" className="p-2 font-medium">{term}</th><td className="whitespace-nowrap p-2 font-mono">{symbol}</td><td className="p-2">{meaning}</td></tr>)}</tbody>
+                    <thead className="bg-surface-tint text-info-foreground"><tr><th scope="col" className="p-2">Term</th><th scope="col" className="p-2">Symbol / example</th><th scope="col" className="p-2">Meaning</th></tr></thead>
+                    <tbody>{symbols.map(([term, symbol, meaning]) => <tr key={term} className="border-b border-border"><th scope="row" className="p-2 font-medium">{term}</th><td className="whitespace-nowrap p-2 font-mono">{symbol}</td><td className="p-2">{meaning}</td></tr>)}</tbody>
                 </table></div>
                 <p className="mt-3">The editor shows the <strong>whole match</strong> as a token, even when the pattern contains capturing groups.</p>
             </>}
             {section === "Flags" && <>
-                <h3 className="mb-2 text-base font-semibold text-cyan-950">Change how the same pattern behaves</h3>
+                <h3 className="mb-2 text-base font-semibold text-info-foreground">Change how the same pattern behaves</h3>
                 <p className="mb-3">A flag is an optional matching setting. You can combine flags. MULTILINE and DOTALL matter when your text already contains line breaks; they do not insert them.</p>
                 <div aria-label="Flag examples" className="mb-4 flex flex-wrap gap-2">{flagExamples.map((item, index) => <Button key={item.name} aria-pressed={flagIndex === index} className={flagIndex === index ? actionClass : optionClass} onClick={() => { setFlagIndex(index); setEnabled(false); }}>{item.name}</Button>)}</div>
-                <p className="mb-3"><strong className="text-cyan-950">{flag.name}:</strong> {flag.meaning}</p>
+                <p className="mb-3"><strong className="text-info-foreground">{flag.name}:</strong> {flag.meaning}</p>
                 <div className="grid gap-3 md:grid-cols-2">
-                    <div className="rounded-lg bg-slate-50 p-3">
+                    <div className="rounded-lg bg-surface-subtle p-3">
                         <p className="mb-1 font-semibold">Pattern</p><code>{flag.pattern}</code>
-                        <p className="mb-1 mt-3 font-semibold">Sample text</p><pre className="whitespace-pre-wrap rounded-md bg-white p-3">{flag.text}</pre>
+                        <p className="mb-1 mt-3 font-semibold">Sample text</p><pre className="whitespace-pre-wrap rounded-md bg-surface p-3">{flag.text}</pre>
                         <p className="mt-2 text-xs">Any line break shown here is an actual newline.</p>
                     </div>
-                    <div className="rounded-lg bg-cyan-50 p-3">
+                    <div className="rounded-lg bg-surface-tint p-3">
                         <label className="flex cursor-pointer items-center gap-2 font-semibold"><input type="checkbox" checked={enabled} onChange={event => setEnabled(event.target.checked)} />Enable {flag.name}</label>
                         <div aria-live="polite" className="mt-3">
                             <p className="mb-2">{matches.length} {matches.length === 1 ? "match" : "matches"} with flag {enabled ? "on" : "off"}</p>
-                            <div className="flex flex-wrap gap-2">{matches.length ? matches.map((match, index) => <code key={index} className="whitespace-pre-wrap rounded-md border border-cyan-200 bg-white px-2 py-1">{match}</code>) : <span>No matches.</span>}</div>
+                            <div className="flex flex-wrap gap-2">{matches.length ? matches.map((match, index) => <code key={index} className="whitespace-pre-wrap rounded-md border border-info-border bg-surface px-2 py-1">{match}</code>) : <span>No matches.</span>}</div>
                             <p className="mt-3">{enabled ? flag.explanation : "Enable the flag to compare the results."}</p>
                         </div>
                     </div>
                 </div>
-                <div className="mt-4 rounded-lg border border-slate-200 p-3">
-                    <h4 className="mb-1 font-semibold text-cyan-950">How flags appear in Python code</h4>
+                <div className="mt-4 rounded-lg border border-border p-3">
+                    <h4 className="mb-1 font-semibold text-info-foreground">How flags appear in Python code</h4>
                     <pre className="overflow-x-auto">{`import re\nre.findall(r"${flag.pattern}", ${JSON.stringify(flag.text)}, flags=re.${flag.name})`}</pre>
                     <p className="mt-2">Inside the pattern, <code>{`(?${flag.inline})${flag.pattern}`}</code> enables the same flag. Combine settings in code with <code>re.IGNORECASE | re.DOTALL</code>, or use <code>(?is)</code> in the pattern.</p>
                 </div>

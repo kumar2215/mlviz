@@ -13,7 +13,7 @@ export default function StepPage({ useModel, parameters, StepVisualizationCompon
     return (
         <div className="grid grid-cols-10 mx-auto w-full h-full relative">
             {/* Standard Parameters Sidebar */}
-            <div className="col-span-2 shadow-lg justify-between overflow-auto p-4 bg-gradient-to-br from-blue-50 to-blue-50 min-h-0">
+            <div className="col-span-2 shadow-lg justify-between overflow-auto p-4 bg-surface-tint   min-h-0">
                 <ModelOptionsForm
                     {...useStep(useModel, parameters)}
                     buttonLabel="Apply Parameters"
@@ -21,7 +21,7 @@ export default function StepPage({ useModel, parameters, StepVisualizationCompon
             </div>
 
             {/* Main Interactive Step Area */}
-            <div data-tour-surface className="col-span-8 shadow-lg overflow-hidden relative bg-white min-h-0">
+            <div data-tour-surface className="col-span-8 shadow-lg overflow-hidden relative bg-surface min-h-0">
                 <StepVisualizationComponent />
             </div>
         </div>

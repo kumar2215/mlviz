@@ -1,3 +1,4 @@
+import { pathwayColors } from "../../theme/colors";
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, LocateFixed } from "lucide-react";
 import { displayCondition } from "@/utils/conditions";
@@ -48,7 +49,7 @@ export default function PathwayGraph() {
         if (!element) return;
         element.scrollBy({ left: horizontal * element.clientWidth * 0.7, top: vertical * Math.max(104, element.clientHeight * 0.7), behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     };
-    const scrollButtonClass = "absolute z-10 flex h-7 w-12 items-center justify-center rounded-full border border-blue-100 bg-white text-blue-700 shadow-sm hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600";
+    const scrollButtonClass = "absolute z-10 flex h-7 w-12 items-center justify-center rounded-full border border-info-border bg-surface text-selection-foreground shadow-sm hover:bg-surface-tint focus-visible:outline-2 focus-visible:outline-ring";
     useEffect(() => {
         if (!focusRequest) return;
         reveal(focusRequest.pageId);
@@ -58,9 +59,9 @@ export default function PathwayGraph() {
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-2">
-            <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2 text-xs text-slate-500"><span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span><button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-blue-700 hover:bg-blue-50 focus-visible:outline-2 focus-visible:outline-blue-600"><LocateFixed className="size-4" /></button></div>
+            <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-2 text-xs text-muted-foreground"><span>{pages.length} {pages.length === 1 ? "page" : "pages"}</span><button type="button" onClick={() => reveal(currentPageId)} aria-label="Show current page" title="Show current page" className="rounded-md p-1.5 text-selection-foreground hover:bg-surface-tint focus-visible:outline-2 focus-visible:outline-ring"><LocateFixed className="size-4" /></button></div>
             <div className="relative flex min-h-0 flex-1 flex-col">
-            <div ref={scrollRef} onScroll={measure} role="region" aria-label="Page pathway" tabIndex={0} className="pathway-scroll min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-blue-600" data-pathway-viewport>
+            <div ref={scrollRef} onScroll={measure} role="region" aria-label="Page pathway" tabIndex={0} className="pathway-scroll min-h-0 flex-1 overflow-auto focus-visible:outline-2 focus-visible:outline-ring" data-pathway-viewport>
                 <div className="relative mx-auto" style={{ width: layout.width, height: layout.height }}>
                     <svg width={layout.width} height={layout.height} className="absolute left-0 top-0" aria-hidden="true">
                         <defs><marker id={markerId} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke" /></marker></defs>
@@ -68,7 +69,7 @@ export default function PathwayGraph() {
                             const available = availableIds.has(edge.id);
                             const solid = available || traversed.has(edge.id);
                             return <g key={edge.id}>
-                                <path data-pathway-edge={edge.id} data-edge-state={solid ? "available" : "locked"} d={edgePath(edge.points)} fill="none" stroke={available ? "#2563eb" : solid ? "#7dd3fc" : "#cbd5e1"} strokeWidth={available ? 2.5 : 2} strokeDasharray={solid ? undefined : "4 5"} markerEnd={`url(#${markerId})`}><title>{titles[edge.from]} → {titles[edge.to]}: {edge.transition.condition.name || displayCondition(edge.transition.condition)}</title></path>
+                                <path data-pathway-edge={edge.id} data-edge-state={solid ? "available" : "locked"} d={edgePath(edge.points)} fill="none" stroke={available ? pathwayColors.edgeCurrent : solid ? pathwayColors.edgeTraversed : pathwayColors.edgeLocked} strokeWidth={available ? 2.5 : 2} strokeDasharray={solid ? undefined : "4 5"} markerEnd={`url(#${markerId})`}><title>{titles[edge.from]} → {titles[edge.to]}: {edge.transition.condition.name || displayCondition(edge.transition.condition)}</title></path>
                             </g>;
                         })}
                     </svg>

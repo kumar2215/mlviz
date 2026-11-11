@@ -1,3 +1,4 @@
+import { colourRecipes } from "../../theme/recipes";
 import { useLayoutEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { Sparkles } from "lucide-react";
@@ -74,7 +75,7 @@ export default function XpTransferAnimation() {
                 const levelsCrossed = Math.floor(reward.after / reward.perLevel) - Math.floor(reward.before / reward.perLevel);
                 const filling = animate(fill, fillFrames, { duration: Math.min(1400, 550 + levelsCrossed * 200), fill: "both" });
                 progressStore.getState().startXpFill(reward.id);
-                animate(meter, [{ boxShadow: "0 0 0 0 #fbbf2400" }, { boxShadow: "0 0 0 6px #fbbf2470" }, { boxShadow: "0 0 0 0 #fbbf2400" }], { duration: 500 });
+                animate(meter, [{ boxShadow: colourRecipes.rewardGlowOff }, { boxShadow: colourRecipes.rewardGlowOn }, { boxShadow: colourRecipes.rewardGlowOff }], { duration: 500 });
                 await filling.finished;
             } catch { /* The XP is already saved; skip presentation if animation is unavailable. */ }
             if (!cancelled) finish();
@@ -90,7 +91,7 @@ export default function XpTransferAnimation() {
     }, [id, pathname]);
 
     return transfer ? <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[65] overflow-hidden">
-        {Array.from({ length: 5 }, (_, index) => <span key={index} ref={element => { sparks.current[index] = element; }} className={`absolute left-0 top-0 size-2 rounded-full opacity-0 ${index % 2 ? "bg-sky-400" : "bg-amber-400"}`} />)}
-        <span ref={badge} className="absolute left-0 top-0 flex items-center gap-1 whitespace-nowrap rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-sm font-bold text-amber-950 opacity-0 shadow-lg"><Sparkles className="size-4" />+{transfer.xp} XP</span>
+        {Array.from({ length: 5 }, (_, index) => <span key={index} ref={element => { sparks.current[index] = element; }} className={`absolute left-0 top-0 size-2 rounded-full opacity-0 ${index % 2 ? "bg-primary" : "bg-reward-meter"}`} />)}
+        <span ref={badge} className="absolute left-0 top-0 flex items-center gap-1 whitespace-nowrap rounded-full border border-reward-border bg-reward px-3 py-1 text-sm font-bold text-reward-foreground opacity-0 shadow-lg"><Sparkles className="size-4" />+{transfer.xp} XP</span>
     </div> : null;
 }

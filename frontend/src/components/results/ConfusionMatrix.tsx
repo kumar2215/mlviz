@@ -1,3 +1,4 @@
+import { uiColors } from "../../theme/colors";
 import { applyFont } from "@/components/visualisation/config/fonts";
 import { useResizeObserver } from "@/hooks/useResizeObserver";
 import { useScaleFactor } from "@/hooks/useScaleFactor";
@@ -185,12 +186,12 @@ const ConfusionMatrixContent: React.FC<ConfusionMatrixProps & {
             .attr("width", xScale.bandwidth())
             .attr("height", yScale.bandwidth())
             .attr("fill", (d) => colorScale(d.value))
-            .attr("stroke", "#fff")
+            .attr("stroke", uiColors.surface)
             .attr("stroke-width", 2 * scaleFactor)
             .attr("cursor", "pointer")
             .on("mouseover", function (event, d) {
                 d3.select(this)
-                    .attr("stroke", "#333")
+                    .attr("stroke", uiColors.foreground)
                     .attr("stroke-width", 3 * scaleFactor);
 
                 const [mouseX, mouseY] = d3.pointer(event, document.body);
@@ -205,7 +206,7 @@ const ConfusionMatrixContent: React.FC<ConfusionMatrixProps & {
             })
             .on("mouseout", function () {
                 d3.select(this)
-                    .attr("stroke", "#fff")
+                    .attr("stroke", uiColors.surface)
                     .attr("stroke-width", 2 * scaleFactor);
                 setTooltip((prev) => ({ ...prev, visible: false }));
             });
@@ -234,7 +235,7 @@ const ConfusionMatrixContent: React.FC<ConfusionMatrixProps & {
             .attr("y", (d) => (yScale(d.actual) || 0) + yScale.bandwidth() / 2)
             .attr("text-anchor", "middle")
             .attr("dominant-baseline", "middle")
-            .attr("fill", (d) => (d.value > maxValue / 2 ? "white" : "black"))
+            .attr("fill", (d) => (d.value > maxValue / 2 ? uiColors.surface : uiColors.foreground))
             .attr("font-size", `${cellFontSize}px`)
             .call(applyFont.family)
             .call(applyFont.weight.bold)
@@ -348,14 +349,14 @@ const ConfusionMatrixContent: React.FC<ConfusionMatrixProps & {
             </div>
 
             {needsScrolling && (
-                <div className="border-t flex justify-center text-xs text-gray-600 flex-shrink-0">
+                <div className="border-t flex justify-center text-xs text-text-secondary flex-shrink-0">
                     <p>Scroll to view more</p>
                 </div>
             )}
 
             {tooltip.visible && (
                 <div
-                    className="fixed z-50 px-3 py-2 text-sm bg-gray-900 text-white rounded-lg shadow-lg pointer-events-none"
+                    className="fixed z-50 px-3 py-2 text-sm border border-border bg-surface text-foreground rounded-lg shadow-lg pointer-events-none"
                     style={{
                         left: tooltip.x + 10,
                         top: tooltip.y - 10,

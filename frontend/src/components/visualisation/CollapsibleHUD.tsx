@@ -1,7 +1,7 @@
 /**
  * CollapsibleHUD
  * Shared container for all visualisation HUD panels.
- * Provides the gradient background, shadow, border, and a
+ * Provides the shared surface, shadow, border, and a
  * click-to-collapse header row.
  */
 import { ChevronDown, ChevronUp } from "lucide-react";
@@ -41,7 +41,7 @@ const CollapsibleHUD: React.FC<CollapsibleHUDProps> = ({
     return (
         <div
             data-tour={tourTarget}
-            className={`bg-gradient-to-br from-blue-50 to-blue-50 backdrop-blur-md rounded-2xl shadow-2xl border border-slate-200 ${className}`}
+            className={`bg-surface-tint   backdrop-blur-md rounded-2xl shadow-2xl border border-border ${className}`}
             style={style}
         >
             {/* Header — always visible, click to toggle */}
@@ -52,14 +52,14 @@ const CollapsibleHUD: React.FC<CollapsibleHUDProps> = ({
                 onClick={() => setOpen((v) => !v)}
                 className="w-full flex items-center justify-between px-5 py-4 cursor-pointer select-none"
             >
-                <span className="font-bold text-slate-800 flex items-center gap-2 text-sm">
+                <span className="font-bold text-foreground flex items-center gap-2 text-sm">
                     {icon}
                     {title}
                 </span>
                 {expanded ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400 shrink-0" />
+                    <ChevronUp className="w-4 h-4 text-text-secondary shrink-0" />
                 ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400 shrink-0" />
+                    <ChevronDown className="w-4 h-4 text-text-secondary shrink-0" />
                 )}
             </button>
 

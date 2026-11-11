@@ -1,3 +1,5 @@
+import { colourRecipes } from "../../../theme/recipes";
+import { uiColors, chartColors } from "../../../theme/colors";
 /**
  * Linear Regression D3 Renderer
  * Draws a scatter plot and an interactive regression line.
@@ -55,13 +57,13 @@ export interface RenderResult {
     } | null;
 }
 
-const TRAIN_COLOR = "#64748b"; // slate-500
-const TEST_COLOR = "#94a3b8"; // slate-400
-const USER_LINE_COLOR = "#3b82f6"; // blue-500
-const OPTIMAL_LINE_COLOR = "#10b981"; // emerald-500
-const PROPOSED_LINE_COLOR = "#0284c7"; // blue-500
-const ERROR_LINE_COLOR = "#ef4444"; // red-500
-const PREDICTION_POINT_COLOR = "#3b82f6"; // blue-500
+const TRAIN_COLOR = chartColors.train;
+const TEST_COLOR = chartColors.test;
+const USER_LINE_COLOR = chartColors.current;
+const OPTIMAL_LINE_COLOR = chartColors.fitted;
+const PROPOSED_LINE_COLOR = chartColors.proposal;
+const ERROR_LINE_COLOR = chartColors.error;
+const PREDICTION_POINT_COLOR = chartColors.current;
 
 /**
  * Main render function for Linear Regression.
@@ -225,9 +227,9 @@ export function renderLinearRegression({
                 .attr("cy", yScale(predictionPoint[1]))
                 .attr("r", 7 * scaleFactor)
                 .attr("fill", PREDICTION_POINT_COLOR)
-                .attr("stroke", "white")
+                .attr("stroke", uiColors.surface)
                 .attr("stroke-width", 2 * scaleFactor)
-                .attr("filter", "drop-shadow(0 0 4px rgba(59, 130, 246, 0.5))");
+                .attr("filter", colourRecipes.currentGlow);
         }
     }
 

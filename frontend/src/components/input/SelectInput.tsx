@@ -29,7 +29,7 @@ const SelectInput = ({
         >
             <SelectTrigger
                 id={id}
-                className="w-full bg-gray-50"
+                className="w-full bg-surface-subtle"
             >
                 <SelectValue placeholder={String(option.default)} />
             </SelectTrigger>

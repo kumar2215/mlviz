@@ -1,21 +1,22 @@
+import { uiColors, chartColors } from "../../../../theme/colors";
 import { useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import DragSelectionSurface from "@/components/interaction/DragSelectionSurface";
 import useDragSelection from "@/hooks/useDragSelection";
 
-export const choiceClass = "h-auto min-h-10 whitespace-normal border border-blue-300 !bg-blue-100 px-3 py-2 text-blue-950 shadow-sm hover:!bg-blue-200";
-export const selectedClass = "h-auto min-h-10 whitespace-normal border border-blue-700 !bg-blue-700 px-3 py-2 text-white shadow-sm hover:!bg-blue-800";
+export const choiceClass = "h-auto min-h-10 whitespace-normal border border-info-border !bg-selection px-3 py-2 text-info-foreground shadow-sm hover:!bg-selection-hover";
+export const selectedClass = "h-auto min-h-10 whitespace-normal border border-primary !bg-primary px-3 py-2 text-primary-foreground shadow-sm hover:!bg-primary-hover";
 
 export function Frame({ children }: { children: ReactNode }) {
     return <main className="h-full min-h-0 p-3">
-        <section className="mx-auto flex h-full min-h-0 max-w-6xl flex-col gap-2 rounded-xl border border-blue-100 bg-white p-3 shadow-sm">
+        <section className="mx-auto flex h-full min-h-0 max-w-6xl flex-col gap-2 rounded-xl border border-info-border bg-surface p-3 shadow-sm">
             {children}
         </section>
     </main>;
 }
 
 export function Result({ children, success = false }: { children: ReactNode; success?: boolean }) {
-    return <p role="status" className={`shrink-0 rounded-lg px-3 py-2 text-sm ${success ? "bg-emerald-100 text-emerald-900" : "bg-amber-50 text-amber-900"}`}>{children}</p>;
+    return <p role="status" className={`shrink-0 rounded-lg px-3 py-2 text-sm ${success ? "bg-success text-success-foreground" : "bg-warning text-warning-foreground"}`}>{children}</p>;
 }
 
 export function DragSurface({ children }: { children: ReactNode }) {
@@ -75,9 +76,9 @@ export function DropTarget({ label, onPlace, children, className = "", disabled 
 
 export function FlowerIcon({ small = false }: { small?: boolean }) {
     return <svg aria-hidden="true" viewBox="0 0 40 40" className={small ? "size-5 shrink-0" : "size-8 shrink-0"}>
-        <path d="M20 23v14m0-3c-6 0-9-4-9-4 6-1 9 1 9 4" fill="none" stroke="#059669" strokeWidth="2.5" />
-        {[0, 60, 120, 180, 240, 300].map(angle => <ellipse key={angle} cx="20" cy="11" rx="4" ry="8" fill="#8bb9fa" stroke="#3a85ed" strokeWidth="1" transform={`rotate(${angle} 20 18)`} />)}
-        <circle cx="20" cy="18" r="4" fill="#fbbf24" />
+        <path d="M20 23v14m0-3c-6 0-9-4-9-4 6-1 9 1 9 4" fill="none" stroke={uiColors.successStrong} strokeWidth="2.5" />
+        {[0, 60, 120, 180, 240, 300].map(angle => <ellipse key={angle} cx="20" cy="11" rx="4" ry="8" fill={chartColors.flower} stroke={chartColors.flowerOutline} strokeWidth="1" transform={`rotate(${angle} 20 18)`} />)}
+        <circle cx="20" cy="18" r="4" fill={uiColors.rewardSpark} />
     </svg>;
 }
 

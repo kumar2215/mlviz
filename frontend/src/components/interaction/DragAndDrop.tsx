@@ -11,7 +11,7 @@ export function DragItem({ id, label, disabled = false, children }: { id: string
     const { ref, selected, select } = useDragSelection<HTMLButtonElement>();
     return (
         <Button ref={ref} type="button" aria-label={label} aria-pressed={selected === id} draggable={!disabled} disabled={disabled}
-            className={`h-auto min-h-10 max-w-full cursor-grab break-all whitespace-normal border px-3 py-2 font-mono text-sm shadow-sm active:cursor-grabbing ${selected === id ? "border-sky-600 !bg-sky-600 text-white" : "border-sky-200 !bg-sky-100 text-sky-950 hover:!bg-sky-200"}`}
+            className={`h-auto min-h-10 max-w-full cursor-grab break-all whitespace-normal border px-3 py-2 font-mono text-sm shadow-sm active:cursor-grabbing ${selected === id ? "border-primary !bg-primary text-primary-foreground" : "border-info-border !bg-selection text-info-foreground hover:!bg-selection-hover"}`}
             onClick={() => select(selected === id ? null : id)}
             onDragStart={event => { event.dataTransfer.setData("text/plain", id); event.dataTransfer.effectAllowed = "move"; select(id); }}
             onDragEnd={() => select(null)}>{children}
@@ -31,7 +31,7 @@ export function DropArea({ label, disabled = false, onPlace, children }: { label
     return (
         <div 
             ref={ref} role="button" tabIndex={disabled ? -1 : 0} aria-label={label} aria-disabled={disabled}
-            className={`min-h-20 rounded-xl border-2 border-dashed p-3 outline-offset-2 ${hovered ? "border-sky-600 bg-sky-200" : "border-sky-300 bg-sky-50"}`}
+            className={`min-h-20 rounded-xl border-2 border-dashed p-3 outline-offset-2 ${hovered ? "border-primary bg-selection" : "border-info-border bg-surface-tint"}`}
             onClick={() => place(selected)}
             onKeyDown={event => { if (event.key === " " || event.key === "Enter") { event.preventDefault(); place(selected); } }}
             onDragOver={event => { if (!disabled) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setHovered(true); } }}

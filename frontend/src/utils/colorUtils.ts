@@ -4,11 +4,12 @@
  */
 
 import * as d3 from "d3";
+import { categoricalPalettes, chartColors, continuousSchemes } from "../theme/colors.ts";
 
 /**
  * Default grey color used for "Unassigned" labels or null values
  */
-export const UNASSIGNED_COLOR = "#999999";
+export const UNASSIGNED_COLOR = chartColors.unassigned;
 
 // ============================================================================
 // Color Palettes
@@ -18,38 +19,15 @@ export const UNASSIGNED_COLOR = "#999999";
  * Default color palette - consistent across histograms, plots, and other visualizations
  * Based on a subset of d3.schemeCategory10 with adjustments
  */
-export const DEFAULT_COLORS = [
-    "#1f77b4", // blue
-    "#ff7f0e", // orange
-    "#2ca02c", // green
-    "#d62728", // red
-    "#0891b2", // teal
-    "#8c564b", // brown
-    "#eab308", // gold
-    "#7f7f7f", // gray
-    "#bcbd22", // olive
-    "#1e3a8a", // navy
-];
+export const DEFAULT_COLORS: string[] = [...categoricalPalettes.default];
 
-// Keep existing palette names compatible while removing purple-hued entries.
-function bluePalette(colors: readonly string[]): string[] {
-    return colors.map(color => {
-        const value = d3.hsl(color);
-        if (value.h >= 235 && value.h <= 345) value.h = 210;
-        return value.formatHex();
-    });
-}
-
-/**
- * Additional color palettes for different visualization needs
- */
 const COLOR_PALETTES = {
     default: DEFAULT_COLORS,
     category10: DEFAULT_COLORS,
-    dark2: bluePalette(d3.schemeDark2),
-    set3: bluePalette(d3.schemeSet3),
-    paired: bluePalette(d3.schemePaired),
-    pastel1: bluePalette(d3.schemePastel1),
+    dark2: [...categoricalPalettes.dark2],
+    set3: [...categoricalPalettes.set3],
+    paired: [...categoricalPalettes.paired],
+    pastel1: [...categoricalPalettes.pastel1],
 } as const;
 
 export type PaletteName = keyof typeof COLOR_PALETTES;
@@ -95,22 +73,18 @@ export function createColorScale(
 /**
  * Available continuous color schemes for regression tasks
  */
-const CONTINUOUS_COLOR_SCHEMES = {
-    viridis: d3.interpolateCividis,
-    plasma: d3.interpolateCividis,
-    inferno: d3.interpolateYlOrBr,
-    magma: d3.interpolateYlOrBr,
-    cividis: d3.interpolateCividis,
-    blues: d3.interpolateBlues,
-    greens: d3.interpolateGreens,
-    reds: d3.interpolateReds,
-    purples: d3.interpolateBlues,
-    oranges: d3.interpolateOranges,
-    greys: d3.interpolateGreys,
-    turbo: d3.interpolateYlOrBr,
-    cool: d3.interpolateBlues,
-    warm: d3.interpolateOranges,
+const interpolators = {
+    Cividis: d3.interpolateCividis,
+    YlOrBr: d3.interpolateYlOrBr,
+    Blues: d3.interpolateBlues,
+    Greens: d3.interpolateGreens,
+    Reds: d3.interpolateReds,
+    Oranges: d3.interpolateOranges,
+    Greys: d3.interpolateGreys,
 } as const;
+const CONTINUOUS_COLOR_SCHEMES = Object.fromEntries(
+    Object.entries(continuousSchemes).map(([name, scheme]) => [name, interpolators[scheme]]),
+) as Record<keyof typeof continuousSchemes, (t: number) => string>;
 
 export type ContinuousSchemeName = keyof typeof CONTINUOUS_COLOR_SCHEMES;
 

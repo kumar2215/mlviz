@@ -1,3 +1,4 @@
+import { uiColors, chartColors, categoricalPalettes } from "../../../theme/colors";
 import {
     prepareHistogramData,
     renderHistogramBars,
@@ -62,9 +63,9 @@ export const renderIntegratedSplitNode = (
         .attr("x", -totalWidth / 2 - 6 * scaleFactor)
         .attr("y", -totalHeight / 2)
         .attr("rx", 6 * scaleFactor)
-        .attr("fill", "#ecececff")
+        .attr("fill", uiColors.surfaceRecessed)
         .attr("fill-opacity", d.data.isOnPath ? interpolationFactor || 0 : 0)
-        .attr("stroke", d.data.isOnPath ? "#333" : "none")
+        .attr("stroke", d.data.isOnPath ? uiColors.foreground : "none")
         .attr(
             "stroke-width",
             d.data.isOnPath ? (interpolationFactor || 0) * 2 * scaleFactor : 0
@@ -90,7 +91,7 @@ export const renderIntegratedSplitNode = (
         .call(applyFont.family)
         .attr("font-size", `${10 * scaleFactor}px`)
         .call(applyFont.weight.bold)
-        .attr("fill", "#374151")
+        .attr("fill", uiColors.textSecondary)
         .text(d.data.feature || d.data.name);
 
     renderDistributionBar(
@@ -137,9 +138,9 @@ export const renderLeafNode = (
                 .attr("x", -totalWidth / 2 - 4 * scaleFactor)
                 .attr("y", -leafHeight / 2 - 4 * scaleFactor)
                 .attr("rx", 8 * scaleFactor)
-                .attr("fill", "#333")
+                .attr("fill", uiColors.foreground)
                 .attr("fill-opacity", interpolationFactor * 0.3)
-                .attr("stroke", "#333")
+                .attr("stroke", uiColors.foreground)
                 .attr("stroke-width", interpolationFactor * 2 * scaleFactor);
         }
 
@@ -150,7 +151,7 @@ export const renderLeafNode = (
             .attr("x", -totalWidth / 2)
             .attr("y", -leafHeight / 2)
             .attr("rx", 6 * scaleFactor)
-            .attr("fill", colorScale ? colorScale(classInfo.class) : "#3b82f6");
+            .attr("fill", colorScale ? colorScale(classInfo.class) : chartColors.current);
 
         nodeGroup
             .append("text")
@@ -159,7 +160,7 @@ export const renderLeafNode = (
             .call(applyFont.family)
             .attr("font-size", `${10 * scaleFactor}px`)
             .call(applyFont.weight.bold)
-            .attr("fill", "#eeeeee")
+            .attr("fill", uiColors.surfaceRecessed)
             .text(classInfo.class.substring(0, 3));
 
         nodeGroup
@@ -168,7 +169,7 @@ export const renderLeafNode = (
             .attr("text-anchor", "middle")
             .call(applyFont.family)
             .attr("font-size", `${8 * scaleFactor}px`)
-            .attr("fill", "white")
+            .attr("fill", uiColors.surface)
             .text(`n=${classInfo.count}`);
     } else {
         // Add animated background highlight for multi-class path leaf nodes
@@ -180,9 +181,9 @@ export const renderLeafNode = (
                 .attr("x", -totalWidth / 2 - 4 * scaleFactor)
                 .attr("y", -leafHeight / 2 - 4 * scaleFactor)
                 .attr("rx", 8 * scaleFactor)
-                .attr("fill", "#333")
+                .attr("fill", uiColors.foreground)
                 .attr("fill-opacity", interpolationFactor * 0.3)
-                .attr("stroke", "#333")
+                .attr("stroke", uiColors.foreground)
                 .attr("stroke-width", interpolationFactor * 2 * scaleFactor);
         }
 
@@ -237,7 +238,7 @@ export const renderLeafNode = (
                     "fill",
                     colorScale
                         ? colorScale(classInfo.class)
-                        : `hsl(${(index * 137.5) % 360}, 50%, 50%)`
+                        : categoricalPalettes.default[index % categoricalPalettes.default.length]
                 );
 
             if (proportionalWidth > 20 * scaleFactor) {
@@ -249,7 +250,7 @@ export const renderLeafNode = (
                     .call(applyFont.family)
                     .attr("font-size", `${10 * scaleFactor}px`)
                     .call(applyFont.weight.bold)
-                    .attr("fill", "white")
+                    .attr("fill", uiColors.surface)
                     .text(classInfo.class.substring(0, 3));
                 nodeGroup
                     .append("text")
@@ -258,7 +259,7 @@ export const renderLeafNode = (
                     .attr("text-anchor", "middle")
                     .call(applyFont.family)
                     .attr("font-size", `${8 * scaleFactor}px`)
-                    .attr("fill", "white")
+                    .attr("fill", uiColors.surface)
                     .text(`n=${classInfo.count}`);
             }
 
@@ -385,7 +386,7 @@ const renderDistributionBar = (
                     "fill",
                     colorScale
                         ? colorScale(classInfo.class)
-                        : `hsl(${(index * 137.5) % 360}, 50%, 50%)`
+                        : categoricalPalettes.default[index % categoricalPalettes.default.length]
                 )
                 .attr("opacity", 0.7);
 
@@ -431,7 +432,7 @@ export const setupTooltip = (): d3.Selection<
             .attr("id", tooltipId)
             .attr(
                 "class",
-                "absolute bg-gray-800 text-white p-3 rounded-lg shadow-lg pointer-events-none opacity-0 z-50 max-w-xs"
+                "absolute border border-border bg-surface text-foreground p-3 rounded-lg shadow-lg pointer-events-none opacity-0 z-50 max-w-xs"
             )
             .style("transition", "opacity 0.3s");
     } else {
@@ -466,8 +467,8 @@ export const addNodeInteractions = (
                 tooltip.html(tooltipContent);
 
                 tooltip
-                    .style("background-color", "white")
-                    .style("color", "black")
+                    .style("background-color", uiColors.surface)
+                    .style("color", uiColors.foreground)
                     .style("opacity", 0.8)
                     .style("left", event.pageX + 15 + "px")
                     .style("top", event.pageY - 10 + "px");
@@ -530,8 +531,8 @@ export const renderExpandableLeafNode = (
         .attr("x", -nodeWidth / 2)
         .attr("y", -nodeHeight / 2)
         .attr("rx", 6 * scaleFactor)
-        .attr("fill", isSelected ? "#dbeafe" : "#f3f4f6")
-        .attr("stroke", isSelected ? "#2563eb" : "#d1d5db")
+        .attr("fill", isSelected ? uiColors.selection : uiColors.surfaceRecessed)
+        .attr("stroke", isSelected ? uiColors.primary : uiColors.border)
         .attr("stroke-width", isSelected ? 2 * scaleFactor : 1 * scaleFactor);
 
     // Display class distribution
@@ -565,7 +566,7 @@ export const renderExpandableLeafNode = (
             .attr("y", nodeHeight / 4 + 5 * scaleFactor)
             .attr("text-anchor", "middle")
             .attr("font-size", `${12 * scaleFactor}px`)
-            .attr("fill", "#2563eb")
+            .attr("fill", uiColors.primary)
             .attr("font-weight", "bold")
             .text("Selected");
     } else {
@@ -574,7 +575,7 @@ export const renderExpandableLeafNode = (
             .attr("y", nodeHeight / 2 - 5 * scaleFactor)
             .attr("text-anchor", "middle")
             .attr("font-size", `${10 * scaleFactor}px`)
-            .attr("fill", "#6b7280")
+            .attr("fill", uiColors.mutedForeground)
             .text(`n=${d.data.samples}`);
     }
 
@@ -619,8 +620,8 @@ export const renderInformationGainGraph = (
     g.append('rect')
         .attr('width', graphWidth)
         .attr('height', graphHeight)
-        .attr('fill', '#f9fafb')
-        .attr('stroke', '#e5e7eb')
+        .attr('fill', uiColors.surfaceSubtle)
+        .attr('stroke', uiColors.border)
         .attr('stroke-width', 1);
     
     // Add grid lines
@@ -634,7 +635,7 @@ export const renderInformationGainGraph = (
         .attr('x2', graphWidth)
         .attr('y1', d => yScale(d))
         .attr('y2', d => yScale(d))
-        .attr('stroke', '#e5e7eb')
+        .attr('stroke', uiColors.border)
         .attr('stroke-width', 1)
         .attr('stroke-dasharray', '2,2');
     
@@ -644,7 +645,7 @@ export const renderInformationGainGraph = (
     g.append('g')
         .call(yAxis)
         .style('font-size', '10px')
-        .style('color', '#6b7280');
+        .style('color', uiColors.mutedForeground);
     
     // Add y-axis label for Information Gain
     g.append('text')
@@ -653,7 +654,7 @@ export const renderInformationGainGraph = (
         .attr('y', -35)
         .attr('text-anchor', 'middle')
         .attr('font-size', '10px')
-        .attr('fill', '#6b7280')
+        .attr('fill', uiColors.mutedForeground)
         .text('Info Gain');
     
     // Create line generator
@@ -702,7 +703,7 @@ export const renderInformationGainGraph = (
     const bestThresholdLine = g.append('line')
         .attr('y1', 0)
         .attr('y2', graphHeight)
-        .attr('stroke', '#10b981')
+        .attr('stroke', chartColors.fitted)
         .attr('stroke-width', 1.5)
         .attr('stroke-dasharray', '4,4')
         .attr('opacity', 0);
@@ -712,7 +713,7 @@ export const renderInformationGainGraph = (
         .attr('y', graphHeight + 12)
         .attr('text-anchor', 'middle')
         .attr('font-size', '9px')
-        .attr('fill', '#10b981')
+        .attr('fill', chartColors.fitted)
         .attr('font-weight', 'bold')
         .text('Best')
         .attr('opacity', 0);
@@ -721,7 +722,7 @@ export const renderInformationGainGraph = (
     const linePath = g.append('path')
         .attr('class', 'info-gain-line')
         .attr('fill', 'none')
-        .attr('stroke', '#2563eb')
+        .attr('stroke', uiColors.primary)
         .attr('stroke-width', 2.5);
     
     // Add explored points as dots
@@ -731,8 +732,8 @@ export const renderInformationGainGraph = (
     const currentPoint = g.append('circle')
         .attr('class', 'current-point')
         .attr('r', 5)
-        .attr('fill', '#2563eb')
-        .attr('stroke', 'white')
+        .attr('fill', uiColors.primary)
+        .attr('stroke', uiColors.surface)
         .attr('stroke-width', 2);
     
     // Update function
@@ -763,7 +764,7 @@ export const renderInformationGainGraph = (
             .attr('cx', d => xScale(d.threshold))
             .attr('cy', d => yScale(d.information_gain))
             .attr('r', 2.5)
-            .attr('fill', '#2563eb')
+            .attr('fill', uiColors.primary)
             .attr('opacity', 0.6);
         
         // Update current point position

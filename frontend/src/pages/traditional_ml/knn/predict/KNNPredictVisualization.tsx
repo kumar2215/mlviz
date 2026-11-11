@@ -1,3 +1,4 @@
+import { uiColors, chartColors } from "../../../../theme/colors";
 import { DEFAULT_COLORS } from "@/utils/colorUtils";
 /**
  * KNN Prediction Visualization
@@ -172,10 +173,10 @@ export default function KNNPredictVisualization({ points }: VisualisationProps) 
                     k: visualizationData_transformed.k,
                     showNeighborLines: true,
                     showDistanceCircles: false,
-                    neighborLineColor: "#666",
+                    neighborLineColor: uiColors.mutedForeground,
                     neighborLineWidth: 1.5,
                     queryPointSize: 8,
-                    highlightColor: "#ff6b6b",
+                    highlightColor: chartColors.highlight,
                 },
             });
         },

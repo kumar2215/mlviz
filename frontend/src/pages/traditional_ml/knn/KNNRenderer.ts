@@ -1,3 +1,4 @@
+import { uiColors, chartColors } from "../../../theme/colors";
 /**
  * KNN Renderer
  * D3-based rendering functions for K-Nearest Neighbors visualization
@@ -147,10 +148,10 @@ export function renderKNNTraining({
                     k: props.k,
                     showNeighborLines: true,
                     showDistanceCircles: false,
-                    neighborLineColor: "#666",
+                    neighborLineColor: uiColors.mutedForeground,
                     neighborLineWidth: 1.5 * scaleFactor,
                     queryPointSize: 8 * scaleFactor,
-                    highlightColor: "#666",
+                    highlightColor: uiColors.mutedForeground,
                     interpolationFactor: 1,
                     scaleFactor,
                 }
@@ -167,10 +168,10 @@ export function renderKNNTraining({
                     colorScale: props.colorScale,
                     k: props.k,
                     showNeighborLines: true,
-                    neighborLineColor: "#666",
+                    neighborLineColor: uiColors.mutedForeground,
                     neighborLineWidth: 1.5 * scaleFactor,
                     queryPointSize: 8 * scaleFactor,
-                    highlightColor: "#ff6b6b",
+                    highlightColor: chartColors.highlight,
                     interpolationFactor: 1,
                     scaleFactor,
                 }
@@ -206,10 +207,10 @@ export function renderKNNPrediction({
         k,
         showNeighborLines = true,
         showDistanceCircles = false,
-        neighborLineColor = "#666",
+        neighborLineColor = uiColors.mutedForeground,
         neighborLineWidth = 1.5 * scaleFactor,
         queryPointSize = 8 * scaleFactor,
-        highlightColor = "#ff6b6b",
+        highlightColor = chartColors.highlight,
     } = props;
     const { currentStep = 0 } = state;
 
@@ -433,7 +434,7 @@ function render2DQueryVisualization(
                 .attr("y1", y1)
                 .attr("x2", x2)
                 .attr("y2", y2)
-                .attr("stroke", isNeighbor ? highlightColor : "#ccc")
+                .attr("stroke", isNeighbor ? highlightColor : uiColors.border)
                 .attr("stroke-width", isNeighbor ? neighborLineWidth : 0.5 * scaleFactor)
                 .attr(
                     "opacity",
@@ -456,9 +457,9 @@ function render2DQueryVisualization(
 
                 // Create tooltip content
                 const tooltipContent = `
-                    <div class="font-semibold text-gray-900 mb-1">Neighbor Point</div>
-                    <div class="text-sm text-gray-700">Class: <span class="font-semibold">${classLabel}</span></div>
-                    <div class="text-sm text-gray-700">Distance: ${distance.toFixed(4)}</div>
+                    <div class="font-semibold text-foreground mb-1">Neighbor Point</div>
+                    <div class="text-sm text-foreground">Class: <span class="font-semibold">${classLabel}</span></div>
+                    <div class="text-sm text-foreground">Distance: ${distance.toFixed(4)}</div>
                 `;
 
                 // Create invisible larger circle for hover detection
@@ -484,8 +485,8 @@ function render2DQueryVisualization(
                         // Show HTML tooltip
                         tooltip.html(tooltipContent);
                         tooltip
-                            .style("background-color", "white")
-                            .style("color", "black")
+                            .style("background-color", uiColors.surface)
+                            .style("color", uiColors.foreground)
                             .style("opacity", 0.8)
                             .style("left", event.pageX + 15 + "px")
                             .style("top", event.pageY - 10 + "px");
@@ -530,7 +531,7 @@ function render2DQueryVisualization(
         .attr("cy", yScale(query.queryPoint[1]))
         .attr("r", queryPointSize)
         .attr("fill", colorScale(query.prediction))
-        .attr("stroke", "#fff")
+        .attr("stroke", uiColors.surface)
         .attr("stroke-width", 2.5 * scaleFactor)
         .attr("opacity", interpolationFactor);
 
@@ -544,7 +545,7 @@ function render2DQueryVisualization(
         .attr("dominant-baseline", "central")
         .attr("font-size", "10px")
         .attr("font-weight", "bold")
-        .attr("fill", "#fff")
+        .attr("fill", uiColors.surface)
         .attr("pointer-events", "none")
         .text("?")
         .attr("opacity", interpolationFactor);
@@ -570,16 +571,16 @@ function render2DQueryVisualization(
 
     // Add interactive tooltip for query point
     const queryTooltipContent = `
-        <div class="font-semibold text-gray-900 mb-1">Prediction: <span class="text-blue-600">${predictionLabel}</span></div>
-        <div class="text-xs text-gray-500 mb-2">Nearest Neighbors (k=${k}):</div>
+        <div class="font-semibold text-foreground mb-1">Prediction: <span class="text-primary">${predictionLabel}</span></div>
+        <div class="text-xs text-muted-foreground mb-2">Nearest Neighbors (k=${k}):</div>
         <div class="space-y-1 max-h-40 overflow-y-auto">
             ${query.neighbors && query.neighbors.length > 0 ? 
                 query.neighbors.slice(0, k).map((n: any, i: number) => `
-                <div class="flex justify-between items-center text-xs border-b border-gray-100 pb-1">
-                    <span class="text-gray-700">#${i + 1} ${n.label}</span>
-                    <span class="font-mono text-gray-400">d=${n.distance.toFixed(3)}</span>
+                <div class="flex justify-between items-center text-xs border-b border-border pb-1">
+                    <span class="text-foreground">#${i + 1} ${n.label}</span>
+                    <span class="font-mono text-disabled-foreground">d=${n.distance.toFixed(3)}</span>
                 </div>
-            `).join("") : '<div class="text-xs text-gray-400 italic">No neighbors available</div>'}
+            `).join("") : '<div class="text-xs text-disabled-foreground italic">No neighbors available</div>'}
         </div>
     `;
 
@@ -587,8 +588,8 @@ function render2DQueryVisualization(
         .on("mouseover", function (event: any) {
             tooltip.html(queryTooltipContent);
             tooltip
-                .style("background-color", "white")
-                .style("color", "black")
+                .style("background-color", uiColors.surface)
+                .style("color", uiColors.foreground)
                 .style("opacity", 0.95)
                 .style("left", event.pageX + 15 + "px")
                 .style("top", event.pageY - 10 + "px");
@@ -708,7 +709,7 @@ function render1DQueryVisualization(
                 .attr("y1", stripCenter)
                 .attr("x2", x2)
                 .attr("y2", stripCenter)
-                .attr("stroke", isNeighbor ? highlightColor : "#ccc")
+                .attr("stroke", isNeighbor ? highlightColor : uiColors.border)
                 .attr("stroke-width", isNeighbor ? neighborLineWidth : 0.5 * scaleFactor)
                 .attr(
                     "opacity",
@@ -731,9 +732,9 @@ function render1DQueryVisualization(
 
                 // Create tooltip content
                 const tooltipContent = `
-                    <div class="font-semibold text-gray-900 mb-1">Neighbor Point</div>
-                    <div class="text-sm text-gray-700">Class: <span class="font-semibold">${classLabel}</span></div>
-                    <div class="text-sm text-gray-700">Distance: ${distance.toFixed(4)}</div>
+                    <div class="font-semibold text-foreground mb-1">Neighbor Point</div>
+                    <div class="text-sm text-foreground">Class: <span class="font-semibold">${classLabel}</span></div>
+                    <div class="text-sm text-foreground">Distance: ${distance.toFixed(4)}</div>
                 `;
 
                 // Create invisible larger circle for hover detection
@@ -759,8 +760,8 @@ function render1DQueryVisualization(
                         // Show HTML tooltip
                         tooltip.html(tooltipContent);
                         tooltip
-                            .style("background-color", "white")
-                            .style("color", "black")
+                            .style("background-color", uiColors.surface)
+                            .style("color", uiColors.foreground)
                             .style("opacity", 0.8)
                             .style("left", event.pageX + 15 + "px")
                             .style("top", event.pageY - 10 + "px");
@@ -805,7 +806,7 @@ function render1DQueryVisualization(
         .attr("cy", stripCenter)
         .attr("r", queryPointSize)
         .attr("fill", colorScale(query.prediction))
-        .attr("stroke", "#fff")
+        .attr("stroke", uiColors.surface)
         .attr("stroke-width", 2.5 * scaleFactor)
         .attr("opacity", interpolationFactor);
 
@@ -819,7 +820,7 @@ function render1DQueryVisualization(
         .attr("dominant-baseline", "central")
         .attr("font-size", "10px")
         .attr("font-weight", "bold")
-        .attr("fill", "#fff")
+        .attr("fill", uiColors.surface)
         .attr("pointer-events", "none")
         .text("?")
         .attr("opacity", interpolationFactor);
@@ -845,16 +846,16 @@ function render1DQueryVisualization(
 
     // Add interactive tooltip for query point
     const queryTooltipContent = `
-        <div class="font-semibold text-gray-900 mb-1">Prediction: <span class="text-blue-600">${predictionLabel}</span></div>
-        <div class="text-xs text-gray-500 mb-2">Nearest Neighbors (k=${k}):</div>
+        <div class="font-semibold text-foreground mb-1">Prediction: <span class="text-primary">${predictionLabel}</span></div>
+        <div class="text-xs text-muted-foreground mb-2">Nearest Neighbors (k=${k}):</div>
         <div class="space-y-1 max-h-40 overflow-y-auto">
             ${query.neighbors && query.neighbors.length > 0 ? 
                 query.neighbors.slice(0, k).map((n: any, i: number) => `
-                <div class="flex justify-between items-center text-xs border-b border-gray-100 pb-1">
-                    <span class="text-gray-700">#${i + 1} ${n.label}</span>
-                    <span class="font-mono text-gray-400">d=${n.distance.toFixed(3)}</span>
+                <div class="flex justify-between items-center text-xs border-b border-border pb-1">
+                    <span class="text-foreground">#${i + 1} ${n.label}</span>
+                    <span class="font-mono text-disabled-foreground">d=${n.distance.toFixed(3)}</span>
                 </div>
-            `).join("") : '<div class="text-xs text-gray-400 italic">No neighbors available</div>'}
+            `).join("") : '<div class="text-xs text-disabled-foreground italic">No neighbors available</div>'}
         </div>
     `;
 
@@ -862,8 +863,8 @@ function render1DQueryVisualization(
         .on("mouseover", function (event: any) {
             tooltip.html(queryTooltipContent);
             tooltip
-                .style("background-color", "white")
-                .style("color", "black")
+                .style("background-color", uiColors.surface)
+                .style("color", uiColors.foreground)
                 .style("opacity", 0.95)
                 .style("left", event.pageX + 15 + "px")
                 .style("top", event.pageY - 10 + "px");
@@ -901,7 +902,7 @@ function setupKNNTooltip(): d3.Selection<
             .attr("id", tooltipId)
             .attr(
                 "class",
-                "absolute bg-gray-800 text-white p-3 rounded-lg shadow-lg pointer-events-none opacity-0 z-50 max-w-xs"
+                "absolute bg-surface-strong text-primary-foreground p-3 rounded-lg shadow-lg pointer-events-none opacity-0 z-50 max-w-xs"
             )
             .style("transition", "opacity 0.3s");
     } else {
@@ -935,8 +936,8 @@ function addTrainingPointTooltips(
 
         // Prepare tooltip content based on dimensions
         const getTooltipContent = () => {
-            let content = `<div class="font-semibold text-gray-900 mb-1">Training Point</div>`;
-            content += `<div class="text-sm text-gray-700">Class: <span class="font-semibold">${classLabel}</span></div>`;
+            let content = `<div class="font-semibold text-foreground mb-1">Training Point</div>`;
+            content += `<div class="text-sm text-foreground">Class: <span class="font-semibold">${classLabel}</span></div>`;
             return content;
         };
 
@@ -947,8 +948,8 @@ function addTrainingPointTooltips(
                 tooltip.html(getTooltipContent());
 
                 tooltip
-                    .style("background-color", "white")
-                    .style("color", "black")
+                    .style("background-color", uiColors.surface)
+                    .style("color", uiColors.foreground)
                     .style("opacity", 0.8)
                     .style("left", event.pageX + 15 + "px")
                     .style("top", event.pageY - 10 + "px");

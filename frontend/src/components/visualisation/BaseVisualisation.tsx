@@ -232,12 +232,12 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
         >
             {/* Top Controls Slot */}
             {topControls && (
-                <div className="bg-white p-4 flex-shrink-0">{topControls}</div>
+                <div className="bg-surface p-4 flex-shrink-0">{topControls}</div>
             )}
 
             <div
                 ref={visualizationRef}
-                className="flex-1 overflow-hidden bg-gradient-to-br from-gray-50 to-white min-h-0 relative"
+                className="flex-1 overflow-hidden bg-surface-subtle min-h-0 relative"
             >
                 <VisualisationControls
                     capabilities={{
@@ -271,7 +271,7 @@ const BaseVisualisation: React.FC<BaseVisualisationProps> = ({
 
             {/* Bottom Info Slot */}
             {bottomInfo && (
-                <div className="p-2 border-t bg-gray-50 text-xs text-gray-600 flex-shrink-0">
+                <div className="p-2 border-t bg-surface-subtle text-xs text-text-secondary flex-shrink-0">
                     {bottomInfo}
                 </div>
             )}

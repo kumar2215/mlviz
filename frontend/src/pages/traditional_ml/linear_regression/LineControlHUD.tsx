@@ -66,7 +66,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
             icon={
                 <TrendingUp
                     style={{ width: fs(14), height: fs(14) }}
-                    className="text-blue-500"
+                    className="text-primary"
                 />
             }
             title="Line Controls"
@@ -80,13 +80,13 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                 <div className="flex justify-between">
                     <label
                         htmlFor={interceptId}
-                        className="text-slate-500 font-medium"
+                        className="text-text-secondary font-medium"
                         style={{ fontSize: fs(12) }}
                     >
                         Intercept (b)
                     </label>
                     <span
-                        className="font-mono text-blue-600 font-bold"
+                        className="font-mono text-primary font-bold"
                         style={{ fontSize: fs(12) }}
                     >
                         {currentIntercept.toFixed(1)}
@@ -109,7 +109,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                         commitLine(currentSlope, currentIntercept)
                     }
                     onKeyUp={() => commitLine(currentSlope, currentIntercept)}
-                    className="w-full accent-blue-500"
+                    className="w-full accent-primary"
                 />
             </div>
 
@@ -123,13 +123,13 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
                     style={{ marginBottom: fs(2) }}
                 >
                     <span
-                        className="text-slate-500 font-medium"
+                        className="text-text-secondary font-medium"
                         style={{ fontSize: fs(12) }}
                     >
                         Slope (m)
                     </span>
                     <span
-                        className="font-mono text-blue-600 font-bold"
+                        className="font-mono text-primary font-bold"
                         style={{ fontSize: fs(12) }}
                     >
                         {currentSlope.toFixed(4)}
@@ -147,7 +147,7 @@ const LineControlHUD: React.FC<LineControlHUDProps> = ({ interceptRange }) => {
 
             {/* Equation preview */}
             <div
-                className="rounded-lg bg-slate-50 border border-slate-100 text-center font-mono text-slate-600"
+                className="rounded-lg bg-surface-subtle border border-border text-center font-mono text-text-secondary"
                 style={{ padding: fs(6), fontSize: fs(11) }}
             >
                 y = {currentSlope.toFixed(3)}x{" "}
