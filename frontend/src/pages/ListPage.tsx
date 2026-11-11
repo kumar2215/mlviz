@@ -60,7 +60,14 @@ export default function ListPage({ listItems }: { listItems: ListItem[] }) {
                     {listItems.length === 0 && <p className="rounded-xl border border-border bg-surface p-6 text-muted-foreground">No activities have been configured here yet.</p>}
                 </div>
             </main>
-            <footer className="flex shrink-0 items-center justify-between border-t border-border bg-surface px-6 py-3 text-xs text-muted-foreground"><a href="https://github.com/local-minima-lab" className="hover:text-selection-foreground">A project by Local Minima Lab</a><a href="https://github.com/kumar2215" className="hover:text-selection-foreground">@kumar</a></footer>
+            <footer className="flex shrink-0 items-center justify-between border-t border-border bg-surface px-6 py-3 text-xs text-muted-foreground">
+                <a href="https://github.com/local-minima-lab" className="hover:text-selection-foreground">A project by Local Minima Lab</a>
+                <div className="flex items-center gap-2">
+                    <span>Contributors:</span>
+                    <a href="https://github.com/kumar2215" className="hover:text-selection-foreground">@kumar</a>
+                    <a href="https://github.com/zaidansani" className="hover:text-selection-foreground">@zaidansani</a>
+                </div>
+            </footer>
         </div>
     );
 }
